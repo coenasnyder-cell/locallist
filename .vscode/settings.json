@@ -1,0 +1,7 @@
+{
+  "github.copilot.enable": {
+    "*": true
+  },
+  "git.autofetch": true,
+  "git.enableSmartCommit": true
+}
