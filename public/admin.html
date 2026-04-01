@@ -1,0 +1,2205 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Local List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 400;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    #header-container {
+      min-height: 60px;
+    }
+
+    .admin-wrapper {
+      display: flex;
+      min-height: calc(100vh - 120px);
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .admin-main {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+    }
+
+    .hub-hero {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #1f2937;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 4px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .hub-analytics-panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .hub-analytics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .hub-analytics-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .hub-analytics-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .hub-stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .hub-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1d4ed8;
+      line-height: 1.1;
+    }
+
+    .hub-stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-top: 4px;
+    }
+
+    .hub-stat-sub {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .hub-analytics-charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .hub-analytics-charts { grid-template-columns: 1fr; }
+    }
+
+    .hub-chart-wrap {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .hub-chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+
+    .hub-hero h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .hub-hero p {
+      color: #475569;
+      font-size: 15px;
+    }
+
+    .hub-section-label {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #334155;
+      margin: 20px 0 10px;
+    }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .hub-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+      min-height: 120px;
+      width: 100%;
+    }
+
+    .hub-card:hover {
+      border-color: #475569;
+      box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15);
+    }
+
+    .hub-card-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .hub-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .hub-card-desc {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    /* Compact row-style hub tiles used for Marketplace, Services, Business */
+    .hub-grid.compact-hub-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .hub-grid.compact-hub-grid .hub-card {
+      padding: 14px 10px;
+      min-height: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .hub-grid.compact-hub-grid .hub-card-icon {
+      font-size: 22px;
+      margin-bottom: 0;
+      line-height: 1;
+    }
+
+    .hub-grid.compact-hub-grid .hub-card-title {
+      font-size: 12px;
+      margin-bottom: 0;
+      color: #334155;
+    }
+
+    .hub-grid.compact-hub-grid .hub-card-desc {
+      display: none;
+    }
+
+    .priority-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .priority-card {
+      background: #fff;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      color: #7f1d1d;
+    }
+
+    .priority-card:hover {
+      border-color: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .priority-count {
+      display: inline-block;
+      min-width: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .table-section {
+      margin-bottom: 14px;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .admin-table th,
+    .admin-table td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 15px;
+      color: #334155;
+      vertical-align: middle;
+      line-height: 1.45;
+    }
+
+    .admin-table th {
+      background: #f8fafc;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .admin-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .admin-item-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 16px;
+    }
+
+    .count-pill {
+      display: inline-block;
+      min-width: 24px;
+      text-align: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .top-priority-table {
+      border-color: #fecaca;
+    }
+
+    .top-priority-table th {
+      background: #fff1f2;
+      color: #9f1239;
+    }
+
+    .admin-back-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .admin-back-btn {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .admin-back-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .status-banner {
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .status-info {
+      background: #eef7fb;
+      color: #475569;
+      border: 1px solid #cfe8f2;
+    }
+
+    .status-success {
+      background: #eef9f0;
+      color: #1f7a3d;
+      border: 1px solid #cfead9;
+    }
+
+    .status-error {
+      background: #fdecec;
+      color: #b3261e;
+      border: 1px solid #f5c2c0;
+    }
+
+    .tab-section {
+      display: none;
+    }
+
+    .tab-section.active {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .btn {
+      border: 1px solid #475569;
+      background: #475569;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .btn.secondary {
+      background: white;
+      color: #475569;
+    }
+
+    .btn.danger {
+      background: #d9534f;
+      border-color: #d9534f;
+    }
+
+    .btn.small {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 10px;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #6A1B9A;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .stat-card:hover {
+      background: #f8fafc;
+      box-shadow: 0 3px 8px rgba(71,85,105,0.15);
+    }
+
+    .stat-card.purple  { border-top-color: #6A1B9A; }
+    .stat-card.green   { border-top-color: #2e7d32; }
+    .stat-card.blue    { border-top-color: #1565C0; }
+    .stat-card.teal    { border-top-color: #00695C; }
+    .stat-card.orange  { border-top-color: #e65100; }
+    .stat-card.red     { border-top-color: #c62828; }
+    .stat-card.amber   { border-top-color: #f57f17; }
+    .stat-card.slate   { border-top-color: #334155; }
+
+    .stat-card-icon {
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+
+    /* Quick Actions */
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .quick-action-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .quick-action-card:hover {
+      border-color: #475569;
+      background: #f8fafc;
+      box-shadow: 0 3px 8px rgba(71,85,105,0.15);
+    }
+
+    .quick-action-icon { font-size: 22px; }
+
+    /* Insights */
+    .insights-section {
+      margin-top: 20px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .insights-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+
+    .insight-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .insight-label {
+      font-size: 13px;
+      color: #475569;
+      font-weight: 600;
+      width: 150px;
+      flex-shrink: 0;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.green  { background: #4CAF50; }
+    .progress-fill.red    { background: #F44336; }
+    .progress-fill.orange { background: #FF9800; }
+    .progress-fill.blue   { background: #2196F3; }
+    .progress-fill.slate  { background: #475569; }
+
+    .insight-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      width: 42px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Admin Settings Modal */
+    .settings-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .settings-modal-backdrop.active { display: flex; }
+
+    .settings-modal {
+      background: white;
+      border-radius: 14px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    }
+
+    .settings-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .settings-modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .settings-modal-close {
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #64748b;
+      padding: 2px 8px;
+      line-height: 1.4;
+    }
+
+    .settings-group {
+      margin-bottom: 20px;
+    }
+
+    .settings-group-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748b;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f8fafc;
+    }
+
+    .settings-row-label {
+      font-size: 14px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .toggle-btn {
+      width: 46px;
+      height: 26px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle-btn.on { background: #475569; }
+
+    .toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      transition: left 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-btn.on::after { left: 23px; }
+
+    .settings-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 8px;
+    }
+
+    /* Admin back button - app style */
+    .admin-back-btn {
+      background: #1d4ed8;
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .admin-back-btn:hover { background: #1e40af; }
+
+    @media (max-width: 768px) {
+      .quick-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .insight-label { width: 100px; }
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .list-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #111;
+    }
+
+    .list-meta {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Typography system: headings medium (500), body regular (400) */
+    .hub-hero h1,
+    .hub-section-label,
+    .hub-card-title,
+    .admin-item-title,
+    .section-title,
+    .admin-table th,
+    .settings-modal-title,
+    .settings-group-title,
+    .insights-title,
+    .stat-value,
+    .stat-label,
+    .list-title {
+      font-weight: 500;
+    }
+
+    .hub-hero p,
+    .hub-card-desc,
+    .admin-table td,
+    .status-banner,
+    .settings-row-label,
+    .btn,
+    .quick-action-card,
+    .priority-card,
+    .list-meta,
+    .modal label,
+    .modal input,
+    .modal textarea,
+    .modal select {
+      font-weight: 400;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-tab {
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #333;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .filter-tab.active {
+      background: #eef7fb;
+      border-color: #475569;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #777;
+      padding: 20px 0;
+      font-size: 14px;
+    }
+
+    .zip-list {
+      margin-top: 10px;
+    }
+
+    .zip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+
+    .settings-form {
+      display: grid;
+      gap: 12px;
+      max-width: 760px;
+    }
+
+    .settings-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .settings-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .settings-form input,
+    .settings-form textarea,
+    .settings-form select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .settings-help {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .report-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .report-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .report-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .report-card-desc {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .report-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .report-filters label {
+      font-size: 13px;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .report-date-input {
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .report-select {
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 10px;
+      max-width: 620px;
+      width: 100%;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .modal textarea {
+      width: 100%;
+      min-height: 90px;
+      margin-top: 6px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .modal select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 13px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .hub-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .priority-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-grid.compact-hub-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hub-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-grid.compact-hub-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="admin-container">
+    <div id="adminStatus" class="status-banner status-info">Checking admin access...</div>
+    <div id="adminContent" style="display: none;">
+
+      <!-- Hub Dashboard (shown by default) -->
+      <div id="adminHub">
+        <div class="hub-hero">
+          <h1>Admin Dashboard</h1>
+          <p>Manage your local marketplace, services, businesses, and community.</p>
+        </div>
+
+        <!-- Weekly Analytics Panel -->
+        <div class="hub-analytics-panel">
+          <div class="hub-analytics-header">
+            <span class="hub-analytics-title">&#128200; This Week at a Glance</span>
+            <div class="row-actions">
+              <a class="btn secondary small" href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">Traffic Analytics</a>
+              <button class="btn secondary small" id="refreshHubAnalytics">Refresh</button>
+            </div>
+          </div>
+          <div class="hub-analytics-stats">
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="weeklyNewUsers">&#8212;</div>
+              <div class="hub-stat-label">New Users</div>
+              <div class="hub-stat-sub">last 7 days</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="weeklyNewListings">&#8212;</div>
+              <div class="hub-stat-label">New Listings</div>
+              <div class="hub-stat-sub">last 7 days</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="weeklyNewBusinesses">&#8212;</div>
+              <div class="hub-stat-label">New Businesses</div>
+              <div class="hub-stat-sub">last 7 days</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="weeklyPurchases">&#8212;</div>
+              <div class="hub-stat-label">Purchases</div>
+              <div class="hub-stat-sub">last 7 days</div>
+            </div>
+          </div>
+          <div class="hub-analytics-charts">
+            <div class="hub-chart-wrap">
+              <div class="hub-chart-title">&#128100; New Users / Day</div>
+              <canvas id="chartNewUsers" height="120"></canvas>
+            </div>
+            <div class="hub-chart-wrap">
+              <div class="hub-chart-title">&#128203; New Listings / Day</div>
+              <canvas id="chartNewListings" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- App Funnel Analytics Panel -->
+        <div class="hub-analytics-panel">
+          <div class="hub-analytics-header">
+            <span class="hub-analytics-title">📱 App Activation Funnel</span>
+            <div class="row-actions">
+              <button class="btn secondary small" id="refreshAppAnalytics">Refresh</button>
+            </div>
+          </div>
+          <div class="hub-analytics-stats">
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="appEventTotal">&#8212;</div>
+              <div class="hub-stat-label">Total Events</div>
+              <div class="hub-stat-sub">All time</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="appCtaTaps">&#8212;</div>
+              <div class="hub-stat-label">CTA Taps</div>
+              <div class="hub-stat-sub">first_listing_cta_tap</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="appFormStarts">&#8212;</div>
+              <div class="hub-stat-label">Form Starts</div>
+              <div class="hub-stat-sub">listing_form_started</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="appSubmissions">&#8212;</div>
+              <div class="hub-stat-label">Submissions</div>
+              <div class="hub-stat-sub">listing_submitted</div>
+            </div>
+            <div class="hub-stat-card">
+              <div class="hub-stat-value" id="appFeaturedCheckout">&#8212;</div>
+              <div class="hub-stat-label">Featured Purchases</div>
+              <div class="hub-stat-sub">featured_checkout_success</div>
+            </div>
+          </div>
+          <div class="hub-analytics-charts">
+            <div class="hub-chart-wrap">
+              <div class="hub-chart-title">📊 Funnel Breakdown</div>
+              <canvas id="chartFunnelBreakdown" height="120"></canvas>
+            </div>
+            <div class="hub-chart-wrap">
+              <div class="hub-chart-title">📈 Events / Day (Last 7 Days)</div>
+              <canvas id="chartAppEvents" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">🚨 Priority Actions</p>
+          <table class="admin-table top-priority-table">
+            <thead>
+              <tr>
+                <th>Queue</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">⏳ Pending Listings</span></td>
+                <td><span class="count-pill" id="priorityPendingListings">0</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
+                <td><span class="count-pill" id="priorityServiceApprovalQueue">0</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">🚩 Reported Listings</span></td>
+                <td><span class="count-pill" id="priorityReportedListings">0</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn small" onclick="window.navigateToTab('reported-listings')">Review</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">💬 Reported Messages</span></td>
+                <td><span class="count-pill" id="priorityReportedMessages">0</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn small" onclick="window.navigateToTab('reported-messages')">Review</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">🚨 Moderation</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Pending Listings</span></td>
+                <td><span class="count-pill" id="modPendingListings">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Service Approval Queue</span></td>
+                <td><span class="count-pill" id="modServiceQueue">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Pending Business Profiles</span></td>
+                <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-business-profiles')">Open Queue</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Reported Listings</span></td>
+                <td><span class="count-pill" id="modReportedListings">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-listings')">Review</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Reported Messages</span></td>
+                <td><span class="count-pill" id="modReportedMessages">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Review</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Listing Safety Review Queue</span></td>
+                <td><span class="count-pill">-</span></td>
+                <td><div class="row-actions"><button class="btn secondary small" onclick="window.comingSoon('Listing Safety Review Queue')">Coming Soon</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">&#127978; Marketplace Control</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Featured Listing Purchases</span></td>
+                <td><span class="count-pill" id="marketplaceFeaturedCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-listings')">Manage</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">&#129514; Business Management</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Business Users</span></td>
+                <td><span class="count-pill" id="businessUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-users')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Service Providers</span></td>
+                <td><span class="count-pill" id="serviceProvidersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('service-providers')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Business Claims</span></td>
+                <td><span class="count-pill" id="businessClaimsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-claims')">Review</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Verified Businesses</span></td>
+                <td><span class="count-pill" id="verifiedBusinessesCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('verified-businesses')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Pending Business Profiles</span></td>
+                <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-business-profiles')">Open Queue</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Featured Listing Purchases</span></td>
+                <td><span class="count-pill" id="featuredListingPurchasesCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-listings')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Featured Service Provider Purchases</span></td>
+                <td><span class="count-pill" id="featuredServicePurchasesCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-services')">Manage</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">👥 User Management</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Pending Users</span></td>
+                <td><span class="count-pill" id="pendingUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-approvals')">Review</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Blocked / Flagged Users</span></td>
+                <td><span class="count-pill" id="blockedUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('blocked')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">All Users Stats</span></td>
+                <td><span class="count-pill" id="totalUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('analytics')">View Stats</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Business Users Stats</span></td>
+                <td><span class="count-pill" id="businessUserStatsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-users')">View Stats</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
+          <p class="hub-section-label">📊 Reports &amp; Exports</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Email Digest Subscribers</span></td>
+                <td><span class="count-pill" id="digestSubscribersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Upgrade Campaign Targets</span></td>
+                <td><span class="count-pill" id="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Purchases Report</span></td>
+                <td><span class="count-pill" id="purchasesReportCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sections view (shown when a hub card is clicked) -->
+      <div id="adminSections" class="admin-main" style="display:none">
+        <div class="admin-back-row">
+          <button class="admin-back-btn" onclick="window.showAdminHub()">&#8592; Dashboard</button>
+          <span id="adminSectionTitle" class="section-title"></span>
+        </div>
+        <section id="tab-analytics" class="tab-section active">
+          <div class="section-header">
+            <div class="section-title">Analytics</div>
+            <button class="btn secondary" id="refreshAnalytics">Refresh</button>
+          </div>
+          <div class="card-grid">
+            <div class="stat-card purple">
+              <div class="stat-card-icon">👥</div>
+              <div class="stat-value" id="statTotalUsers">0</div>
+              <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card orange">
+              <div class="stat-card-icon">⏳</div>
+              <div class="stat-value" id="statPendingUsers">0</div>
+              <div class="stat-label">Pending Users</div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-card-icon">📋</div>
+              <div class="stat-value" id="statTotalListings">0</div>
+              <div class="stat-label">Total Listings</div>
+            </div>
+            <div class="stat-card teal">
+              <div class="stat-card-icon">💬</div>
+              <div class="stat-value" id="statTotalMessages">0</div>
+              <div class="stat-label">Total Messages</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-icon">🚫</div>
+              <div class="stat-value" id="statReportedMessages">0</div>
+              <div class="stat-label">Reported Messages</div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-icon">⚠️</div>
+              <div class="stat-value" id="statPendingMessageReports">0</div>
+              <div class="stat-label">Pending Msg Reports</div>
+            </div>
+            <div class="stat-card orange">
+              <div class="stat-card-icon">🏴</div>
+              <div class="stat-value" id="statReportedListings">0</div>
+              <div class="stat-label">Reported Listings</div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-icon">⚠️</div>
+              <div class="stat-value" id="statPendingListingReports">0</div>
+              <div class="stat-label">Pending Listing Reports</div>
+            </div>
+            <div class="stat-card slate">
+              <div class="stat-card-icon">🏢</div>
+              <div class="stat-value" id="statBusinessAccounts">0</div>
+              <div class="stat-label">Business Accounts</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-card-icon">💳</div>
+              <div class="stat-value" id="statPaidPlans">0</div>
+              <div class="stat-label">Paid Plans</div>
+            </div>
+            <div class="stat-card orange">
+              <div class="stat-card-icon">📋</div>
+              <div class="stat-value" id="statPendingClaims">0</div>
+              <div class="stat-label">Pending Claims</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-card-icon">✅</div>
+              <div class="stat-value" id="statApprovedClaims">0</div>
+              <div class="stat-label">Approved Claims</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-icon">❌</div>
+              <div class="stat-value" id="statRejectedClaims">0</div>
+              <div class="stat-label">Rejected Claims</div>
+            </div>
+          </div>
+
+          <div class="insights-section">
+            <div class="insights-title">📈 Platform Health Insights</div>
+            <div class="insight-item">
+              <span class="insight-label">Approval Rate</span>
+              <div class="progress-bar"><div class="progress-fill green" id="insightApprovalBar" style="width:0%"></div></div>
+              <span class="insight-value" id="insightApprovalVal">—</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Pending Rate</span>
+              <div class="progress-bar"><div class="progress-fill orange" id="insightPendingBar" style="width:0%"></div></div>
+              <span class="insight-value" id="insightPendingVal">—</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Business Rate</span>
+              <div class="progress-bar"><div class="progress-fill blue" id="insightBusinessBar" style="width:0%"></div></div>
+              <span class="insight-value" id="insightBusinessVal">—</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Paid Plans (of Business)</span>
+              <div class="progress-bar"><div class="progress-fill green" id="insightPaidBar" style="width:0%"></div></div>
+              <span class="insight-value" id="insightPaidVal">—</span>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top: 10px;">
+            <div class="section-title">Zip Code Distribution (Approved Users)</div>
+          </div>
+          <div class="zip-list" id="zipList"></div>
+        </section>
+
+        <section id="tab-business-users" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Business Users</div>
+            <button class="btn secondary" id="refreshBusinessUsers">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <input type="text" id="businessSearchInput" placeholder="Search by name, email, or business name..." 
+              style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
+          </div>
+          <div class="list" id="businessUsersList"></div>
+        </section>
+
+        <section id="tab-service-providers" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Service Providers</div>
+            <button class="btn secondary" id="refreshServiceProviders">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <input type="text" id="serviceProvidersSearchInput" placeholder="Search by name, email, provider name, or user ID..." 
+              style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
+          </div>
+          <div class="list" id="serviceProvidersList"></div>
+        </section>
+
+        <section id="tab-feature-purchases-listings" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Featured Listing Purchases</div>
+            <button class="btn secondary" id="refreshFeaturePurchasesListings">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn secondary" id="filterPendingListings" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">Pending</button>
+            <button class="btn secondary" id="filterCompletedListings">Completed</button>
+            <button class="btn secondary" id="filterAllListings">All</button>
+          </div>
+          <div class="list" id="featurePurchasesListingsList"></div>
+        </section>
+
+        <section id="tab-feature-purchases-services" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Featured Service Purchases</div>
+            <button class="btn secondary" id="refreshFeaturePurchasesServices">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn secondary" id="filterPendingServices" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">Pending</button>
+            <button class="btn secondary" id="filterCompletedServices">Completed</button>
+            <button class="btn secondary" id="filterAllServices">All</button>
+          </div>
+          <div class="list" id="featurePurchasesServicesList"></div>
+        </section>
+
+        <section id="tab-business-claims" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Business Claim Requests</div>
+            <button class="btn secondary" id="refreshBusinessClaims">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn secondary" id="filterClaimsPending" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">Pending</button>
+            <button class="btn secondary" id="filterClaimsApproved">Approved</button>
+            <button class="btn secondary" id="filterClaimsRejected">Rejected</button>
+            <button class="btn secondary" id="filterClaimsAll">All</button>
+          </div>
+          <div class="list" id="businessClaimsList"></div>
+        </section>
+
+        <section id="tab-verified-businesses" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Verified Businesses</div>
+            <button class="btn secondary" id="refreshVerifiedBusinesses">Refresh</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <input type="text" id="verifiedBusinessesSearchInput" placeholder="Search by business name, email, owner user ID, city, or ZIP..."
+              style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
+          </div>
+          <div class="list" id="verifiedBusinessesList"></div>
+        </section>
+
+        <section id="tab-shop-local-section" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Browse: Business Local Section</div>
+            <button class="btn secondary" id="refreshShopLocalSectionSettings">Refresh</button>
+          </div>
+          <form id="shopLocalSectionSettingsForm" class="settings-form">
+            <div class="settings-field">
+              <label for="shopLocalSectionEnabled" class="settings-label">Section Visibility</label>
+              <select id="shopLocalSectionEnabled">
+                <option value="true">Enabled</option>
+                <option value="false">Hidden</option>
+              </select>
+            </div>
+
+            <div class="settings-field">
+              <label for="shopLocalSectionTitle" class="settings-label">Section Title</label>
+              <input id="shopLocalSectionTitle" type="text" placeholder="🏪 Business Local" maxlength="80">
+            </div>
+
+            <div class="settings-field">
+              <label for="shopLocalSectionDescription" class="settings-label">Section Description</label>
+              <textarea id="shopLocalSectionDescription" rows="4" placeholder="Explain what users can find in Business Local."></textarea>
+            </div>
+
+            <div class="settings-field">
+              <label for="shopLocalSectionButtonText" class="settings-label">Button Text</label>
+              <input id="shopLocalSectionButtonText" type="text" placeholder="Explore Business Local" maxlength="40">
+            </div>
+
+            <div class="settings-field">
+              <label for="shopLocalSectionRecentLimit" class="settings-label">Recent Businesses Count</label>
+              <input id="shopLocalSectionRecentLimit" type="number" min="1" max="6" step="1" value="3">
+              <div class="settings-help">Choose how many recent businesses are shown on Browse (1 to 6).</div>
+            </div>
+
+            <div>
+              <button type="button" class="btn" id="saveShopLocalSectionSettings">Save Settings</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="tab-community-settings" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Community Settings</div>
+            <button class="btn secondary" id="refreshCommunitySettings">Refresh</button>
+          </div>
+          <form id="communitySettingsForm" class="settings-form">
+            <div class="settings-field">
+              <label class="settings-label">Section Visibility</label>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="checkbox" id="showFeaturedListings" style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="showFeaturedListings" style="cursor: pointer; margin: 0;">Show Featured Listings</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="checkbox" id="showEditorsPicks" style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="showEditorsPicks" style="cursor: pointer; margin: 0;">Show Editor's Picks</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="checkbox" id="showSpotlight" style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="showSpotlight" style="cursor: pointer; margin: 0;">Show Community Spotlight</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="checkbox" id="showNews" style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="showNews" style="cursor: pointer; margin: 0;">Show Community News</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <input type="checkbox" id="showQuoteOfDay" style="width: 18px; height: 18px; cursor: pointer;">
+                  <label for="showQuoteOfDay" style="cursor: pointer; margin: 0;">Show Quote of the Day</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-field" style="margin-top: 18px;">
+              <label class="settings-label">Quote of the Day</label>
+              <div class="settings-help" style="margin-bottom: 10px;">Update this daily to share a message with the community.</div>
+              <div style="display: grid; gap: 10px;">
+                <div>
+                  <label for="quoteOfDayText" class="settings-label">Quote Text</label>
+                  <textarea id="quoteOfDayText" rows="3" placeholder="Enter today's quote..."></textarea>
+                </div>
+                <div>
+                  <label for="quoteOfDayAttribution" class="settings-label">Attribution</label>
+                  <input id="quoteOfDayAttribution" type="text" placeholder="- Local List Community">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-field" style="margin-top: 18px;">
+              <label class="settings-label">Community Spotlight Content</label>
+              <div class="settings-help" style="margin-bottom: 10px;">Update this weekly to highlight a local business, service provider, article, or outstanding person in the community.</div>
+
+              <div style="display: grid; gap: 10px;">
+                <div>
+                  <label for="spotlightHeadline" class="settings-label">Headline</label>
+                  <input id="spotlightHeadline" type="text" placeholder="Connect with this week's featured local story">
+                </div>
+
+                <div>
+                  <label for="spotlightDescription" class="settings-label">Description</label>
+                  <textarea id="spotlightDescription" rows="4" placeholder="Write a short spotlight description..."></textarea>
+                </div>
+
+                <div>
+                  <label for="spotlightImageUrl" class="settings-label">Image URL</label>
+                  <input id="spotlightImageUrl" type="url" placeholder="https://example.com/spotlight-image.jpg">
+                  <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+                    <input id="spotlightImageFile" type="file" accept="image/*" style="max-width: 320px;">
+                    <button type="button" class="btn secondary" id="uploadSpotlightImageBtn">Upload Image</button>
+                  </div>
+                  <div id="spotlightImageUploadStatus" class="settings-help" style="margin-top: 6px;"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label for="spotlightCtaText" class="settings-label">CTA Button Text</label>
+                    <input id="spotlightCtaText" type="text" placeholder="Read Full Story">
+                  </div>
+                  <div>
+                    <label for="spotlightCtaUrl" class="settings-label">CTA Link URL</label>
+                    <input id="spotlightCtaUrl" type="url" placeholder="https://app.locallist.biz/article-link">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <button type="button" class="btn" id="saveCommunitySettings">Save Settings</button>
+              <div id="communitySettingsStatus" class="status-banner" style="margin-top: 12px; display: none;"></div>
+            </div>
+          </form>
+        </section>
+
+        <section id="tab-blocked" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Blocked Users</div>
+            <button class="btn secondary" id="refreshBlocked">Refresh</button>
+          </div>
+          <div class="list" id="blockedList"></div>
+        </section>
+
+        <section id="tab-pending-approvals" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Pending Approvals</div>
+            <button class="btn secondary" id="refreshApprovals">Refresh</button>
+          </div>
+          <div class="list" id="pendingApprovalsList"></div>
+
+          <div class="section-header" style="margin-top: 14px;">
+            <div class="section-title">Rejected Requests</div>
+          </div>
+          <div class="list" id="rejectedApprovalsList"></div>
+        </section>
+
+        <section id="tab-reports" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Reports &amp; Exports</div>
+          </div>
+          <p style="color:#6b7280;margin-bottom:20px;font-size:14px;">Select a date range for each report then click Export CSV to download.</p>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">📧 Email Digest Subscribers</div>
+                <div class="report-card-desc">Users who opted in to receive email digests. Use for sending newsletters and digest emails.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Signed up from <input type="date" id="digestFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="digestTo" class="report-date-input"></label>
+              <button class="btn small" onclick="window.exportDigestSubscribers()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">🚀 Free Business Users (Upgrade Campaign)</div>
+                <div class="report-card-desc">Business accounts on the free tier — target these for upgrade campaigns to premium.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Profile created from <input type="date" id="upgradeFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="upgradeTo" class="report-date-input"></label>
+              <label>Status:
+                <select id="upgradeStatusFilter" class="report-select">
+                  <option value="">All</option>
+                  <option value="approved">Approved Only</option>
+                  <option value="pending">Pending Only</option>
+                </select>
+              </label>
+              <button class="btn small" onclick="window.exportUpgradeTargets()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">👥 All Users</div>
+                <div class="report-card-desc">Full user list for general mailing or audit purposes.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Signed up from <input type="date" id="allUsersFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="allUsersTo" class="report-date-input"></label>
+              <label>Status:
+                <select id="allUsersStatusFilter" class="report-select">
+                  <option value="">All</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </label>
+              <button class="btn small" onclick="window.exportAllUsers()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">🏢 Business Users</div>
+                <div class="report-card-desc">All business accounts — use for financial recording and account reviews.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Signed up from <input type="date" id="bizUsersFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="bizUsersTo" class="report-date-input"></label>
+              <button class="btn small" onclick="window.exportBusinessUsers()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">💳 Purchases Report</div>
+                <div class="report-card-desc">Featured listing and service purchases for financial record keeping.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Purchase date from <input type="date" id="purchasesFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="purchasesTo" class="report-date-input"></label>
+              <label>Type:
+                <select id="purchasesTypeFilter" class="report-select">
+                  <option value="">All</option>
+                  <option value="listing">Listings</option>
+                  <option value="service">Services</option>
+                </select>
+              </label>
+              <label>Status:
+                <select id="purchasesStatusFilter" class="report-select">
+                  <option value="">All</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </label>
+              <button class="btn small" onclick="window.exportPurchases()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">🛠 Service Listing Posters (Paid + Free)</div>
+                <div class="report-card-desc">Service listings report with email, address (if provided), and whether they purchased featuring.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Posted from <input type="date" id="serviceListingsFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="serviceListingsTo" class="report-date-input"></label>
+              <label>Type:
+                <select id="serviceListingsPurchaseFilter" class="report-select">
+                  <option value="">Paid + Free</option>
+                  <option value="purchased">Paid only</option>
+                  <option value="free">Free only</option>
+                </select>
+              </label>
+              <button class="btn small" onclick="window.exportServiceListingPosters()">Export CSV</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-pending-listings" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Pending Listings</div>
+            <button class="btn secondary" id="refreshListings">Refresh</button>
+          </div>
+          <div class="list" id="pendingListingsList"></div>
+        </section>
+
+        <section id="tab-pending-services" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Pending Services</div>
+            <button class="btn secondary" id="refreshServices">Refresh</button>
+          </div>
+          <div class="list" id="pendingServicesList"></div>
+        </section>
+
+        <section id="tab-pending-business-profiles" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Pending Business Profiles</div>
+            <button class="btn secondary" id="refreshPendingBusinessProfiles">Refresh</button>
+          </div>
+          <div class="list" id="pendingBusinessProfilesList"></div>
+        </section>
+
+        <section id="tab-reported-messages" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Reported Messages</div>
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="pending" data-target="messages">Pending</button>
+              <button class="filter-tab" data-filter="reviewed" data-target="messages">Reviewed</button>
+            </div>
+          </div>
+          <div class="list" id="reportedMessagesList"></div>
+        </section>
+
+        <section id="tab-reported-listings" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Reported Listings</div>
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="pending" data-target="listings">Pending</button>
+              <button class="filter-tab" data-filter="reviewed" data-target="listings">Reviewed</button>
+            </div>
+          </div>
+          <div class="list" id="reportedListingsList"></div>
+        </section>
+
+        <section id="tab-auto-approvals" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Auto-Approvals</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn secondary" id="refreshAutoApprovals">Refresh</button>
+              <select id="autoApprovalsFilter" style="padding: 6px 10px; border: 1px solid #475569; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                <option value="all">All</option>
+                <option value="service">Services</option>
+                <option value="job">Jobs</option>
+              </select>
+            </div>
+          </div>
+          <div class="list" id="autoApprovalsList"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Settings Modal -->
+  <div class="settings-modal-backdrop" id="settingsModalBackdrop">
+    <div class="settings-modal">
+      <div class="settings-modal-header">
+        <span class="settings-modal-title">⚙️ Admin Settings</span>
+        <button class="settings-modal-close" id="settingsModalClose">✕</button>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Listing Content</div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:13px;font-weight:700;color:#334155;display:block;margin-bottom:6px">Banned Keywords / Phrases</label>
+          <textarea id="settingBannedKeywords" style="width:100%;min-height:56px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box" placeholder="Enter keywords separated by commas"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Featured Duration (days)</label>
+            <input id="settingFeaturedDuration" type="number" min="1" value="30" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Max Featured Per User</label>
+            <input id="settingMaxFeatured" type="number" min="1" value="3" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Min Account Age (days)</label>
+            <input id="settingMinAccountAge" type="number" min="0" value="7" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Notifications</div>
+        <div class="settings-row">
+          <span class="settings-row-label">Email Alerts for Pending Approvals</span>
+          <button class="toggle-btn on" data-setting="emailAlerts"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">Alerts for Flagged / Reported Content</span>
+          <button class="toggle-btn on" data-setting="flaggedAlerts"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">New User Signup Notifications</span>
+          <button class="toggle-btn on" data-setting="signupAlerts"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">Daily Admin Digest</span>
+          <button class="toggle-btn" data-setting="dailyDigest"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">Weekly Admin Digest</span>
+          <button class="toggle-btn on" data-setting="weeklyDigest"></button>
+        </div>
+      </div>
+
+      <div class="settings-modal-footer">
+        <button class="btn secondary" id="settingsModalCancel">Cancel</button>
+        <button class="btn" id="settingsModalSave">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="reportModalBackdrop">
+    <div class="modal">
+      <h3 id="reportModalTitle">Report Details</h3>
+      <div id="reportModalBody"></div>
+      <label for="reportStatus">Update Status</label>
+      <select id="reportStatus">
+        <option value="reviewed">Reviewed</option>
+        <option value="dismissed">Dismissed</option>
+        <option value="action_taken">Action Taken</option>
+      </select>
+      <label for="reportNotes">Admin Notes</label>
+      <textarea id="reportNotes" placeholder="Add notes for this report..."></textarea>
+      <div class="modal-actions">
+        <button class="btn secondary" id="closeReportModal">Close</button>
+        <button class="btn" id="saveReportModal">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Insights computation ──────────────────────────────────────────────
+    function updateAdminInsights() {
+      const total    = parseInt(document.getElementById('statTotalUsers')?.textContent    || '0', 10);
+      const pending  = parseInt(document.getElementById('statPendingUsers')?.textContent  || '0', 10);
+      const business = parseInt(document.getElementById('statBusinessAccounts')?.textContent || '0', 10);
+      const paid     = parseInt(document.getElementById('statPaidPlans')?.textContent     || '0', 10);
+      if (!total) return;
+
+      const set = (barId, valId, pct) => {
+        const p = Math.min(100, Math.max(0, pct));
+        const bar = document.getElementById(barId);
+        const val = document.getElementById(valId);
+        if (bar) bar.style.width = p + '%';
+        if (val) val.textContent = p + '%';
+      };
+
+      set('insightApprovalBar', 'insightApprovalVal', Math.round(((total - pending) / total) * 100));
+      set('insightPendingBar',  'insightPendingVal',  Math.round((pending  / total)    * 100));
+      set('insightBusinessBar', 'insightBusinessVal', Math.round((business / total)    * 100));
+      set('insightPaidBar',     'insightPaidVal',     business > 0 ? Math.round((paid / business) * 100) : 0);
+    }
+
+    // ── Admin Settings modal ─────────────────────────────────────────────
+    function initAdminSettingsModal() {
+      const backdrop  = document.getElementById('settingsModalBackdrop');
+      const closeBtn  = document.getElementById('settingsModalClose');
+      const cancelBtn = document.getElementById('settingsModalCancel');
+      const saveBtn   = document.getElementById('settingsModalSave');
+
+      [closeBtn, cancelBtn].forEach(btn =>
+        btn?.addEventListener('click', () => backdrop.classList.remove('active'))
+      );
+      backdrop?.addEventListener('click', e => {
+        if (e.target === backdrop) backdrop.classList.remove('active');
+      });
+      saveBtn?.addEventListener('click', () => {
+        // TODO: wire up to Firestore admin config document
+        backdrop.classList.remove('active');
+        alert('Settings saved (not yet persisted).');
+      });
+      document.querySelectorAll('.toggle-btn[data-setting]').forEach(btn =>
+        btn.addEventListener('click', function () { this.classList.toggle('on'); })
+      );
+    }
+
+    // ── App Funnel Analytics ──────────────────────────────────────────
+    let funnelCharts = {}; // Track active chart instances for cleanup
+    
+    async function loadHubAnalytics() {
+      try {
+        // Query appAnalyticsEvents from Firestore
+        const eventsSnapshot = await firebase.firestore()
+          .collection('appAnalyticsEvents')
+          .get();
+        
+        const events = eventsSnapshot.docs.map(doc => doc.data());
+        
+        // Calculate funnel metrics
+        const metrics = {
+          'first_listing_cta_tap': 0,
+          'listing_form_started': 0,
+          'listing_draft_restored': 0,
+          'listing_submitted': 0,
+          'featured_checkout_started': 0,
+          'featured_checkout_success': 0
+        };
+        
+        // Count events by type
+        events.forEach(event => {
+          if (metrics.hasOwnProperty(event.eventName)) {
+            metrics[event.eventName]++;
+          }
+        });
+        
+        const totalEvents = events.length;
+        const ctaTaps = metrics['first_listing_cta_tap'] || 0;
+        const formStarts = metrics['listing_form_started'] || 0;
+        const submissions = metrics['listing_submitted'] || 0;
+        const featuredPurchases = metrics['featured_checkout_success'] || 0;
+        
+        // Update stat cards
+        document.getElementById('appEventTotal').textContent = totalEvents.toLocaleString();
+        document.getElementById('appCtaTaps').textContent = ctaTaps.toLocaleString();
+        document.getElementById('appFormStarts').textContent = formStarts.toLocaleString();
+        document.getElementById('appSubmissions').textContent = submissions.toLocaleString();
+        document.getElementById('appFeaturedCheckout').textContent = featuredPurchases.toLocaleString();
+        
+        // Calculate conversion rates for funnel chart
+        const funnelData = [
+          { label: 'CTA Taps', value: ctaTaps, color: '#1d4ed8' },
+          { label: 'Form Starts', value: formStarts, color: '#0ea5e9' },
+          { label: 'Submissions', value: submissions, color: '#10b981' },
+          { label: 'Featured', value: featuredPurchases, color: '#f59e0b' }
+        ];
+        
+        // Create funnel chart (bar chart showing drop-off)
+        const funnelCtx = document.getElementById('chartFunnelBreakdown')?.getContext('2d');
+        if (funnelCtx) {
+          // Destroy previous chart if it exists
+          if (funnelCharts['funnel']) funnelCharts['funnel'].destroy();
+          
+          funnelCharts['funnel'] = new Chart(funnelCtx, {
+            type: 'bar',
+            data: {
+              labels: funnelData.map(d => d.label),
+              datasets: [{
+                label: 'Count',
+                data: funnelData.map(d => d.value),
+                backgroundColor: funnelData.map(d => d.color),
+                borderRadius: 6,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                x: { beginAtZero: true, ticks: { callback: v => v > 0 ? v : '' } }
+              }
+            }
+          });
+        }
+        
+        // Generate 7-day timeline data
+        const last7Days = [];
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          last7Days.push(date.toISOString().split('T')[0]);
+        }
+        
+        const eventsByDay = {};
+        last7Days.forEach(day => eventsByDay[day] = 0);
+        
+        events.forEach(event => {
+          if (event.timestamp) {
+            const eventDate = event.timestamp instanceof firebase.firestore.Timestamp
+              ? event.timestamp.toDate()
+              : new Date(event.timestamp);
+            const dateKey = eventDate.toISOString().split('T')[0];
+            if (eventsByDay.hasOwnProperty(dateKey)) {
+              eventsByDay[dateKey]++;
+            }
+          }
+        });
+        
+        // Create timeline chart
+        const timelineCtx = document.getElementById('chartAppEvents')?.getContext('2d');
+        if (timelineCtx) {
+          // Destroy previous chart if it exists
+          if (funnelCharts['timeline']) funnelCharts['timeline'].destroy();
+          
+          funnelCharts['timeline'] = new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+              labels: last7Days.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+              datasets: [{
+                label: 'Events',
+                data: last7Days.map(day => eventsByDay[day]),
+                borderColor: '#1d4ed8',
+                backgroundColor: 'rgba(29, 78, 216, 0.1)',
+                tension: 0.3,
+                borderWidth: 2,
+                fill: true,
+                pointBackgroundColor: '#1d4ed8',
+                pointRadius: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { display: true, position: 'top' }
+              },
+              scales: {
+                y: { beginAtZero: true, ticks: { callback: v => v > 0 ? v : '0' } }
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error loading app analytics:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initAdminSettingsModal();
+
+      // Watch statTotalUsers for live updates from admin.js and re-compute insights
+      const statEl = document.getElementById('statTotalUsers');
+      if (statEl) {
+        new MutationObserver(updateAdminInsights)
+          .observe(statEl, { characterData: true, childList: true, subtree: true });
+      }
+      // Also hook the Refresh button in the analytics tab
+      document.getElementById('refreshAnalytics')?.addEventListener('click', () =>
+        setTimeout(updateAdminInsights, 800)
+      );
+      // Refresh button for app funnel analytics
+      document.getElementById('refreshAppAnalytics')?.addEventListener('click', () =>
+        loadHubAnalytics()
+      );
+      
+      // Initial attempt after Firebase data likely loads
+      setTimeout(updateAdminInsights, 3000);
+      setTimeout(loadHubAnalytics, 3500);
+    });
+  </script>
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

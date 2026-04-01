@@ -1,0 +1,634 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userDocExists() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function emailVerified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return signedIn() && userDoc().role == 'admin';
+    }
+
+    function isActiveAccount() {
+      return signedIn()
+        && userDoc().status == 'approved'
+        && !userDoc().isDisabled
+        && !userDoc().isBanned;
+    }
+
+    function canAccessAccount() {
+      return isActiveAccount();
+    }
+
+    function canCreateListing() {
+      return signedIn()
+        && (
+          !userDocExists()
+          || (!userDoc().isDisabled && !userDoc().isBanned)
+        );
+    }
+
+    function isBlockedBy(otherUserId) {
+      return get(/databases/$(database)/documents/users/$(otherUserId)).data.blockedUsers.hasAny([request.auth.uid]);
+    }
+
+    function hasBlocked(otherUserId) {
+      return userDoc().blockedUsers.hasAny([otherUserId]);
+    }
+
+    function isValidImageUrl(url) {
+      return url is string && url.matches('^https://.*');
+    }
+
+    function isBusinessOwner(businessId) {
+      return exists(/databases/$(database)/documents/businessLocal/$(businessId))
+        && get(/databases/$(database)/documents/businessLocal/$(businessId)).data.userId == request.auth.uid;
+    }
+
+    function hasValidImages(data) {
+      return data.images is list
+        && data.images.size() > 0
+        && data.images.all(url, isValidImageUrl(url));
+    }
+
+    function isPublicViewCountIncrement() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
+        && request.resource.data.viewCount is int
+        && (
+          (resource.data.viewCount is int && request.resource.data.viewCount == resource.data.viewCount + 1)
+          || (!(resource.data.viewCount is int) && request.resource.data.viewCount == 1)
+        );
+    }
+
+    function isOwnerMarkingSold() {
+      return signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'sold';
+    }
+
+    function isOwnerArchivingListing() {
+      return signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'archived';
+    }
+
+    function isOwnerRestoringArchivedListing() {
+      return signedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'archived'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'approved';
+    }
+
+    match /payments/{document} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /listings/{document} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status in ['pending', 'approved'];
+      allow read: if true; // Allow public read access to all listings
+      allow update: if isPublicViewCountIncrement()
+        || isOwnerMarkingSold()
+        || isOwnerArchivingListing()
+        || isOwnerRestoringArchivedListing()
+        || (isAdmin() || (canAccessAccount() && resource.data.userId == request.auth.uid))
+        && (!request.resource.data.keys().hasAny(['images']) || hasValidImages(request.resource.data));
+      allow write: if false;
+      allow delete: if isAdmin() || (canAccessAccount() && resource.data.userId == request.auth.uid);
+      // Admin soft delete: allow status update to 'deleted'
+      allow update: if isAdmin() && request.resource.data.status == 'deleted';
+    }
+
+    match /jobBoard/{document} {
+      allow create: if signedIn()
+        && userDocExists()
+        && canAccessAccount()
+        && userDoc().accountType == 'business'
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.jobTitle is string
+        && request.resource.data.jobTitle.size() > 0
+        && request.resource.data.jobDescription is string
+        && request.resource.data.jobDescription.size() > 0
+        && request.resource.data.jobCategory is string
+        && request.resource.data.jobCategory.size() > 0
+        && request.resource.data.jobType is string
+        && request.resource.data.jobType.size() > 0
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() > 0;
+      allow read: if true;
+      allow update: if isPublicViewCountIncrement()
+        || isAdmin() || (canAccessAccount() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /users/{document} {
+      allow create: if request.auth.uid == document
+        // Prevent self-seeding privileged account flags on initial profile creation.
+        && (!('role' in request.resource.data.keys()) || request.resource.data.role == 'user')
+        && (!('status' in request.resource.data.keys()) || request.resource.data.status in ['pending', 'approved'])
+        && (!('isDisabled' in request.resource.data.keys()) || request.resource.data.isDisabled == false)
+        && (!('isBanned' in request.resource.data.keys()) || request.resource.data.isBanned == false)
+        && (!('zipApproved' in request.resource.data.keys()) || request.resource.data.zipApproved == false)
+        && (!('accountType' in request.resource.data.keys()) || request.resource.data.accountType in ['personal', 'user']);
+      allow read: if signedIn(); // Allow authenticated users to read user documents (needed for block checking)
+      allow update: if request.auth.uid == document
+        && (
+          // Protect critical fields - they cannot be changed by users
+          (request.resource.data.role == resource.data.role || !('role' in request.resource.data.keys()))
+          && (request.resource.data.status == resource.data.status || !('status' in request.resource.data.keys()))
+          && (request.resource.data.isDisabled == resource.data.isDisabled || !('isDisabled' in request.resource.data.keys()))
+          && (request.resource.data.isBanned == resource.data.isBanned || !('isBanned' in request.resource.data.keys()))
+          && (request.resource.data.zipApproved == resource.data.zipApproved || !('zipApproved' in request.resource.data.keys()))
+          && (request.resource.data.accountType == resource.data.accountType || !('accountType' in request.resource.data.keys()))
+          && (request.resource.data.email == resource.data.email || !('email' in request.resource.data.keys()))
+          // Users may update their own profile names
+          && (!('displayName' in request.resource.data.keys())
+            || request.resource.data.displayName == resource.data.displayName
+            || (request.resource.data.displayName is string
+              && request.resource.data.displayName.size() >= 2
+              && request.resource.data.displayName.size() <= 80))
+          && (!('name' in request.resource.data.keys())
+            || request.resource.data.name == resource.data.name
+            || (request.resource.data.name is string
+              && request.resource.data.name.size() >= 2
+              && request.resource.data.name.size() <= 80))
+        );
+      allow delete: if request.auth.uid == document || isAdmin();
+    }
+
+    match /pendingApprovals/{userId} {
+      allow create: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /zipCodes/{document} {
+      allow create: if false;
+      allow read: if true;
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /zipCode/{document} {
+      allow create: if false;
+      allow read: if true;
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /approved_zips/{document} {
+      allow create: if false;
+      allow read: if true;
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Pet hub posts (lost/found/adoption)
+    match /pets/{document} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.postType in ['lost', 'found', 'adoption'];
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+  match /threads/{threadId} {
+  allow list: if request.auth != null;
+  allow create: if request.auth != null 
+  && request.auth.uid in request.resource.data.participantIds;
+  allow read, update: if request.auth != null 
+  && request.auth.uid in resource.data.participantIds;
+  match /messages/{messageId} {
+  allow create: if request.auth != null
+  && request.auth.uid == request.resource.data.senderId
+  && request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participantIds;
+
+  allow read: if request.auth != null
+  && request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participantIds;
+
+  allow update, delete: if request.auth != null
+  && request.auth.uid == resource.data.senderId;
+	}
+
+}
+  
+  match /settings/{document} {
+    allow create: if isAdmin();
+    allow read: if true;
+    allow update: if isAdmin();
+    allow write: if false;
+    allow delete: if isAdmin();
+  }
+
+  match /categories/{document} {
+    allow create: if isAdmin();
+    allow read: if true;
+    allow write: if false;
+    allow delete: if false;
+  }
+
+  match /businessCategory/{document} {
+    allow read: if true;
+    allow create, update, delete: if isAdmin();
+  }
+
+  match /businessCategories/{document} {
+    allow read: if true;
+    allow create, update, delete: if isAdmin();
+  }
+
+  match /community_news/{document} {
+    allow read: if true;
+    allow create, update, delete: if isAdmin();
+  }
+
+  match /reports/{document} {
+    allow create: if signedIn();
+    allow read: if isAdmin();
+    allow write: if false;
+    allow delete: if false;
+  }
+
+  match /messageReports/{reportId} {
+    allow create: if request.auth != null
+      && request.auth.uid == request.resource.data.reportedBy;
+    allow read, update, delete: if isAdmin();
+  }
+
+  match /userReports/{reportId} {
+    allow create: if request.auth != null
+      && request.auth.uid == request.resource.data.reportedBy;
+    allow read, update, delete: if isAdmin();
+  }
+
+  // Featured listing purchases - users can see their own, admins manage
+  match /featurePurchases/{document} {
+    allow create: if canAccessAccount() && request.resource.data.userId == request.auth.uid;
+    allow read: if canAccessAccount() && (resource.data.userId == request.auth.uid || isAdmin());
+    allow update: if isAdmin(); // admins can update payment status/verification
+    allow write: if false;
+    allow delete: if false;
+  }
+
+  match /saveListings/{document=**} {
+    allow create: if request.auth.uid == request.resource.data.userId;
+    allow read: if request.auth != null && (resource == null || request.auth.uid == resource.data.userId);
+    allow list: if request.auth.uid == resource.data.userId;
+    allow update: if request.auth.uid == resource.data.userId;
+    allow delete: if request.auth.uid == resource.data.userId;
+  }
+
+  function canCreateBusinessClaim() {
+    return signedIn()
+      && userDoc().accountType == 'business'
+      && request.resource.data.userId == request.auth.uid
+      && request.resource.data.claimStatus == 'pending'
+      && request.resource.data.businessId is string
+      && request.resource.data.businessName is string
+      && request.resource.data.claimMessage is string
+      && request.resource.data.userEmail is string
+      && request.resource.data.claimImages is list
+      && request.resource.data.claimImages.size() <= 10
+      && request.resource.data.claimImages.all(url, url is string && url.matches('^https://.*'))
+      && request.resource.data.keys().hasOnly([
+        'businessId',
+        'businessName',
+        'claimImages',
+        'claimMessage',
+        'claimStatus',
+        'createdAt',
+        'userEmail',
+        'userId'
+      ]);
+  }
+
+  match /businessClaims/{claimId} {
+    allow create: if canCreateBusinessClaim();
+    allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    allow update, delete: if isAdmin();
+  }
+
+  // Shop Local business profiles - business users can create public-facing profiles
+  match /businessLocal/{document} {
+    allow create: if signedIn() 
+      && request.resource.data.userId == request.auth.uid
+      && userDoc().accountType == 'business';
+    allow read: if true; // Allow public read access to all business profiles
+    allow update: if isPublicViewCountIncrement()
+      || isAdmin()
+      || (signedIn() && resource.data.userId == request.auth.uid && userDoc().accountType == 'business');
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  // Services - any signed-in user can post a service listing
+  match /services/{document} {
+    allow create: if signedIn()
+      && canAccessAccount()
+      && request.resource.data.userId == request.auth.uid;
+    allow read: if true; // Allow public read access to all service listings
+    allow update: if isPublicViewCountIncrement()
+      || isAdmin()
+      || (signedIn() && resource.data.userId == request.auth.uid);
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  // Deals - visible to authenticated users, managed by owner or admin
+  match /deals/{document} {
+    allow create: if signedIn()
+      && canAccessAccount()
+      && userDoc().accountType == 'business'
+      && request.resource.data.userId == request.auth.uid;
+    allow read: if signedIn();
+    allow update: if isPublicViewCountIncrement()
+      || isAdmin()
+      || (signedIn() && resource.data.userId == request.auth.uid);
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  // Events - visible to authenticated users, managed by owner or admin
+  match /events/{document} {
+    allow create: if signedIn()
+      && canAccessAccount()
+      && userDoc().accountType == 'business'
+      && request.resource.data.userId == request.auth.uid;
+    allow read: if signedIn();
+    allow update: if isAdmin()
+      || (signedIn() && resource.data.userId == request.auth.uid);
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  // Legacy collection retained for backward compatibility
+  match /shopLocal/{document} {
+    allow create: if signedIn() 
+      && request.resource.data.userId == request.auth.uid
+      && userDoc().accountType == 'business';
+    allow read: if true; // Allow public read access to all business profiles
+    allow update: if isPublicViewCountIncrement()
+      || isAdmin() || (signedIn() && resource.data.userId == request.auth.uid && userDoc().accountType == 'business');
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  // Business reviews and ratings
+  match /businessReviews/{reviewId} {
+    allow read: if true;
+
+    allow create: if signedIn()
+      && request.resource.data.userId == request.auth.uid
+      && request.resource.data.businessId is string
+      && !isBusinessOwner(request.resource.data.businessId)
+      && request.resource.data.rating is int
+      && request.resource.data.rating >= 1
+      && request.resource.data.rating <= 5
+      && request.resource.data.reviewText is string
+      && request.resource.data.status in ['approved', 'pending'];
+
+    allow update: if signedIn()
+      && resource.data.userId == request.auth.uid
+      && request.resource.data.userId == request.auth.uid
+      && request.resource.data.businessId == resource.data.businessId
+      && !isBusinessOwner(resource.data.businessId)
+      && request.resource.data.rating is int
+      && request.resource.data.rating >= 1
+      && request.resource.data.rating <= 5
+      && request.resource.data.reviewText is string
+      && request.resource.data.status in ['approved', 'pending'];
+
+    allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+  }
+
+  // Community yard sales listings
+  match /yardSales/{saleId} {
+    allow read: if true;
+    allow create: if signedIn()
+      && request.resource.data.userId == request.auth.uid;
+    allow update, delete: if isAdmin()
+      || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
+  match /jobDigestSubscribers/{document} {
+    allow create: if request.resource.data.keys().hasOnly(['email', 'frequency', 'subscribedAt'])
+      && request.resource.data.email is string
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.frequency == 'weekly'
+      && request.resource.data.subscribedAt == request.time;
+    allow read, update, delete: if isAdmin();
+  }
+
+  match /yardSaleSubscribers/{document} {
+    allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt'])
+      && request.resource.data.email is string
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.subscribedAt == request.time;
+    allow update: if request.resource.data.keys().hasOnly(['email', 'subscribedAt'])
+      && resource.data.email is string
+      && request.resource.data.email == resource.data.email
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.subscribedAt == request.time;
+    allow read, delete: if isAdmin();
+  }
+
+  match /eventDigestSubscribers/{document} {
+    allow create: if request.resource.data.keys().hasOnly(['email', 'frequency', 'subscribedAt'])
+      && request.resource.data.email is string
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.frequency in ['weekly', 'monthly']
+      && request.resource.data.subscribedAt == request.time;
+    allow update: if request.resource.data.keys().hasOnly(['email', 'frequency', 'subscribedAt'])
+      && resource.data.email is string
+      && resource.data.frequency in ['weekly', 'monthly']
+      && request.resource.data.email == resource.data.email
+      && request.resource.data.frequency == resource.data.frequency
+      && request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+      && request.resource.data.subscribedAt == request.time;
+    allow read, delete: if isAdmin();
+  }
+
+  match /community_settings/{document} {
+    allow read: if true; // Allow public read access to display settings
+    allow create, update, delete: if isAdmin();
+  }
+
+  match /analyticsDailyViews/{document} {
+    allow read: if isAdmin() || (signedIn() && resource.data.businessId == request.auth.uid);
+
+    allow create: if signedIn()
+      && canAccessAccount()
+      && userDoc().accountType == 'business'
+      && request.resource.data.businessId == request.auth.uid
+      && request.resource.data.keys().hasOnly([
+        'entityType',
+        'entityId',
+        'businessId',
+        'dateKey',
+        'viewCount',
+        'updatedAt'
+      ])
+      && request.resource.data.entityType in ['business_profile', 'listing', 'job', 'service']
+      && request.resource.data.entityId is string
+      && request.resource.data.entityId.size() > 0
+      && request.resource.data.businessId is string
+      && request.resource.data.businessId.size() > 0
+      && request.resource.data.dateKey is string
+      && request.resource.data.dateKey.matches('^\\d{4}-\\d{2}-\\d{2}$')
+      && request.resource.data.viewCount is int
+      && request.resource.data.viewCount == 1;
+
+    allow update: if signedIn()
+      && request.auth.uid == resource.data.businessId
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'updatedAt'])
+      && request.resource.data.entityType == resource.data.entityType
+      && request.resource.data.entityId == resource.data.entityId
+      && request.resource.data.businessId == resource.data.businessId
+      && request.resource.data.dateKey == resource.data.dateKey
+      && request.resource.data.viewCount is int
+      && resource.data.viewCount is int
+      && request.resource.data.viewCount == resource.data.viewCount + 1;
+  }
+
+  match /promotions/{promotionId} {
+    allow create: if signedIn()
+      && request.resource.data.businessId == request.auth.uid
+      && request.resource.data.goalType in ['profile', 'marketplace', 'service', 'job']
+      && request.resource.data.targetCollection in ['businessLocal', 'listings', 'services', 'jobBoard']
+      && request.resource.data.targetId is string
+      && request.resource.data.targetId.size() > 0
+      && request.resource.data.headline is string
+      && request.resource.data.headline.size() > 0
+      && request.resource.data.status in ['draft', 'active', 'paused', 'completed'];
+
+    allow read: if isAdmin()
+      || resource.data.status == 'active'
+      || (signedIn() && resource.data.businessId == request.auth.uid);
+
+    allow update, delete: if isAdmin()
+      || (signedIn() && resource.data.businessId == request.auth.uid);
+  }
+
+  match /promotionDailyStats/{document} {
+    allow read: if isAdmin() || (signedIn() && resource.data.businessId == request.auth.uid);
+
+    allow create: if signedIn()
+      && canAccessAccount()
+      && userDoc().accountType == 'business'
+      && request.resource.data.businessId == request.auth.uid
+      && request.resource.data.keys().hasOnly([
+        'promotionId',
+        'businessId',
+        'sourceType',
+        'dateKey',
+        'impressions',
+        'clicks',
+        'leads',
+        'updatedAt'
+      ])
+      && request.resource.data.promotionId is string
+      && request.resource.data.promotionId.size() > 0
+      && exists(/databases/$(database)/documents/promotions/$(request.resource.data.promotionId))
+      && get(/databases/$(database)/documents/promotions/$(request.resource.data.promotionId)).data.businessId == request.resource.data.businessId
+      && request.resource.data.businessId is string
+      && request.resource.data.businessId.size() > 0
+      && request.resource.data.sourceType in ['profile', 'marketplace', 'service', 'job']
+      && request.resource.data.dateKey is string
+      && request.resource.data.dateKey.matches('^\\d{4}-\\d{2}-\\d{2}$')
+      && request.resource.data.impressions is int
+      && request.resource.data.clicks is int
+      && request.resource.data.leads is int
+      && request.resource.data.impressions >= 0 && request.resource.data.impressions <= 1
+      && request.resource.data.clicks >= 0 && request.resource.data.clicks <= 1
+      && request.resource.data.leads >= 0 && request.resource.data.leads <= 1;
+
+    allow update: if signedIn()
+      && request.auth.uid == resource.data.businessId
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['impressions', 'clicks', 'leads', 'updatedAt'])
+      && request.resource.data.promotionId == resource.data.promotionId
+      && request.resource.data.businessId == resource.data.businessId
+      && request.resource.data.sourceType == resource.data.sourceType
+      && request.resource.data.dateKey == resource.data.dateKey
+      && request.resource.data.impressions is int
+      && request.resource.data.clicks is int
+      && request.resource.data.leads is int
+      && request.resource.data.impressions >= resource.data.impressions
+      && request.resource.data.impressions <= resource.data.impressions + 1
+      && request.resource.data.clicks >= resource.data.clicks
+      && request.resource.data.clicks <= resource.data.clicks + 1
+      && request.resource.data.leads >= resource.data.leads
+      && request.resource.data.leads <= resource.data.leads + 1;
+  }
+
+  match /betaFeedback/{document} {
+    allow create: if signedIn()
+      && request.resource.data.userId == request.auth.uid
+      && request.resource.data.issueType in ['bug', 'ux', 'performance', 'crash', 'payment', 'other']
+      && request.resource.data.title is string
+      && request.resource.data.title.size() > 3
+      && request.resource.data.steps is string
+      && request.resource.data.steps.size() > 5
+      && request.resource.data.actualResult is string
+      && request.resource.data.actualResult.size() > 3
+      && request.resource.data.status == 'open'
+      && request.resource.data.severity == 'untriaged';
+
+    allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    allow update: if isAdmin();
+    allow delete: if isAdmin();
+  }
+
+  // App analytics - authenticated users write funnel events for data-driven decisions
+  match /appAnalyticsEvents/{document} {
+    allow create: if request.auth != null
+      && request.resource.data.eventName in [
+        'first_listing_cta_tap',
+        'listing_form_started',
+        'listing_draft_restored',
+        'listing_submitted',
+        'featured_checkout_started',
+        'featured_checkout_success'
+      ]
+      && request.resource.data.timestamp != null
+      && request.resource.data.platform is string;
+    allow read: if isAdmin(); // Only admins can read analytics
+    allow write: if false;
+    allow delete: if false;
+  }
+
+  // Reported listings - allow admins to manage, allow querying for filtering
+  match /reportedListings/{document} {
+    allow create: if signedIn()
+      && request.resource.data.reportedBy == request.auth.uid;
+    allow read: if true; // Allow public read access for home page filtering
+    allow update: if isAdmin();
+    allow write: if false;
+    allow delete: if isAdmin();
+  }
+
+  match /{document=**} {
+    allow read, write: if isAdmin();
+  }
+}
+}

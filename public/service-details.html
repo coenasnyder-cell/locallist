@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Details - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    .page-header-wrapper {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5491 100%);
+      width: 100%;
+      padding: 24px 0 20px;
+      box-shadow: 0 4px 12px rgba(30, 58, 95, 0.18);
+      margin-bottom: 16px;
+    }
+
+    .page-header {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    .back-row {
+      margin: 6px 0 14px;
+    }
+
+    .back-link {
+      color: #475569;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .profile-header {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .hero-image {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+    }
+
+    .hero-fallback {
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 70px;
+    }
+
+    .header-content {
+      padding: 18px;
+      text-align: center;
+    }
+
+    .service-name {
+      font-size: 30px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+    }
+
+    .pill-category {
+      background: #e8f4f8;
+      color: #0f766e;
+      border-color: #bfe3ea;
+    }
+
+    .pill-price {
+      background: #ecfdf3;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .pill-tier {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fcd34d;
+    }
+
+    .description {
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 760px;
+      margin: 0 auto;
+      white-space: pre-wrap;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .info-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 18px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 12px;
+    }
+
+    .info-item {
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    .info-item:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .info-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .info-value {
+      color: #334155;
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .info-value a {
+      color: #475569;
+      text-decoration: none;
+    }
+
+    .info-value a:hover {
+      text-decoration: underline;
+    }
+
+    .preferred-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .preferred-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+
+    .preferred-value {
+      color: #78350f;
+      font-weight: 700;
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 12px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      border-color: #475569;
+    }
+
+    .btn-primary:hover {
+      background: #3b4a5a;
+      border-color: #3b4a5a;
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #eef2f7;
+    }
+
+    .empty-state {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 26px;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    footer {
+      margin-top: 28px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+    }
+
+    @media (max-width: 840px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service-name {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">Service Details</h1>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="back-row">
+      <a class="back-link" href="serviceslist.html">← Back to Services</a>
+    </div>
+
+    <div id="detailsContainer" class="empty-state">
+      <p>Loading service details...</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <!-- Message Provider Modal -->
+  <div id="messageModal" class="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <strong style="font-size:16px;">Message Provider</strong>
+        <button onclick="closeMessageModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;">&times;</button>
+      </div>
+      <label style="font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px;">Start a conversation (optional)</label>
+      <textarea id="initialMessage" style="width:100%;min-height:100px;padding:10px;font-size:14px;border:1px solid #ddd;border-radius:8px;resize:vertical;font-family:inherit;" placeholder="Hi, I'm interested in your service..." onkeydown="if(event.ctrlKey&&event.key==='Enter')startServiceThread()"></textarea>
+      <p style="font-size:12px;color:#999;margin-top:6px;">Press Ctrl+Enter to send</p>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+        <button onclick="closeMessageModal()" class="btn btn-secondary">Cancel</button>
+        <button onclick="startServiceThread()" class="btn btn-primary">Send Message</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db   = window.firebaseDb  || firebase.firestore();
+    const auth  = window.firebaseAuth || firebase.auth();
+    const detailsContainer = document.getElementById('detailsContainer');
+    const pageParams = new URLSearchParams(window.location.search);
+    const promotionId = pageParams.get('promo');
+    const promotionStatsSession = new Set();
+    let currentService = null;
+
+    function getTodayDateKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    async function trackDailyViewEvent(entityType, entityId, businessId) {
+      if (!entityType || !entityId || !businessId) return;
+
+      const dateKey = getTodayDateKey();
+      const metricDocId = `${entityType}_${entityId}_${dateKey}`;
+      try {
+        await db.collection('analyticsDailyViews').doc(metricDocId).set({
+          entityType,
+          entityId,
+          businessId,
+          dateKey,
+          viewCount: firebase.firestore.FieldValue.increment(1),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      } catch (error) {
+        console.warn('Could not track daily service view analytics:', error);
+      }
+    }
+
+    async function trackPromotionDailyEvent(sourceType, eventType, businessId, dedupeKey) {
+      if (!promotionId || !sourceType || !eventType || !businessId) return;
+      if (dedupeKey && promotionStatsSession.has(dedupeKey)) return;
+
+      const dateKey = getTodayDateKey();
+      const metricDocId = `${promotionId}_${dateKey}`;
+      try {
+        await db.collection('promotionDailyStats').doc(metricDocId).set({
+          promotionId,
+          businessId,
+          sourceType,
+          dateKey,
+          impressions: eventType === 'impression' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          clicks: eventType === 'click' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          leads: eventType === 'lead' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        if (dedupeKey) promotionStatsSession.add(dedupeKey);
+      } catch (error) {
+        console.warn('Could not track promotion service event:', error);
+      }
+    }
+
+    function getServiceViewSessionKey(serviceId) {
+      return serviceId ? `service_viewed_${serviceId}` : null;
+    }
+
+    async function incrementServiceViewCount(serviceId, serviceData) {
+      const sessionKey = getServiceViewSessionKey(serviceId);
+      if (!serviceId || !sessionKey) return;
+      if (sessionStorage.getItem(sessionKey) === '1') return;
+
+      const viewerUid = auth?.currentUser?.uid || null;
+      if (viewerUid && serviceData?.userId && viewerUid === serviceData.userId) {
+        sessionStorage.setItem(sessionKey, '1');
+        return;
+      }
+
+      try {
+        await db.collection('services').doc(serviceId).update({
+          viewCount: firebase.firestore.FieldValue.increment(1)
+        });
+        const businessId = serviceData?.userId || null;
+        if (businessId) {
+          await trackDailyViewEvent('service', serviceId, businessId);
+        }
+        sessionStorage.setItem(sessionKey, '1');
+      } catch (error) {
+        console.warn('Could not increment service view count:', error);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function normalizeUrl(url) {
+      const text = String(url || '').trim();
+      if (!text) return '';
+      if (/^https?:\/\//i.test(text)) return text;
+      return `https://${text}`;
+    }
+
+    function formatPrice(profile) {
+      if (profile.priceType === 'quote') return 'Free Quote';
+      if (profile.priceType === 'negotiable') return 'Negotiable';
+      if (profile.priceAmount) return profile.priceAmount;
+      return 'Pricing not specified';
+    }
+
+    function resolvePreferredContact(profile) {
+      const preferred = String(profile.preferredContactMethod || '').toLowerCase();
+      const phone = String(profile.contactPhone || '').trim();
+      const email = String(profile.contactEmail || '').trim();
+      const website = String(profile.contactWebsite || '').trim();
+
+      if (preferred === 'phone' && phone) return { label: 'Phone', value: phone };
+      if (preferred === 'email' && email) return { label: 'Email', value: email };
+      if (preferred === 'website' && website) return { label: 'Website', value: website };
+
+      if (phone) return { label: 'Phone', value: phone };
+      if (email) return { label: 'Email', value: email };
+      if (website) return { label: 'Website', value: website };
+      return null;
+    }
+
+    function renderNotFound() {
+      detailsContainer.innerHTML = `
+        <div class="empty-state">
+          <h2>Service Not Found</h2>
+          <p>This service could not be loaded.</p>
+          <div class="actions" style="justify-content:center;margin-top:16px;">
+            <a class="btn btn-primary" href="serviceslist.html">Back to Services</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderService(profile) {
+      const serviceName = profile.serviceName || profile.businessName || 'Service';
+      const description = profile.serviceDescription || profile.businessDescription || 'No description available.';
+      const providerName = profile.providerName || profile.businessName || 'Not provided';
+      const category = profile.category || 'Services';
+      const categoryIcon = profile.categoryIcon || '🔧';
+      const serviceImage = profile.serviceImage || profile.businessLogo || '';
+      const serviceArea = profile.serviceArea || 'Not specified';
+      const zipCode = profile.zipCode || 'Not specified';
+      const tier = String(profile.businessTier || '').toLowerCase();
+
+      const contactPhone = String(profile.contactPhone || '').trim();
+      const contactEmail = String(profile.contactEmail || '').trim();
+      const contactWebsiteRaw = String(profile.contactWebsite || '').trim();
+      const contactWebsite = normalizeUrl(contactWebsiteRaw);
+
+      const preferred = resolvePreferredContact(profile);
+      const priceLabel = formatPrice(profile);
+
+      const imageHtml = serviceImage
+        ? `<img class="hero-image" src="${escapeHtml(serviceImage)}" alt="${escapeHtml(serviceName)}">`
+        : `<div class="hero-fallback">${escapeHtml(categoryIcon)}</div>`;
+
+      const tierHtml = tier === 'premium' ? '<span class="pill pill-tier">⭐ Premium</span>' : '';
+
+      let preferredValueHtml = '<div class="preferred-value">No preferred contact method provided</div>';
+      if (preferred) {
+        if (preferred.label === 'Phone') {
+          preferredValueHtml = `<div class="preferred-value"><a href="tel:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
+        } else if (preferred.label === 'Email') {
+          preferredValueHtml = `<div class="preferred-value"><a href="mailto:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
+        } else {
+          const preferredUrl = normalizeUrl(preferred.value);
+          preferredValueHtml = `<div class="preferred-value"><a href="${escapeHtml(preferredUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(preferred.value)}</a></div>`;
+        }
+      }
+
+      const messagingBtn = profile.allowMessaging
+        ? `<button class="btn btn-primary" onclick="openMessageModal()">💬 Message Provider</button>`
+        : '';
+
+      const actionButtons = [
+        messagingBtn,
+        contactPhone ? `<a class="btn btn-primary" href="tel:${escapeHtml(contactPhone)}">📞 Call</a>` : '',
+        contactEmail ? `<a class="btn btn-primary" href="mailto:${escapeHtml(contactEmail)}">✉️ Email</a>` : '',
+        contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">🌐 Visit Website</a>` : ''
+      ].filter(Boolean).join('');
+
+      detailsContainer.innerHTML = `
+        <article class="profile-header">
+          ${imageHtml}
+          <div class="header-content">
+            <h2 class="service-name">${escapeHtml(serviceName)}</h2>
+            <div class="meta-row">
+              <span class="pill pill-category">${escapeHtml(categoryIcon)} ${escapeHtml(category)}</span>
+              <span class="pill pill-price">💰 ${escapeHtml(priceLabel)}</span>
+              ${tierHtml}
+            </div>
+            <p class="description">${escapeHtml(description)}</p>
+          </div>
+        </article>
+
+        <section class="content-grid">
+          <div class="info-card">
+            <h3 class="card-title">Service Info</h3>
+            <div class="info-item">
+              <div class="info-label">Provider</div>
+              <div class="info-value">${escapeHtml(providerName)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Pricing</div>
+              <div class="info-value">${escapeHtml(priceLabel)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Service Area</div>
+              <div class="info-value">${escapeHtml(serviceArea)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ZIP Code</div>
+              <div class="info-value">${escapeHtml(zipCode)}</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3 class="card-title">Contact</h3>
+            <div class="preferred-box">
+              <div class="preferred-title">Preferred Contact${preferred ? `: ${escapeHtml(preferred.label)}` : ''}</div>
+              ${preferredValueHtml}
+            </div>
+
+            ${contactPhone ? `
+              <div class="info-item">
+                <div class="info-label">Phone</div>
+                <div class="info-value"><a href="tel:${escapeHtml(contactPhone)}">${escapeHtml(contactPhone)}</a></div>
+              </div>
+            ` : ''}
+
+            ${contactEmail ? `
+              <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value"><a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a></div>
+              </div>
+            ` : ''}
+
+            ${contactWebsiteRaw ? `
+              <div class="info-item">
+                <div class="info-label">Website</div>
+                <div class="info-value"><a href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">${escapeHtml(contactWebsiteRaw)}</a></div>
+              </div>
+            ` : ''}
+
+            <div class="actions">
+              ${actionButtons || '<span class="info-value">No contact methods listed.</span>'}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    async function loadService() {
+      const id = pageParams.get('id');
+
+      if (!id) {
+        renderNotFound();
+        return;
+      }
+
+      try {
+        const snap = await db.collection('services').doc(id).get();
+        if (!snap.exists) {
+          renderNotFound();
+          return;
+        }
+
+        const data = snap.data() || {};
+        if (data.isActive === false) {
+          renderNotFound();
+          return;
+        }
+
+        currentService = { id: snap.id, ...data };
+        await incrementServiceViewCount(snap.id, data);
+        await trackPromotionDailyEvent('service', 'click', data.userId || data.businessId || '', `click_service_${promotionId}_${snap.id}`);
+        renderService(data);
+      } catch (error) {
+        console.error('Error loading service details:', error);
+        renderNotFound();
+      }
+    }
+
+    function openMessageModal() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please log in to message service providers.');
+        window.location.href = 'login.html';
+        return;
+      }
+      const modal = document.getElementById('messageModal');
+      modal.style.display = 'flex';
+      document.getElementById('initialMessage').focus();
+    }
+
+    function closeMessageModal() {
+      const modal = document.getElementById('messageModal');
+      modal.style.display = 'none';
+      document.getElementById('initialMessage').value = '';
+    }
+
+    document.getElementById('messageModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('messageModal')) closeMessageModal();
+    });
+
+    async function startServiceThread() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please log in to message service providers.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (!currentService || !currentService.userId) {
+        alert('Provider information is missing.');
+        return;
+      }
+
+      if (user.uid === currentService.userId) {
+        alert('You cannot message yourself.');
+        closeMessageModal();
+        return;
+      }
+
+      // Check blocking relationships
+      const [userDoc, providerDoc] = await Promise.all([
+        db.collection('users').doc(user.uid).get(),
+        db.collection('users').doc(currentService.userId).get()
+      ]);
+      const userBlocked     = userDoc.data()?.blockedUsers || [];
+      const providerBlocked = providerDoc.data()?.blockedUsers || [];
+      if (userBlocked.includes(currentService.userId)) {
+        alert('You cannot message this provider because you have blocked them.');
+        closeMessageModal();
+        return;
+      }
+      if (providerBlocked.includes(user.uid)) {
+        alert('You cannot message this provider because they have blocked you.');
+        closeMessageModal();
+        return;
+      }
+
+      const initialMessageText = document.getElementById('initialMessage').value.trim();
+      const threadsRef = db.collection('threads');
+
+      // Reuse existing thread if one already exists
+      const snapshot = await threadsRef
+        .where('listingId', '==', currentService.id)
+        .where('buyerId',   '==', user.uid)
+        .get();
+
+      let threadId;
+      if (!snapshot.empty) {
+        threadId = snapshot.docs[0].id;
+
+        // Backfill lead type for older threads that predate typed leads.
+        await db.collection('threads').doc(threadId).set({
+          leadType: 'service'
+        }, { merge: true });
+
+        if (initialMessageText) {
+          await db.collection('threads').doc(threadId).collection('messages').add({
+            text: initialMessageText,
+            senderId: user.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          await db.collection('threads').doc(threadId).update({
+            lastMessage: initialMessageText,
+            lastTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            unreadBy: firebase.firestore.FieldValue.arrayUnion(currentService.userId)
+          });
+        }
+      } else {
+        const threadData = {
+          listingId:      currentService.id,
+          leadType:       'service',
+          buyerId:        user.uid,
+          sellerId:       currentService.userId,
+          participantIds: [user.uid, currentService.userId],
+          listingTitle:   currentService.serviceName || 'Service',
+          listingImage:   currentService.serviceImage || null,
+          createdAt:      firebase.firestore.FieldValue.serverTimestamp(),
+          lastMessage:    initialMessageText || '',
+          lastTimestamp:  firebase.firestore.FieldValue.serverTimestamp(),
+          unreadBy:       initialMessageText ? [currentService.userId] : []
+        };
+        const docRef = await threadsRef.add(threadData);
+        threadId = docRef.id;
+        await trackPromotionDailyEvent('service', 'lead', currentService.userId || currentService.businessId || '', `lead_service_${promotionId}_${threadId}`);
+        if (initialMessageText) {
+          await db.collection('threads').doc(threadId).collection('messages').add({
+            text: initialMessageText,
+            senderId: user.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      }
+
+      closeMessageModal();
+      window.location.href = `messages.html?threadId=${threadId}`;
+    }
+
+    loadService();
+  </script>
+</body>
+</html>

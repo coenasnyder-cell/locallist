@@ -1,0 +1,740 @@
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
+
+import { initializeApp } from "firebase-admin/app";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { setGlobalOptions } from "firebase-functions";
+import * as logger from "firebase-functions/logger";
+import { onSchedule } from "firebase-functions/scheduler";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onCall, onRequest } from "firebase-functions/v2/https";
+import Stripe from "stripe";
+
+// Start writing functions
+// https://firebase.google.com/docs/functions/typescript
+
+// For cost control, you can set the maximum number of containers that can be
+// running at the same time. This helps mitigate the impact of unexpected
+// traffic spikes by instead downgrading performance. This limit is a
+// per-function limit. You can override the limit for each function using the
+// `maxInstances` option in the function's options, e.g.
+// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
+// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// In the v1 API, each function can only serve one request per container, so
+// this will be the maximum concurrent request count.
+setGlobalOptions({ maxInstances: 10 });
+
+initializeApp();
+
+/**
+ * Ensures jobBoard documents always keep canonical identity fields.
+ */
+export const normalizeJobBoardIdentity = onDocumentCreated(
+  "jobBoard/{jobDocId}",
+  async (event) => {
+    const db = getFirestore();
+    const snapshot = event.data;
+    if (!snapshot) return;
+
+    const jobData = snapshot.data();
+    const userId = (jobData.userId as string | undefined) || null;
+
+    if (!userId) {
+      logger.warn("Job board document missing userId", { jobDocId: snapshot.id });
+      return;
+    }
+
+    try {
+      const userSnap = await db.collection("users").doc(userId).get();
+      const userData = userSnap.exists ? userSnap.data() : null;
+      const resolvedUserName =
+        userData?.displayName ||
+        userData?.name ||
+        userData?.email ||
+        jobData.userName ||
+        "Unknown";
+      const resolvedBusinessId = userData?.accountType === "business" ? userId : null;
+
+      const identityUpdates: Record<string, unknown> = {};
+      if (jobData.userName !== resolvedUserName) {
+        identityUpdates.userName = resolvedUserName;
+      }
+      if (jobData.businessId !== resolvedBusinessId) {
+        identityUpdates.businessId = resolvedBusinessId;
+      }
+
+      if (Object.keys(identityUpdates).length > 0) {
+        await snapshot.ref.update(identityUpdates);
+      }
+    } catch (error) {
+      logger.error("Failed normalizing jobBoard identity", {
+        jobDocId: snapshot.id,
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Create Stripe Checkout Session for Featured Listing Payment
+ * Called from client-side when user wants to feature their listing
+ */
+export const createCheckoutSession = onCall(
+  { secrets: ["STRIPE_SECRET_KEY", "STRIPE_SERVICE_PRICE_ID"] },
+  async (request) => {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const listingPriceId = process.env.STRIPE_LISTING_PRICE_ID?.trim();
+    const servicePriceId = process.env.STRIPE_SERVICE_PRICE_ID?.trim();
+    
+    if (!stripeSecretKey) {
+      logger.error("Missing Stripe secret key");
+      throw new Error("Stripe is not configured");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    const itemTypeRaw = String(request.data?.itemType || "listing").toLowerCase();
+    const isService = itemTypeRaw === "service";
+    const isMobileApp = Boolean(request.data?.mobileApp);
+
+    const listingId = request.data?.listingId;
+    const listingTitle = request.data?.listingTitle;
+    const serviceId = request.data?.serviceId;
+    const serviceTitle = request.data?.serviceTitle;
+    const requestedPostCheckoutPath = String(request.data?.postCheckoutPath || "").trim();
+
+    const safePostCheckoutPath = requestedPostCheckoutPath.startsWith("/")
+      ? requestedPostCheckoutPath
+      : "";
+
+    const targetId = isService ? serviceId : listingId;
+    const targetTitle = isService ? serviceTitle : listingTitle;
+
+    if (!targetId || !targetTitle) {
+      throw new Error(
+        isService
+          ? "Missing required parameters: serviceId and serviceTitle"
+          : "Missing required parameters: listingId and listingTitle"
+      );
+    }
+
+    logger.info(`Creating checkout session for ${isService ? "service" : "listing"}: ${targetId}`);
+
+    try {
+      // Determine base URL from the request or use environment variable
+      const baseUrl = process.env.FUNCTIONS_EMULATOR === "true" 
+        ? "http://localhost:8081" 
+        : "https://app.locallist.biz";
+
+      const unitAmount = isService ? 1000 : 500;
+      const durationDays = isService ? 30 : 7;
+      const itemName = isService ? `Featured Service - ${targetTitle}` : `Featured Listing - ${targetTitle}`;
+      const itemDescription = isService
+        ? "30 days of featured service placement (activates after admin approval)"
+        : "7 days of featured placement (activates after admin approval)";
+      const mobileAuthActionBase = `myapp://auth-action?itemType=${isService ? "service" : "listing"}&${isService ? "serviceId" : "listingId"}=${targetId}`;
+      const successUrl =
+        isMobileApp
+          ? `${mobileAuthActionBase}&checkout=featured`
+          : isService && safePostCheckoutPath
+            ? `${baseUrl}${safePostCheckoutPath}`
+            : `${baseUrl}/profile.html?checkout=featured#pending`;
+      const cancelUrl =
+        isMobileApp
+          ? `${mobileAuthActionBase}&featureCanceled=1`
+          : isService
+            ? `${baseUrl}/create-service-listing.html?featureCanceled=1`
+            : `${baseUrl}/payment-cancel.html?listingId=${targetId}`;
+
+      let selectedPriceId = isService ? servicePriceId : listingPriceId;
+
+      // Guard against misconfigured Stripe price IDs (e.g. service price pointing to $5 listing price).
+      // If the configured price amount does not match expected app pricing, fallback to inline price_data.
+      if (selectedPriceId) {
+        try {
+          const configuredPrice = await stripe.prices.retrieve(selectedPriceId);
+          const configuredUnitAmount = configuredPrice.unit_amount;
+
+          if (configuredUnitAmount !== unitAmount) {
+            logger.warn(
+              `Configured ${isService ? "service" : "listing"} price ID '${selectedPriceId}' has unit_amount=${configuredUnitAmount}; expected ${unitAmount}. Falling back to inline price_data.`
+            );
+            selectedPriceId = undefined;
+          }
+        } catch (priceLookupError) {
+          logger.warn(
+            `Could not validate configured price ID '${selectedPriceId}' for ${isService ? "service" : "listing"}; falling back to inline price_data.`,
+            priceLookupError
+          );
+          selectedPriceId = undefined;
+        }
+      }
+
+      const lineItems = selectedPriceId
+        ? [
+            {
+              price: selectedPriceId,
+              quantity: 1,
+            },
+          ]
+        : [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: itemName,
+                  description: itemDescription,
+                },
+                unit_amount: unitAmount,
+              },
+              quantity: 1,
+            },
+          ];
+
+      if (!selectedPriceId) {
+        logger.warn(
+          `Missing ${isService ? "STRIPE_SERVICE_PRICE_ID" : "STRIPE_LISTING_PRICE_ID"}; using fallback inline price_data.`
+        );
+      }
+
+      const createSessionWithItems = async (items: Stripe.Checkout.SessionCreateParams.LineItem[]) => {
+        return stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: items,
+          mode: "payment",
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          client_reference_id: String(targetId),
+          metadata: {
+            itemType: isService ? "service" : "listing",
+            targetId: String(targetId),
+            durationDays: String(durationDays),
+            ...(isService ? { serviceId: String(targetId) } : { listingId: String(targetId) }),
+          },
+        });
+      };
+
+      let session: Stripe.Checkout.Session;
+      try {
+        session = await createSessionWithItems(lineItems as Stripe.Checkout.SessionCreateParams.LineItem[]);
+      } catch (error: unknown) {
+        const stripeErr = error as { code?: string; param?: string; message?: string };
+        const priceNotFound =
+          stripeErr?.code === "resource_missing" &&
+          stripeErr?.param === "line_items[0][price]";
+
+        if (!priceNotFound || !selectedPriceId) {
+          throw error;
+        }
+
+        logger.warn(
+          `Configured price ID '${selectedPriceId}' not found for ${isService ? "service" : "listing"}; retrying with inline price_data.`
+        );
+
+        const fallbackItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: itemName,
+                description: itemDescription,
+              },
+              unit_amount: unitAmount,
+            },
+            quantity: 1,
+          },
+        ];
+
+        session = await createSessionWithItems(fallbackItems);
+      }
+
+      logger.info(`Checkout session created: ${session.id} for ${isService ? "service" : "listing"}: ${targetId}`);
+
+      return {
+        sessionId: session.id,
+        url: session.url,
+      };
+    } catch (error) {
+      logger.error("Error creating checkout session:", error);
+      throw new Error("Failed to create checkout session");
+    }
+  }
+);
+
+/**
+ * Scheduled function to expire featured listings after 7 days
+ * Runs daily at 2 AM UTC
+ */
+export const expireFeaturedListings = onSchedule("every day 02:00", async (context) => {
+  const db = getFirestore();
+  
+  try {
+    const now = new Date();
+    logger.info("Starting featured listing expiration check at", { timestamp: now });
+    
+    // Find all expired featured listings
+    const expiredListings = await db
+      .collection("listings")
+      .where("isFeatured", "==", true)
+      .where("featureExpiresAt", "<", now.toISOString())
+      .get();
+
+    logger.info(`Found ${expiredListings.size} expired featured listings`);
+
+    // Batch update to remove featured status and archive expired featured listings
+    const batch = db.batch();
+    expiredListings.forEach((doc) => {
+      batch.update(doc.ref, {
+        isFeatured: false,
+        status: "archived",
+        featureExpiresAt: FieldValue.delete(),
+        updatedAt: now.toISOString(),
+      });
+    });
+
+    await batch.commit();
+    logger.info(`Successfully expired ${expiredListings.size} featured listings`);
+
+    // Expire featured services
+    const expiredServices = await db
+      .collection("services")
+      .where("isFeatured", "==", true)
+      .where("featureExpiresAt", "<", now.toISOString())
+      .get();
+
+    logger.info(`Found ${expiredServices.size} expired featured services`);
+
+    const serviceBatch = db.batch();
+    expiredServices.forEach((doc) => {
+      serviceBatch.update(doc.ref, {
+        isFeatured: false,
+        featureExpiresAt: FieldValue.delete(),
+        updatedAt: now.toISOString(),
+      });
+    });
+
+    await serviceBatch.commit();
+    logger.info(`Successfully expired ${expiredServices.size} featured services`);
+    
+    // Also update feature purchases to "completed" status
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 1);
+    
+    const completedPurchases = await db
+      .collection("featurePurchases")
+      .where("status", "==", "completed")
+      .where("expiresAt", "<", futureDate.toISOString())
+      .get();
+
+    logger.info(`Found ${completedPurchases.size} completed feature purchases to archive`);
+    
+  } catch (error) {
+    logger.error("Error in expireFeaturedListings:", error);
+    throw error;
+  }
+});
+
+/**
+ * Stripe Webhook Handler for successful checkout sessions
+ * Updates listing with feature payment status without setting isFeatured yet
+ * Featured status only activates when listing is admin-approved
+ */
+export const handleStripeCheckout = onRequest(
+  { secrets: ["STRIPE_WEBHOOK_SECRET"] },
+  async (req, res) => {
+    const db = getFirestore();
+    const signature = req.get("stripe-signature");
+    const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!signature || !stripeWebhookSecret) {
+      logger.error("Missing Stripe signature or webhook secret");
+      res.status(400).send("Missing signature or secret");
+      return;
+    }
+
+    try {
+      // Note: In production, verify Stripe signature with Stripe SDK
+      // For now, we'll process the event directly (ensure proper authentication at edge)
+      const event = req.body;
+
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+
+        const itemType = String(session.metadata?.itemType || "listing").toLowerCase();
+        const listingId = session.metadata?.listingId;
+        const serviceId = session.metadata?.serviceId;
+        const targetId = itemType === "service" ? serviceId : listingId;
+
+        if (!targetId) {
+          logger.error("checkout.session.completed: Missing targetId in metadata", {
+            itemType,
+            metadata: session.metadata,
+          });
+          res.status(400).send("Missing targetId");
+          return;
+        }
+
+        const durationDays = Number(session.metadata?.durationDays || (itemType === "service" ? 30 : 7));
+        const amount = Number(session.amount_total || 0) / 100;
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + durationDays);
+
+        if (itemType === "service") {
+          logger.info(`Processing Stripe checkout for service: ${targetId}`);
+
+          const serviceDoc = await db.collection("services").doc(targetId).get();
+          const serviceData = serviceDoc.exists ? serviceDoc.data() : undefined;
+
+          await db.collection("featurePurchases").doc(session.id).set({
+            itemType: "service",
+            serviceId: targetId,
+            userId: serviceData?.userId || null,
+            amount,
+            currency: (session.currency || "usd").toUpperCase(),
+            status: "pending",
+            paymentMethod: "stripe",
+            purchasedAt: new Date().toISOString(),
+            expiresAt: expiresAt.toISOString(),
+            stripeSessionId: session.id,
+            stripePaymentIntentId: session.payment_intent || null,
+            updatedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          await db.collection("services").doc(targetId).update({
+            featurePaymentStatus: "paid",
+            featureRequested: true,
+            featurePaymentDate: new Date().toISOString(),
+            featureDurationDays: 30,
+            featurePrice: amount,
+            updatedAt: new Date().toISOString(),
+          });
+
+          logger.info(`Service ${targetId} marked as feature payment received`);
+        } else {
+          logger.info(`Processing Stripe checkout for listing: ${targetId}`);
+
+          const listingDoc = await db.collection("listings").doc(targetId).get();
+          const listingData = listingDoc.exists ? listingDoc.data() : undefined;
+
+          await db.collection("featurePurchases").doc(session.id).set({
+            listingId: targetId,
+            userId: listingData?.userId || null,
+            amount,
+            currency: (session.currency || "usd").toUpperCase(),
+            status: "pending",
+            paymentMethod: "stripe",
+            purchasedAt: new Date().toISOString(),
+            expiresAt: expiresAt.toISOString(),
+            stripeSessionId: session.id,
+            stripePaymentIntentId: session.payment_intent || null,
+            updatedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          await db.collection("listings").doc(targetId).update({
+            featurePaymentStatus: "paid",
+            featureRequested: true,
+            featurePaymentDate: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+
+          // For listings that are already approved, activate featured status immediately.
+          if (listingData?.status === "approved") {
+            await db.collection("listings").doc(targetId).update({
+              isFeatured: true,
+              featureExpiresAt: expiresAt.toISOString(),
+              featureActivatedDate: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+
+            if (listingData?.userId) {
+              await db.collection("users").doc(String(listingData.userId)).update({
+                featurePurchases: FieldValue.increment(1),
+              });
+            }
+
+            logger.info(`Listing ${targetId} featured status activated immediately (already approved)`);
+          }
+
+          logger.info(`Listing ${targetId} marked as feature payment received`);
+        }
+
+        res.status(200).send({ received: true });
+      } else {
+        logger.info(`Ignoring Stripe event type: ${event.type}`);
+        res.status(200).send({ received: true });
+      }
+    } catch (error) {
+      logger.error("Error processing Stripe webhook:", error);
+      res.status(500).send("Webhook error");
+    }
+  }
+);
+
+/**
+ * Triggers when listing status changes to "approved"
+ * If featurePaymentStatus === "paid", activate featured status
+ */
+export const onListingApproved = onDocumentUpdated(
+  "listings/{listingId}",
+  async (event) => {
+    const db = getFirestore();
+    const listingId = event.params.listingId;
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+
+    try {
+      // Check if status changed to "approved"
+      if (before?.status !== "approved" && after?.status === "approved") {
+        logger.info(`Listing ${listingId} approved. Checking for pending feature payment...`);
+
+        // Check if feature payment is marked as paid
+        if (after?.featurePaymentStatus === "paid" && after?.featureRequested === true) {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 7);
+
+          logger.info(`Activating featured status for listing ${listingId}. Expires: ${expiresAt.toISOString()}`);
+
+          // Activate featured status
+          await db.collection("listings").doc(listingId).update({
+            isFeatured: true,
+            featureExpiresAt: expiresAt.toISOString(),
+            featureActivatedDate: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+
+          // Increment featurePurchases counter in user's document
+          const userId = after?.userId;
+          if (userId) {
+            await db.collection("users").doc(userId).update({
+              featurePurchases: FieldValue.increment(1),
+            });
+            logger.info(`Incremented featurePurchases for user ${userId}`);
+          }
+
+          logger.info(`✅ Featured status activated for listing ${listingId}`);
+        } else {
+          logger.info(
+            `Listing ${listingId} approved but no pending feature payment (status: ${after?.featurePaymentStatus})`
+          );
+        }
+      }
+    } catch (error) {
+      logger.error(`Error in onListingApproved for ${listingId}:`, error);
+      throw error;
+    }
+  }
+);
+
+/**
+ * Triggers when service approval changes to approved.
+ * If feature payment is paid and feature was requested, activate featured status for 30 days.
+ */
+export const onServiceApproved = onDocumentUpdated(
+  "services/{serviceId}",
+  async (event) => {
+    const db = getFirestore();
+    const serviceId = event.params.serviceId;
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+
+    try {
+      if (before?.isApproved !== true && after?.isApproved === true) {
+        logger.info(`Service ${serviceId} approved. Checking for paid feature request...`);
+
+        if (after?.featurePaymentStatus === "paid" && after?.featureRequested === true) {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30);
+
+          await db.collection("services").doc(serviceId).update({
+            isFeatured: true,
+            featureExpiresAt: expiresAt.toISOString(),
+            featureActivatedDate: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+
+          const userId = after?.userId;
+          if (userId) {
+            await db.collection("users").doc(userId).update({
+              featurePurchases: FieldValue.increment(1),
+            });
+          }
+
+          logger.info(`Featured status activated for service ${serviceId}`);
+        } else {
+          logger.info(`Service ${serviceId} approved without paid feature request.`);
+        }
+      }
+    } catch (error) {
+      logger.error(`Error in onServiceApproved for ${serviceId}:`, error);
+      throw error;
+    }
+  }
+);
+
+/**
+ * Auto-approve services created by verified businesses
+ * Triggers on services collection creation
+ * If creator's business account is approved (isApproved===true), auto-approve the service
+ * and notify admins of the auto-approval
+ */
+export const autoApproveService = onDocumentCreated(
+  "services/{serviceId}",
+  async (event) => {
+    const db = getFirestore();
+    const serviceId = event.params.serviceId;
+    const serviceData = event.data?.data();
+
+    if (!serviceData) {
+      logger.warn("Service document has no data", { serviceId });
+      return;
+    }
+
+    try {
+      const userId = serviceData?.userId as string | undefined;
+
+      if (!userId) {
+        logger.warn("Service missing userId", { serviceId });
+        return;
+      }
+
+      // Check if user's business account is approved
+      const userSnap = await db.collection("users").doc(userId).get();
+      const userData = userSnap.exists ? userSnap.data() : null;
+
+      if (!userData) {
+        logger.warn("User not found for service creator", { userId, serviceId });
+        return;
+      }
+
+      // Only auto-approve if:
+      // 1. User is a business account
+      // 2. Business account is approved (isApproved === true)
+      if (userData.accountType !== "business" || userData.isApproved !== true) {
+        logger.info(`Service ${serviceId} created by non-approved business or individual`, {
+          userId,
+          accountType: userData.accountType,
+          isApproved: userData.isApproved,
+        });
+        return;
+      }
+
+      // Auto-approve the service
+      const now = new Date();
+      await db.collection("services").doc(serviceId).update({
+        isApproved: true,
+        approvalStatus: "approved",
+        autoApprovedAt: now.toISOString(),
+        autoApprovedBySystem: true,
+      });
+
+      logger.info(`✅ Service ${serviceId} auto-approved for verified business ${userId}`, {
+        serviceName: serviceData.serviceName,
+        providerName: serviceData.providerName,
+      });
+
+      // Create admin notification
+      await db.collection("adminNotifications").add({
+        type: "auto_approved_service",
+        title: `Service Auto-Approved: ${serviceData.serviceName || "Untitled"}`,
+        message: `Service "${serviceData.serviceName}" by ${serviceData.providerName} from verified business was automatically approved.`,
+        itemType: "service",
+        serviceId,
+        serviceName: serviceData.serviceName,
+        providerName: serviceData.providerName,
+        userId,
+        businessName: userData.businessName || userData.displayName || "Unknown",
+        createdAt: now.toISOString(),
+        read: false,
+        severity: "info",
+      });
+
+      logger.info(`Admin notification created for auto-approved service ${serviceId}`);
+    } catch (error) {
+      logger.error(`Error in autoApproveService for ${serviceId}:`, error);
+      // Don't throw - if notification fails, service is already approved
+    }
+  }
+);
+
+/**
+ * Auto-approve jobs created by verified businesses
+ * Triggers on jobBoard collection creation
+ * If creator's business account is approved (isApproved===true), service is already set to approved
+ * But we add admin notification for visibility
+ */
+export const notifyAutoApprovedJob = onDocumentCreated(
+  "jobBoard/{jobId}",
+  async (event) => {
+    const db = getFirestore();
+    const jobId = event.params.jobId;
+    const jobData = event.data?.data();
+
+    if (!jobData) {
+      logger.warn("Job document has no data", { jobId });
+      return;
+    }
+
+    try {
+      const userId = jobData?.userId as string | undefined;
+
+      if (!userId) {
+        logger.warn("Job missing userId", { jobId });
+        return;
+      }
+
+      // Check if user's business account is approved
+      const userSnap = await db.collection("users").doc(userId).get();
+      const userData = userSnap.exists ? userSnap.data() : null;
+
+      if (!userData) {
+        logger.warn("User not found for job poster", { userId, jobId });
+        return;
+      }
+
+      // Only notify if user is a verified business
+      if (userData.accountType !== "business" || userData.isApproved !== true) {
+        logger.info(`Job ${jobId} posted by non-approved business or individual`, {
+          userId,
+          accountType: userData.accountType,
+          isApproved: userData.isApproved,
+        });
+        return;
+      }
+
+      const now = new Date();
+
+      // Create admin notification about auto-approved job
+      await db.collection("adminNotifications").add({
+        type: "auto_approved_job",
+        title: `Job Auto-Approved: ${jobData.jobTitle || "Untitled"}`,
+        message: `Job "${jobData.jobTitle}" by ${jobData.companyName} from verified business was automatically approved.`,
+        itemType: "job",
+        jobId,
+        jobTitle: jobData.jobTitle,
+        companyName: jobData.companyName,
+        userId,
+        businessName: userData.businessName || userData.displayName || "Unknown",
+        createdAt: now.toISOString(),
+        read: false,
+        severity: "info",
+      });
+
+      logger.info(`✅ Job ${jobId} auto-approved and admin notified for verified business ${userId}`, {
+        jobTitle: jobData.jobTitle,
+        companyName: jobData.companyName,
+      });
+    } catch (error) {
+      logger.error(`Error in notifyAutoApprovedJob for ${jobId}:`, error);
+      // Don't throw - job is already created and approved
+    }
+  }
+);

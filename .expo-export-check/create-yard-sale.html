@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post a Yard Sale - Local List</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f5f7;
+      color: #334155;
+      min-height: 100vh;
+    }
+
+    /* Back row */
+    .back-row {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 10px 14px;
+    }
+
+    .back-row-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      color: #1e3a5f;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 14px 36px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title h1 {
+      font-size: 30px;
+      color: #334155;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .title p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .section-divider {
+      font-size: 13px;
+      font-weight: 700;
+      color: #dc2626;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 20px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #fee2e2;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .required::after {
+      content: ' *';
+      color: #dc2626;
+    }
+
+    .optional-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input:focus,
+    .textarea:focus {
+      outline: none;
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .help {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Image upload */
+    .image-upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .image-upload-area:hover {
+      border-color: #dc2626;
+      background: #fff5f5;
+    }
+
+    .upload-icon { font-size: 32px; }
+
+    .image-upload-area p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    #imageInput { display: none; }
+
+    #imagePreview {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #imagePreview img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: #087a9a; }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+      min-width: 120px;
+    }
+
+    .btn-secondary:hover:not(:disabled) { background: #cbd5e1; }
+
+    /* Alerts */
+    .alert {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #065f46;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px 28px; }
+      .title h1 { font-size: 26px; }
+      .grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .btn-secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <div class="panel">
+      <div class="title">
+        <h1>🏷️ Post a Yard Sale</h1>
+        <p>Let your neighbors know about your upcoming sale</p>
+      </div>
+
+      <div id="errorMessage" class="alert alert-error"></div>
+      <div id="successMessage" class="alert alert-success"></div>
+
+      <form id="yardSaleForm">
+
+        <!-- Sale Info -->
+        <p class="section-divider">Sale Info</p>
+
+        <div class="form-group">
+          <label class="label required" for="yardsaleTitle">Sale Title</label>
+          <input class="input" id="yardsaleTitle" type="text" placeholder="e.g. Multi-Family Yard Sale" required>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="yardsaleDescription">
+            Description <span class="optional-tag">Optional</span>
+          </label>
+          <textarea class="textarea" id="yardsaleDescription" placeholder="What kinds of items will be for sale? Any other details..."></textarea>
+        </div>
+
+        <!-- Date & Time -->
+        <p class="section-divider">Date &amp; Time</p>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="yardsaleDate">Sale Date</label>
+            <input class="input" id="yardsaleDate" type="date" required>
+          </div>
+          <div class="form-group">
+            <label class="label" for="yardsaleExpires">
+              Listing Expires After <span class="optional-tag">Optional</span>
+            </label>
+            <input class="input" id="yardsaleExpires" type="date">
+            <div class="help">Leave blank — listing auto-expires on the sale date.</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="yardsaleStart">Start Time</label>
+            <input class="input" id="yardsaleStart" type="time" required>
+          </div>
+          <div class="form-group">
+            <label class="label" for="yardsaleEndtime">
+              End Time <span class="optional-tag">Optional</span>
+            </label>
+            <input class="input" id="yardsaleEndtime" type="time">
+          </div>
+        </div>
+
+        <!-- Location -->
+        <p class="section-divider">Location</p>
+
+        <div class="form-group">
+          <label class="label required" for="yardsalelocation">Address / Location</label>
+          <input class="input" id="yardsalelocation" type="text" placeholder="123 Main St, Harrison, AR" required>
+          <div class="help">Enter the full street address where the sale will be held.</div>
+        </div>
+
+        <!-- Photo -->
+        <p class="section-divider">Photo <span class="optional-tag" style="font-size:12px;">Optional</span></p>
+
+        <div class="form-group">
+          <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+            <div class="upload-icon">📷</div>
+            <p>Click to upload a photo of your sale items</p>
+            <p>JPG, PNG, or GIF — max 5 MB</p>
+          </div>
+          <input type="file" id="imageInput" accept="image/*">
+          <div id="imagePreview"></div>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Post Yard Sale</button>
+          <button class="btn btn-secondary" type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='yard-sales.html'; }">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    const form = document.getElementById('yardSaleForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorEl = document.getElementById('errorMessage');
+    const successEl = document.getElementById('successMessage');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+
+    let currentUser = null;
+    let uploadedImageUrl = '';
+    let isUploadingImage = false;
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      successEl.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSuccess(msg) {
+      successEl.textContent = msg;
+      successEl.style.display = 'block';
+      errorEl.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Auth guard
+    if (!auth) {
+      window.location.href = 'login.html';
+    } else {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUser = user;
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    // Image upload
+    imageInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image must be under 5 MB.');
+        imageInput.value = '';
+        return;
+      }
+
+      if (!currentUser) {
+        showError('Please sign in to upload an image.');
+        return;
+      }
+
+      isUploadingImage = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading image...';
+      imagePreview.innerHTML = '';
+      uploadedImageUrl = '';
+
+      try {
+        const fileRef = storage.ref(`yardSaleImages/${currentUser.uid}/${Date.now()}_${file.name}`);
+        await fileRef.put(file);
+        uploadedImageUrl = await fileRef.getDownloadURL();
+
+        const img = document.createElement('img');
+        img.src = uploadedImageUrl;
+        imagePreview.appendChild(img);
+      } catch (err) {
+        console.error('Image upload error:', err);
+        showError('Image upload failed. Please try again.');
+        uploadedImageUrl = '';
+      } finally {
+        isUploadingImage = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Yard Sale';
+      }
+    });
+
+    // Form submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        showError('You must be signed in to post a yard sale.');
+        return;
+      }
+
+      if (isUploadingImage) {
+        showError('Please wait for the image to finish uploading.');
+        return;
+      }
+
+      const yardsaleTitle = document.getElementById('yardsaleTitle').value.trim();
+      const yardsaleDescription = document.getElementById('yardsaleDescription').value.trim();
+      const yardsaleDateValue = document.getElementById('yardsaleDate').value;
+      const yardsaleExpiresValue = document.getElementById('yardsaleExpires').value;
+      const yardsaleStart = document.getElementById('yardsaleStart').value;
+      const yardsaleEndtime = document.getElementById('yardsaleEndtime').value;
+      const yardsalelocation = document.getElementById('yardsalelocation').value.trim();
+
+      if (!yardsaleTitle || !yardsaleDateValue || !yardsaleStart || !yardsalelocation) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting...';
+
+      try {
+        const yardsaleDate = firebase.firestore.Timestamp.fromDate(new Date(yardsaleDateValue));
+
+        // Default expiry: the sale date itself
+        const expiryDate = yardsaleExpiresValue
+          ? firebase.firestore.Timestamp.fromDate(new Date(yardsaleExpiresValue))
+          : yardsaleDate;
+
+        const yardsaleId = db.collection('yardSales').doc().id;
+
+        await db.collection('yardSales').doc(yardsaleId).set({
+          yardsaleId,
+          yardsaleTitle,
+          yardsaleDescription,
+          yardsaleDate,
+          yardsaleStart,
+          yardsaleEndtime,
+          yardsalelocation,
+          yardsaleExpires: expiryDate,
+          yardsaleImage: uploadedImageUrl,
+          yardsalestatus: 'active',
+          userName: currentUser.displayName || currentUser.email || '',
+          userId: currentUser.uid,
+          yardsaleCreatedat: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        showSuccess('Your yard sale has been posted! Redirecting...');
+        form.reset();
+        imagePreview.innerHTML = '';
+        uploadedImageUrl = '';
+
+        setTimeout(() => {
+          window.location.href = 'yard-sales.html';
+        }, 2000);
+      } catch (err) {
+        console.error('Error posting yard sale:', err);
+        showError('Failed to post yard sale. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Yard Sale';
+      }
+    });
+  </script>
+</body>
+</html>

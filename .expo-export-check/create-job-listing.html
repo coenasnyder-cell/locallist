@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Job Listing - Local List</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f5f7;
+      color: #334155;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 14px 36px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .title h1 {
+      font-size: 30px;
+      color: #334155;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .title p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .required::after {
+      content: ' *';
+      color: #dc2626;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #fff;
+    }
+
+    .textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .help {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #087a9a;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+      min-width: 120px;
+    }
+
+    .alert {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #065f46;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 20px 12px 28px; }
+      .title h1 { font-size: 26px; }
+      .grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .btn-secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <div class="panel">
+      <div class="title">
+        <h1>Create Job Listing</h1>
+        <p>Post a local hiring opportunity to the Job Board</p>
+      </div>
+
+      <div id="errorMessage" class="alert alert-error"></div>
+      <div id="successMessage" class="alert alert-success"></div>
+
+      <form id="jobForm">
+        <div class="form-group">
+          <label class="label required" for="jobTitle">Job Title</label>
+          <input class="input" id="jobTitle" required>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="jobCategory">Job Category</label>
+            <select class="select" id="jobCategory" required>
+              <option value="">Loading categories...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label required" for="jobType">Job Type</label>
+            <select class="select" id="jobType" required>
+              <option value="">Select type</option>
+              <option>Full-time</option>
+              <option>Part-time</option>
+              <option>Contract</option>
+              <option>Temporary</option>
+              <option>Seasonal</option>
+              <option>Internship</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="jobLocation">Job Location</label>
+            <input class="input" id="jobLocation" placeholder="City or ZIP" required>
+          </div>
+          <div class="form-group">
+            <label class="label required" for="companyName">Company Name</label>
+            <input class="input" id="companyName" required>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label" for="contactEmail">Contact Email</label>
+            <input class="input" id="contactEmail" type="email" placeholder="Optional if How To Apply includes instructions">
+          </div>
+          <div class="form-group">
+            <label class="label required" for="howApply">How To Apply</label>
+            <input class="input" id="howApply" placeholder="Email, URL, or instructions" required>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="payMin">Pay Min</label>
+            <input class="input" id="payMin" type="number" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="label required" for="payMax">Pay Max</label>
+            <input class="input" id="payMax" type="number" min="0" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label required" for="jobDescription">Job Description</label>
+          <textarea class="textarea" id="jobDescription" required></textarea>
+          <div class="help">Describe duties, schedule, and any requirements.</div>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Submit Job</button>
+          <button class="btn btn-secondary" type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='list-hub.html'; }">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    const DEFAULT_JOB_CATEGORIES = [
+      'General Labor',
+      'Construction',
+      'Retail',
+      'Food Service',
+      'Healthcare',
+      'Education',
+      'Administrative',
+      'Skilled Trades',
+      'Transportation',
+      'Technology',
+      'Sales',
+      'Customer Service'
+    ];
+
+    const form = document.getElementById('jobForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const jobCategorySelect = document.getElementById('jobCategory');
+
+    let currentUser = null;
+    let userProfileData = null;
+
+    function isBusinessAccount() {
+      return userProfileData?.accountType === 'business';
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+    }
+
+    function setCategories(categories) {
+      const cleaned = categories.filter((name) => typeof name === 'string' && name.trim().length > 0);
+      jobCategorySelect.innerHTML = '<option value="">Select category</option>';
+      cleaned.forEach((name) => {
+        const option = document.createElement('option');
+        option.value = name.trim();
+        option.textContent = name.trim();
+        jobCategorySelect.appendChild(option);
+      });
+    }
+
+    async function loadCategories() {
+      try {
+        const snapshot = await db.collection('jobCategories').get();
+        const categories = snapshot.docs.map((docSnap) => docSnap.data()?.name);
+        if (categories.length > 0) {
+          setCategories(categories);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to load job categories:', error);
+      }
+
+      setCategories(DEFAULT_JOB_CATEGORIES);
+    }
+
+    async function preloadUser() {
+      if (!currentUser) return;
+
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        userProfileData = userDoc.data() || {};
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+        userProfileData = {};
+      }
+
+      if (currentUser.email) {
+        document.getElementById('contactEmail').value = currentUser.email;
+      }
+
+      if (userProfileData?.accountType === 'business' && userProfileData?.businessName) {
+        document.getElementById('companyName').value = userProfileData.businessName;
+      }
+
+      if (!isBusinessAccount()) {
+        showError('Business account required. Only business accounts can post job listings.');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Business Account Required';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Job';
+      }
+    }
+
+    function redirectToLogin() {
+      showError('You must be logged in to post a job. Redirecting to login...');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 800);
+    }
+
+    if (!auth) {
+      redirectToLogin();
+    } else {
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          redirectToLogin();
+          return;
+        }
+
+        currentUser = user;
+        await Promise.all([loadCategories(), preloadUser()]);
+      });
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      if (!isBusinessAccount()) {
+        showError('Business account required. Only business accounts can post job listings.');
+        return;
+      }
+
+      const jobTitle = document.getElementById('jobTitle').value.trim();
+      const jobDescription = document.getElementById('jobDescription').value.trim();
+      const jobCategory = document.getElementById('jobCategory').value;
+      const jobType = document.getElementById('jobType').value;
+      const jobLocation = document.getElementById('jobLocation').value.trim();
+      const companyName = document.getElementById('companyName').value.trim();
+      const contactEmail = document.getElementById('contactEmail').value.trim();
+      const howApply = document.getElementById('howApply').value.trim();
+      const payMin = Number(document.getElementById('payMin').value);
+      const payMax = Number(document.getElementById('payMax').value);
+
+      if (!jobTitle || !jobDescription || !jobCategory || !jobType || !jobLocation || !companyName || !howApply) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      if (!contactEmail && howApply.length < 5) {
+        showError('Provide clear instructions in How To Apply or add a contact email.');
+        return;
+      }
+
+      if (!Number.isFinite(payMin) || !Number.isFinite(payMax)) {
+        showError('Pay minimum and maximum must be valid numbers.');
+        return;
+      }
+
+      if (payMin > payMax) {
+        showError('Pay minimum cannot be greater than pay maximum.');
+        return;
+      }
+
+      const userName = userProfileData?.displayName || currentUser.displayName || currentUser.email || 'Unknown';
+      const businessId = userProfileData?.accountType === 'business' ? currentUser.uid : null;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const jobRef = db.collection('jobBoard').doc();
+
+        await jobRef.set({
+          jobId: jobRef.id,
+          jobTitle,
+          jobDescription,
+          jobCategory,
+          jobType,
+          jobLocation,
+          companyName,
+          contactEmail: contactEmail || null,
+          howApply,
+          payMin,
+          payMax,
+          status: 'approved',
+          viewCount: 0,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          expiresAt: expiresAt.toISOString(),
+          userName,
+          userId: currentUser.uid,
+          businessId,
+        });
+
+        showSuccess('Job listing created successfully. Redirecting...');
+        form.reset();
+
+        setTimeout(() => {
+          window.location.href = 'community-hub.html';
+        }, 1000);
+      } catch (error) {
+        console.error('Error creating job listing:', error);
+        showError('Could not create job listing. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Job';
+      }
+    });
+  </script>
+</body>
+</html>

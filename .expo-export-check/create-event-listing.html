@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Event - Local List</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f5f7;
+      color: #334155;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 14px 36px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title h1 {
+      font-size: 30px;
+      color: #334155;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .title p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .section-divider {
+      font-size: 13px;
+      font-weight: 700;
+      color: #059669;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 20px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #d1fae5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .required::after {
+      content: ' *';
+      color: #dc2626;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      outline: none;
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .help {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Image upload */
+    .image-upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .image-upload-area:hover {
+      border-color: #059669;
+      background: #f0fdf4;
+    }
+
+    .image-upload-area p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .image-upload-area .upload-icon {
+      font-size: 32px;
+    }
+
+    #eventImageInput {
+      display: none;
+    }
+
+    #imagePreview {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #imagePreview img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #087a9a;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+      min-width: 120px;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #cbd5e1;
+    }
+
+    /* Alerts */
+    .alert {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #065f46;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px 28px; }
+      .title h1 { font-size: 26px; }
+      .grid { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .btn-secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <div class="panel">
+      <div class="title">
+        <h1>🎉 List an Event</h1>
+        <p>Share a local event with your community</p>
+      </div>
+
+      <div id="errorMessage" class="alert alert-error"></div>
+      <div id="successMessage" class="alert alert-success"></div>
+
+      <form id="eventForm">
+
+        <!-- Event Details -->
+        <p class="section-divider">Event Details</p>
+
+        <div class="form-group">
+          <label class="label required" for="eventTitle">Event Title</label>
+          <input class="input" id="eventTitle" type="text" placeholder="e.g. Summer Festival 2026" required>
+        </div>
+
+        <div class="form-group">
+          <label class="label required" for="eventDescription">Description</label>
+          <textarea class="textarea" id="eventDescription" placeholder="Tell people what the event is about..." required></textarea>
+        </div>
+
+        <!-- Date & Time -->
+        <p class="section-divider">Date &amp; Time</p>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="eventDate">Event Date</label>
+            <input class="input" id="eventDate" type="date" required>
+          </div>
+          <div class="form-group">
+            <label class="label" for="ticketPrice">Ticket Price</label>
+            <input class="input" id="ticketPrice" type="text" placeholder="e.g. Free, $10, $5–$20">
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="label required" for="eventStarttime">Start Time</label>
+            <input class="input" id="eventStarttime" type="time" required>
+          </div>
+          <div class="form-group">
+            <label class="label" for="eventEndtime">End Time</label>
+            <input class="input" id="eventEndtime" type="time">
+          </div>
+        </div>
+
+        <!-- Location -->
+        <p class="section-divider">Location</p>
+
+        <div class="form-group">
+          <label class="label required" for="eventAdress">Street Address</label>
+          <input class="input" id="eventAdress" type="text" placeholder="123 Main St" required>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label class="label required" for="eventCity">City</label>
+            <input class="input" id="eventCity" type="text" required>
+          </div>
+          <div class="form-group">
+            <label class="label required" for="eventState">State</label>
+            <input class="input" id="eventState" type="text" maxlength="2" placeholder="e.g. AR" required>
+          </div>
+          <div class="form-group">
+            <label class="label required" for="eventZipcode">ZIP Code</label>
+            <input class="input" id="eventZipcode" type="text" maxlength="10" required>
+          </div>
+        </div>
+
+        <!-- Extra Info -->
+        <p class="section-divider">Additional Info</p>
+
+        <div class="form-group">
+          <label class="label" for="eventWebsite">Website / Link</label>
+          <input class="input" id="eventWebsite" type="url" placeholder="https://...">
+          <div class="help">Optional — link to event page, ticket sales, etc.</div>
+        </div>
+
+        <!-- Image -->
+        <p class="section-divider">Event Image</p>
+
+        <div class="form-group">
+          <label class="label">Event Photo</label>
+          <div class="image-upload-area" onclick="document.getElementById('eventImageInput').click()">
+            <div class="upload-icon">📷</div>
+            <p>Click to upload an image</p>
+            <p>JPG, PNG, or GIF — max 5 MB</p>
+          </div>
+          <input type="file" id="eventImageInput" accept="image/*">
+          <div id="imagePreview"></div>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Submit Event</button>
+          <button class="btn btn-secondary" type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='events.html'; }">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    const form = document.getElementById('eventForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorEl = document.getElementById('errorMessage');
+    const successEl = document.getElementById('successMessage');
+    const imageInput = document.getElementById('eventImageInput');
+    const imagePreview = document.getElementById('imagePreview');
+
+    let currentUser = null;
+    let uploadedImageUrl = '';
+    let isUploadingImage = false;
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      successEl.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSuccess(msg) {
+      successEl.textContent = msg;
+      successEl.style.display = 'block';
+      errorEl.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Auth check
+    if (!auth) {
+      window.location.href = 'login.html';
+    } else {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUser = user;
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    // Image upload handler
+    imageInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image must be under 5 MB.');
+        imageInput.value = '';
+        return;
+      }
+
+      if (!currentUser) {
+        showError('Please sign in to upload an image.');
+        return;
+      }
+
+      isUploadingImage = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading image...';
+      imagePreview.innerHTML = '';
+      uploadedImageUrl = '';
+
+      try {
+        const fileRef = storage.ref(`eventImages/${currentUser.uid}/${Date.now()}_${file.name}`);
+        await fileRef.put(file);
+        uploadedImageUrl = await fileRef.getDownloadURL();
+
+        const img = document.createElement('img');
+        img.src = uploadedImageUrl;
+        imagePreview.appendChild(img);
+      } catch (err) {
+        console.error('Image upload error:', err);
+        showError('Image upload failed. Please try again.');
+        uploadedImageUrl = '';
+      } finally {
+        isUploadingImage = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Event';
+      }
+    });
+
+    // Form submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        showError('You must be signed in to list an event.');
+        return;
+      }
+
+      if (isUploadingImage) {
+        showError('Please wait for the image to finish uploading.');
+        return;
+      }
+
+      const eventTitle = document.getElementById('eventTitle').value.trim();
+      const eventDescription = document.getElementById('eventDescription').value.trim();
+      const eventDateValue = document.getElementById('eventDate').value;
+      const eventStarttime = document.getElementById('eventStarttime').value;
+      const eventEndtime = document.getElementById('eventEndtime').value;
+      const eventAdress = document.getElementById('eventAdress').value.trim();
+      const eventCity = document.getElementById('eventCity').value.trim();
+      const eventState = document.getElementById('eventState').value.trim().toUpperCase();
+      const eventZipcode = document.getElementById('eventZipcode').value.trim();
+      const eventWebsite = document.getElementById('eventWebsite').value.trim();
+      const ticketPrice = document.getElementById('ticketPrice').value.trim();
+
+      if (!eventTitle || !eventDescription || !eventDateValue || !eventStarttime || !eventAdress || !eventCity || !eventState || !eventZipcode) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const eventDate = firebase.firestore.Timestamp.fromDate(new Date(eventDateValue));
+        const eventId = db.collection('events').doc().id;
+
+        await db.collection('events').doc(eventId).set({
+          eventId,
+          eventTitle,
+          eventDescription,
+          eventDate,
+          eventStarttime,
+          eventEndtime,
+          eventAdress,
+          eventCity,
+          eventState,
+          eventZipcode,
+          eventWebsite,
+          ticketPrice,
+          eventImage: uploadedImageUrl,
+          eventStatus: 'active',
+          userName: currentUser.displayName || currentUser.email || '',
+          userId: currentUser.uid,
+          eventCreatedat: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        showSuccess('Your event has been listed! Redirecting...');
+        form.reset();
+        imagePreview.innerHTML = '';
+        uploadedImageUrl = '';
+
+        setTimeout(() => {
+          window.location.href = 'events.html';
+        }, 2000);
+      } catch (err) {
+        console.error('Error submitting event:', err);
+        showError('Failed to submit event. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Event';
+      }
+    });
+  </script>
+</body>
+</html>

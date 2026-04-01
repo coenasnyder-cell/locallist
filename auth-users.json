@@ -1,0 +1,11 @@
+{"users": [
+{
+  "localId": "4LaqQJM6jiPVNZu6DQlnw3MbRXz1",
+  "email": "coenasnyder@gmail.com",
+  "emailVerified": true,
+  "passwordHash": "VLCi+d62OfJk6rdC4AtZbTKqmOyQuH27KOJQCJUCAjY1534ipY1liiRQscO9Ks2tMoJnV0IaSDbi5p665J9Zbg==",
+  "salt": "mTxt8MtSruIhjQ==",
+  "lastSignedInAt": "1771719851960",
+  "createdAt": "1771056293463",
+  "providerUserInfo": []
+}]}

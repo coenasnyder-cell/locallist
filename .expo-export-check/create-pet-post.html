@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Lost Pet - Local List</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .back-link {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 {
+      color: #475569;
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    .form {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .form-group { margin-bottom: 20px; }
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    .input:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+    .textarea { resize: vertical; min-height: 100px; }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .button-grid.two-up { grid-template-columns: repeat(2, 1fr); }
+    .pick-button {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      touch-action: manipulation;
+      font-weight: 600;
+      color: #333;
+      transition: all 0.2s;
+    }
+    .pick-button:hover { border-color: #0066cc; }
+    .pick-button.active {
+      background: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
+    .submit-button {
+      width: 100%;
+      padding: 14px;
+      background: #475569;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    .submit-button:hover { background: #087a9a; }
+    .submit-button:disabled { opacity: 0.7; cursor: not-allowed; }
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .form-actions .submit-button {
+      margin-top: 0;
+    }
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px;
+    }
+    .back-button:hover {
+      background: #cbd5e1;
+    }
+    .required { color: #ff4444; }
+    .hidden { display: none; }
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .image-preview img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    .hint {
+      color: #777;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .success-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1200;
+    }
+    .success-modal-overlay.show {
+      display: flex;
+    }
+    .success-modal {
+      width: 100%;
+      max-width: 460px;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.28);
+      overflow: hidden;
+      border: 1px solid #d7e3f5;
+    }
+    .success-modal-top {
+      background: linear-gradient(135deg, #0b74da, #22a3ff);
+      color: #fff;
+      padding: 18px 20px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .success-modal-body {
+      padding: 18px 20px 20px;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .success-modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .success-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .success-action-primary {
+      background: #0066cc;
+      color: #fff;
+    }
+    .success-action-primary:hover {
+      background: #0052a3;
+    }
+    .success-action-secondary {
+      background: #f7fbff;
+      color: #0b4f8a;
+      border-color: #b9d8f8;
+    }
+    .success-action-secondary:hover {
+      background: #edf6ff;
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 24px; }
+      .button-grid, .button-grid.two-up { grid-template-columns: 1fr; }
+      .form-actions { grid-template-columns: 1fr; }
+      .success-modal-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="container">
+    <h1>Report A Lost Pet</h1>
+    <div class="form">
+      <form id="petPostForm">
+        <div class="form-group">
+          <label class="label">Pet Name <span class="required">*</span></label>
+          <input type="text" class="input" id="petName" placeholder="e.g., Max, Bella" required>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Pet Type <span class="required">*</span></label>
+          <input type="text" class="input" id="petType" placeholder="e.g., Dog, Cat, Rabbit" required>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Pet Images <span class="required">*</span></label>
+          <input type="file" class="input" id="petImages" accept="image/*" multiple required>
+          <div class="hint">Upload at least one image of your pet. You can select multiple files.</div>
+          <div id="imagePreview" class="image-preview"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Breed <span class="required">*</span></label>
+          <input type="text" class="input" id="petBreed" placeholder="e.g., Golden Retriever, Siamese" required>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Age</label>
+          <input type="text" class="input" id="petAge" placeholder="e.g., 3 years, 6 months">
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="petGender">Gender</label>
+          <select class="input" id="petGender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="locationGroup">
+          <label class="label" id="locationLabel">Last Seen Location <span class="required">*</span></label>
+          <textarea class="input textarea" id="petSeenLocation" placeholder="Where was your pet last seen?" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Description</label>
+          <textarea class="input textarea" id="petDescription" placeholder="Describe any distinguishing features, collar, etc."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="submit-button" id="submitBtn">Submit</button>
+          <a href="pet-hub.html" class="back-button" onclick="if (window.history.length > 1) { event.preventDefault(); window.history.back(); }">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="success-modal-overlay" id="successModalOverlay" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+    <div class="success-modal">
+      <div class="success-modal-top" id="successModalTitle">Post Submitted Successfully</div>
+      <div class="success-modal-body">
+        Your lost pet post is now live. Where would you like to go next?
+        <div class="success-modal-actions">
+          <a href="pet-hub.html" class="success-action success-action-secondary">The Best Corner</a>
+          <a href="#" id="viewListingBtn" class="success-action success-action-primary">View Listing</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="header.js"></script>
+
+  <script type="module">
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+    let currentUser = null;
+
+    const submitBtn = document.getElementById('submitBtn');
+    const descriptionInput = document.getElementById('petDescription');
+    const petGenderInput = document.getElementById('petGender');
+    const imagePreview = document.getElementById('imagePreview');
+    const successModalOverlay = document.getElementById('successModalOverlay');
+    const viewListingBtn = document.getElementById('viewListingBtn');
+        function showSuccessModal(listingId) {
+          if (!viewListingBtn || !successModalOverlay) {
+            window.location.href = 'pet-hub.html';
+            return;
+          }
+
+          viewListingBtn.href = `pet-details.html?id=${encodeURIComponent(listingId)}`;
+          successModalOverlay.classList.add('show');
+        }
+
+    
+    let uploadedImageUrls = [];
+    let isUploadingImages = false;
+
+    function checkAuth() {
+      const auth = window.firebaseAuth;
+
+      if (!auth) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUser = user;
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    document.getElementById('petImages').addEventListener('change', async (event) => {
+      imagePreview.innerHTML = '';
+      uploadedImageUrls = [];
+      const files = Array.from(event.target.files || []);
+
+      if (!files.length) {
+        return;
+      }
+
+      if (!currentUser) {
+        alert('Please sign in to upload images.');
+        return;
+      }
+
+      isUploadingImages = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading images...';
+
+      try {
+        for (const file of files) {
+          const fileRef = storage.ref(`petImages/${currentUser.uid}/${Date.now()}_${file.name}`);
+          await fileRef.put(file);
+          const downloadUrl = await fileRef.getDownloadURL();
+          uploadedImageUrls.push(downloadUrl);
+
+          const img = document.createElement('img');
+          img.src = downloadUrl;
+          imagePreview.appendChild(img);
+        }
+      } catch (error) {
+        console.error('Image upload error:', error);
+        alert('Image upload failed. Please try again.');
+        uploadedImageUrls = [];
+      } finally {
+        isUploadingImages = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      }
+    });
+
+    document.getElementById('petPostForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const petName = document.getElementById('petName').value.trim();
+      const petType = document.getElementById('petType').value.trim();
+      const petBreed = document.getElementById('petBreed').value.trim();
+      const petAge = document.getElementById('petAge').value.trim() || 'Unknown';
+      const petSeenLocation = document.getElementById('petSeenLocation').value.trim();
+      const petDescription = descriptionInput.value.trim();
+      const selectedGender = petGenderInput.value;
+
+      if (!petName || !petType || !petBreed || !petSeenLocation) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      if (uploadedImageUrls.length === 0) {
+        alert('Please upload at least one image of your pet.');
+        return;
+      }
+
+      if (isUploadingImages) {
+        alert('Please wait for images to finish uploading.');
+        return;
+      }
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting...';
+
+        if (!currentUser?.uid) {
+          alert('Please sign in before submitting your pet post.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit';
+          return;
+        }
+
+        if (!db) {
+          throw new Error('Firestore is not initialized.');
+        }
+
+        const userId = currentUser.uid;
+
+        const docRef = await db.collection('pets').add({
+          postType: 'lost',
+          petName,
+          petType,
+          petBreed,
+          petAge,
+          petGender: selectedGender,
+          petDescription,
+          petSeenLocation,
+          petImages: uploadedImageUrls,
+          petAdoptionFee: 0,
+          userId,
+          petStatus: 'lost',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        showSuccessModal(docRef.id);
+      } catch (error) {
+        console.error('Error creating pet post:', error);
+        alert('Failed to create your pet post. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      }
+    });
+
+    checkAuth();
+  </script>
+</body>
+</html>

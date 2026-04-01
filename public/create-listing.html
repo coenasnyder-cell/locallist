@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Listing - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      color: #475569;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f8f8f8;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #475569;
+      background: #fff;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #777;
+      margin-top: 6px;
+    }
+
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      padding: 12px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #087a9a;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+      min-width: 120px;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .success-message {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .verification-warning {
+      background: #fff3e0;
+      color: #e65100;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+      border-left: 4px solid #ff9800;
+    }
+
+    .verification-warning-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .verification-warning p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .verification-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-small {
+      padding: 8px 14px;
+      font-size: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-verify {
+      background: #ff9800;
+      color: #fff;
+    }
+
+    .btn-verify:hover {
+      background: #f57c00;
+    }
+
+    .btn-verify-secondary {
+      background: #ffe0b2;
+      color: #e65100;
+    }
+
+    .btn-verify-secondary:hover {
+      background: #ffd699;
+    }
+
+    .feature-box {
+      background: #f0f8fc;
+      border-left: 4px solid #475569;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn-secondary {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-functions-compat.js"></script>
+  
+  <!-- Stripe SDK -->
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1>Create Listing</h1>
+      <div id="verificationWarning" class="verification-warning">
+        <div class="verification-warning-title">Email Verification Required</div>
+        <p>Please verify your email address before creating a listing. This helps us keep the community safe and trustworthy.</p>
+        <div class="verification-actions">
+          <button type="button" class="btn-small btn-verify" onclick="sendVerificationEmail()">Send Verification Email</button>
+          <button type="button" class="btn-small btn-verify-secondary" onclick="dismissVerificationWarning()">Dismiss</button>
+        </div>
+      </div>
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+
+      <form id="listingForm">
+        <div class="form-group">
+          <label class="form-label" for="images">Images (required)</label>
+          <input type="file" id="images" class="form-input" accept="image/*" multiple required>
+          <div class="hint">Upload at least one image. You can select multiple files.</div>
+          <div id="imagePreview" class="image-preview"></div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label" for="sellerName">Your Name</label>
+            <input type="text" id="sellerName" class="form-input" placeholder="Your name" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="title">Title</label>
+            <input type="text" id="title" class="form-input" placeholder="Listing title" required>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label" for="price">Price</label>
+            <input type="number" id="price" class="form-input" placeholder="0.00" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description</label>
+          <textarea id="description" class="form-textarea" placeholder="Describe your item" required></textarea>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label" for="category">Category</label>
+            <select id="category" class="form-select" required>
+              <option value="">Select category</option>
+              <option value="Home Goods">Home Goods</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Autos">Autos</option>
+              <option value="Outdoors">Outdoors</option>
+              <option value="Handmade Gifts">Handmade Gifts</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Tools">Tools</option>
+              <option value="Baby & Kids">Baby & Kids</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="condition">Condition</label>
+            <select id="condition" class="form-select" required>
+              <option value="">Select condition</option>
+              <option value="New">New</option>
+              <option value="Like New">Like New</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+              <option value="Poor">Poor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label" for="zipCode">Zip Code</label>
+            <input type="text" id="zipCode" class="form-input" placeholder="12345" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="city">City</label>
+            <input type="text" id="city" class="form-input" placeholder="e.g., Harrison" required>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-title">Boost Your Listing</div>
+          <div class="hint">Featured listings appear at the top of search results. ($5 for 7 days)</div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+            <input type="checkbox" id="wantsFeatured">
+            <label for="wantsFeatured">Feature this listing</label>
+          </div>
+          <div id="paymentInfo" style="display: none; margin-top: 12px; padding: 12px; background: #f0f9ff; border-left: 4px solid #475569; border-radius: 4px;">
+            <p style="font-weight: 600; color: #475569; margin-bottom: 8px;">� Secure Payment with Stripe</p>
+            <p style="font-size: 14px; color: #555; margin-bottom: 8px;">After creating your listing, you'll be redirected to complete your $5.00 payment securely through Stripe.</p>
+            <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Approval required:</strong> Your featured listing goes live after admin approval. Typical review time is 24 hours (up to 48 hours).</p>
+            <p style="font-size: 12px; color: #666; margin-top: 8px; font-style: italic;">✓ Secure checkout • ✓ Credit/Debit cards accepted • ✓ Featured for 7 days after admin approval</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="submitBtn" class="btn btn-primary">Submit Listing</button>
+          <button type="button" class="btn btn-secondary" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='profile.html'; }">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const app = window.firebaseApp;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    const form = document.getElementById('listingForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const categorySelect = document.getElementById('category');
+    const imagePreview = document.getElementById('imagePreview');
+    let currentUser = null;
+    let uploadedImageUrls = [];
+    let isUploadingImages = false;
+    let verificationPollIntervalId = null;
+
+    function applyCategoryFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const rawCategory = params.get('category');
+      if (!rawCategory) return;
+
+      const removedCategories = new Set([
+        'Yard Sales',
+        'Job Postings',
+        'Jobs',
+        'Job Post',
+        'Pets',
+        'Pet',
+        'Events',
+        'Event',
+        'Business',
+        'Business Local',
+        'Shop Local',
+        'Services'
+      ]);
+
+      if (removedCategories.has(rawCategory)) {
+        return;
+      }
+
+      const categoryAliases = {
+        Home: 'Home Goods',
+      };
+
+      const normalizedCategory = categoryAliases[rawCategory] || rawCategory;
+      const hasOption = Array.from(categorySelect.options).some(option => option.value === normalizedCategory);
+
+      if (hasOption) {
+        categorySelect.value = normalizedCategory;
+        categorySelect.dispatchEvent(new Event('change'));
+      }
+    }
+
+    function redirectToLogin() {
+      showError('You must be logged in to create a listing. Redirecting to login...');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 800);
+    }
+
+    if (!auth) {
+      redirectToLogin();
+    } else {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUser = user;
+          preloadUserProfile();
+        } else {
+          stopEmailVerificationPolling();
+          redirectToLogin();
+        }
+      });
+    }
+
+    function startEmailVerificationPolling() {
+      if (verificationPollIntervalId) return;
+      verificationPollIntervalId = window.setInterval(async () => {
+        if (!currentUser) return;
+        try {
+          await currentUser.reload();
+          const shouldContinuePolling = checkEmailVerification();
+          if (!shouldContinuePolling) {
+            stopEmailVerificationPolling();
+          }
+        } catch (error) {
+          console.error('Error checking email verification:', error);
+        }
+      }, 30000);
+    }
+
+    function stopEmailVerificationPolling() {
+      if (!verificationPollIntervalId) return;
+      clearInterval(verificationPollIntervalId);
+      verificationPollIntervalId = null;
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+    }
+
+    // Show/hide payment info when feature checkbox is toggled
+    document.getElementById('wantsFeatured').addEventListener('change', (e) => {
+      document.getElementById('paymentInfo').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    applyCategoryFromUrl();
+
+    // Stripe checkout must run on HTTPS in production (localhost is allowed for testing).
+    const isStripeContextAllowed =
+      window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    const stripe =
+      isStripeContextAllowed && window.stripeConfig && typeof window.Stripe === 'function'
+        ? Stripe(window.stripeConfig.publishableKey)
+        : null;
+
+    // Function to initiate Stripe Checkout
+    async function initiateStripeCheckout(listingId, listingTitle) {
+      if (!isStripeContextAllowed) {
+        showError('Featured checkout requires HTTPS. Please open this page over HTTPS and try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Listing';
+        return;
+      }
+
+      if (!stripe) {
+        showError('Stripe is not configured. Please contact support.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Listing';
+        return;
+      }
+
+      try {
+        // Call Cloud Function to create checkout session
+        const createCheckoutSession = firebase.functions().httpsCallable('createCheckoutSession');
+        const result = await createCheckoutSession({
+          listingId: listingId,
+          listingTitle: listingTitle
+        });
+
+        const { sessionId } = result.data;
+
+        if (!sessionId) {
+          throw new Error('No session ID returned from server');
+        }
+
+        // Redirect to Stripe Checkout
+        const { error } = await stripe.redirectToCheckout({ sessionId });
+
+        if (error) {
+          console.error('Stripe redirect error:', error);
+          showError('Payment initialization failed: ' + error.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Listing';
+        }
+      } catch (error) {
+        console.error('Stripe checkout error:', error);
+        showError('Failed to initialize payment. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Listing';
+      }
+    }
+
+    document.getElementById('images').addEventListener('change', async (event) => {
+      imagePreview.innerHTML = '';
+      uploadedImageUrls = [];
+      const files = Array.from(event.target.files || []);
+
+      if (!files.length) {
+        return;
+      }
+
+      if (!currentUser) {
+        showError('Please sign in to upload images.');
+        return;
+      }
+
+      isUploadingImages = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading images...';
+
+      try {
+        for (const file of files) {
+          const fileRef = storage.ref(`listingImages/${currentUser.uid}/${Date.now()}_${file.name}`);
+          await fileRef.put(file);
+          const downloadUrl = await fileRef.getDownloadURL();
+          uploadedImageUrls.push(downloadUrl);
+
+          const img = document.createElement('img');
+          img.src = downloadUrl;
+          imagePreview.appendChild(img);
+        }
+      } catch (error) {
+        console.error('Image upload error:', error);
+        showError('Image upload failed. Please try again.');
+        uploadedImageUrls = [];
+      } finally {
+        isUploadingImages = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Listing';
+      }
+    });
+
+    let userProfileData = null;
+
+    async function preloadUserProfile() {
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        userProfileData = userDoc.data() || {};
+        
+        // Populate seller name field
+        const sellerNameField = document.getElementById('sellerName');
+        const sellerName = userProfileData?.displayName || userProfileData?.name || currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous';
+        sellerNameField.value = sellerName;
+        
+        // Check email verification status
+        await currentUser.reload();
+        const shouldPoll = checkEmailVerification();
+        if (shouldPoll) {
+          startEmailVerificationPolling();
+        } else {
+          stopEmailVerificationPolling();
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+    }
+
+    function checkEmailVerification() {
+      const verificationWarning = document.getElementById('verificationWarning');
+      if (!currentUser) {
+        verificationWarning.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.title = '';
+        return false;
+      }
+
+      const isPasswordAuth = currentUser.providerData && currentUser.providerData.length > 0 &&
+                           currentUser.providerData[0].providerId === 'password';
+      const requiresVerification = isPasswordAuth && !currentUser.emailVerified;
+
+      if (requiresVerification) {
+        verificationWarning.style.display = 'block';
+        submitBtn.disabled = true;
+        submitBtn.title = 'Please verify your email before creating a listing';
+      } else {
+        verificationWarning.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.title = '';
+      }
+
+      return requiresVerification;
+    }
+
+    async function sendVerificationEmail() {
+      try {
+        await currentUser.sendEmailVerification({
+          url: 'https://app.locallist.biz/verify-email.html'
+        });
+        showSuccess('Verification email sent! Please check your inbox and verify your email.');
+        document.getElementById('verificationWarning').style.display = 'block';
+      } catch (error) {
+        console.error('Error sending verification email:', error);
+        showError('Failed to send verification email. Please try again.');
+      }
+    }
+
+    function dismissVerificationWarning() {
+      document.getElementById('verificationWarning').style.display = 'none';
+    }
+
+    function isValidImageUrl(url) {
+      return typeof url === 'string' && url.startsWith('https://');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      // Force token refresh to ensure email verification status is current in Firestore rules
+      try {
+        await currentUser.getIdToken(true);
+      } catch (error) {
+        console.error('Error refreshing auth token:', error);
+      }
+
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const category = document.getElementById('category').value;
+      const condition = document.getElementById('condition').value;
+      const zipCode = document.getElementById('zipCode').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const wantsFeatured = document.getElementById('wantsFeatured').checked;
+
+      // Auto-generate seller name from profile
+      const sellerName = userProfileData?.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous';
+      const pickupLocation = 'Contact seller for details';
+      const businessId = userProfileData?.accountType === 'business' ? currentUser.uid : null;
+
+      if (isUploadingImages) {
+        showError('Please wait for images to finish uploading.');
+        return;
+      }
+
+      if (!uploadedImageUrls.length) {
+        showError('Please upload at least one image.');
+        return;
+      }
+
+      if (!title || !description || !price || !category || !condition || !zipCode || !city) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      // Check if user is posting to business-only categories
+      if ((category === 'Shop Local' || category === 'Services') && userProfileData?.accountType !== 'business') {
+        showError('Only business accounts can post in the Business Local and Services categories. Upgrade your account to business to post here.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Listing';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        if (!uploadedImageUrls.length || uploadedImageUrls.some(url => !isValidImageUrl(url))) {
+          showError('Image upload failed. Please try again.');
+          submitBtn.textContent = 'Submit Listing';
+          submitBtn.disabled = false;
+          return;
+        }
+
+        const listingData = {
+          images: uploadedImageUrls,
+          title,
+          description,
+          price: parseFloat(price),
+          category,
+          condition,
+          zipCode,
+          city,
+          pickupLocation,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: wantsFeatured ? 'pending' : 'approved',  // Featured listings need admin approval
+          viewCount: 0,
+          isActive: true,
+          isFeatured: false,
+          favoritesCount: 0,
+          allowMessages: true,
+          userId: currentUser.uid,
+          userName: sellerName,
+          businessId,
+          sellerName,
+          sellerEmail: currentUser.email,
+          sellerBusinessName: userProfileData?.accountType === 'business' ? userProfileData?.businessName || null : null,
+          sellerBusinessTier: userProfileData?.accountType === 'business' ? userProfileData?.businessTier || 'free' : null,
+          sellerAccountType: userProfileData?.accountType || null
+        };
+
+        // Marketplace listings auto-expire after 30 days.
+        // Services and Shop Local listings are manually managed.
+        if (category !== 'Services' && category !== 'Shop Local') {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30);
+          listingData.expiresAt = firebase.firestore.Timestamp.fromDate(expiresAt);
+        }
+
+        // If featured, add payment tracking fields
+        if (wantsFeatured) {
+          listingData.featureRequested = true;
+          listingData.featurePaymentStatus = 'pending';
+        }
+
+        const listingRef = await db.collection('listings').add(listingData);
+
+        if (wantsFeatured) {
+          // Redirect to Stripe Checkout
+          await initiateStripeCheckout(listingRef.id, title);
+        } else {
+          showSuccess('Listing created successfully! Redirecting to your profile...');
+          form.reset();
+          imagePreview.innerHTML = '';
+          uploadedImageUrls = [];
+          submitBtn.textContent = 'Submit Listing';
+          submitBtn.disabled = false;
+
+          setTimeout(() => {
+            window.location.href = 'profile.html';
+          }, 1200);
+        }
+
+        form.reset();
+        imagePreview.innerHTML = '';
+        uploadedImageUrls = [];
+        submitBtn.textContent = 'Submit Listing';
+        submitBtn.disabled = false;
+
+        setTimeout(() => {
+          window.location.href = 'profile.html';
+        }, wantsFeatured ? 3000 : 1200);
+      } catch (error) {
+        console.error('Error creating listing:', error);
+        showError('Error creating listing: ' + error.message);
+        submitBtn.textContent = 'Submit Listing';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

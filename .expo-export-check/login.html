@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 20px;
+      flex: 1;
+    }
+    
+    .login-box {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #475569;
+    }
+    
+    .subtitle {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .info {
+      font-size: 15px;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #555;
+      line-height: 1.5;
+    }
+    
+    .google-btn {
+      width: 100%;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #475569;
+      background: white;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .google-btn:hover {
+      background: #f0f8fc;
+    }
+    
+    .google-btn:active {
+      transform: scale(0.98);
+    }
+
+    .google-helper {
+      margin-top: -16px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .google-cancel-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #475569;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+      height: 1px;
+      background: #e0e0e0;
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 16px;
+      position: relative;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .field {
+      margin-bottom: 20px;
+    }
+    
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: #475569;
+    }
+    
+    .input::placeholder {
+      color: #999;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: #475569;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 12px;
+    }
+    
+    .login-btn:hover {
+      background: #3b4a5a;
+    }
+    
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .login-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .forgot-password {
+      text-align: center;
+      margin-top: 16px;
+    }
+    
+    .forgot-password a {
+      color: #475569;
+      font-size: 14px;
+      text-decoration: underline;
+    }
+    
+    .forgot-password a:hover {
+      color: #087a9a;
+    }
+    
+    .signup-link {
+      text-align: center;
+      margin-top: 24px;
+      color: #333;
+      font-size: 15px;
+    }
+    
+    .signup-link a {
+      color: #475569;
+      text-decoration: underline;
+    }
+    
+    .signup-link a:hover {
+      color: #087a9a;
+    }
+    
+    .error-message {
+      display: none;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .action-panel {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      background: #f8fafc;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .action-panel p {
+      margin-bottom: 10px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .link-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: white;
+      color: #475569;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .link-btn.primary {
+      background: #475569;
+      color: white;
+      border-color: #475569;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+        margin: 20px auto;
+      }
+      
+      .login-box {
+        padding: 24px 20px;
+      }
+      
+      .title {
+        font-size: 20px;
+      }
+      
+      .subtitle {
+        font-size: 16px;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <div class="login-box">
+      <h1 class="title">Welcome to Local List</h1>
+      <p class="subtitle">Harrison's Local Marketplace</p>
+      <p class="info">Log in to post listings, message sellers, and manage your account.</p>
+      
+      <div class="error-message" id="errorMessage"></div>
+      
+      <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="input" 
+            placeholder="you@email.com"
+          >
+        </div>
+        
+        <div class="field hidden" id="passwordField">
+          <label class="label" for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="input" 
+            placeholder="Enter your password"
+            disabled
+          >
+        </div>
+        
+        <button type="submit" class="login-btn" id="loginBtn">Continue</button>
+        <button type="button" class="link-btn hidden" id="changeEmailBtn" onclick="resetAuthFlow()">Use a different email</button>
+
+        <div class="action-panel hidden" id="noAccountPanel">
+          <p>Need an account? Create one or continue with Google.</p>
+          <button type="button" class="link-btn primary" id="createAccountBtn" onclick="goToSignup()">Create an account</button>
+          <button type="button" class="google-btn" onclick="signInWithGoogle()" style="margin-top: 10px; margin-bottom: 0;">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            Sign up with Google
+          </button>
+        </div>
+
+        <div class="action-panel hidden" id="googleOnlyPanel">
+          <p>This email uses Google sign-in.</p>
+          <button type="button" class="google-btn" onclick="signInWithGoogle()" style="margin-top: 6px; margin-bottom: 0;">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            Continue with Google
+          </button>
+        </div>
+      </form>
+      
+      <div class="forgot-password hidden" id="forgotPasswordSection">
+        <a href="forgot-password.html">Forgot Your Password?</a>
+      </div>
+      
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    let authStep = 'email';
+    let checkedEmail = '';
+
+    function setVisibility(elementId, isVisible) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (isVisible) {
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    function goToSignup() {
+      const email = (document.getElementById('email').value || '').trim();
+      if (email) {
+        window.location.href = 'signup.html?complete=1&email=' + encodeURIComponent(email);
+        return;
+      }
+      window.location.href = 'signup.html?complete=1';
+    }
+
+    function resetAuthFlow() {
+      authStep = 'email';
+      checkedEmail = '';
+      const passwordInput = document.getElementById('password');
+      const emailInput = document.getElementById('email');
+      const loginBtn = document.getElementById('loginBtn');
+
+      if (passwordInput) {
+        passwordInput.value = '';
+        passwordInput.disabled = true;
+      }
+      if (emailInput) {
+        emailInput.readOnly = false;
+        emailInput.focus();
+      }
+
+      setVisibility('passwordField', false);
+      setVisibility('changeEmailBtn', false);
+      setVisibility('noAccountPanel', false);
+      setVisibility('googleOnlyPanel', false);
+      setVisibility('forgotPasswordSection', false);
+
+      if (loginBtn) {
+        loginBtn.textContent = 'Continue';
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('hidden');
+      }
+    }
+
+    function applyMethodsFlow(methods, hasUserProfile) {
+      const emailInput = document.getElementById('email');
+      const loginBtn = document.getElementById('loginBtn');
+      const hasPassword = methods.includes('password');
+      const hasGoogle = methods.includes('google.com');
+
+      if (emailInput) {
+        emailInput.readOnly = true;
+      }
+
+      setVisibility('changeEmailBtn', true);
+
+      if (!hasPassword && !hasGoogle && !hasUserProfile) {
+        // Auth method checks can be inconclusive in some Firebase setups,
+        // so do not block sign-in here. Allow password attempt and show
+        // account creation options at the same time.
+        authStep = 'password';
+        if (loginBtn) {
+          loginBtn.classList.remove('hidden');
+          loginBtn.textContent = 'Log In';
+          loginBtn.disabled = false;
+        }
+        setVisibility('passwordField', true);
+        setVisibility('forgotPasswordSection', true);
+        setVisibility('noAccountPanel', true);
+        setVisibility('googleOnlyPanel', false);
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+          passwordInput.disabled = false;
+          passwordInput.focus();
+        }
+        return;
+      }
+
+      if (hasPassword || hasUserProfile) {
+        authStep = 'password';
+        if (loginBtn) {
+          loginBtn.classList.remove('hidden');
+          loginBtn.textContent = 'Log In';
+          loginBtn.disabled = false;
+        }
+        setVisibility('passwordField', true);
+        setVisibility('forgotPasswordSection', true);
+        setVisibility('noAccountPanel', false);
+        setVisibility('googleOnlyPanel', false);
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+          passwordInput.disabled = false;
+          passwordInput.focus();
+        }
+        return;
+      }
+
+      authStep = 'none';
+      if (loginBtn) {
+        loginBtn.classList.add('hidden');
+      }
+      setVisibility('passwordField', false);
+      setVisibility('forgotPasswordSection', false);
+      setVisibility('noAccountPanel', false);
+      setVisibility('googleOnlyPanel', true);
+      const passwordInput = document.getElementById('password');
+      if (passwordInput) {
+        passwordInput.disabled = true;
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      
+      setTimeout(() => {
+        errorDiv.classList.remove('show');
+      }, 5000);
+    }
+
+    function getErrorMessage(error) {
+      // Map Firebase error codes to user-friendly messages
+      switch(error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          return 'Username or password not correct';
+        case 'auth/invalid-email':
+          return 'Invalid email address';
+        case 'auth/user-disabled':
+          return 'This account has been disabled';
+        case 'auth/too-many-requests':
+          return 'Too many failed login attempts. Please try again later';
+        case 'auth/invalid-credential':
+          return 'Username or password not correct';
+        case 'auth/invalid-login-credentials':
+          return 'No account found with that email, or incorrect password. Please try again or create a new account.';
+        default:
+          return error.message || 'Login failed. Please try again';
+      }
+    }
+    
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      // Force the account picker so the Google prompt is always visible
+      provider.setCustomParameters({ prompt: 'select_account' });
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          handleAuthSuccess(result.user);
+        })
+        .catch((error) => {
+          console.error('Google Sign-In error:', error);
+          if (error.code === 'auth/popup-closed-by-user') {
+            // User dismissed — do nothing
+          } else if (error.code === 'auth/cancelled-popup-request') {
+            showError('Sign-in was interrupted. Please try again.');
+          } else {
+            showError('Google Sign-In failed. Please try again.');
+          }
+        });
+    }
+    
+    async function handleAuthSuccess(user) {
+      try {
+        const providerIds = Array.isArray(user.providerData)
+          ? user.providerData.map((provider) => provider && provider.providerId).filter(Boolean)
+          : [];
+        const isGoogleUser = providerIds.includes('google.com');
+
+        const setLocalSession = (isAdmin) => {
+          localStorage.setItem('userToken', user.uid);
+          localStorage.setItem('userName', user.email || '');
+          localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+        };
+
+        // Get user's role from Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        // If Google auth created a new user, create a minimal profile and send to profile completion.
+        if (!userDoc.exists) {
+          if (isGoogleUser) {
+            const fallbackName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+            await db.collection('users').doc(user.uid).set({
+              email: user.email || '',
+              displayName: fallbackName,
+              name: fallbackName,
+              accountType: 'personal',
+              role: 'user',
+              status: 'pending',
+              zipCode: null,
+              zipApproved: false,
+              isDisabled: false,
+              isBanned: false,
+              blockedUsers: [],
+              createdAt: new Date(),
+              lastLoginAt: new Date()
+            }, { merge: true });
+            setLocalSession(false);
+            alert('Google account created successfully. Please complete your profile.');
+            window.location.href = 'profile.html';
+            return;
+          }
+          window.location.href = 'signup.html?complete=1';
+          return;
+        }
+
+        const profile = userDoc.data() || {};
+        const hasMinimumProfile = Boolean(
+          profile.email &&
+          profile.zipCode &&
+          (profile.name || profile.displayName)
+        );
+
+        if (!hasMinimumProfile) {
+          if (isGoogleUser) {
+            setLocalSession(profile.role === 'admin');
+            alert('Google sign-in succeeded. Please complete your profile details.');
+            window.location.href = 'profile.html';
+            return;
+          }
+          window.location.href = 'signup.html?complete=1';
+          return;
+        }
+        
+        const isAdmin = userDoc.data().role === 'admin';
+        
+        // Store user info in localStorage
+        setLocalSession(isAdmin);
+        
+        // Redirect to home page
+        window.location.href = 'index.html';
+      } catch (error) {
+        showError('Error fetching user data: ' + error.message);
+      }
+    }
+    
+    function handleLogin(event) {
+      event.preventDefault();
+
+      if (!auth) {
+        showError('Authentication is unavailable right now. Please refresh the page and try again.');
+        return;
+      }
+      
+      const emailInput = document.getElementById('email');
+      const rawEmail = (emailInput.value || '').trim();
+      const email = rawEmail.toLowerCase();
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+
+      emailInput.value = email;
+
+      if (!email) {
+        showError('Please enter your email address.');
+        return;
+      }
+
+      if (authStep === 'email') {
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Checking...';
+
+        auth.fetchSignInMethodsForEmail(email)
+          .then((methods) => {
+            checkedEmail = email;
+            applyMethodsFlow(Array.isArray(methods) ? methods : [], false);
+          })
+          .catch(() => {
+            // Some Firebase projects can return inconclusive results here.
+            // Fall back to password + account creation options instead of blocking.
+            checkedEmail = email;
+            applyMethodsFlow([], false);
+          })
+          .finally(() => {
+            loginBtn.disabled = false;
+            if (authStep === 'email') {
+              loginBtn.textContent = 'Continue';
+            }
+          });
+        return;
+      }
+
+      if (authStep !== 'password') {
+        return;
+      }
+
+      if (!password) {
+        showError('Please enter your password.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Log In';
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+
+      auth.signInWithEmailAndPassword(checkedEmail || email, password)
+        .then((userCredential) => {
+          handleAuthSuccess(userCredential.user);
+        })
+        .catch((error) => {
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Log In';
+          showError(getErrorMessage(error));
+        });
+    }
+
+    resetAuthFlow();
+  </script>
+</body>
+</html>

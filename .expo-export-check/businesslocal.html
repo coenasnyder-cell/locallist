@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Local - Create Business Profile - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      color: #475569;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .required {
+      color: #d32f2f;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f8f8f8;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #475569;
+      background: #fff;
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #777;
+      margin-top: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-full {
+      grid-column: 1 / -1;
+    }
+
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .image-preview-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .image-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .image-preview-wrapper:hover .image-remove-btn {
+      opacity: 1;
+    }
+
+    .file-preview {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-preview-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .file-preview-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .file-preview-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-preview-size {
+      color: #64748b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .file-remove-btn {
+      border: 1px solid #fecaca;
+      background: #fff1f2;
+      color: #be123c;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .file-remove-btn:hover {
+      background: #ffe4e6;
+    }
+
+    .file-empty {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .logo-preview {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .section-divider {
+      border-top: 1px solid #e0e0e0;
+      margin: 28px 0;
+      padding-top: 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 16px;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .success-message {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .upgrade-cta {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .upgrade-cta .btn {
+      width: 100%;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #3a4654;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .info-box {
+      background: #f0f7fa;
+      border-left: 4px solid #475569;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .info-box p {
+      font-size: 14px;
+      color: #1565c0;
+      line-height: 1.5;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 86vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 34px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-description {
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+    }
+
+    .tier-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .tier-option {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.2s;
+    }
+
+    .tier-option.selected {
+      border-color: #4CAF50;
+      background-color: #f1f8f6;
+      color: #4CAF50;
+    }
+
+    .upgrade-submit {
+      width: 100%;
+      margin-top: 20px;
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .upgrade-submit:hover {
+      background: #45a049;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1>Add Or Claim A Business</h1>
+      <p class="subtitle">Add a Business Profile for your business so local customers can discover, trust, and contact you.</p>
+
+      <div class="info-box">
+        <p><strong>Why create a business profile?</strong></p>
+        <ul>
+          <li>Get found by local shoppers in Business Local and Services.</li>
+          <li>Show your business details, branding, and contact options in one place.</li>
+          <li>Build trust with a complete profile and verification options.</li>
+        </ul>
+        <p>Upgrade to a business account below to start creating your profile.</p>
+      </div>
+
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+      <div id="upgradeBusinessCta" class="upgrade-cta">
+        <button type="button" class="btn btn-primary" onclick="openModal('upgradeModal')">Upgrade To A Business Account</button>
+      </div>
+      <div id="duplicateClaimCta" class="upgrade-cta">
+        <button type="button" id="claimExistingBtn" class="btn btn-primary">Claim Existing Business Listing</button>
+      </div>
+
+      <form id="businessProfileForm">
+        <!-- Business Logo Section -->
+        <div class="section-title">Business Logo</div>
+        <div class="form-group">
+          <label class="form-label">Business Logo <span style="color: #999;">(Optional)</span></label>
+          <input type="file" id="businessLogo" class="form-input" accept="image/*">
+          <div class="hint">Recommended: PNG or JPG, square format. Max 5MB.</div>
+          <img id="logoPreview" class="logo-preview" alt="Logo preview">
+        </div>
+
+        <!-- Business Information Section -->
+        <div class="section-divider">
+          <div class="section-title">Business Information</div>
+        </div>
+
+        <div class="grid grid-full">
+          <div class="form-group">
+            <label class="form-label">Business Name <span class="required">*</span></label>
+            <input type="text" id="businessName" class="form-input" placeholder="e.g., Hope Grows Coffee Co." required>
+          </div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label">Business Type <span class="required">*</span></label>
+          <select id="listingType" class="form-select" required>
+            <option value="">Select where to display your business...</option>
+            <option value="shopLocal">Business Local Only - Retail & physical products</option>
+            <option value="services">Services Only - Professional services</option>
+            <option value="both">Both - Business Local & Services</option>
+          </select>
+          <div class="hint">Choose where your business will be displayed on Local List.</div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label">Business Description <span class="required">*</span></label>
+          <textarea id="businessDescription" class="form-textarea" placeholder="Tell customers about your business, what makes it special, and what you offer..." required></textarea>
+          <div class="hint">Be engaging and informative. Include what you sell/offer and your business values.</div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="section-divider">
+          <div class="section-title">Contact & Web Information</div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">Business Contact Email <span style="color: #999;">(Optional)</span></label>
+            <input type="email" id="businessEmail" class="form-input" placeholder="contact@yourbusiness.com">
+            <div class="hint">This can be different from your sign-in email.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone <span style="color: #999;">(Optional)</span></label>
+            <input type="tel" id="businessPhone" class="form-input" placeholder="(555) 123-4567">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Website <span style="color: #999;">(Optional)</span></label>
+            <input type="url" id="businessWebsite" class="form-input" placeholder="https://www.example.com">
+          </div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label">Preferred method for users to contact you <span class="required">*</span></label>
+          <select id="preferredContactMethod" class="form-select" required>
+            <option value="email">Email</option>
+            <option value="phone">Phone</option>
+            <option value="local_list">Local List Messaging</option>
+          </select>
+          <div class="hint">Choose the main contact option shown when users tap the Contact Seller button on your profile.</div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label" style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="allowLocalListMessaging" style="width: 18px; height: 18px; cursor: pointer;">
+            Allow users to contact me inside Local List messaging
+          </label>
+          <div class="hint">Check this to receive direct messages through Local List.</div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">Facebook <span style="color: #999;">(Optional)</span></label>
+            <input type="url" id="facebookUrl" class="form-input" placeholder="https://facebook.com/yourbusiness">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instagram <span style="color: #999;">(Optional)</span></label>
+            <input type="url" id="instagramUrl" class="form-input" placeholder="https://instagram.com/yourbusiness">
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">TikTok <span style="color: #999;">(Optional)</span></label>
+            <input type="url" id="tiktokUrl" class="form-input" placeholder="https://tiktok.com/@yourbusiness">
+          </div>
+          <div class="form-group">
+            <label class="form-label">YouTube <span style="color: #999;">(Optional)</span></label>
+            <input type="url" id="youtubeUrl" class="form-input" placeholder="https://youtube.com/@yourbusiness">
+          </div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label">Business Address <span style="color: #999;">(Optional)</span></label>
+          <textarea id="businessAddress" class="form-textarea" placeholder="Street address (if you have a physical location)" style="min-height: 70px;"></textarea>
+          <div class="hint">Physical address is not required if you do not have a physical location.</div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">City <span class="required">*</span></label>
+            <input type="text" id="businessCity" class="form-input" placeholder="e.g., Harrison" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State <span class="required">*</span></label>
+            <input type="text" id="businessState" class="form-input" placeholder="e.g., AR" required>
+          </div>
+        </div>
+
+        <div class="grid grid-full">
+          <div class="form-group">
+            <label class="form-label">Zip Code <span class="required">*</span></label>
+            <input type="text" id="businessZipcode" class="form-input" placeholder="e.g., 72601" required>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">Business Category <span class="required">*</span></label>
+            <select id="businessCategory" class="form-select" required>
+              <option value="">Loading categories...</option>
+            </select>
+            <div class="hint">Categories are managed in Firebase and update automatically.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Business Hours <span style="color: #999;">(Optional)</span></label>
+            <textarea id="businessHours" class="form-textarea" placeholder="Mon-Fri: 9am-5pm&#10;Sat: 10am-2pm&#10;Sun: Closed" style="min-height: 70px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Business Images Section -->
+        <div class="section-divider">
+          <div class="section-title">Business Photos</div>
+        </div>
+
+        <div class="form-group grid-full">
+          <label class="form-label">Business Images <span style="color: #999;">(Optional)</span></label>
+          <input type="file" id="businessImages" class="form-input" accept="image/*" multiple>
+          <div class="hint">Upload photos of your business, products, or storefront. You can select multiple files.</div>
+          <div id="businessImagePreview" class="image-preview"></div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="actions">
+          <button type="submit" id="submitBtn" class="btn btn-primary">Save Changes</button>
+          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div id="upgradeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        💼 Upgrade to Business Account
+        <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
+      </div>
+      <p class="modal-description">
+        Upgrade your account to a business account to access additional features and showcase your business information.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Business Name <span class="required">*</span></label>
+        <input type="text" class="form-input" id="upgradeBusinessName" placeholder="Enter your business name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Business Description</label>
+        <textarea class="form-textarea" id="upgradeBusinessDescription" rows="4" placeholder="Describe your business"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Business Phone</label>
+        <input type="tel" class="form-input" id="upgradeBusinessPhone" placeholder="(555) 123-4567">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Business Website</label>
+        <input type="url" class="form-input" id="upgradeBusinessWebsite" placeholder="https://www.example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Business Tier</label>
+        <div class="tier-options">
+          <button type="button" class="tier-option selected" id="upgradeTierFree" onclick="setUpgradeTier('free')">Free</button>
+          <button type="button" class="tier-option" id="upgradeTierPremium" onclick="setUpgradeTier('premium')">Premium</button>
+        </div>
+      </div>
+
+      <button class="btn upgrade-submit" onclick="handleUpgradeToBusiness()">Complete Upgrade</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const app = window.firebaseApp;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    const form = document.getElementById('businessProfileForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const upgradeBusinessCta = document.getElementById('upgradeBusinessCta');
+    const duplicateClaimCta = document.getElementById('duplicateClaimCta');
+    const claimExistingBtn = document.getElementById('claimExistingBtn');
+    const businessLogoInput = document.getElementById('businessLogo');
+    const logoPreview = document.getElementById('logoPreview');
+    const businessImagesInput = document.getElementById('businessImages');
+    const businessImagePreview = document.getElementById('businessImagePreview');
+    let currentUser = null;
+    let currentUserRole = null;
+    let existingBusinessProfileData = null;
+    let uploadedBusinessLogoUrl = null;
+    let uploadedBusinessImageUrls = [];
+    let isUploading = false;
+    let duplicateListingId = null;
+    let pendingUserBusinessCategory = '';
+
+    const DEFAULT_BUSINESS_CATEGORIES = [
+      'Restaurant',
+      'Retail',
+      'Salon',
+      'Mechanic',
+      'Contractor',
+      'Home Services',
+      'Food Truck',
+      'Gym',
+      'Church',
+      'Thrift Store'
+    ];
+    let businessCategories = [...DEFAULT_BUSINESS_CATEGORIES];
+
+    function redirectToLogin() {
+      showError('You must be logged in to create a business profile. Redirecting to login...');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1000);
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      if (upgradeBusinessCta) {
+        upgradeBusinessCta.style.display = 'none';
+      }
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.remove('active');
+    }
+
+    let selectedUpgradeTier = 'free';
+
+    function setUpgradeTier(tier) {
+      selectedUpgradeTier = tier === 'premium' ? 'premium' : 'free';
+
+      const freeBtn = document.getElementById('upgradeTierFree');
+      const premiumBtn = document.getElementById('upgradeTierPremium');
+      if (!freeBtn || !premiumBtn) return;
+
+      freeBtn.classList.toggle('selected', selectedUpgradeTier === 'free');
+      premiumBtn.classList.toggle('selected', selectedUpgradeTier === 'premium');
+    }
+
+    async function handleUpgradeToBusiness() {
+      if (!currentUser) {
+        showError('You must be logged in to upgrade your account.');
+        return;
+      }
+
+      const businessName = document.getElementById('upgradeBusinessName').value.trim();
+      const businessDescription = document.getElementById('upgradeBusinessDescription').value.trim();
+      const businessPhone = document.getElementById('upgradeBusinessPhone').value.trim();
+      const businessWebsite = document.getElementById('upgradeBusinessWebsite').value.trim();
+
+      if (!businessName) {
+        showError('Business name is required to upgrade your account.');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to upgrade to a business account?')) {
+        return;
+      }
+
+      try {
+        await db.collection('users').doc(currentUser.uid).set({
+          accountType: 'business',
+          businessTier: selectedUpgradeTier,
+          upgradedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          businessName,
+          businessDescription: businessDescription || null,
+          businessPhone: businessPhone || null,
+          businessWebsite: businessWebsite || null
+        }, { merge: true });
+
+        currentUserRole = currentUserRole || 'user';
+        closeModal('upgradeModal');
+
+        document.getElementById('upgradeBusinessName').value = '';
+        document.getElementById('upgradeBusinessDescription').value = '';
+        document.getElementById('upgradeBusinessPhone').value = '';
+        document.getElementById('upgradeBusinessWebsite').value = '';
+        setUpgradeTier('free');
+
+        if (upgradeBusinessCta) {
+          upgradeBusinessCta.style.display = 'none';
+        }
+        form.style.display = 'block';
+
+        if (!document.getElementById('businessName').value.trim()) {
+          document.getElementById('businessName').value = businessName;
+        }
+
+        showSuccess('Success! Your account has been upgraded to a business account.');
+      } catch (error) {
+        console.error('Error upgrading account:', error);
+        showError('Error upgrading account: ' + (error.message || 'Unknown error'));
+      }
+    }
+
+    function clearDuplicateClaimCta() {
+      duplicateListingId = null;
+      if (duplicateClaimCta) {
+        duplicateClaimCta.style.display = 'none';
+      }
+    }
+
+    function showDuplicateClaimCta(duplicateProfile) {
+      duplicateListingId = duplicateProfile?.id || null;
+      if (duplicateClaimCta && duplicateListingId) {
+        duplicateClaimCta.style.display = 'block';
+      }
+    }
+
+    function formatFileSize(bytes) {
+      const size = Number(bytes || 0);
+      if (!Number.isFinite(size) || size <= 0) return '';
+      if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+      if (size >= 1024) return `${Math.round(size / 1024)} KB`;
+      return `${size} B`;
+    }
+
+    function normalizeText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function formatCategoryLabel(raw) {
+      return String(raw || '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function renderBusinessCategorySelect(selectedCategory = '') {
+      const categorySelect = document.getElementById('businessCategory');
+      const optionSet = new Set(businessCategories);
+      const selectedValue = String(selectedCategory || '').trim();
+
+      if (selectedValue && !optionSet.has(selectedValue)) {
+        optionSet.add(selectedValue);
+      }
+
+      const options = Array.from(optionSet)
+        .filter((category) => String(category || '').trim().length > 0)
+        .sort((a, b) => a.localeCompare(b));
+
+      categorySelect.innerHTML = [
+        '<option value="">Select a category</option>',
+        ...options.map((category) => `<option value="${category}">${category}</option>`)
+      ].join('');
+
+      categorySelect.value = selectedValue;
+    }
+
+    async function fetchBusinessCategories() {
+      try {
+        const categorySnapshot = await db.collection('businessCategory').get();
+        const categorySet = new Set();
+
+        categorySnapshot.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          Object.entries(data).forEach(([key, value]) => {
+            if (typeof value === 'string' && value.trim().length > 0) {
+              categorySet.add(formatCategoryLabel(value));
+            } else if (String(key).trim().length > 0) {
+              categorySet.add(formatCategoryLabel(key));
+            }
+          });
+        });
+
+        businessCategories = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+        if (!businessCategories.length) {
+          businessCategories = [...DEFAULT_BUSINESS_CATEGORIES];
+        }
+      } catch (error) {
+        console.error('Error loading business categories:', error);
+        businessCategories = [...DEFAULT_BUSINESS_CATEGORIES];
+      }
+
+      renderBusinessCategorySelect(pendingUserBusinessCategory);
+    }
+
+    function getLocationParts({ address, city, state }) {
+      const normalizedAddress = normalizeText(address);
+      let normalizedCity = normalizeText(city);
+      let normalizedState = normalizeText(state);
+
+      if ((!normalizedCity || !normalizedState) && normalizedAddress) {
+        const addressParts = String(address || '').split(',').map((part) => part.trim()).filter(Boolean);
+        if (addressParts.length >= 2) {
+          const inferredCity = normalizeText(addressParts[addressParts.length - 2]);
+          const lastPart = addressParts[addressParts.length - 1] || '';
+          const inferredState = normalizeText(lastPart.split(/\s+/)[0] || '');
+
+          if (!normalizedCity) {
+            normalizedCity = inferredCity;
+          }
+          if (!normalizedState) {
+            normalizedState = inferredState;
+          }
+        }
+      }
+
+      return {
+        normalizedAddress,
+        normalizedCity,
+        normalizedState
+      };
+    }
+
+    async function findDuplicateBusinessProfile({ businessName, businessAddress, businessCity, businessState, currentUserId }) {
+      const normalizedName = normalizeText(businessName);
+      if (!normalizedName) return null;
+
+      const submittedLocation = getLocationParts({
+        address: businessAddress,
+        city: businessCity,
+        state: businessState
+      });
+      const snapshot = await db.collection('businessLocal').get();
+      let duplicate = null;
+
+      snapshot.forEach((docSnap) => {
+        if (duplicate) return;
+        if (docSnap.id === currentUserId) return;
+
+        const data = docSnap.data() || {};
+        const existingName = normalizeText(data.businessName);
+        if (!existingName || existingName !== normalizedName) return;
+
+        const existingLocation = getLocationParts({
+          address: data.businessAddress || data.address,
+          city: data.businessCity || data.city,
+          state: data.businessState || data.state
+        });
+
+        const addressMatches =
+          submittedLocation.normalizedAddress &&
+          existingLocation.normalizedAddress &&
+          submittedLocation.normalizedAddress === existingLocation.normalizedAddress;
+
+        const cityStateMatches =
+          submittedLocation.normalizedCity &&
+          submittedLocation.normalizedState &&
+          existingLocation.normalizedCity &&
+          existingLocation.normalizedState &&
+          submittedLocation.normalizedCity === existingLocation.normalizedCity &&
+          submittedLocation.normalizedState === existingLocation.normalizedState;
+
+        if (addressMatches || cityStateMatches) {
+          duplicate = {
+            id: docSnap.id,
+            ...data
+          };
+        }
+      });
+
+      return duplicate;
+    }
+
+    function handleCancel() {
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+
+      if (document.referrer) {
+        window.location.href = document.referrer;
+        return;
+      }
+
+      window.location.href = 'browse.html';
+    }
+
+    cancelBtn.addEventListener('click', handleCancel);
+    claimExistingBtn.addEventListener('click', () => {
+      if (!duplicateListingId) {
+        window.location.href = 'businesslocallist.html';
+        return;
+      }
+
+      window.location.href = `businesslocallist.html?claimBusinessId=${encodeURIComponent(duplicateListingId)}`;
+    });
+
+    window.addEventListener('click', (event) => {
+      const upgradeModal = document.getElementById('upgradeModal');
+      if (upgradeModal && event.target === upgradeModal) {
+        closeModal('upgradeModal');
+      }
+    });
+
+    // Logo preview handler
+    businessLogoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          logoPreview.src = event.target.result;
+          logoPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Business images preview handler
+    businessImagesInput.addEventListener('change', (e) => {
+      businessImagePreview.innerHTML = '';
+      const files = Array.from(e.target.files || []);
+
+      if (!files.length) return;
+
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'image-preview-wrapper';
+          
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'image-remove-btn';
+          removeBtn.innerHTML = '✕';
+          removeBtn.type = 'button';
+          removeBtn.onclick = (e) => {
+            e.preventDefault();
+            wrapper.remove();
+            // Rebuild the file input by removing this file from the array
+            const dt = new DataTransfer();
+            Array.from(businessImagesInput.files).forEach((f, i) => {
+              if (i !== index) dt.items.add(f);
+            });
+            businessImagesInput.files = dt.files;
+          };
+          
+          wrapper.appendChild(img);
+          wrapper.appendChild(removeBtn);
+          businessImagePreview.appendChild(wrapper);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Check authentication on page load
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        
+        // Check if user is a business account
+        try {
+          const userDoc = await db.collection('users').doc(user.uid).get();
+          const userData = userDoc.data() || {};
+          const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get();
+          const businessLocalData = businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+          const profileData = { ...userData, ...businessLocalData };
+
+          existingBusinessProfileData = businessLocalData;
+          uploadedBusinessImageUrls = Array.isArray(profileData.businessImages)
+            ? profileData.businessImages.filter((url) => typeof url === 'string' && url.trim() !== '')
+            : [];
+
+          currentUserRole = userData.role || null;
+
+          if (userData.accountType !== 'business' && currentUserRole !== 'admin') {
+            showError('Only business accounts can add a Business Profile or claim a business that is already listed. Upgrade now by clicking the button below.');
+            form.style.display = 'none';
+            if (upgradeBusinessCta) {
+              upgradeBusinessCta.style.display = 'block';
+            }
+            return;
+          }
+
+          if (upgradeBusinessCta) {
+            upgradeBusinessCta.style.display = 'none';
+          }
+
+          // Pre-fill business name from user profile
+          document.getElementById('businessName').value = profileData.businessName || '';
+          document.getElementById('listingType').value = profileData.listingType || '';
+          document.getElementById('businessDescription').value = profileData.businessDescription || '';
+          document.getElementById('businessEmail').value = profileData.businessEmail || user.email || '';
+          document.getElementById('businessPhone').value = profileData.businessPhone || '';
+          document.getElementById('businessWebsite').value = profileData.businessWebsite || '';
+          document.getElementById('preferredContactMethod').value = profileData.preferredContactMethod || 'email';
+          document.getElementById('allowLocalListMessaging').checked = profileData.allowLocalListMessaging === true || profileData.preferredContactMethod === 'local_list';
+          document.getElementById('facebookUrl').value = profileData.facebookUrl || '';
+          document.getElementById('instagramUrl').value = profileData.instagramUrl || '';
+          document.getElementById('tiktokUrl').value = profileData.tiktokUrl || '';
+          document.getElementById('youtubeUrl').value = profileData.youtubeUrl || '';
+          document.getElementById('businessAddress').value = profileData.businessAddress || '';
+          document.getElementById('businessCity').value = profileData.businessCity || '';
+          document.getElementById('businessState').value = profileData.businessState || '';
+          document.getElementById('businessZipcode').value = profileData.businessZipcode || '';
+          pendingUserBusinessCategory = profileData.businessCategory || '';
+          renderBusinessCategorySelect(pendingUserBusinessCategory);
+          document.getElementById('businessHours').value = profileData.businessHours || '';
+
+          // Show existing logo if available
+          if (profileData.businessLogo) {
+            logoPreview.src = profileData.businessLogo;
+            logoPreview.style.display = 'block';
+            uploadedBusinessLogoUrl = profileData.businessLogo;
+          }
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          showError('Failed to load your business information.');
+        }
+      } else {
+        redirectToLogin();
+      }
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        showError('You must be logged in.');
+        return;
+      }
+
+      const businessName = document.getElementById('businessName').value.trim();
+      const listingType = document.getElementById('listingType').value;
+      const businessDescription = document.getElementById('businessDescription').value.trim();
+      const businessEmail = document.getElementById('businessEmail').value.trim();
+      const businessPhone = document.getElementById('businessPhone').value.trim();
+      const businessWebsite = document.getElementById('businessWebsite').value.trim();
+      const preferredContactMethod = document.getElementById('preferredContactMethod').value;
+      const allowLocalListMessaging = document.getElementById('allowLocalListMessaging').checked;
+      const facebookUrl = document.getElementById('facebookUrl').value.trim();
+      const instagramUrl = document.getElementById('instagramUrl').value.trim();
+      const tiktokUrl = document.getElementById('tiktokUrl').value.trim();
+      const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+      const businessAddress = document.getElementById('businessAddress').value.trim();
+      const businessCity = document.getElementById('businessCity').value.trim();
+      const businessState = document.getElementById('businessState').value.trim();
+      const businessZipcode = document.getElementById('businessZipcode').value.trim();
+      const businessCategory = document.getElementById('businessCategory').value.trim();
+      const businessHours = document.getElementById('businessHours').value.trim();
+      const logoFile = businessLogoInput.files[0];
+      const imageFiles = Array.from(businessImagesInput.files || []);
+
+      clearDuplicateClaimCta();
+
+      if (!businessName) {
+        showError('Business name is required.');
+        return;
+      }
+
+      if (!businessDescription) {
+        showError('Business description is required.');
+        return;
+      }
+
+      if (!listingType) {
+        showError('Listing type is required.');
+        return;
+      }
+
+      if (!businessCategory) {
+        showError('Business category is required.');
+        return;
+      }
+
+      if (!preferredContactMethod) {
+        showError('Preferred contact method is required.');
+        return;
+      }
+
+      if (businessEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(businessEmail)) {
+        showError('Please enter a valid business contact email.');
+        return;
+      }
+
+      if (preferredContactMethod === 'phone' && !businessPhone) {
+        showError('Add a phone number if you want users to contact you by phone.');
+        return;
+      }
+
+      if (preferredContactMethod === 'email' && !businessEmail) {
+        showError('Add a business contact email if you want users to contact you by email.');
+        return;
+      }
+
+      if (preferredContactMethod === 'local_list' && !allowLocalListMessaging) {
+        showError('Check the Local List messaging option to use it as your preferred contact method.');
+        return;
+      }
+
+      if (!businessCity) {
+        showError('City is required.');
+        return;
+      }
+
+      if (!businessState) {
+        showError('State is required.');
+        return;
+      }
+
+      if (!businessZipcode) {
+        showError('Zip code is required.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Profile...';
+      isUploading = true;
+
+      try {
+        const duplicateProfile = await findDuplicateBusinessProfile({
+          businessName,
+          businessAddress,
+          businessCity,
+          businessState,
+          currentUserId: currentUser.uid
+        });
+
+        if (duplicateProfile) {
+          showError('This business name and location already appear to be listed. You can submit a claim request instead of creating a duplicate listing.');
+          showDuplicateClaimCta(duplicateProfile);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Changes';
+          isUploading = false;
+          return;
+        }
+
+        // Upload logo if new one selected
+        if (logoFile) {
+          const logoRef = storage.ref(`businessLogos/${currentUser.uid}/${logoFile.name}`);
+          await logoRef.put(logoFile);
+          uploadedBusinessLogoUrl = await logoRef.getDownloadURL();
+        }
+
+        // Keep existing gallery images unless the user uploads additional files.
+        const businessImageUrlsToSave = Array.isArray(uploadedBusinessImageUrls)
+          ? [...uploadedBusinessImageUrls]
+          : [];
+        for (const file of imageFiles) {
+          const imageRef = storage.ref(`shopLocalImages/${currentUser.uid}/${Date.now()}_${file.name}`);
+          await imageRef.put(file);
+          const url = await imageRef.getDownloadURL();
+          businessImageUrlsToSave.push(url);
+        }
+
+        const isAdminUser = currentUserRole === 'admin';
+        const isExistingProfile = !!existingBusinessProfileData;
+        const existingApprovalStatus = String(existingBusinessProfileData?.approvalStatus || '').toLowerCase();
+        const nextIsApproved = isAdminUser
+          ? true
+          : (isExistingProfile ? existingBusinessProfileData?.isApproved === true : false);
+        const nextApprovalStatus = isAdminUser
+          ? 'approved'
+          : (nextIsApproved
+            ? 'approved'
+            : ((existingApprovalStatus === 'rejected' || existingApprovalStatus === 'deleted') ? 'pending' : (existingApprovalStatus || 'pending')));
+        const nextIsActive = isAdminUser
+          ? true
+          : (nextIsApproved && existingBusinessProfileData?.isActive !== false);
+        const nextIsVerified = isAdminUser
+          ? true
+          : (isExistingProfile ? existingBusinessProfileData?.isVerified === true : false);
+        const createdAtValue = existingBusinessProfileData?.createdAt || new Date();
+
+        // Create/update business profile document
+        const businessLocalData = {
+          businessName,
+          listingType,
+          businessDescription,
+          businessPhone: businessPhone || null,
+          businessEmail: businessEmail || null,
+          businessWebsite: businessWebsite || null,
+          preferredContactMethod,
+          allowLocalListMessaging,
+          facebookUrl: facebookUrl || null,
+          instagramUrl: instagramUrl || null,
+          tiktokUrl: tiktokUrl || null,
+          youtubeUrl: youtubeUrl || null,
+          businessAddress: businessAddress || null,
+          businessCity: businessCity || null,
+          businessState: businessState || null,
+          businessZipcode: businessZipcode || null,
+          businessCategory: businessCategory,
+          businessHours: businessHours || null,
+          businessLogo: uploadedBusinessLogoUrl || null,
+          businessImages: businessImageUrlsToSave,
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          createdAt: createdAtValue,
+          updatedAt: new Date(),
+          isApproved: nextIsApproved,
+          isActive: nextIsActive,
+          approvalStatus: nextApprovalStatus,
+          isVerified: nextIsVerified,
+          viewCount: 0
+        };
+
+        // Save to the new businessLocal collection
+        const businessLocalRef = db.collection('businessLocal').doc(currentUser.uid);
+        await businessLocalRef.set(businessLocalData, { merge: true });
+
+        // Also update user's business profile (for backward compatibility)
+        await db.collection('users').doc(currentUser.uid).update({
+          businessName,
+          listingType,
+          businessDescription,
+          businessPhone: businessPhone || null,
+          businessEmail: businessEmail || null,
+          businessWebsite: businessWebsite || null,
+          preferredContactMethod,
+          allowLocalListMessaging,
+          facebookUrl: facebookUrl || null,
+          instagramUrl: instagramUrl || null,
+          tiktokUrl: tiktokUrl || null,
+          youtubeUrl: youtubeUrl || null,
+          businessAddress: businessAddress || null,
+          businessCity: businessCity || null,
+          businessState: businessState || null,
+          businessZipcode: businessZipcode || null,
+          businessCategory: businessCategory,
+          businessHours: businessHours || null,
+          businessLogo: uploadedBusinessLogoUrl || null
+        });
+
+        existingBusinessProfileData = {
+          ...(existingBusinessProfileData || {}),
+          ...businessLocalData,
+        };
+        uploadedBusinessImageUrls = businessImageUrlsToSave;
+
+        if (currentUserRole === 'admin') {
+          showSuccess('✓ Business profile created successfully! Redirecting to your profile...');
+          setTimeout(() => {
+            window.location.href = 'profile.html';
+          }, 1500);
+        } else {
+          if (nextIsApproved) {
+            showSuccess('✓ Changes saved and published successfully.');
+          } else {
+            showSuccess('✓ Your business profile has been submitted and is pending admin approval. You will be notified once it is reviewed.');
+          }
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Changes';
+          isUploading = false;
+        }
+
+      } catch (error) {
+        console.error('Error creating business profile:', error);
+        showError('Failed to create business profile: ' + error.message);
+        clearDuplicateClaimCta();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Changes';
+        isUploading = false;
+      }
+    });
+
+    fetchBusinessCategories();
+  </script>
+</body>
+</html>

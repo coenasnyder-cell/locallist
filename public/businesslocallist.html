@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Local - Local List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 20px;
+    }
+
+    .page-header-wrapper {
+      background: transparent;
+      width: 100%;
+      padding: 24px 0 20px;
+      margin-bottom: 24px;
+      border-bottom: none;
+      box-shadow: none;
+    }
+
+    .page-header {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1f2937;
+      margin: 0 0 12px;
+      text-align: center;
+      text-shadow: none;
+    }
+
+    .search-panel {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .search-grid {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .search-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-field-query {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .search-field-category {
+      flex: 0 0 240px;
+      max-width: 240px;
+    }
+
+    .search-field-query .search-label {
+      width: 130px;
+    }
+
+    .search-field-category .search-label {
+      width: 72px;
+      text-align: right;
+    }
+
+    .search-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .category-select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .category-select:focus {
+      outline: none;
+      border-color: #1e3a5f;
+      box-shadow: 0 0 0 3px rgba(30,58,95,0.12);
+    }
+
+    .category-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+      margin-left: 2px;
+    }
+
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+
+    .category-chip {
+      background: #eef2f7;
+      border: 1px solid #d7dde6;
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .category-chip.active {
+      background: #475569;
+      border-color: #475569;
+      color: #fff;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #1e3a5f;
+      box-shadow: 0 0 0 3px rgba(30,58,95,0.12);
+    }
+
+    .search-input::placeholder {
+      color: #64748b;
+      opacity: 1;
+    }
+
+    .search-help {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .btn-list-business {
+      width: 100%;
+      text-align: center;
+      padding: 11px 14px;
+      border-radius: 10px;
+    }
+
+    .benefits-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 8px;
+      margin-bottom: 12px;
+      max-height: 300px;
+      overflow: hidden;
+    }
+
+    .benefits-image {
+      width: 100%;
+      max-height: 300px;
+      min-height: 0;
+      object-fit: cover;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      display: block;
+    }
+
+    .benefits-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    .benefits-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #334155;
+      line-height: 1.25;
+    }
+
+    .benefits-text {
+      font-size: 20px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .benefits-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #475569;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .benefits-cta {
+      align-self: center;
+      padding: 7px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3b4a5a;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .filters {
+      display: none;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 100%;
+      margin: 0 auto 40px;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .featured-section {
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .featured-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .featured-subtitle {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .results-section-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 28px 0 18px;
+      text-align: center;
+      align-items: center;
+    }
+
+    .results-section-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #334155;
+      margin: 0;
+    }
+
+    .results-section-subtitle {
+      color: #64748b;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .featured-empty {
+      background: transparent;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      color: #64748b;
+      font-size: 14px;
+      grid-column: 1 / -1;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .profile-card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .profile-cover {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-cover-fallback {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .profile-image {
+      width: 104px;
+      height: 104px;
+      margin: -52px auto 8px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-image span {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      font-size: 44px;
+    }
+
+    .tier-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .tier-badge.premium {
+      background: #FFD700;
+      color: #8B4513;
+    }
+
+    .profile-content {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .profile-reviews {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 6px 9px;
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .profile-reviews-stars {
+      color: #f59e0b;
+      letter-spacing: 0.6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .profile-contact {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 8px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .profile-verified {
+      font-size: 13px;
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 8px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .profile-contact a {
+      color: #475569;
+      text-decoration: none;
+    }
+
+    .profile-contact a:hover {
+      text-decoration: underline;
+    }
+
+    .profile-social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 2px 0 10px;
+      justify-content: center;
+    }
+
+    .profile-social-section {
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .profile-social-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .profile-social-link {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f8fafc;
+      color: #475569;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 15px;
+      transition: all 0.2s ease;
+    }
+
+    .profile-social-link:hover {
+      color: #1f2937;
+      border-color: #94a3b8;
+      background: #eef2f7;
+      transform: translateY(-1px);
+    }
+
+    .profile-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin: 4px 0 10px;
+    }
+
+    .profile-gallery-item {
+      width: 100%;
+      height: 74px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: block;
+    }
+
+    .claim-inline-btn {
+      background: transparent;
+      border: none;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .claim-inline-btn:hover {
+      color: #334155;
+    }
+
+    .profile-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+
+    .profile-footer button {
+      flex: 1 1 140px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-view {
+      background: #475569;
+      color: #fff;
+      border: 1px solid #475569;
+    }
+
+    .btn-view:hover {
+      background: #3b4a5a;
+      border-color: #3b4a5a;
+    }
+
+    .btn-contact {
+      background: #e2e8f0;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-contact:hover {
+      background: #cbd5e1;
+      border-color: #cbd5e1;
+    }
+
+    .btn-claim {
+      background: #e2e8f0;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-claim:hover {
+      background: #cbd5e1;
+      border-color: #cbd5e1;
+    }
+
+    .claim-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .claim-modal {
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+      padding: 20px;
+    }
+
+    .claim-modal h2 {
+      color: #1e293b;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .claim-subtitle {
+      color: #64748b;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .benefits-box {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .benefits-box h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #0f172a;
+    }
+
+    .benefits-box ul {
+      padding-left: 20px;
+      color: #334155;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .form-textarea,
+    .form-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #0f172a;
+      font-family: inherit;
+    }
+
+    .form-textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .claim-disclaimer {
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #7f1d1d;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .claim-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+
+    .helper-text {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #666;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
+    }
+
+    /* Modal CSS removed - now using dedicated business-profile.html page */
+
+    @media (max-width: 1024px) {
+      .profiles-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .featured-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .search-grid {
+        gap: 8px;
+      }
+
+      .search-field {
+        gap: 6px;
+      }
+
+      .search-field-query .search-label {
+        width: 92px;
+        font-size: 12px;
+      }
+
+      .search-field-category .search-label {
+        width: 62px;
+        font-size: 12px;
+      }
+
+      .search-field-category {
+        flex: 0 0 42%;
+        max-width: 42%;
+      }
+
+      .profiles-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+      }
+
+      .featured-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits-row { grid-template-columns: 1fr; }
+      .benefits-image { min-height: 150px; }
+      .benefits-cta { width: 100%; text-align: center; }
+
+      .filters {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">Local Businesses</h1>
+    </div>
+  </div>
+
+  <div class="container">
+      <section class="benefits-row" aria-label="Benefits of creating a business profile">
+        <img class="benefits-image" src="businsshub.png" alt="List your business on Local List">
+        <div class="benefits-content">
+          <h2 class="benefits-title">Show Your Business Some Local Love</h2>
+          <p class="benefits-text">Local List gives you the opportunity to add your local business to our directory. Your profile lets you share what you do, how to contact you, and what makes your business special. It only takes a minute to set up and it helps provide even more exposure locally, giving your business more visibility within our community.</p>
+          <p class="benefits-text"></p>
+          <a href="businesslocal.html" class="btn btn-primary benefits-cta">+ Add A Business</a>
+        </div>
+      </section>
+
+      <div class="search-panel">
+        <div class="search-grid">
+          <div class="search-field search-field-query">
+            <label class="search-label" for="searchInput">Search Businesses</label>
+            <input class="search-input" type="text" id="searchInput" placeholder="Search by business name or description">
+          </div>
+          <div class="search-field search-field-category">
+            <label class="search-label" for="categorySelect">Category</label>
+            <select id="categorySelect" class="category-select">
+              <option value="All">All</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    <section id="featuredSection" class="featured-section">
+      <h2 class="featured-title">Featured Businesses</h2>
+      <p class="featured-subtitle">Highlighted local businesses you may want to explore first.</p>
+      <div id="featuredContainer" class="featured-grid"></div>
+    </section>
+
+    <section class="results-section" aria-label="Business directory results">
+      <div class="results-section-header">
+        <h2 id="resultsSectionTitle" class="results-section-title">All Local Businesses</h2>
+        <p class="results-section-subtitle">Browse the latest local businesses in this category.</p>
+      </div>
+
+      <div id="profilesContainer" class="profiles-grid">
+        <div class="loading">Loading Business Local businesses...</div>
+      </div>
+    </section>
+
+    <!-- Modal removed - now using dedicated business-profile.html page -->
+  </div>
+
+  <div id="claimModalBackdrop" class="claim-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
+    <div class="claim-modal">
+      <h2 id="claimModalTitle">Claim This Business</h2>
+      <p class="claim-subtitle" id="claimBusinessName">Submit a request to verify ownership and connect this business to your account.</p>
+
+      <div class="benefits-box">
+        <h3>Benefits of claiming your business</h3>
+        <ul>
+          <li>Post deals and promotions to reach local customers.</li>
+          <li>Make profile updates and keep your business information current.</li>
+          <li>View analytics and engagement for your business profile.</li>
+          <li>Link your listings directly to your business profile.</li>
+        </ul>
+      </div>
+
+      <form id="claimBusinessForm">
+        <div class="form-group">
+          <label class="form-label" for="claimMessage">Tell us about your connection to this business</label>
+          <textarea id="claimMessage" class="form-textarea" placeholder="Example: I am the owner/manager and can verify access to this location and official channels." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="claimImages">Proof of ownership (optional images)</label>
+          <input id="claimImages" class="form-input" type="file" accept="image/*" multiple>
+          <div class="helper-text">Accepted examples: storefront signage, business license screenshots, website admin view, social profile management screenshots.</div>
+        </div>
+
+        <div class="claim-disclaimer">
+          Do not upload tax documents, SSNs, EIN letters, or other sensitive tax records. Claims with tax documents will be rejected.
+        </div>
+
+        <div class="claim-modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeClaimModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitClaimBtn">Submit Claim Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="header.js"></script>
+  <script>
+    const db = window.firebaseDb || firebase.firestore();
+    const storage = window.firebaseStorage || firebase.storage();
+    const auth = firebase.auth();
+    const DEFAULT_CATEGORIES = ['Restaurant', 'Retail', 'Salon', 'Mechanic', 'Contractor', 'Home Services', 'Food Truck', 'Gym', 'Church', 'Thrift Store'];
+
+    let allProfiles = [];
+    let filteredProfiles = [];
+    let categories = [...DEFAULT_CATEGORIES];
+    let selectedCategory = 'All';
+    let selectedClaimProfile = null;
+    let currentUser = null;
+    let currentUserProfile = null;
+
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      currentUserProfile = null;
+
+      if (!user) return;
+
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          currentUserProfile = userDoc.data() || null;
+        }
+      } catch (error) {
+        console.error('Could not load current user profile:', error);
+      }
+    });
+
+    function normalizeValue(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function formatCategoryLabel(raw) {
+      return String(raw || '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function getResultsSectionTitle() {
+      const normalizedCategory = normalizeValue(selectedCategory);
+      if (!normalizedCategory || normalizedCategory === 'all') {
+        return 'All Local Businesses';
+      }
+
+      return `${formatCategoryLabel(selectedCategory)} Local Businesses`;
+    }
+
+    function updateResultsSectionTitle() {
+      const titleElement = document.getElementById('resultsSectionTitle');
+      if (!titleElement) return;
+      titleElement.textContent = getResultsSectionTitle();
+    }
+
+    async function fetchBusinessCategories() {
+      try {
+        const categorySnapshot = await db.collection('businessCategory').get();
+        const categorySet = new Set();
+
+        categorySnapshot.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          Object.entries(data).forEach(([key, value]) => {
+            if (typeof value === 'string' && value.trim().length > 0) {
+              categorySet.add(formatCategoryLabel(value));
+            } else if (String(key).trim().length > 0) {
+              categorySet.add(formatCategoryLabel(key));
+            }
+          });
+        });
+
+        categories = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+        if (!categories.length) {
+          categories = [...DEFAULT_CATEGORIES];
+        }
+      } catch (error) {
+        console.error('Error fetching business categories:', error);
+        categories = [...DEFAULT_CATEGORIES];
+      }
+
+      renderCategorySelect();
+    }
+
+    function renderCategorySelect() {
+      const categorySelect = document.getElementById('categorySelect');
+      const allOptions = ['All', ...categories];
+
+      categorySelect.innerHTML = allOptions
+        .map((category) => `<option value="${category}">${category}</option>`)
+        .join('');
+      categorySelect.value = selectedCategory;
+    }
+
+    async function loadShopLocalProfiles() {
+      try {
+        const container = document.getElementById('profilesContainer');
+        container.innerHTML = '<div class="loading">Loading Business Local businesses...</div>';
+
+        let profilesSnapshot = await db.collection('businessLocal').get();
+        if (profilesSnapshot.empty) {
+          profilesSnapshot = await db.collection('shopLocal').get();
+        }
+        allProfiles = [];
+
+        for (const docSnap of profilesSnapshot.docs) {
+          const profileData = docSnap.data();
+          const hasExplicitApproval = Object.prototype.hasOwnProperty.call(profileData, 'isApproved');
+          const isApprovedProfile = profileData.isApproved === true;
+          const isLegacyVisibleProfile = !hasExplicitApproval && profileData.isActive !== false;
+          
+          // Filter: Only show businesses with listing type 'shopLocal' or 'both'
+          if (profileData.listingType !== 'shopLocal' && profileData.listingType !== 'both') {
+            continue; // Skip this business
+          }
+
+          // Hide pending submissions but keep older active records visible.
+          if (!isApprovedProfile && !isLegacyVisibleProfile) {
+            continue; // Skip pending/unverified businesses
+          }
+          
+          // Get user info for seller details
+          let userName = 'Business';
+          try {
+            const userSnap = await db.collection('users').doc(profileData.userId).get();
+            if (userSnap.exists) {
+              userName = userSnap.data().displayName || 'Business';
+            }
+          } catch (e) {
+            console.log('Could not fetch user info:', e);
+          }
+
+          allProfiles.push({
+            id: docSnap.id,
+            ...profileData,
+            displayName: userName
+          });
+        }
+
+        filteredProfiles = [...allProfiles];
+        displayProfiles();
+        return Promise.resolve();
+      } catch (error) {
+        console.error('Error loading profiles:', error);
+        document.getElementById('profilesContainer').innerHTML = `
+          <div class="empty-state">
+            <h2>Error Loading Profiles</h2>
+            <p>${error.message}</p>
+          </div>
+        `;
+        return Promise.reject(error);
+      }
+    }
+
+    function displayProfiles() {
+      const container = document.getElementById('profilesContainer');
+      const featuredSection = document.getElementById('featuredSection');
+      const featuredContainer = document.getElementById('featuredContainer');
+
+      updateResultsSectionTitle();
+
+      const featuredProfiles = filteredProfiles
+        .filter((profile) => {
+          const premium = (profile.businessTier || '').toLowerCase() === 'premium';
+          const featuredValue = String(profile.isFeatured ?? '').trim().toLowerCase();
+          const explicitlyFeatured = profile.isFeatured === true || profile.isFeatured === 1 || featuredValue === 'true' || featuredValue === '1';
+          return premium || explicitlyFeatured;
+        })
+        .slice(0, 3);
+
+      if (featuredProfiles.length > 0) {
+        featuredContainer.innerHTML = featuredProfiles.map((profile) => createProfileCard(profile)).join('');
+      } else {
+        featuredContainer.innerHTML = '<div class="featured-empty">No featured businesses yet. Check back soon.</div>';
+      }
+
+      if (filteredProfiles.length === 0) {
+        const hasFilters = document.getElementById('searchInput').value.trim().length > 0 || selectedCategory !== 'All';
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h2>No Businesses Found</h2>
+            <p>${hasFilters ? 'Try adjusting your search or category filter.' : 'Check back later for new businesses.'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredProfiles.map(profile => createProfileCard(profile)).join('');
+      attachCardEventListeners();
+    }
+
+    function isBusinessClaimed(profile) {
+      const claimedValue = profile?.isClaimed;
+      const normalizedClaimed = String(claimedValue ?? '').trim().toLowerCase();
+      const hasClaimedFlag = claimedValue === true || claimedValue === 1 || normalizedClaimed === 'true' || normalizedClaimed === '1';
+      const hasOwner = !!(profile?.ownerUserId && String(profile.ownerUserId).trim() !== '');
+      return hasClaimedFlag || hasOwner;
+    }
+
+    function isBusinessVerified(profile) {
+      const verifiedValue = profile?.isVerified;
+      const normalizedVerified = String(verifiedValue ?? '').trim().toLowerCase();
+      return verifiedValue === true || verifiedValue === 1 || normalizedVerified === 'true' || normalizedVerified === '1';
+    }
+
+    function getBusinessLocationLine(profile) {
+      const normalizeValue = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+      const fullAddress = normalizeValue(profile.businessAddress || profile.address);
+      if (fullAddress) {
+        return fullAddress;
+      }
+
+      const city = normalizeValue(profile.businessCity || profile.city);
+      const state = normalizeValue(profile.businessState || profile.state);
+      if (city || state) {
+        return [city, state].filter(Boolean).join(', ');
+      }
+
+      const genericLocation = normalizeValue(profile.location);
+      return genericLocation || '';
+    }
+
+    function createProfileCard(profile) {
+      const coverImageUrl = profile.businessCoverImage
+        || profile.businessBanner
+        || (Array.isArray(profile.businessImages) && profile.businessImages.length ? profile.businessImages[0] : '')
+        || '';
+
+      const additionalImages = (Array.isArray(profile.businessImages) ? profile.businessImages : [])
+        .filter((url) => typeof url === 'string' && url.trim().length > 0)
+        .filter((url) => url !== profile.businessLogo && url !== coverImageUrl)
+        .slice(0, 3);
+
+      const galleryMarkup = additionalImages.length
+        ? `
+          <div class="profile-gallery">
+            ${additionalImages.map((url, index) => `<img class="profile-gallery-item" src="${url}" alt="${profile.businessName} photo ${index + 1}" loading="lazy" onerror="this.style.display='none';">`).join('')}
+          </div>
+        `
+        : '';
+
+      const coverMarkup = coverImageUrl
+        ? `<img src="${coverImageUrl}" alt="${profile.businessName} cover banner" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;profile-cover-fallback&quot;></div>';">`
+        : '<div class="profile-cover-fallback"></div>';
+
+      const businessImage = profile.businessLogo 
+        ? `<img src="${profile.businessLogo}" alt="${profile.businessName}">`
+        : `<span style="font-size: 64px; opacity: 0.9;">🏢</span>`;
+
+      const tier = profile.businessTier || 'free';
+      const tierBadge = tier === 'premium'
+        ? '<span class="tier-badge premium">⭐ Premium Featured</span>'
+        : '';
+      const isClaimed = isBusinessClaimed(profile);
+      const isVerified = isBusinessVerified(profile);
+      const claimedLabel = isVerified
+        ? '<div class="profile-verified">✅ Local Business Verified</div>'
+        : '';
+      const claimInline = (!isClaimed && !isVerified)
+        ? `<div class="profile-contact">🟡 <button class="claim-inline-btn" onclick="event.stopPropagation(); openClaimModal('${profile.id}')">Claim Business</button></div>`
+        : '';
+      const locationLine = getBusinessLocationLine(profile);
+      const locationMarkup = locationLine
+        ? `<div class="profile-contact">📍 ${locationLine}</div>`
+        : '';
+      const ratingCount = Number(profile.ratingCount || 0);
+      const ratingAverage = Number(profile.ratingAverage || 0);
+      const hasReviews = Number.isFinite(ratingCount) && ratingCount > 0 && Number.isFinite(ratingAverage) && ratingAverage > 0;
+      const roundedStars = Math.max(1, Math.min(5, Math.round(ratingAverage)));
+      const reviewMarkup = hasReviews
+        ? `
+          <div class="profile-reviews" title="${ratingAverage.toFixed(1)} out of 5 from ${ratingCount} review${ratingCount === 1 ? '' : 's'}">
+            <span class="profile-reviews-stars">${'★'.repeat(roundedStars)}${'☆'.repeat(5 - roundedStars)}</span>
+            <span>${ratingAverage.toFixed(1)} (${ratingCount})</span>
+          </div>
+        `
+        : '';
+      const socialLinks = [
+        { url: profile.facebookUrl, iconClass: 'fab fa-facebook-f', label: 'Facebook' },
+        { url: profile.instagramUrl, iconClass: 'fab fa-instagram', label: 'Instagram' },
+        { url: profile.tiktokUrl, iconClass: 'fab fa-tiktok', label: 'TikTok' },
+        { url: profile.youtubeUrl, iconClass: 'fab fa-youtube', label: 'YouTube' },
+      ].filter((item) => typeof item.url === 'string' && item.url.trim() !== '');
+      const socialMarkup = socialLinks.length > 0
+        ? `
+          <div class="profile-social-section">
+            <div class="profile-social-title">Find us on social media</div>
+            <div class="profile-social-links">
+              ${socialLinks.map((item) => `<a class="profile-social-link" href="${item.url}" target="_blank" rel="noopener noreferrer" aria-label="${item.label}" title="${item.label}" onclick="event.stopPropagation();"><i class="${item.iconClass}"></i></a>`).join('')}
+            </div>
+          </div>
+        `
+        : '';
+
+      return `
+        <div class="profile-card" data-id="${profile.id}">
+          <div class="profile-cover">
+            ${coverMarkup}
+            ${tierBadge}
+          </div>
+          <div class="profile-content">
+            <div class="profile-image">
+              ${businessImage}
+            </div>
+            <div class="profile-name">
+              <span>${profile.businessName}</span>
+            </div>
+            <p class="profile-description">${profile.businessDescription || 'No description available'}</p>
+            ${reviewMarkup}
+            ${galleryMarkup}
+            ${locationMarkup}
+            ${profile.businessWebsite ? `<div class="profile-contact">🌐 <a href="${profile.businessWebsite}" target="_blank">Visit Website</a></div>` : ''}
+            ${claimedLabel}
+            ${socialMarkup}
+            ${claimInline}
+            <div class="profile-footer">
+              <button class="btn-view" onclick="viewDetails('${profile.id}')">View Details</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openClaimModal(profileId) {
+      if (!currentUser) {
+        alert('Please sign in with your business account to submit a claim request.');
+        window.location.href = `login.html?next=${encodeURIComponent(`businesslocallist.html?id=${profileId}`)}`;
+        return;
+      }
+
+      if (!currentUserProfile || currentUserProfile.accountType !== 'business') {
+        alert('Only business accounts can submit claim requests.');
+        return;
+      }
+
+      const profile = allProfiles.find((p) => p.id === profileId);
+      if (!profile) {
+        alert('Business listing not found. Please refresh and try again.');
+        return;
+      }
+
+      if (isBusinessClaimed(profile)) {
+        alert('This business has already been claimed.');
+        return;
+      }
+
+      selectedClaimProfile = profile;
+      document.getElementById('claimBusinessName').textContent = `Request ownership verification for ${profile.businessName || 'this business'}.`;
+      document.getElementById('claimMessage').value = '';
+      document.getElementById('claimImages').value = '';
+      document.getElementById('claimModalBackdrop').style.display = 'flex';
+    }
+
+    function closeClaimModal() {
+      document.getElementById('claimModalBackdrop').style.display = 'none';
+      selectedClaimProfile = null;
+      const submitBtn = document.getElementById('submitClaimBtn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Claim Request';
+    }
+
+    async function submitClaimRequest(event) {
+      event.preventDefault();
+
+      try {
+        if (!currentUser || !selectedClaimProfile) {
+          alert('Please sign in and choose a business before submitting a claim request.');
+          return;
+        }
+
+        if (!currentUserProfile || currentUserProfile.accountType !== 'business') {
+          alert('Only business accounts can submit claim requests.');
+          return;
+        }
+
+        const claimMessage = (document.getElementById('claimMessage').value || '').trim();
+        const claimFiles = Array.from(document.getElementById('claimImages').files || []);
+        const submitBtn = document.getElementById('submitClaimBtn');
+
+        if (!claimMessage) {
+          alert('Please include a short claim message.');
+          return;
+        }
+
+        const latestProfileSnap = await db.collection('businessLocal').doc(selectedClaimProfile.id).get();
+        if (!latestProfileSnap.exists) {
+          alert('Business listing no longer exists.');
+          return;
+        }
+        const latestProfileData = latestProfileSnap.data() || {};
+        if (isBusinessClaimed(latestProfileData)) {
+          alert('This business has already been claimed.');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const proofUrls = [];
+        for (const file of claimFiles) {
+          const fileName = `${Date.now()}_${file.name}`;
+          const claimRef = storage.ref(`businessClaimProofs/${currentUser.uid}/${fileName}`);
+          await claimRef.put(file);
+          const url = await claimRef.getDownloadURL();
+          proofUrls.push(url);
+        }
+
+        const claimDocId = `${selectedClaimProfile.id}_${currentUser.uid}`;
+        await db.collection('businessClaims').doc(claimDocId).set({
+          businessId: selectedClaimProfile.id,
+          businessName: selectedClaimProfile.businessName || '',
+          claimImages: proofUrls,
+          claimMessage,
+          claimStatus: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          userEmail: currentUser.email || '',
+          userId: currentUser.uid,
+        }, { merge: true });
+
+        alert('Claim request submitted. Our team will review and manually approve if verified.');
+        closeClaimModal();
+      } catch (error) {
+        console.error('Error submitting claim request:', error);
+        alert(error?.message || 'Could not submit your claim request right now.');
+        const submitBtn = document.getElementById('submitClaimBtn');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Claim Request';
+      }
+    }
+
+    function attachCardEventListeners() {
+      document.querySelectorAll('.profile-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('button')) {
+            const profileId = card.dataset.id;
+            window.location.href = `business-profile.html?id=${profileId}`;
+          }
+        });
+      });
+    }
+
+    // Old modal functions removed - now using dedicated business-profile.html page
+    
+    function viewDetails(profileId) {
+      // Navigate to business profile page
+      window.location.href = `business-profile.html?id=${profileId}`;
+    }
+
+    function contactBusiness(profileId) {
+      // Navigate to business profile page
+      window.location.href = `business-profile.html?id=${profileId}`;
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const activeCategory = normalizeValue(selectedCategory);
+
+      filteredProfiles = allProfiles.filter(profile => {
+        const matchesSearch = profile.businessName.toLowerCase().includes(searchTerm) ||
+                             (profile.businessDescription && profile.businessDescription.toLowerCase().includes(searchTerm));
+        const profileCategory = normalizeValue(profile.businessCategory);
+        const matchesCategory = activeCategory === 'all' || profileCategory === activeCategory;
+
+        return matchesSearch && matchesCategory;
+      });
+
+      displayProfiles();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      applyFilters();
+    }
+
+    // Event listeners for filters
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('categorySelect').addEventListener('change', (event) => {
+      selectedCategory = event.target.value || 'All';
+      applyFilters();
+    });
+    document.getElementById('claimBusinessForm').addEventListener('submit', submitClaimRequest);
+    document.getElementById('claimModalBackdrop').addEventListener('click', (event) => {
+      if (event.target.id === 'claimModalBackdrop') {
+        closeClaimModal();
+      }
+    });
+
+    // Check for userId parameter and auto-open profile
+    function checkAndOpenProfileFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId');
+      
+      if (userId && allProfiles.length > 0) {
+        const userProfile = allProfiles.find(p => p.userId === userId);
+        if (userProfile) {
+          viewDetails(userProfile.id);
+        } else {
+          console.log('No Business Local profile found for this user');
+        }
+      }
+    }
+
+    function checkAndOpenClaimFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const claimBusinessId = urlParams.get('claimBusinessId');
+
+      if (claimBusinessId && allProfiles.length > 0) {
+        const matchedProfile = allProfiles.find((profile) => profile.id === claimBusinessId);
+        if (matchedProfile) {
+          openClaimModal(claimBusinessId);
+          return;
+        }
+
+        console.log('No business listing found for claim request parameter');
+      }
+    }
+
+    // Load profiles on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      Promise.all([loadShopLocalProfiles(), fetchBusinessCategories()]).then(() => {
+        checkAndOpenClaimFromUrl();
+        checkAndOpenProfileFromUrl();
+      });
+    });
+  </script>
+</body>
+</html>

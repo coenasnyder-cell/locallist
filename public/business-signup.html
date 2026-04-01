@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Sign Up - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 20px;
+      flex: 1;
+    }
+    
+    .signup-box {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .business-badge {
+      background: linear-gradient(135deg, #1565C0 0%, #0d47a1 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+    }
+    
+    .business-badge::before {
+      content: '💼 ';
+      font-size: 20px;
+    }
+    
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #475569;
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #555;
+      line-height: 1.5;
+    }
+    
+    .info {
+      background: #e3f2fd;
+      border-left: 4px solid #1565C0;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #0d47a1;
+    }
+    
+    .field {
+      margin-bottom: 18px;
+    }
+    
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    
+    .label-required::after {
+      content: ' *';
+      color: #d32f2f;
+    }
+    
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: #1565C0;
+    }
+    
+    .input::placeholder {
+      color: #999;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    
+    .checkbox-label {
+      font-size: 14px;
+      color: #333;
+      flex: 1;
+      cursor: pointer;
+    }
+    
+    .tier-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .tier-option {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .tier-option:hover {
+      border-color: #475569;
+    }
+    
+    .tier-option.active {
+      border-color: #475569;
+      background: #e3f2fd;
+      color: #475569;
+    }
+    
+    .signup-btn {
+      width: 100%;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #475569 0%, #087a9a 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+      margin-top: 12px;
+    }
+    
+    .signup-btn:hover {
+      box-shadow: 0 4px 12px rgba(10, 126, 164, 0.3);
+    }
+    
+    .signup-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .signup-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .google-btn {
+      width: 100%;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #475569;
+      background: white;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .google-btn:hover {
+      background: #f0f8fc;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+      height: 1px;
+      background: #e0e0e0;
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 16px;
+      position: relative;
+      color: #666;
+      font-size: 13px;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .login-link a {
+      color: #475569;
+      text-decoration: underline;
+    }
+    
+    .login-link a:hover {
+      color: #087a9a;
+    }
+    
+    .back-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .cancel-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .cancel-btn:hover {
+      background: #cbd5e1;
+    }
+    
+    .error-message {
+      display: none;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+        margin: 20px auto;
+      }
+      
+      .signup-box {
+        padding: 24px 20px;
+      }
+      
+      .title {
+        font-size: 20px;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <div class="signup-box">
+      <div class="business-badge">Business Account</div>
+      
+      <h1 class="title">Create Your Business Account</h1>
+      <p class="subtitle">Join Harrison's local business community</p>
+      
+      <div class="info">
+        ✓ Free plan to get started<br>
+        ✓ Upgrade anytime to premium features<br>
+        ✓ Reach local customers effectively
+      </div>
+      
+      <div class="error-message" id="errorMessage"></div>
+      
+      <button class="google-btn" onclick="signUpWithGoogle()">
+        <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Sign up with Google
+      </button>
+      
+      <div class="divider">
+        <span>OR</span>
+      </div>
+      
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <div class="field">
+          <label class="label label-required" for="name">Your Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            class="input" 
+            placeholder="John Doe"
+            required
+          >
+        </div>
+        
+        <div class="field">
+          <label class="label label-required" for="businessName">Business Name</label>
+          <input 
+            type="text" 
+            id="businessName" 
+            name="businessName" 
+            class="input" 
+            placeholder="Your Business Name"
+            required
+          >
+        </div>
+        
+        <div class="field">
+          <label class="label label-required" for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="input" 
+            placeholder="you@business.com"
+            required
+          >
+        </div>
+        
+        <div class="field">
+          <label class="label label-required" for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="input" 
+            placeholder="At least 6 characters"
+            minlength="6"
+            required
+          >
+        </div>
+        
+        <div class="field">
+          <label class="label">Business Tier</label>
+          <div class="tier-selector">
+            <button type="button" class="tier-option active" data-tier="free" onclick="setBusinessTier('free')">Free</button>
+            <button type="button" class="tier-option" data-tier="premium" onclick="setBusinessTier('premium')">Premium</button>
+          </div>
+        </div>
+        
+        <div class="field">
+          <label class="label label-required" for="zipCode">ZIP Code</label>
+          <input 
+            type="text" 
+            id="zipCode" 
+            name="zipCode" 
+            class="input" 
+            placeholder="12345"
+            pattern="[0-9]{5}"
+            maxlength="5"
+            required
+          >
+        </div>
+        
+        <div class="checkbox-container">
+          <input 
+            type="checkbox" 
+            id="termsCheckbox" 
+            class="checkbox"
+            required
+          >
+          <label for="termsCheckbox" class="checkbox-label">
+            I agree to the Terms and Privacy Policy
+          </label>
+        </div>
+        
+        <button type="submit" class="signup-btn" id="signupBtn">Create Business Account</button>
+      </form>
+      
+      <div class="login-link">
+        Already have a business account?
+        <a href="#" onclick="toggleMode(); return false;">Sign In</a>
+      </div>
+      
+      <div class="back-link">
+        <button type="button" class="cancel-btn" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='login.html'; }">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    let isLoginMode = false;
+    let currentBusinessTier = 'free';
+
+    async function upsertBusinessAccount(user, extraData = {}) {
+      if (!user || !user.uid) {
+        throw new Error('No authenticated user found.');
+      }
+
+      const baseName = extraData.displayName || extraData.name || user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+
+      await db.collection('users').doc(user.uid).set({
+        email: user.email || extraData.email || '',
+        accountType: 'business',
+        businessTier: currentBusinessTier,
+        upgradedAt: new Date(),
+        displayName: baseName,
+        name: baseName,
+        ...extraData
+      }, { merge: true });
+
+      const verifyDoc = await db.collection('users').doc(user.uid).get();
+      const verifyData = verifyDoc.data() || {};
+      if (verifyData.accountType !== 'business') {
+        throw new Error('Business upgrade did not persist. Please try again.');
+      }
+    }
+
+    function setBusinessTier(tier) {
+      currentBusinessTier = tier;
+      const tierButtons = document.querySelectorAll('.tier-option');
+      tierButtons.forEach(btn => {
+        if (btn.dataset.tier === tier) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      
+      setTimeout(() => {
+        errorDiv.classList.remove('show');
+      }, 5000);
+    }
+
+    function toggleMode() {
+      isLoginMode = !isLoginMode;
+      const title = document.querySelector('.title');
+      const subtitle = document.querySelector('.subtitle');
+      const nameField = document.getElementById('name').closest('.field');
+      const businessNameField = document.getElementById('businessName').closest('.field');
+      const zipField = document.getElementById('zipCode').closest('.field');
+      const termsCheckbox = document.querySelector('.checkbox-container');
+      const signupBtn = document.getElementById('signupBtn');
+      const loginLink = document.querySelector('.login-link');
+      
+      if (isLoginMode) {
+        title.textContent = 'Business Sign In';
+        subtitle.textContent = 'Welcome back!';
+        nameField.style.display = 'none';
+        businessNameField.style.display = 'none';
+        zipField.style.display = 'none';
+        termsCheckbox.style.display = 'none';
+        // Remove required so browser validation doesn't block hidden fields
+        document.getElementById('name').removeAttribute('required');
+        document.getElementById('businessName').removeAttribute('required');
+        document.getElementById('zipCode').removeAttribute('required');
+        document.getElementById('termsCheckbox').removeAttribute('required');
+        signupBtn.textContent = 'Sign In';
+        loginLink.innerHTML = 'Don\'t have a business account? <a href="#" onclick="toggleMode(); return false;">Sign Up</a>';
+      } else {
+        title.textContent = 'Create Your Business Account';
+        subtitle.textContent = 'Join Harrison\'s local business community';
+        nameField.style.display = 'block';
+        businessNameField.style.display = 'block';
+        zipField.style.display = 'block';
+        termsCheckbox.style.display = 'flex';
+        // Restore required for sign-up mode
+        document.getElementById('name').setAttribute('required', '');
+        document.getElementById('businessName').setAttribute('required', '');
+        document.getElementById('zipCode').setAttribute('required', '');
+        document.getElementById('termsCheckbox').setAttribute('required', '');
+        signupBtn.textContent = 'Create Business Account';
+        loginLink.innerHTML = 'Already have a business account? <a href="#" onclick="toggleMode(); return false;">Sign In</a>';
+      }
+    }
+    
+    function signUpWithGoogle() {
+      const name = document.getElementById('name').value.trim();
+      const businessName = document.getElementById('businessName').value.trim();
+      const zipCode = document.getElementById('zipCode').value.trim();
+
+      if (!isLoginMode) {
+        if (!name) {
+          showError('Please enter your name before using Google sign-up.');
+          return;
+        }
+        if (!businessName) {
+          showError('Please enter your business name before using Google sign-up.');
+          return;
+        }
+        if (!/^[0-9]{5}$/.test(zipCode)) {
+          showError('Please enter a valid 5-digit ZIP code before using Google sign-up.');
+          return;
+        }
+      }
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(async (result) => {
+          let zipApproved = false;
+          if (zipCode) {
+            const zipCodeSnap = await db.collection('zipCode').where('zip', '==', zipCode).get();
+            const zipSnap = await db.collection('zipCodes').where('zip', '==', zipCode).get();
+            const approvedZipSnap = await db.collection('approved_zips').where('zip', '==', zipCode).get();
+            zipApproved = !zipCodeSnap.empty || !zipSnap.empty || !approvedZipSnap.empty;
+          }
+
+          const displayName = name || result.user.displayName || (result.user.email ? result.user.email.split('@')[0] : 'User');
+
+          await upsertBusinessAccount(result.user, {
+            name: displayName,
+            displayName: displayName,
+            zipCode: zipCode || null,
+            zipApproved: zipApproved,
+            subscriptionPlan: 'free',
+            subscriptionStatus: 'active',
+            role: 'user',
+            status: zipCode ? (zipApproved ? 'approved' : 'pending') : 'approved',
+            businessName: businessName || null,
+            isDisabled: false,
+            isBanned: false,
+            createdAt: new Date(),
+            lastLoginAt: new Date()
+          });
+          
+          window.location.href = 'profile.html';
+        })
+        .catch((error) => {
+          console.error('Google Sign-Up error:', error);
+          if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+            window.location.href = 'login.html';
+          } else {
+            showError('Google Sign-Up failed: ' + error.message);
+          }
+        });
+    }
+    
+    async function handleSignup(event) {
+      event.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const signupBtn = document.getElementById('signupBtn');
+      
+      signupBtn.disabled = true;
+      
+      try {
+        if (isLoginMode) {
+          // Sign in mode
+          signupBtn.textContent = 'Signing in...';
+          let activeUser = auth.currentUser;
+
+          // If already signed in as this email, reuse that session instead of failing on duplicate sign-in attempts.
+          const isSameSignedInUser = !!(
+            activeUser &&
+            activeUser.email &&
+            email &&
+            activeUser.email.toLowerCase() === email.toLowerCase()
+          );
+
+          if (!isSameSignedInUser) {
+            if (activeUser) {
+              await auth.signOut();
+            }
+
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            activeUser = userCredential.user;
+          }
+          
+          await upsertBusinessAccount(activeUser, {
+            lastLoginAt: new Date()
+          });
+          
+          window.location.href = 'profile.html';
+        } else {
+          // Sign up mode
+          signupBtn.textContent = 'Creating account...';
+          
+          const name = document.getElementById('name').value;
+          const businessName = document.getElementById('businessName').value;
+          const zipCode = document.getElementById('zipCode').value;
+          
+          // Create user
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          
+          // Send email verification
+          await user.sendEmailVerification({
+            url: 'https://app.locallist.biz/auth-action.html'
+          });
+          
+          // Check if ZIP is approved
+          let zipApproved = false;
+          const zipCodeSnap = await db.collection('zipCode').where('zip', '==', zipCode).get();
+          const zipSnap = await db.collection('zipCodes').where('zip', '==', zipCode).get();
+          const approvedZipSnap = await db.collection('approved_zips').where('zip', '==', zipCode).get();
+          zipApproved = !zipCodeSnap.empty || !zipSnap.empty || !approvedZipSnap.empty;
+          
+          // Create user document
+          await upsertBusinessAccount(user, {
+            name: name,
+            displayName: name,
+            businessName: businessName,
+            businessDescription: null,
+            businessPhone: null,
+            businessWebsite: null,
+            subscriptionPlan: 'free',
+            subscriptionStatus: 'active',
+            subscriptionStartedAt: new Date(),
+            subscriptionExpiresAt: null,
+            zipCode: zipCode,
+            zipApproved: zipApproved,
+            status: zipApproved ? 'approved' : 'pending',
+            role: 'user',
+            isDisabled: false,
+            isBanned: false,
+            createdAt: new Date(),
+            lastLoginAt: new Date(),
+            termsAcceptedAt: new Date(),
+            digestNotification: true,
+            listingUpNotification: true,
+            messageNotification: true,
+            phone: ''
+          });
+          
+          // If not approved, add to pending approvals
+          if (!zipApproved) {
+            await db.collection('pendingApprovals').doc(user.uid).set({
+              userId: user.uid,
+              name: name,
+              email: user.email,
+              zipCode: zipCode,
+              requestedAt: new Date(),
+              status: 'pending'
+            });
+          }
+          
+          alert('Business account created! Please check your email to verify your account before logging in.');
+          window.location.href = 'login.html';
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        signupBtn.disabled = false;
+        signupBtn.textContent = isLoginMode ? 'Sign In' : 'Create Business Account';
+        
+        let errorMessage = error.message;
+        if (error.code === 'auth/email-already-in-use' || error.code === 'auth/account-exists-with-different-credential') {
+          errorMessage = 'Account already exists. Please log in instead.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage = 'Password should be at least 6 characters.';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Please enter a valid email address.';
+        }
+        
+        showError(errorMessage);
+      }
+    }
+  </script>
+</body>
+</html>

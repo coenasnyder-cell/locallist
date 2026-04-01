@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Cancelled - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 32px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .cancel-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+
+    .cancel-icon svg {
+      width: 48px;
+      height: 48px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      color: #2d3748;
+      font-size: 28px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .info-box {
+      background: #fff5f5;
+      border-left: 4px solid #fc8181;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: left;
+      margin-bottom: 32px;
+    }
+
+    .info-box h3 {
+      color: #2d3748;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .info-box p {
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .info-box ul {
+      margin-left: 20px;
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #f5576c;
+      border: 2px solid #f5576c;
+    }
+
+    .btn-secondary:hover {
+      background: #fff5f5;
+    }
+
+    .listing-id {
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 24px;
+    }
+  </style>
+
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="cancel-icon">
+      <svg viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </div>
+
+    <h1>Payment Cancelled</h1>
+    <p class="subtitle">Your payment was not processed. Your listing has been created but is not featured.</p>
+
+    <div class="info-box">
+      <h3>What's the status of my listing?</h3>
+      <p>Your listing was successfully created and is <strong>active</strong>, but it's not featured since the payment was cancelled.</p>
+      
+      <h3 style="margin-top: 16px;">You can still:</h3>
+      <ul>
+        <li>View your listing in your profile</li>
+        <li>Edit your listing details</li>
+        <li>Feature it later by contacting support</li>
+      </ul>
+    </div>
+
+    <div class="buttons">
+      <a href="profile.html" class="btn btn-primary">View My Listings</a>
+      <a href="browse.html" class="btn btn-secondary">Browse Listings</a>
+      <button id="retryBtn" class="btn btn-secondary" style="display: none;">Try Payment Again</button>
+    </div>
+
+    <p class="listing-id" id="listingIdDisplay"></p>
+  </div>
+
+  <script>
+    const db = window.firebaseDb;
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('listingId');
+    
+    if (listingId) {
+      document.getElementById('listingIdDisplay').textContent = `Listing ID: ${listingId}`;
+      
+      // Update listing to remove pending payment status
+      if (db) {
+        db.collection('listings').doc(listingId).update({
+          featurePaymentStatus: 'cancelled',
+          featureRequested: false
+        }).catch(error => {
+          console.error('Error updating listing:', error);
+        });
+      }
+
+      // Show retry button
+      const retryBtn = document.getElementById('retryBtn');
+      retryBtn.style.display = 'inline-block';
+      retryBtn.onclick = () => {
+        window.location.href = `create-listing.html?retry=${listingId}`;
+      };
+    }
+
+    // Auto-redirect after 15 seconds
+    setTimeout(() => {
+      window.location.href = 'profile.html';
+    }, 15000);
+  </script>
+</body>
+</html>

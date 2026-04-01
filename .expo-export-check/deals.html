@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deals - Local List</title>
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --border: #e5e7eb;
+      --brand: #d97706;
+      --brand-dark: #b45309;
+      --highlight: #fef3c7;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% -20%, #fde68a 0%, transparent 35%),
+        radial-gradient(circle at 90% 0%, #f9a8d4 0%, transparent 28%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 14px 40px;
+    }
+
+    .hero {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      height: 140px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      margin-bottom: 22px;
+    }
+
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, rgba(17, 24, 39, 0.78), rgba(17, 24, 39, 0.42));
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      color: #ffffff;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .hero-copy h1 {
+      font-size: 28px;
+      line-height: 1.1;
+      margin-bottom: 4px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .hero-copy p {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #f8fafc;
+      font-weight: 500;
+    }
+
+    .layout {
+      display: block;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      text-align: left;
+    }
+
+    .panel h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .panel p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .deal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .deal-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      text-align: left;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      background: var(--highlight);
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 8px;
+    }
+
+    .deal-card h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .deal-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      justify-content: flex-start;
+    }
+
+    .meta-chip {
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .deal-card p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .expires {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .loading,
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--muted);
+      background: #fffbeb;
+      grid-column: 1 / -1;
+    }
+
+    .cta {
+      display: inline-flex;
+      margin-top: 6px;
+      text-decoration: none;
+      color: #ffffff;
+      background: var(--brand);
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 0.2s ease;
+    }
+
+    .cta:hover {
+      background: var(--brand-dark);
+    }
+
+    footer {
+      margin-top: 26px;
+      background: #333;
+      color: #ffffff;
+      text-align: center;
+      padding: 18px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy h1 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-wrap {
+        padding: 14px 10px 30px;
+      }
+
+      .hero {
+        height: 110px;
+      }
+
+      .hero img {
+        height: 100%;
+      }
+
+      .hero-overlay {
+        padding: 12px;
+      }
+
+      .hero-copy h1 {
+        font-size: 20px;
+      }
+
+      .hero-copy p {
+        font-size: 12px;
+      }
+
+      .deal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="page-wrap">
+    <section class="hero" aria-label="Deals highlight banner">
+      <img src="communityhub.png" alt="Shoppers and local businesses in the community">
+      <div class="hero-overlay">
+        <div class="hero-copy">
+          <h1>Local Deals</h1>
+          <p>Browse active promotions from businesses, service providers, and admin-curated offers, all in one place.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout" aria-label="Deals content">
+      <article class="panel">
+        <h2>Featured Deals</h2>
+        <p>Live deals from your Firestore collection: business, service provider, and admin posts.</p>
+        <div class="deal-grid" id="dealsGrid">
+          <div class="loading">
+            Loading deals...
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = window.firebaseDb;
+    const auth = window.firebaseAuth;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeDate(raw) {
+      if (!raw) return null;
+      if (raw.toDate && typeof raw.toDate === 'function') {
+        return raw.toDate();
+      }
+      const parsed = new Date(raw);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatDate(raw) {
+      const date = normalizeDate(raw);
+      if (!date) return 'N/A';
+      return date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function titleForCategory(rawCategory) {
+      const category = String(rawCategory || '').trim();
+      if (!category) return 'Deal';
+      return category;
+    }
+
+    function getDealTag(deal) {
+      const category = String(deal.dealsCategory || '').trim();
+      if (category) return category;
+      if (deal.businessId) return 'Business Deal';
+      return 'Admin Deal';
+    }
+
+    function getStatusText(status) {
+      const value = String(status || '').trim();
+      return value ? value : 'pending';
+    }
+
+    function isAdminDeal(deal) {
+      const category = String(deal.dealsCategory || '').toLowerCase().trim();
+      const role = String(deal.createdByRole || deal.role || '').toLowerCase().trim();
+      return category.includes('admin') || role === 'admin';
+    }
+
+    async function getViewerIsAdmin() {
+      const localAdmin = localStorage.getItem('isAdmin') === 'true';
+      if (localAdmin) return true;
+      if (!auth || !db) return false;
+
+      try {
+        const user = auth.currentUser;
+        if (!user) return false;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) return false;
+        const role = String((userDoc.data() || {}).role || '').toLowerCase();
+        return role === 'admin';
+      } catch (error) {
+        console.error('Failed to check admin status:', error);
+        return false;
+      }
+    }
+
+    async function loadDeals(viewerIsAdmin) {
+      const grid = document.getElementById('dealsGrid');
+      if (!grid) return;
+
+      if (!db) {
+        grid.innerHTML = '<div class="empty-state">Firestore is not initialized. Check your Firebase SDK and config load order.</div>';
+        return;
+      }
+
+      try {
+        const snap = await db.collection('deals').orderBy('dealsStartdate', 'desc').get();
+
+        if (snap.empty) {
+          grid.innerHTML = '<div class="empty-state">No deals posted yet. Once deals are published, they will appear here.</div>';
+          return;
+        }
+
+        const cards = [];
+        snap.forEach((doc) => {
+          const deal = doc.data() || {};
+          if (!viewerIsAdmin && isAdminDeal(deal)) {
+            return;
+          }
+
+          const title = escapeHtml(deal.dealsTitle || titleForCategory(deal.dealsCategory));
+          const description = escapeHtml(deal.dealsDescription || 'No description available yet.');
+          const tag = escapeHtml(getDealTag(deal));
+          const status = escapeHtml(getStatusText(deal.dealsStatus));
+          const featured = deal.dealsisFeatured === true ? '<span class="meta-chip">Featured</span>' : '';
+          const startDate = formatDate(deal.dealsStartdate);
+          const endDate = formatDate(deal.dealsEnddate);
+
+          cards.push(`
+            <div class="deal-card">
+              <span class="tag">${tag}</span>
+              <h3>${title}</h3>
+              <div class="deal-meta">
+                <span class="meta-chip">${status}</span>
+                ${featured}
+              </div>
+              <p>${description}</p>
+              <div class="expires">Starts: ${startDate}</div>
+              <div class="expires">Ends: ${endDate}</div>
+            </div>
+          `);
+        });
+
+        if (cards.length === 0) {
+          grid.innerHTML = '<div class="empty-state">No deals are available to display right now.</div>';
+          return;
+        }
+
+        grid.innerHTML = cards.join('');
+      } catch (error) {
+        console.error('Error loading deals:', error);
+        grid.innerHTML = '<div class="empty-state">Could not load deals right now. Please try again.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const viewerIsAdmin = await getViewerIsAdmin();
+      await loadDeals(viewerIsAdmin);
+    });
+  </script>
+</body>
+</html>

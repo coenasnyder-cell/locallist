@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Hub - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f5f7;
+      color: #334155;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 14px 36px;
+    }
+
+    .title-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title-wrap h1 {
+      font-size: 34px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .title-wrap-intro {
+      max-width: 48rem;
+      margin: 12px auto 0;
+      text-align: left;
+    }
+
+    .title-wrap-intro p {
+      font-size: 15px;
+      color: #64748b;
+      line-height: 1.65;
+      margin-bottom: 12px;
+    }
+
+    .title-wrap-intro p:last-child {
+      margin-bottom: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 126px;
+      text-decoration: none;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: block;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .emoji {
+      font-size: 24px;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 16px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 12px 30px;
+      }
+
+      .title-wrap h1 {
+        font-size: 30px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <div class="title-wrap">
+      <h1>Have something to list?</h1>
+      <div class="title-wrap-intro">
+      <p>Choose from items, pets, yard sales, events, or services — and post in seconds.</p>
+      </div>
+    </div>
+
+    <section class="grid" aria-label="List hub options">
+      <a class="card" href="create-listing.html?category=Home%20Goods" aria-label="Sell An Item">
+        <div class="emoji">🛒</div>
+        <div class="card-title">Sell An Item</div>
+        <div class="card-subtitle">Post items for local buyers</div>
+      </a>
+
+      <a class="card" href="create-yard-sale.html" aria-label="Yard Sale">
+        <div class="emoji">🏷️</div>
+        <div class="card-title">Yard Sale</div>
+        <div class="card-subtitle">Promote your garage or yard sale</div>
+      </a>
+
+      <a class="card" href="create-event-listing.html" aria-label="Event">
+        <div class="emoji">🎉</div>
+        <div class="card-title">Event</div>
+        <div class="card-subtitle">Share upcoming local events</div>
+      </a>
+
+      <a class="card" href="create-pet-post.html" aria-label="Pet Lost">
+        <div class="emoji">🔎</div>
+        <div class="card-title">Pet Lost</div>
+        <div class="card-subtitle">Report a lost pet quickly</div>
+      </a>
+
+      <a class="card" href="create-found-pet.html" aria-label="Pet Found">
+        <div class="emoji">🐾</div>
+        <div class="card-title">Pet Found</div>
+        <div class="card-subtitle">Report a found pet</div>
+      </a>
+
+      <a class="card" href="create-adoption-listing.html" aria-label="Adopt A Pet">
+        <div class="emoji">💙</div>
+        <div class="card-title">Adopt A Pet</div>
+        <div class="card-subtitle">List pets for adoption</div>
+      </a>
+
+      <a class="card" href="create-service-listing.html" aria-label="Services">
+        <div class="emoji">🧰</div>
+        <div class="card-title">Services</div>
+        <div class="card-subtitle">Offer professional services</div>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+</body>
+</html>

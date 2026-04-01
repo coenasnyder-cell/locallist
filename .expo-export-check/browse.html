@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Categories - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .search-container {
+      margin-bottom: 0;
+      flex: 0 1 420px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .search-bar {
+      width: 100%;
+      max-width: 420px;
+      padding: 14px 20px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      border-color: #475569;
+    }
+
+    .featured-container {
+      background: #fafafa;
+      padding: 24px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      border: 1px solid #e6e6e6;
+    }
+
+    .featured-section h2 {
+      color: #475569;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .featured-section p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .list-hub-highlight {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .list-hub-highlight-image {
+      min-height: 160px;
+      aspect-ratio: 16 / 10;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .list-hub-highlight-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      display: block;
+    }
+
+    .list-hub-highlight-text h3 {
+      color: #334155;
+      font-size: 20px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .list-hub-highlight-text p {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.25s;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(71, 85, 105, 0.25);
+    }
+
+    .category-listings-container {
+      margin-top: 8px;
+    }
+
+    .filters-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .category-filter {
+      flex: 0 1 320px;
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .category-label {
+      color: #475569;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .category-dropdown {
+      margin-bottom: 0;
+    }
+
+    .category-dropdown select {
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      color: #334155;
+      font-size: 14px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .listings-section {
+      background: transparent;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 30px;
+      box-shadow: none;
+    }
+
+    .listings-section h2 {
+      color: #475569;
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
+
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .listing-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .listing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      border-color: #475569;
+    }
+
+    .listing-image {
+      width: 100%;
+      height: 200px;
+      background: #f0f0f0;
+      object-fit: cover;
+    }
+
+    .listing-content {
+      padding: 11px;
+    }
+
+    .listing-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .listing-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .listing-category {
+      display: inline-block;
+      background: #f0f0f0;
+      color: #666;
+      padding: 3px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .listing-location {
+      font-size: 13px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .no-listings {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .promo-banner {
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+      border: 1px solid #fdba74;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #9a3412;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .promo-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #ea580c;
+      color: #fff;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+      z-index: 2;
+    }
+
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .filters-row {
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .search-container,
+      .category-filter {
+        display: block;
+        flex: 0 0 auto !important;
+        flex-basis: auto !important;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        min-height: 0;
+        margin: 0 0 8px 0;
+      }
+
+      .category-filter {
+        gap: 4px;
+        margin-bottom: 0;
+      }
+
+      .category-label {
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .category-dropdown select {
+        width: 100%;
+      }
+
+      .list-hub-highlight {
+        grid-template-columns: 1fr;
+      }
+
+      .list-hub-highlight-image {
+        min-height: 140px;
+        aspect-ratio: 16 / 11;
+      }
+
+      .listings-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .listing-image {
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .listings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="container">
+    <div class="featured-container">
+      <div class="list-hub-highlight">
+        <div class="list-hub-highlight-image"><img src="listhub.png" alt="List Hub preview image" loading="lazy" onerror="this.onerror=null;this.src='listhub.png';"></div>
+        <div class="list-hub-highlight-text">
+          <h3>List Hub: Your One-Stop Listing Center</h3>
+          <p>
+            Use List Hub to quickly post what you need in one place: items for sale, yard sales,
+            lost and found pets, adoptions, services, jobs, deals, and business listings.
+          </p>
+          <button class="btn btn-primary" onclick="window.location.href='list-hub.html'">Open List Hub</button>
+        </div>
+      </div>
+
+      <div class="featured-section" id="editorsPicksSection">
+        <h2>Editor's Picks</h2>
+        <p>Hand-selected listings from your community</p>
+        <button class="btn btn-primary" onclick="window.location.href='featured-listings.html'">View Featured Listings</button>
+      </div>
+    </div>
+
+    <div class="category-listings-container">
+      <div class="filters-row">
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-bar"
+            id="searchInput"
+            placeholder="Search listings..."
+            onkeypress="if(event.key === 'Enter') searchListings()"
+          >
+        </div>
+
+        <div class="category-filter">
+          <label class="category-label" for="categorySelect">Shop by Category</label>
+          <div class="category-dropdown">
+            <select id="categorySelect" onchange="navigateToCategory(this.value)">
+              <option value="All">All</option>
+              <option value="Yard Sales">Yard Sales</option>
+              <option value="Home Goods">Home Goods</option>
+              <option value="Handmade Gifts">Handmade Gifts</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Baby & Kids">Baby & Kids</option>
+              <option value="Outdoors">Outdoors</option>
+              <option value="Autos">Autos</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Tools">Tools</option>
+              <option value="Jobs">Jobs</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="listings-section">
+        <h2 id="listingsTitle">All Listings</h2>
+        <div id="listingsContainer" class="listings-grid">
+          <div class="loading">Loading listings...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = window.firebaseDb;
+    const promotionStatsSession = new Set();
+
+    function getTodayDateKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    async function trackPromotionDailyEvent(promotionId, businessId, sourceType, eventType, dedupeKey) {
+      if (!promotionId || !businessId || !sourceType || !eventType) return;
+      if (dedupeKey && promotionStatsSession.has(dedupeKey)) return;
+
+      const dateKey = getTodayDateKey();
+      const docId = `${promotionId}_${dateKey}`;
+
+      try {
+        await db.collection('promotionDailyStats').doc(docId).set({
+          promotionId,
+          businessId,
+          sourceType,
+          dateKey,
+          impressions: eventType === 'impression' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          clicks: eventType === 'click' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          leads: eventType === 'lead' ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+
+        if (dedupeKey) promotionStatsSession.add(dedupeKey);
+      } catch (error) {
+        console.warn('Could not track promotion daily stats:', error);
+      }
+    }
+
+    async function loadActivePromotion(goalType, targetCollection) {
+      try {
+        const snap = await db.collection('promotions')
+          .where('status', '==', 'active')
+          .where('goalType', '==', goalType)
+          .where('targetCollection', '==', targetCollection)
+          .limit(1)
+          .get();
+
+        if (snap.empty) return null;
+        const docSnap = snap.docs[0];
+        return { id: docSnap.id, ...docSnap.data() };
+      } catch (error) {
+        console.warn('Could not load active promotion:', error);
+        return null;
+      }
+    }
+
+    function getUrlParameter(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function updateCategoryHighlight(selectedCategory) {
+      const titleEl = document.getElementById('listingsTitle');
+      if (selectedCategory && selectedCategory !== 'All') {
+        titleEl.textContent = `${selectedCategory} Listings`;
+      } else {
+        titleEl.textContent = 'All Listings';
+      }
+
+      const select = document.getElementById('categorySelect');
+      if (select) {
+        select.value = selectedCategory && selectedCategory !== '' ? selectedCategory : 'All';
+      }
+    }
+
+    async function loadListings() {
+      const container = document.getElementById('listingsContainer');
+      const selectedCategory = getUrlParameter('category');
+
+      if (selectedCategory === 'Events') {
+        window.location.href = 'events.html';
+        return;
+      }
+
+      updateCategoryHighlight(selectedCategory);
+
+      try {
+        let query = db.collection('listings')
+          .where('status', '==', 'approved')
+          .orderBy('createdAt', 'desc')
+          .limit(12);
+
+        if (selectedCategory && selectedCategory !== 'All') {
+          query = query.where('category', '==', selectedCategory);
+        }
+
+        const [snapshot, promo] = await Promise.all([
+          query.get(),
+          loadActivePromotion('marketplace', 'listings')
+        ]);
+
+        let promoListing = null;
+        if (promo && promo.targetId) {
+          const promoListingDoc = await db.collection('listings').doc(String(promo.targetId)).get().catch(() => null);
+          if (promoListingDoc && promoListingDoc.exists) {
+            const data = promoListingDoc.data() || {};
+            if (data.status === 'approved') {
+              promoListing = { id: promoListingDoc.id, ...data };
+            }
+          }
+        }
+
+        if (snapshot.empty && !promoListing) {
+          container.innerHTML = '<div class="no-listings">No listings found in this category. Check back soon!</div>';
+          return;
+        }
+
+        let html = '';
+        if (promoListing && promo) {
+          const promoPrice = promoListing.price ? `$${promoListing.price}` : 'Contact';
+          const promoImage = promoListing.images && promoListing.images.length > 0
+            ? promoListing.images[0]
+            : 'logo.png';
+          const promoHeadline = String(promo.headline || 'Featured Promotion').trim();
+
+          html += `<div class="promo-banner">Promoted: ${promoHeadline}</div>`;
+          html += `
+            <div class="listing-card" onclick="goToListing('${promoListing.id}', '${promo.id}', '${promo.businessId || ''}')" style="position: relative;">
+              <span class="promo-badge">PROMOTED</span>
+              <div style="position: relative;">
+                <img src="${promoImage}" alt="${promoListing.title || 'Promoted Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+              </div>
+              <div class="listing-content">
+                <div class="listing-title">${promoListing.title || 'Untitled'}</div>
+                <div class="listing-price">${promoPrice}</div>
+                <span class="listing-category">${promoListing.category || 'General'}</span>
+                <div class="listing-location">Location: ${promoListing.city || 'Location TBD'}</div>
+              </div>
+            </div>
+          `;
+
+          trackPromotionDailyEvent(
+            promo.id,
+            promo.businessId || '',
+            'marketplace',
+            'impression',
+            `impression_marketplace_${promo.id}_${promoListing.id}`
+          );
+        }
+
+        for (const doc of snapshot.docs) {
+          if (promoListing && doc.id === promoListing.id) continue;
+          const listing = doc.data();
+
+          let isBusiness = false;
+          const auth = window.firebaseAuth;
+          if (listing.userId && auth && auth.currentUser) {
+            try {
+              const userDoc = await db.collection('users').doc(listing.userId).get();
+              if (userDoc.exists) {
+                isBusiness = userDoc.data().accountType === 'business';
+              }
+            } catch (err) {
+              // Not critical — BIZ badge simply won't show
+            }
+          }
+
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0
+            ? listing.images[0]
+            : 'logo.png';
+
+          const businessBadge = isBusiness
+            ? '<div style="position: absolute; top: 8px; right: 8px; background: #1565C0; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 11px; font-weight: 700; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">BIZ</div>'
+            : '';
+
+          html += `
+            <div class="listing-card" onclick="goToListing('${doc.id}')" style="position: relative;">
+              <div style="position: relative;">
+                <img src="${image}" alt="${listing.title || 'Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+                ${businessBadge}
+              </div>
+              <div class="listing-content">
+                <div class="listing-title">${listing.title || 'Untitled'}</div>
+                <div class="listing-price">${price}</div>
+                <span class="listing-category">${listing.category || 'General'}</span>
+                <div class="listing-location">Location: ${listing.city || 'Location TBD'}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading listings:', error);
+        container.innerHTML = '<div class="no-listings">Error loading listings. Please try again.</div>';
+      }
+    }
+
+    function goToListing(listingId, promoId, promoBusinessId) {
+      if (promoId && promoBusinessId) {
+        trackPromotionDailyEvent(
+          promoId,
+          promoBusinessId,
+          'marketplace',
+          'click',
+          `click_marketplace_${promoId}_${listingId}`
+        );
+        window.location.href = `single-listing.html?id=${listingId}&promo=${encodeURIComponent(promoId)}`;
+        return;
+      }
+      window.location.href = `single-listing.html?id=${listingId}`;
+    }
+
+    function goToApp(path) {
+      const overlay = document.getElementById('menuOverlay');
+      const sidebar = document.getElementById('menuSidebar');
+      if (overlay && sidebar) {
+        overlay.classList.remove('active');
+        sidebar.classList.remove('active');
+      }
+      window.location.href = path || '/';
+    }
+
+    function navigateToCategory(categoryName) {
+      if (categoryName === 'All') {
+        window.location.href = 'browse.html';
+      } else {
+        window.location.href = `browse.html?category=${encodeURIComponent(categoryName)}`;
+      }
+    }
+
+    function searchListings() {
+      const searchValue = document.getElementById('searchInput').value;
+      if (searchValue.trim()) {
+        window.location.href = 'search-results.html?search=' + encodeURIComponent(searchValue);
+      }
+    }
+
+    async function fetchDisplaySettings() {
+      try {
+        if (!db) {
+          console.warn('Firestore not initialized, using default display settings');
+          return { showEditorsPicks: true };
+        }
+        const settingsDoc = await db.collection('community_settings').doc('display').get();
+        const settings = settingsDoc.exists ? settingsDoc.data() : {};
+        return {
+          showEditorsPicks: settings.showEditorsPicks !== false,
+        };
+      } catch (error) {
+        console.error('Error fetching display settings:', error);
+        return { showEditorsPicks: true };
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const displaySettings = await fetchDisplaySettings();
+      const editorsPicksSection = document.getElementById('editorsPicksSection');
+      if (editorsPicksSection) {
+        editorsPicksSection.style.display = displaySettings.showEditorsPicks ? 'block' : 'none';
+      }
+
+      loadListings();
+    });
+  </script>
+</body>
+</html>

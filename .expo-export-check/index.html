@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    section {
+      background: transparent;
+      margin-bottom: 0px;
+      border-radius: 0;
+      padding: 24px;
+    }
+    
+    section h2 {
+      color: #222;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    section > p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .btn {
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      min-width: 200px;
+      text-align: center;
+    }
+    
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #f0f8fc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(31, 77, 58, 0.3);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #8bc2cb;
+      border: 2px solid #8bc2cb;
+    }
+    
+    .btn-secondary:hover {
+      background: #f0f8fc;
+      transform: translateY(-2px);
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    .card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-image {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+    }
+    
+    .card-content {
+      padding: 12px;
+    }
+    
+    .card-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #475569;
+    }
+    
+    .card-price {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .spotlight-content {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    .spotlight-image {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      flex-shrink: 0;
+    }
+    
+    .spotlight-text h3 {
+      color: #222;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .spotlight-text p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .spotlight-cta {
+      margin-top: 12px;
+    }
+
+    .quote-of-day {
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .quote-of-day-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .quote-of-day-text {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .quote-of-day-attribution {
+      font-size: 13px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .hub-explainer {
+      margin-top: 26px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .hub-explainer-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .hub-explainer-image {
+      width: 100%;
+      min-height: 220px;
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      border: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .hub-explainer-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      display: block;
+    }
+
+    .hub-explainer-text h3 {
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .hub-explainer-text p {
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .hub-explainer-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .list-hub-explainer {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .list-hub-explainer-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .list-hub-image {
+      width: 100%;
+      min-height: 230px;
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      border: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .list-hub-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      display: block;
+    }
+
+    .list-hub-text h3 {
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .list-hub-text p {
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .list-hub-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .pet-type-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      border-radius: 999px;
+      padding: 5px 9px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .pet-type-lost {
+      background: #dc2626;
+    }
+
+    .pet-type-found {
+      background: #059669;
+    }
+
+    .pet-type-adoption {
+      background: #7c3aed;
+    }
+
+    .pet-type-default {
+      background: #475569;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+    
+    .marketplace-banner {
+      width: 100%;
+      background: linear-gradient(135deg, #475569 0%, #475569 100%);
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(27, 149, 168, 0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      header h1 {
+        font-size: 24px;
+      }
+      
+      .spotlight-content {
+        flex-direction: column;
+      }
+      
+      .spotlight-image {
+        width: 100%;
+        height: 160px;
+      }
+
+      .hub-explainer-content {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-explainer-image {
+        min-height: 170px;
+        aspect-ratio: 16 / 11;
+      }
+
+      .list-hub-explainer-content {
+        grid-template-columns: 1fr;
+      }
+
+      .list-hub-image {
+        min-height: 170px;
+        aspect-ratio: 16 / 11;
+      }
+      
+      .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card-image {
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+
+      .card img {
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+    }
+
+    @media (min-width: 560px) and (max-width: 768px) {
+      .card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="marketplace-banner">
+    Harrison's Local Marketplace & Your One Stop for Buying and Selling Local
+  </div>
+  
+  <div class="container">
+    <section id="quoteOfDaySection" style="display: none;">
+      <div class="quote-of-day" aria-label="Quote of the day">
+        <div class="quote-of-day-label">Quote of the Day</div>
+        <p class="quote-of-day-text" id="quoteOfDayTextDisplay"></p>
+        <p class="quote-of-day-attribution" id="quoteOfDayAttributionDisplay"></p>
+      </div>
+    </section>
+
+    <!-- Community Spotlight Section -->
+    <section id="communitySpotlightSection" style="display: none;">
+      <h2>Community Spotlight</h2>
+      <p></p>
+      <div class="spotlight-content">
+        <div class="spotlight-image" id="communitySpotlightImage"></div>
+        <div class="spotlight-text">
+          <h3 id="communitySpotlightHeadline"></h3>
+          <p id="communitySpotlightDescription"></p>
+          <p id="communitySpotlightSecondary"></p>
+          <div class="spotlight-cta" id="communitySpotlightCta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community Hub Explainer Placeholder -->
+    <section>
+      <div class="hub-explainer">
+        <div class="hub-explainer-content">
+          <div class="hub-explainer-image">
+            <img src="communityhub.png" alt="Community hub preview image" loading="lazy" onerror="this.onerror=null;this.src='communityhub.png';">
+          </div>
+          <div class="hub-explainer-text">
+            <h3>Your Community, All in One Place</h3>
+            <p>Browse local events, plan your next yard sale, and explore job opportunities in the community. Discover amazing deals, connect with trusted local businesses and services, and explore our Pet Corner for pet resources and listings. From everyday needs to community happenings, everything is organized to help you stay informed, get involved, and feel more connected to the community.
+            </p>
+                       <div class="hub-explainer-note">Placeholder section ready for your content update.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Featured Listings Section -->
+    <section id="featuredSection">
+      <h2>Featured Listings</h2>
+      <p></p>
+      <div class="card-grid" id="featuredListingsGrid">
+        <div class="card">
+          <div class="card-image">⏳</div>
+          <div class="card-content">
+            <div class="card-title">Loading featured listings...</div>
+            <div class="card-price">Please wait</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="window.location.href='featured-listings.html'">View All Featured</button>
+      </div>
+    </section>
+
+    <!-- List Hub Explainer Section -->
+    <section>
+      <div class="list-hub-explainer">
+        <div class="list-hub-explainer-content">
+          <div class="list-hub-image">
+            <img src="listhub.png" alt="List Hub preview image" loading="lazy" onerror="this.onerror=null;this.src='listhub.png';">
+          </div>
+          <div class="list-hub-text">
+            <h3>List Hub: Your One-Stop Place To Post</h3>
+            <p>
+              List Hub makes it easy to post everything in one place, including items for sale,
+              yard sales, events, pet lost and found posts, adoptions, business profiles,
+              services, jobs, and deals.
+            </p>
+            <p>
+              Start from one simple hub, choose your listing type, and publish to the right area
+              faster without jumping between multiple pages.
+            </p>
+            <div class="spotlight-cta">
+              <button class="btn btn-primary" onclick="window.location.href='list-hub.html'">Open List Hub</button>
+            </div>
+            <div class="list-hub-note">Image placeholder is on the left and ready for your final visual.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Recent Listings Section -->
+    <section>
+      <h2>Marketplace Recent Listings</h2>
+      <p>Check out what's new in your community</p>
+      <div class="card-grid" id="recentListingsGrid">
+        <div class="card">
+          <div class="card-image">⏳</div>
+          <div class="card-content">
+            <div class="card-title">Loading listings...</div>
+            <div class="card-price">Please wait</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="window.location.href='browse.html'">Browse More</button>
+      </div>
+    </section>
+
+    <!-- Pet Corner Recent Listings Section -->
+    <section>
+      <h2>The Pet Corner Recent Listings</h2>
+      <p>Newest lost, found, and adoption posts from The Pet Corner</p>
+      <div class="card-grid" id="recentPetListingsGrid">
+        <div class="card">
+          <div class="card-image">⏳</div>
+          <div class="card-content">
+            <div class="card-title">Loading pet listings...</div>
+            <div class="card-price">Please wait</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="window.location.href='pet-hub.html'">View The Pet Corner</button>
+      </div>
+    </section>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const app = window.firebaseApp;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    function goToApp(path) {
+      // Close menu if open
+      const overlay = document.getElementById('menuOverlay');
+      const sidebar = document.getElementById('menuSidebar');
+      if (overlay && sidebar) {
+        overlay.classList.remove('active');
+        sidebar.classList.remove('active');
+      }
+      // Navigate to the Expo app route
+      window.location.href = path || '/';
+    }
+
+    function getListingColumns() {
+      const width = window.innerWidth || 1024;
+      if (width >= 769) return 4;
+      if (width >= 560) return 3;
+      return 2;
+    }
+
+    function getMaxCardsForTwoRows() {
+      return getListingColumns() * 2;
+    }
+
+    async function loadFeaturedListings() {
+      const grid = document.getElementById('featuredListingsGrid');
+      if (!grid) return;
+      const maxCards = getMaxCardsForTwoRows();
+
+      if (!db) {
+        console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        return;
+      }
+
+      try {
+        const now = new Date();
+        const snapshot = await db.collection('listings')
+          .where('status', '==', 'approved')
+          .where('isFeatured', '==', true)
+          .orderBy('createdAt', 'desc')
+          .limit(maxCards * 2)
+          .get();
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<div class="card"><div class="card-image">🌟</div><div class="card-content"><div class="card-title">No featured listings yet</div><div class="card-price">Be the first!</div></div></div>';
+          return;
+        }
+
+        const cards = [];
+        for (const doc of snapshot.docs) {
+          const listing = doc.data();
+          
+          // Check if feature has expired
+          if (listing.featureExpiresAt) {
+            const expiresAt = listing.featureExpiresAt.toDate ? listing.featureExpiresAt.toDate() : new Date(listing.featureExpiresAt);
+            if (expiresAt < now) {
+              continue; // Skip expired featured listings
+            }
+          }
+
+          // Check if user is a business user
+          let isBusiness = false;
+          if (listing.userId) {
+            try {
+              const userDoc = await db.collection('users').doc(listing.userId).get();
+              if (userDoc.exists) {
+                isBusiness = userDoc.data().accountType === 'business';
+              }
+            } catch (err) {
+              console.error('Error fetching user:', err);
+            }
+          }
+
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0
+            ? listing.images[0]
+            : '';
+
+          const imageHtml = image
+            ? `<img src="${image}" alt="${listing.title || 'Listing'}" style="width: 100%; height: 120px; object-fit: cover;">`
+            : '<div class="card-image">✨</div>';
+
+          const businessBadge = isBusiness
+            ? '<div style="position: absolute; top: 4px; right: 4px; background: #1565C0; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
+            : '';
+
+          cards.push(`
+            <div class="card" onclick="window.location.href='single-listing.html?id=${doc.id}'" style="cursor: pointer; position: relative;">
+              <div style="position: relative;">
+                ${imageHtml}
+                ${businessBadge}
+              </div>
+              <div class="card-content">
+                <div class="card-title">${listing.title || 'Untitled'}</div>
+                <div class="card-price">${price}</div>
+              </div>
+            </div>
+          `);
+
+          if (cards.length >= maxCards) {
+            break;
+          }
+        }
+
+        if (cards.length === 0) {
+          grid.innerHTML = '<div class="card"><div class="card-image">🌟</div><div class="card-content"><div class="card-title">No featured listings yet</div><div class="card-price">Be the first!</div></div></div>';
+        } else {
+          grid.innerHTML = cards.join('');
+        }
+      } catch (error) {
+        console.error('Error loading featured listings:', error);
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
+      }
+    }
+
+    async function loadRecentListings() {
+      const grid = document.getElementById('recentListingsGrid');
+      if (!grid) return;
+      const maxCards = getMaxCardsForTwoRows();
+
+      if (!db) {
+        console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection('listings')
+          .where('status', '==', 'approved')
+          .orderBy('createdAt', 'desc')
+          .limit(maxCards)
+          .get();
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<div class="card"><div class="card-image">📭</div><div class="card-content"><div class="card-title">No listings yet</div><div class="card-price">Check back soon</div></div></div>';
+          return;
+        }
+
+        const cards = [];
+        
+        for (const doc of snapshot.docs) {
+          const listing = doc.data();
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0
+            ? listing.images[0]
+            : '';
+
+          // Check if user is a business user
+          let isBusiness = false;
+          if (listing.userId) {
+            try {
+              const userDoc = await db.collection('users').doc(listing.userId).get();
+              if (userDoc.exists) {
+                isBusiness = userDoc.data().accountType === 'business';
+              }
+            } catch (err) {
+              console.error('Error fetching user:', err);
+            }
+          }
+
+          const imageHtml = image
+            ? `<img src="${image}" alt="${listing.title || 'Listing'}" style="width: 100%; height: 120px; object-fit: cover;">`
+            : '<div class="card-image">📦</div>';
+
+          const businessBadge = isBusiness
+            ? '<div style="position: absolute; top: 4px; right: 4px; background: #1565C0; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
+            : '';
+
+          cards.push(`
+            <div class="card" onclick="window.location.href='single-listing.html?id=${doc.id}'" style="cursor: pointer; position: relative;">
+              <div style="position: relative;">
+                ${imageHtml}
+                ${businessBadge}
+              </div>
+              <div class="card-content">
+                <div class="card-title">${listing.title || 'Untitled'}</div>
+                <div class="card-price">${price}</div>
+              </div>
+            </div>
+          `);
+        }
+
+        grid.innerHTML = cards.join('');
+      } catch (error) {
+        console.error('Error loading recent listings:', error);
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
+      }
+    }
+
+    function getPetPostLabel(postType) {
+      if (postType === 'lost') return 'Lost';
+      if (postType === 'found') return 'Found';
+      if (postType === 'adoption') return 'Adoption';
+      return 'Pet';
+    }
+
+    function getPetPostBadgeClass(postType) {
+      if (postType === 'lost') return 'pet-type-lost';
+      if (postType === 'found') return 'pet-type-found';
+      if (postType === 'adoption') return 'pet-type-adoption';
+      return 'pet-type-default';
+    }
+
+    async function loadRecentPetListings() {
+      const grid = document.getElementById('recentPetListingsGrid');
+      if (!grid) return;
+      const maxCards = getMaxCardsForTwoRows();
+
+      if (!db) {
+        console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Pet listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection('pets')
+          .orderBy('createdAt', 'desc')
+          .limit(maxCards)
+          .get();
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<div class="card"><div class="card-image">🐾</div><div class="card-content"><div class="card-title">No pet listings yet</div><div class="card-price">Check back soon</div></div></div>';
+          return;
+        }
+
+        const cards = [];
+
+        for (const doc of snapshot.docs) {
+          const pet = doc.data();
+          const petName = pet.petName || 'Unnamed Pet';
+          const petType = pet.petType || 'Pet';
+          const petBreed = pet.petBreed || '';
+          const petLabel = getPetPostLabel(pet.postType);
+          const petBadgeClass = getPetPostBadgeClass(pet.postType);
+          const location = pet.petSeenLocation || 'Location TBD';
+          const image = (pet.petImages && pet.petImages.length > 0)
+            ? pet.petImages[0]
+            : pet.petPhoto;
+
+          const imageHtml = image
+            ? `<img src="${image}" alt="${petName}" style="width: 100%; height: 120px; object-fit: cover;" onerror="this.outerHTML='<div class=\\'card-image\\'>🐾</div>'">`
+            : '<div class="card-image">🐾</div>';
+
+          cards.push(`
+            <div class="card" onclick="window.location.href='pet-details.html?id=${doc.id}'" style="cursor: pointer; position: relative;">
+              <div style="position: relative;">
+                ${imageHtml}
+                <div class="pet-type-badge ${petBadgeClass}">${petLabel}</div>
+              </div>
+              <div class="card-content">
+                <div class="card-title">${petName}</div>
+                <div class="card-price">The Pet Corner</div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 6px;">${petType}${petBreed ? ` • ${petBreed}` : ''}</div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${location}</div>
+              </div>
+            </div>
+          `);
+        }
+
+        grid.innerHTML = cards.join('');
+      } catch (error) {
+        console.error('Error loading pet listings:', error);
+        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading pet listings</div><div class="card-price">Please try again</div></div></div>';
+      }
+    }
+
+    async function fetchDisplaySettings() {
+      try {
+        if (!db) {
+          console.warn('Firestore not initialized, using default display settings');
+          return {
+            showFeaturedListings: true,
+            showSpotlight: true,
+            showQuoteOfDay: true,
+            quoteOfDayText: '',
+            quoteOfDayAttribution: '',
+            spotlightHeadline: '',
+            spotlightDescription: '',
+            spotlightImageUrl: '',
+            spotlightCtaText: '',
+            spotlightCtaUrl: '',
+          };
+        }
+        const settingsDoc = await db.collection('community_settings').doc('display').get();
+        const settings = settingsDoc.exists ? settingsDoc.data() : {};
+        const displaySettings = {
+          showFeaturedListings: settings.showFeaturedListings !== false,
+          showSpotlight: settings.showSpotlight !== false,
+          showQuoteOfDay: settings.showQuoteOfDay !== false,
+          quoteOfDayText: settings.quoteOfDayText || '',
+          quoteOfDayAttribution: settings.quoteOfDayAttribution || '',
+          spotlightHeadline: settings.spotlightHeadline || '',
+          spotlightDescription: settings.spotlightDescription || '',
+          spotlightImageUrl: settings.spotlightImageUrl || '',
+          spotlightCtaText: settings.spotlightCtaText || '',
+          spotlightCtaUrl: settings.spotlightCtaUrl || '',
+        };
+        console.log('Display settings fetched:', displaySettings);
+        return displaySettings;
+      } catch (error) {
+        console.error('Error fetching display settings:', error);
+        return {
+          showFeaturedListings: true,
+          showSpotlight: true,
+          showQuoteOfDay: true,
+          quoteOfDayText: '',
+          quoteOfDayAttribution: '',
+          spotlightHeadline: '',
+          spotlightDescription: '',
+          spotlightImageUrl: '',
+          spotlightCtaText: '',
+          spotlightCtaUrl: '',
+        };
+      }
+    }
+
+    function renderQuoteOfDay(displaySettings) {
+      const section = document.getElementById('quoteOfDaySection');
+      const quoteTextEl = document.getElementById('quoteOfDayTextDisplay');
+      const quoteAttributionEl = document.getElementById('quoteOfDayAttributionDisplay');
+
+      if (!section || !quoteTextEl || !quoteAttributionEl) return;
+
+      if (!displaySettings.showQuoteOfDay) {
+        section.style.display = 'none';
+        return;
+      }
+
+      const quoteText = (displaySettings.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."';
+      const quoteAttribution = (displaySettings.quoteOfDayAttribution || '').trim() || '- Local List';
+
+      quoteTextEl.textContent = quoteText;
+      quoteAttributionEl.textContent = quoteAttribution;
+      section.style.display = 'block';
+    }
+
+    function renderCommunitySpotlight(displaySettings) {
+      const section = document.getElementById('communitySpotlightSection');
+      const imageContainer = document.getElementById('communitySpotlightImage');
+      const headlineEl = document.getElementById('communitySpotlightHeadline');
+      const descriptionEl = document.getElementById('communitySpotlightDescription');
+      const secondaryEl = document.getElementById('communitySpotlightSecondary');
+      const ctaContainer = document.getElementById('communitySpotlightCta');
+
+      if (section) {
+        section.style.display = displaySettings.showSpotlight ? 'block' : 'none';
+      }
+
+      if (!displaySettings.showSpotlight) {
+        return;
+      }
+
+      if (headlineEl && displaySettings.spotlightHeadline) {
+        headlineEl.textContent = displaySettings.spotlightHeadline;
+      }
+
+      if (descriptionEl && displaySettings.spotlightDescription) {
+        descriptionEl.textContent = displaySettings.spotlightDescription;
+      }
+
+      if (secondaryEl) {
+        secondaryEl.style.display = 'none';
+      }
+
+      if (imageContainer && displaySettings.spotlightImageUrl) {
+        imageContainer.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = displaySettings.spotlightImageUrl;
+        img.alt = displaySettings.spotlightHeadline || 'Community spotlight image';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        imageContainer.appendChild(img);
+      }
+
+      if (ctaContainer) {
+        ctaContainer.innerHTML = '';
+        const ctaText = (displaySettings.spotlightCtaText || '').trim();
+        const ctaUrl = (displaySettings.spotlightCtaUrl || '').trim();
+        if (ctaText && /^https?:\/\//i.test(ctaUrl)) {
+          const button = document.createElement('a');
+          button.className = 'btn btn-primary';
+          button.href = ctaUrl;
+          button.textContent = ctaText;
+          button.target = '_blank';
+          button.rel = 'noopener noreferrer';
+          button.style.minWidth = 'unset';
+          button.style.padding = '10px 18px';
+          button.style.fontSize = '14px';
+          ctaContainer.appendChild(button);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const displaySettings = await fetchDisplaySettings();
+      renderQuoteOfDay(displaySettings);
+      renderCommunitySpotlight(displaySettings);
+      
+      // Hide Featured Listings section if toggled off
+      const featuredSection = document.getElementById('featuredSection');
+      if (featuredSection) {
+        featuredSection.style.display = displaySettings.showFeaturedListings ? 'block' : 'none';
+      }
+
+      if (displaySettings.showFeaturedListings) {
+        loadFeaturedListings();
+      }
+      loadRecentListings();
+      loadRecentPetListings();
+    });
+  </script>
+</body>
+</html>

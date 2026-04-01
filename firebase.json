@@ -1,0 +1,62 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "us-east4",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "!/login.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "!/signup.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "!/auth-action.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "!/forgot-password.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "!/verify-email.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "!/**.html",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
+}

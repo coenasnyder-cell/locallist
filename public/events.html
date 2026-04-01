@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .hero {
+      background: transparent;
+      color: #1f2937;
+      padding: 34px 20px 30px;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 14px 36px;
+    }
+
+    .events-benefits-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 8px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .events-benefits-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      display: block;
+    }
+
+    .events-benefits-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .events-benefits-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #334155;
+      line-height: 1.25;
+    }
+
+    .events-benefits-text {
+      font-size: 16px;
+      color: #475569;
+      line-height: 1.5;
+      max-width: 540px;
+    }
+
+    .events-benefits-cta {
+      margin-top: 4px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #475569;
+      color: #fff;
+      transition: background 0.2s;
+    }
+
+    .events-benefits-cta:hover {
+      background: #3b4a5a;
+    }
+
+    .filters-panel {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .filter-input,
+    .filter-select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 16px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: #1e3a5f;
+      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.12);
+    }
+
+    .section-block {
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 23px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .event-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .event-card-media {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    }
+
+    .event-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .event-card-media-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      user-select: none;
+    }
+
+    .event-days-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.88);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      line-height: 1.2;
+      max-width: calc(100% - 20px);
+      text-align: right;
+    }
+
+    .event-card-body {
+      padding: 14px;
+    }
+
+    .event-card-clickable {
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .event-card-clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+
+    .event-meta {
+      color: #334155;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .event-description {
+      color: #64748b;
+      font-size: 16px;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .event-card-actions {
+      margin-top: 12px;
+    }
+
+    .event-card-details-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #1e3a5f;
+      color: #fff;
+      transition: background 0.2s;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .event-card-details-btn:hover {
+      background: #152a45;
+      color: #fff;
+    }
+
+    .empty-state {
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      color: #64748b;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    .section-view-all-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .section-view-all-wrap[hidden] {
+      display: none !important;
+    }
+
+    .section-view-all-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 2px solid #1e3a5f;
+      background: #fff;
+      color: #1e3a5f;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .section-view-all-btn:hover {
+      background: #1e3a5f;
+      color: #fff;
+    }
+
+    .digest-banner {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-top: 8px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      color: #1f2937;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .digest-icon {
+      font-size: 52px;
+      flex-shrink: 0;
+    }
+
+    .digest-body {
+      flex: 1;
+    }
+
+    .digest-body h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .digest-body p {
+      font-size: 16px;
+      color: #475569;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .digest-form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .digest-input {
+      flex: 1;
+      min-width: 220px;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 16px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #fff;
+    }
+
+    .digest-input:focus {
+      outline: 2px solid #bfdbfe;
+    }
+
+    .digest-options {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .digest-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .digest-btn {
+      background: #0f172a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .digest-btn:hover:not(:disabled) {
+      background: #020617;
+    }
+
+    .digest-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .digest-msg {
+      font-size: 16px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    .digest-msg.success {
+      color: #86efac;
+    }
+
+    .digest-msg.error {
+      color: #fca5a5;
+    }
+
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        padding: 28px 16px 24px;
+      }
+
+      .hero h1 {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 28px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .container {
+        padding: 14px 10px 30px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .events-benefits-row {
+        grid-template-columns: 1fr;
+      }
+
+      .events-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .events-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .digest-banner {
+        flex-direction: column;
+        gap: 14px;
+        text-align: center;
+      }
+
+      .digest-form {
+        flex-direction: column;
+      }
+
+      .digest-input,
+      .digest-btn {
+        width: 100%;
+      }
+
+      .digest-options {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Events</h1>
+      <p>Discover local events happening right here in our community</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="events-benefits-row" aria-label="Benefits of posting an event">
+      <img class="events-benefits-image" src="eventshub.png" alt="Promote your next event on Local List">
+      <div class="events-benefits-content">
+        <h2 class="events-benefits-title">Promote Your Next Event Locally</h2>
+        <p class="events-benefits-text">Hosting something in the community? Post your event on Local List to reach local attendees, share key details in one place, and help more people discover what is happening. From fundraisers and family events to workshops and live music, your listing makes it easier for neighbors to find and attend.</p>
+        <a href="create-event-listing.html" class="events-benefits-cta">+ Post Your Event</a>
+      </div>
+    </section>
+
+    <section class="filters-panel" aria-label="Event filters">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label" for="searchEventsInput">Search Events</label>
+          <input id="searchEventsInput" class="filter-input" type="text" placeholder="Search by title, city, or keyword">
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="categoryFilter">Filter by Category</label>
+          <select id="categoryFilter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Community">Community</option>
+            <option value="Family">Family</option>
+            <option value="Food">Food</option>
+            <option value="Music">Music</option>
+            <option value="Sports">Sports</option>
+            <option value="Business">Business</option>
+            <option value="Charity">Charity</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label" for="dateFilter">Filter by Date</label>
+          <input id="dateFilter" class="filter-input" type="date">
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" aria-label="Happening this week">
+      <h2 class="section-title">Happening This Week</h2>
+      <div id="thisWeekGrid" class="events-grid"></div>
+      <div id="thisWeekViewAll" class="section-view-all-wrap" hidden></div>
+    </section>
+
+    <section class="section-block" aria-label="Upcoming events">
+      <h2 class="section-title">Upcoming Events</h2>
+      <div id="thisMonthGrid" class="events-grid"></div>
+      <div id="thisMonthViewAll" class="section-view-all-wrap" hidden></div>
+    </section>
+
+    <div class="digest-banner" aria-label="Subscribe to events digest">
+      <div class="digest-icon">📬</div>
+      <div class="digest-body">
+        <h3>Get Events Digest Updates</h3>
+        <p>Subscribe to weekly and monthly event roundups so you never miss what is happening locally.</p>
+        <div class="digest-form">
+          <input class="digest-input" id="digestEmail" type="email" placeholder="Enter your email address" autocomplete="email">
+          <button class="digest-btn" id="digestBtn" type="button">Subscribe</button>
+        </div>
+        <div class="digest-options">
+          <label class="digest-option" for="digestWeekly">
+            <input id="digestWeekly" type="checkbox" checked>
+            Weekly Digest
+          </label>
+          <label class="digest-option" for="digestMonthly">
+            <input id="digestMonthly" type="checkbox" checked>
+            Monthly Digest
+          </label>
+        </div>
+        <div class="digest-msg" id="digestMsg"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const searchInput = document.getElementById('searchEventsInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const dateFilter = document.getElementById('dateFilter');
+
+    let allEvents = [];
+    let expandedThisWeek = false;
+    let expandedThisMonth = false;
+
+    /** Match .events-grid breakpoints: 3 cols >960, 2 cols 621–960, 1 col ≤620 */
+    function getEventsGridColumnCount() {
+      const w = window.innerWidth;
+      if (w <= 620) return 1;
+      if (w <= 960) return 2;
+      return 3;
+    }
+
+    function maxEventsForTwoRows() {
+      return getEventsGridColumnCount() * 2;
+    }
+
+    function hidePreviewFooter(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.hidden = true;
+        el.innerHTML = '';
+      }
+    }
+
+    function hideAllPreviewFooters() {
+      hidePreviewFooter('thisWeekViewAll');
+      hidePreviewFooter('thisMonthViewAll');
+    }
+
+    function updatePreviewFooter(footerId, items, expanded, sectionKey) {
+      const wrap = document.getElementById(footerId);
+      if (!wrap) return;
+      const cap = maxEventsForTwoRows();
+      if (!items.length || items.length <= cap) {
+        wrap.hidden = true;
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.hidden = false;
+      if (expanded) {
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="false">Show fewer</button>`;
+      } else {
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="true">View all events (${items.length})</button>`;
+      }
+    }
+
+    function normalizeDate(value) {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (value.toDate && typeof value.toDate === 'function') return value.toDate();
+      if (typeof value.seconds === 'number') {
+        return new Date(value.seconds * 1000 + (value.nanoseconds || 0) / 1e6);
+      }
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    /** Firestore listings use eventDate; some docs may only have eventStartDate. */
+    function getListingDateRaw(eventItem) {
+      return eventItem?.eventDate ?? eventItem?.eventStartDate ?? null;
+    }
+
+    function formatDate(dateValue) {
+      const date = normalizeDate(dateValue);
+      if (!date) return 'Date TBD';
+      return date.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
+
+    function sanitizeText(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeAttr(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+    }
+
+    function getEventImageUrl(eventItem) {
+      const main = (eventItem.eventImage || '').trim();
+      if (main) return main;
+      if (Array.isArray(eventItem.eventImages)) {
+        const found = eventItem.eventImages.find((u) => u && String(u).trim());
+        if (found) return String(found).trim();
+      }
+      return '';
+    }
+
+    /** Days from local today (midnight) until event start date (calendar day). */
+    function formatDaysUntil(eventDateValue) {
+      const d = normalizeDate(eventDateValue);
+      if (!d) return '';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const eventDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      eventDay.setHours(0, 0, 0, 0);
+      const diff = Math.round((eventDay.getTime() - today.getTime()) / 86400000);
+      if (diff < 0) return 'Past event';
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Tomorrow';
+      return `In ${diff} days`;
+    }
+
+    function getEventDetailsUrl(eventItem) {
+      const eventId = eventItem.eventId || eventItem.id || '';
+      if (eventId) {
+        return `event-details.html?eventId=${encodeURIComponent(eventId)}`;
+      }
+
+      const fallbackPayload = encodeURIComponent(JSON.stringify(eventItem || {}));
+      return `event-details.html?payload=${fallbackPayload}`;
+    }
+
+    function createEventCard(eventItem) {
+      const detailsUrl = getEventDetailsUrl(eventItem);
+      const imgUrl = getEventImageUrl(eventItem);
+      const daysLabel = formatDaysUntil(getListingDateRaw(eventItem));
+      const daysHtml = daysLabel
+        ? `<span class="event-days-badge">${sanitizeText(daysLabel)}</span>`
+        : '';
+      const mediaInner = imgUrl
+        ? `<img src="${escapeAttr(imgUrl)}" alt="" loading="lazy">`
+        : '<div class="event-card-media-placeholder" aria-hidden="true">📅</div>';
+
+      return `
+        <article class="event-card event-card-clickable" data-event-details-url="${detailsUrl}">
+          <div class="event-card-media">
+            ${mediaInner}
+            ${daysHtml}
+          </div>
+          <div class="event-card-body">
+            <h3 class="event-title">${sanitizeText(eventItem.eventTitle || 'Untitled Event')}</h3>
+            <div class="event-meta">${formatDate(getListingDateRaw(eventItem))}</div>
+            <div class="event-meta">${sanitizeText(eventItem.eventCity || eventItem.eventAdress || 'Location TBD')}${eventItem.eventState ? `, ${sanitizeText(eventItem.eventState)}` : ''}</div>
+            <div class="event-meta">${sanitizeText(eventItem.eventStarttime || 'Time TBD')}${eventItem.eventEndtime ? ` - ${sanitizeText(eventItem.eventEndtime)}` : ''}</div>
+            <p class="event-description">${sanitizeText(eventItem.eventDescription || 'No description yet.')}</p>
+            <div class="event-card-actions">
+              <a class="event-card-details-btn" href="${escapeAttr(detailsUrl)}">View details</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function showEmpty(gridId, message) {
+      document.getElementById(gridId).innerHTML = `<div class="empty-state">${message}</div>`;
+    }
+
+    function applyFilters(events) {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedCategory = categoryFilter.value;
+      const selectedDate = dateFilter.value;
+
+      return events.filter((eventItem) => {
+        const title = (eventItem.eventTitle || '').toLowerCase();
+        const city = (eventItem.eventCity || '').toLowerCase();
+        const address = (eventItem.eventAdress || '').toLowerCase();
+        const description = (eventItem.eventDescription || '').toLowerCase();
+        const eventCategory = eventItem.eventCategory || '';
+        const eventDate = normalizeDate(getListingDateRaw(eventItem));
+
+        const matchesSearch = !searchTerm
+          || title.includes(searchTerm)
+          || city.includes(searchTerm)
+          || address.includes(searchTerm)
+          || description.includes(searchTerm);
+
+        const matchesCategory = !selectedCategory || eventCategory === selectedCategory;
+
+        const matchesDate = !selectedDate
+          || (eventDate && eventDate.toISOString().slice(0, 10) === selectedDate);
+
+        return matchesSearch && matchesCategory && matchesDate;
+      });
+    }
+
+    function getEventDayStart(eventItem) {
+      const eventDate = normalizeDate(getListingDateRaw(eventItem));
+      if (!eventDate) return null;
+      return new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+    }
+
+    /** Sunday end date for the current calendar week (same rule as before). */
+    function getEndOfCalendarWeek(startToday) {
+      const endOfWeek = new Date(startToday);
+      endOfWeek.setDate(startToday.getDate() + (7 - startToday.getDay()));
+      return endOfWeek;
+    }
+
+    /**
+     * week: today through end of current calendar week (inclusive).
+     * month: rest of the current calendar month plus any future months (same listing can also appear in week).
+     */
+    function getDateBuckets(events) {
+      const today = new Date();
+      const startToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfWeek = getEndOfCalendarWeek(startToday);
+      const curY = startToday.getFullYear();
+      const curM = startToday.getMonth();
+      const firstDayNextMonth = new Date(curY, curM + 1, 1);
+
+      const buckets = {
+        week: [],
+        month: [],
+      };
+
+      for (const eventItem of events) {
+        const eventDay = getEventDayStart(eventItem);
+        if (!eventDay || eventDay < startToday) continue;
+
+        if (eventDay <= endOfWeek) {
+          buckets.week.push(eventItem);
+        }
+
+        const inThisMonth = eventDay.getFullYear() === curY && eventDay.getMonth() === curM;
+        if (inThisMonth || eventDay >= firstDayNextMonth) {
+          buckets.month.push(eventItem);
+        }
+      }
+
+      const byDate = (a, b) => {
+        const da = normalizeDate(getListingDateRaw(a));
+        const db = normalizeDate(getListingDateRaw(b));
+        if (!da || !db) return 0;
+        return da.getTime() - db.getTime();
+      };
+      buckets.week.sort(byDate);
+      buckets.month.sort(byDate);
+
+      return buckets;
+    }
+
+    function renderEvents() {
+      const filtered = applyFilters(allEvents);
+      const buckets = getDateBuckets(filtered);
+      const twoRowCap = maxEventsForTwoRows();
+
+      if (!buckets.week.length) {
+        showEmpty('thisWeekGrid', 'No events found for this week.');
+        hidePreviewFooter('thisWeekViewAll');
+      } else {
+        const weekShown = expandedThisWeek ? buckets.week : buckets.week.slice(0, twoRowCap);
+        document.getElementById('thisWeekGrid').innerHTML = weekShown.map(createEventCard).join('');
+        updatePreviewFooter('thisWeekViewAll', buckets.week, expandedThisWeek, 'week');
+      }
+
+      if (!buckets.month.length) {
+        showEmpty('thisMonthGrid', 'No upcoming events found.');
+        hidePreviewFooter('thisMonthViewAll');
+      } else {
+        const monthShown = expandedThisMonth ? buckets.month : buckets.month.slice(0, twoRowCap);
+        document.getElementById('thisMonthGrid').innerHTML = monthShown.map(createEventCard).join('');
+        updatePreviewFooter('thisMonthViewAll', buckets.month, expandedThisMonth, 'month');
+      }
+    }
+
+    function resetPreviewExpansion() {
+      expandedThisWeek = false;
+      expandedThisMonth = false;
+    }
+
+    searchInput.addEventListener('input', () => {
+      resetPreviewExpansion();
+      renderEvents();
+    });
+    categoryFilter.addEventListener('change', () => {
+      resetPreviewExpansion();
+      renderEvents();
+    });
+    dateFilter.addEventListener('change', () => {
+      resetPreviewExpansion();
+      renderEvents();
+    });
+
+    let previewResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(previewResizeTimer);
+      previewResizeTimer = setTimeout(() => renderEvents(), 150);
+    });
+
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('.section-view-all-btn[data-preview-section]');
+      if (!(btn instanceof HTMLElement)) return;
+      const section = btn.getAttribute('data-preview-section');
+      const expand = btn.getAttribute('data-preview-expand') === 'true';
+      if (section === 'week') expandedThisWeek = expand;
+      else if (section === 'month') expandedThisMonth = expand;
+      renderEvents();
+    });
+
+    async function loadEvents() {
+      const db = window.firebaseDb;
+      if (!db) {
+        console.error('Firestore not initialized');
+        ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
+          showEmpty(id, 'Unable to load events.');
+        });
+        hideAllPreviewFooters();
+        return;
+      }
+
+      ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
+        document.getElementById(id).innerHTML = '<div class="empty-state">Loading events…</div>';
+      });
+      hideAllPreviewFooters();
+
+      try {
+        const snapshot = await db.collection('events').get();
+        const now = new Date();
+        allEvents = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((ev) => {
+            if (ev.eventStatus && ev.eventStatus !== 'active') return false;
+            const exp = normalizeDate(ev.expiresAt);
+            if (exp && exp < now) return false;
+            return true;
+          });
+      } catch (err) {
+        console.error('Error loading events:', err);
+        allEvents = [];
+        ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
+          showEmpty(id, 'Error loading events. Please refresh.');
+        });
+        hideAllPreviewFooters();
+        return;
+      }
+
+      renderEvents();
+    }
+
+    const digestEmail = document.getElementById('digestEmail');
+    const digestBtn = document.getElementById('digestBtn');
+    const digestWeekly = document.getElementById('digestWeekly');
+    const digestMonthly = document.getElementById('digestMonthly');
+    const digestMsg = document.getElementById('digestMsg');
+
+    function setDigestMessage(text, type) {
+      digestMsg.textContent = text;
+      digestMsg.className = `digest-msg ${type}`;
+    }
+
+    async function subscribeDigest() {
+      const email = digestEmail.value.trim().toLowerCase();
+      const wantsWeekly = digestWeekly.checked;
+      const wantsMonthly = digestMonthly.checked;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setDigestMessage('Please enter a valid email address.', 'error');
+        return;
+      }
+
+      if (!wantsWeekly && !wantsMonthly) {
+        setDigestMessage('Select at least one digest option (weekly or monthly).', 'error');
+        return;
+      }
+
+      const db = window.firebaseDb;
+      if (!db) {
+        setDigestMessage('Service unavailable. Please try again later.', 'error');
+        return;
+      }
+
+      digestBtn.disabled = true;
+      digestBtn.textContent = 'Subscribing...';
+      setDigestMessage('', '');
+
+      try {
+        const frequencies = [];
+        if (wantsWeekly) frequencies.push('weekly');
+        if (wantsMonthly) frequencies.push('monthly');
+
+        for (const frequency of frequencies) {
+          const existing = await db.collection('eventDigestSubscribers')
+            .where('email', '==', email)
+            .where('frequency', '==', frequency)
+            .limit(1)
+            .get();
+
+          if (!existing.empty) {
+            continue;
+          }
+
+          await db.collection('eventDigestSubscribers').add({
+            email,
+            frequency,
+            subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+
+        setDigestMessage('Subscribed! You will receive event digest updates based on your selections.', 'success');
+        digestEmail.value = '';
+      } catch (error) {
+        console.error('Events digest subscription error:', error);
+        setDigestMessage('Something went wrong. Please try again.', 'error');
+      } finally {
+        digestBtn.disabled = false;
+        digestBtn.textContent = 'Subscribe';
+      }
+    }
+
+    digestBtn.addEventListener('click', subscribeDigest);
+    digestEmail.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        subscribeDigest();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const card = target.closest('.event-card-clickable');
+      if (card instanceof HTMLElement) {
+        if (target.closest('a.event-card-details-btn')) {
+          return;
+        }
+        const detailsUrl = card.getAttribute('data-event-details-url');
+        if (detailsUrl) {
+          window.location.href = detailsUrl;
+        }
+        return;
+      }
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>

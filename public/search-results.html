@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      color: #475569;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .search-info {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .search-container {
+      margin-bottom: 30px;
+    }
+    
+    .search-bar {
+      width: 100%;
+      max-width: 600px;
+      padding: 14px 20px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.3s;
+    }
+    
+    .search-bar:focus {
+      outline: none;
+      border-color: #475569;
+    }
+    
+    .listings-section {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .listings-section h2 {
+      color: #475569;
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .listing-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .listing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      border-color: #475569;
+    }
+    
+    .listing-image {
+      width: 100%;
+      height: 200px;
+      background: #f0f0f0;
+      object-fit: cover;
+    }
+    
+    .listing-content {
+      padding: 11px;
+    }
+    
+    .listing-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .listing-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    
+    .listing-category {
+      display: inline-block;
+      background: #f0f0f0;
+      color: #666;
+      padding: 3px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    .listing-location {
+      font-size: 13px;
+      color: #999;
+      margin-top: 8px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .listings-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <h1>Search Results</h1>
+    <p class="search-info" id="searchInfo">Searching...</p>
+    
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        class="search-bar" 
+        id="searchInput"
+        placeholder="Search listings..." 
+        onkeypress="if(event.key === 'Enter') performSearch()"
+      >
+    </div>
+    
+    <!-- Results Section -->
+    <div class="listings-section">
+      <div id="resultsContainer" class="listings-grid">
+        <div class="loading">Loading results...</div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = window.firebaseDb;
+
+    // Get URL parameters
+    function getUrlParameter(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function isExpiredListing(listing) {
+      if (!listing || !listing.expiresAt) return false;
+      const expiresAt = listing.expiresAt.toDate
+        ? listing.expiresAt.toDate()
+        : new Date(listing.expiresAt);
+      if (!(expiresAt instanceof Date) || Number.isNaN(expiresAt.getTime())) {
+        return false;
+      }
+      return expiresAt < new Date();
+    }
+
+    // Perform search
+    async function searchListings(searchQuery) {
+      const container = document.getElementById('resultsContainer');
+      const searchInfo = document.getElementById('searchInfo');
+
+      try {
+        if (!searchQuery || searchQuery.trim() === '') {
+          container.innerHTML = '<div class="no-results"><div class="no-results-icon">🔍</div><p>Enter a search term to find listings</p></div>';
+          searchInfo.textContent = 'Ready to search';
+          return;
+        }
+
+        searchInfo.textContent = `Searching for "${searchQuery}"...`;
+        
+        // Search logic: query listings where status is approved and search in title/description
+        const snapshot = await db.collection('listings')
+          .where('status', '==', 'approved')
+          .orderBy('createdAt', 'desc')
+          .limit(50)
+          .get();
+
+        const results = [];
+        const lowerQuery = searchQuery.toLowerCase();
+
+        snapshot.forEach(doc => {
+          const listing = doc.data();
+          if (isExpiredListing(listing)) return;
+          const title = (listing.title || '').toLowerCase();
+          const description = (listing.description || '').toLowerCase();
+          const category = (listing.category || '').toLowerCase();
+
+          // Check if search term matches title, description, or category
+          if (title.includes(lowerQuery) || description.includes(lowerQuery) || category.includes(lowerQuery)) {
+            results.push({ id: doc.id, ...listing });
+          }
+        });
+
+        if (results.length === 0) {
+          container.innerHTML = '<div class="no-results"><div class="no-results-icon">📭</div><p>No listings found matching your search</p></div>';
+          searchInfo.textContent = `No results for "${searchQuery}"`;
+          return;
+        }
+
+        // Render results
+        let html = '';
+        for (const listing of results) {
+          // Check if user is a business user
+          let isBusiness = false;
+          if (listing.userId) {
+            try {
+              const userDoc = await db.collection('users').doc(listing.userId).get();
+              if (userDoc.exists) {
+                isBusiness = userDoc.data().accountType === 'business';
+              }
+            } catch (err) {
+              console.error('Error fetching user:', err);
+            }
+          }
+          
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0 
+            ? listing.images[0] 
+            : 'https://via.placeholder.com/280x200?text=No+Image';
+          
+          const businessBadge = isBusiness
+            ? '<div style="position: absolute; top: 8px; right: 8px; background: #1565C0; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
+            : '';
+          
+          html += `
+            <div class="listing-card" onclick="goToListing('${listing.id}')" style="position: relative;">
+              <div style="position: relative;">
+                <img src="${image}" alt="${listing.title}" class="listing-image" onerror="this.src='https://via.placeholder.com/280x200?text=No+Image'">
+                ${businessBadge}
+              </div>
+              <div class="listing-content">
+                <div class="listing-title">${listing.title || 'Untitled'}</div>
+                <div class="listing-price">${price}</div>
+                <span class="listing-category">${listing.category || 'General'}</span>
+                <div class="listing-location">📍 ${listing.city || 'Location TBD'}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+        searchInfo.textContent = `Found ${results.length} listing${results.length === 1 ? '' : 's'} for "${searchQuery}"`;
+      } catch (error) {
+        console.error('Error searching listings:', error);
+        container.innerHTML = '<div class="no-results">Error searching listings. Please try again.</div>';
+        searchInfo.textContent = 'Error performing search';
+      }
+    }
+
+    function goToListing(listingId) {
+      window.location.href = `single-listing.html?id=${listingId}`;
+    }
+
+    function performSearch() {
+      const searchValue = document.getElementById('searchInput').value;
+      searchListings(searchValue);
+    }
+
+    // Load search results on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchQuery = getUrlParameter('search');
+      if (searchQuery) {
+        document.getElementById('searchInput').value = searchQuery;
+        searchListings(searchQuery);
+      } else {
+        searchListings('');
+      }
+    });
+  </script>
+</body>
+</html>

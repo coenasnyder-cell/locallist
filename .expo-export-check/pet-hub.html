@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Hub - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #475569;
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .pets-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .listings-section {
+      margin-top: 8px;
+    }
+
+    .services-section {
+      margin-bottom: 22px;
+    }
+
+    .pet-services-promo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .pet-services-promo-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+    }
+
+    .pet-services-promo-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .pet-services-promo-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #334155;
+      line-height: 1.25;
+    }
+
+    .pet-services-promo-text {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+      max-width: 560px;
+    }
+
+    .pet-services-promo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .services-header {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .services-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .services-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .services-header h2 {
+      color: #2f3b52;
+      font-size: 24px;
+      margin-bottom: 0;
+    }
+
+    .services-header p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .add-service-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: #0c6ecf;
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid #0c6ecf;
+      transition: background 0.2s ease;
+    }
+
+    .add-service-btn:hover {
+      background: #0959a7;
+    }
+
+    .browse-services-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: #ffffff;
+      color: #0c6ecf;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid #9ec3eb;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .browse-services-btn:hover {
+      background: #e8f3ff;
+      color: #0959a7;
+    }
+
+    .services-placeholder {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .service-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .service-card-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: #f0f0f0;
+      display: block;
+    }
+
+    .service-card-content {
+      padding: 12px;
+    }
+
+    .service-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2f3b52;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .service-card-meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .service-card-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1565c0;
+      margin-top: 6px;
+    }
+
+    .services-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .services-chip {
+      background: #eef3ff;
+      color: #374151;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .services-note {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .listings-header {
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .listings-header h2 {
+      color: #2f3b52;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .listings-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .pet-section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: none;
+    }
+
+    .pet-section h2 {
+      color: #475569;
+      font-size: 22px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pet-count {
+      color: #999;
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: auto;
+    }
+
+    .pet-section p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .pets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .pet-card {
+     
+      border-radius: 0%8px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .pet-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .pet-image-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #f0f0f0;
+      overflow: hidden;
+    }
+
+    .pet-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pet-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      font-size: 48px;
+    }
+
+    .pet-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge-reunited {
+      background: #4CAF50;
+    }
+
+    .badge-adopted {
+      background: #2196F3;
+    }
+
+    .badge-lost {
+      background: #FF9800;
+    }
+
+    .badge-found {
+      background: #9C27B0;
+    }
+
+    .pet-content {
+      padding: 12px;
+    }
+
+    .pet-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .pet-details {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .pet-location {
+      font-size: 12px;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    .pet-fee {
+      font-size: 13px;
+      color: #2196F3;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .empty-state p {
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .filter-container {
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover {
+      border-color: #475569;
+    }
+
+    .filter-btn.active {
+      background: #475569;
+      border-color: #475569;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .pets-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+
+    .cta-section {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .cta-button {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      min-height: 240px;
+      padding: 24px;
+      background: #f0f0f0;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: visible;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: none;
+    }
+
+    .cta-button-lost {
+      background: transparent;
+      border-color: transparent;
+      background-image: url('lost-pet-bg.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #fff;
+    }
+
+    .cta-button-adoption {
+      background: transparent;
+      border-color: transparent;
+      background-image: url('adoption-bg.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #fff;
+    }
+
+    .cta-button-found {
+      background: transparent;
+      border-color: transparent;
+      background-image: url('found-pet-bg.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #fff;
+    }
+
+    .cta-button-emoji {
+      font-size: 34px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-button-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: #333;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-button-lost .cta-button-text {
+      color: #fff;
+    }
+
+    .cta-button-adoption .cta-button-text {
+      color: #fff;
+    }
+
+    .cta-button-found .cta-button-text {
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .pet-services-promo {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-section {
+        grid-template-columns: 1fr;
+      }
+
+      .services-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cta-button {
+        min-height: 220px;
+      }
+
+      .services-header-top {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <h1>🐾 The Pet Corner</h1>
+    <p class="subtitle">Your one-stop resource for lost pets, adoptions, and services for our furry friends</p>
+
+    <div class="cta-section">
+      <a href="create-pet-post.html?type=lost" class="cta-button cta-button-lost" aria-label="Report Lost Pet"></a>
+      <a href="create-found-pet.html" class="cta-button cta-button-found" aria-label="Report Found Pet"></a>
+      <a href="create-adoption-listing.html" class="cta-button cta-button-adoption" aria-label="Pets for Adoption"></a>
+    </div>
+
+    <section class="pet-services-promo" aria-label="Benefits of listing a pet service">
+      <img class="pet-services-promo-image" src="pethub.png" alt="Promote your pet services on Local List">
+      <div class="pet-services-promo-content">
+        <h2 class="pet-services-promo-title">Connect with Local Pet Owners</h2>
+        <p class="pet-services-promo-text">Offer grooming, walking, boarding, training, pet sitting, or veterinary support? Add your pet service listing so local pet owners can find you faster. Share what you offer, your service area, and how people can contact you, then start connecting with nearby customers who need trusted pet care.</p>
+        <div class="pet-services-promo-actions">
+          <a href="create-service-listing.html" class="add-service-btn">Add A Pet Service Listing</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="services-section" aria-label="Pet Owner Services">
+      <div class="services-header">
+        <div class="services-header-top">
+          <h2>Pet Services</h2>
+          <div class="services-header-actions">
+            <a href="serviceslist.html?category=pet-care" class="browse-services-btn">View All Pet Services</a>
+          </div>
+        </div>
+        <p>
+          This area will list pet-related services such as grooming, veterinary care, boarding, training, and pet sitting.
+          Once categories are configured, matching listings will automatically appear here.
+        </p>
+      </div>
+      <div class="services-placeholder" id="petServicesContainer">
+        <div class="services-chips" aria-label="Service categories preview">
+          <span class="services-chip">Grooming</span>
+          <span class="services-chip">Veterinary</span>
+          <span class="services-chip">Boarding</span>
+          <span class="services-chip">Training</span>
+          <span class="services-chip">Pet Sitting</span>
+        </div>
+        <p class="services-note">No service listings yet. Category-based service results will show in this section.</p>
+      </div>
+    </section>
+
+    <section class="listings-section" aria-label="Community Pet Listings">
+      <div class="pets-container" id="petsContainer">
+        <div class="loading">Loading pets...</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Script includes -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="header.js"></script>
+  
+  <script type="module">
+    import { collection, getDocs, getFirestore, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+    import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+
+    const firebaseConfig = window.firebaseApp?.options || {
+      apiKey: "AIzaSyDGaAN-Fg1mK3KZANo88t__OEoJA8SJAD0",
+      authDomain: "local-list-wski21.firebaseapp.com",
+      projectId: "local-list-wski21",
+      storageBucket: "local-list-wski21.firebasestorage.app",
+      messagingSenderId: "280253430618",
+      appId: "1:280253430618:web:f1110d0f205e619fea9163"
+    };
+    const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const db = getFirestore(firebaseApp);
+    let latestPetServices = [];
+
+    let allPets = {
+      lost: [],
+      found: [],
+      adoption: []
+    };
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function extractTimestampMs(value) {
+      if (!value) return 0;
+      if (typeof value.toDate === 'function') {
+        return value.toDate().getTime();
+      }
+      const date = new Date(value);
+      const time = date.getTime();
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function isPetServiceListing(listing) {
+      const text = [
+        listing.title,
+        listing.subtitle,
+        listing.description,
+        listing.tags,
+        listing.serviceType
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      const petKeywords = [
+        'pet',
+        'dog',
+        'cat',
+        'groom',
+        'veter',
+        'boarding',
+        'kennel',
+        'walker',
+        'training',
+        'sitting'
+      ];
+
+      return petKeywords.some(keyword => text.includes(keyword));
+    }
+
+    function isPetServiceProfile(service) {
+      const categoryId = String(service.categoryId || '').toLowerCase();
+      const category = String(service.category || '').toLowerCase();
+      const text = [
+        service.serviceName,
+        service.serviceDescription,
+        service.providerName,
+        service.category,
+        service.categoryId
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      if (categoryId === 'pet-care') return true;
+      if (category.includes('pet')) return true;
+
+      const petKeywords = [
+        'pet',
+        'dog',
+        'cat',
+        'groom',
+        'veter',
+        'boarding',
+        'kennel',
+        'walker',
+        'training',
+        'sitting'
+      ];
+
+      return petKeywords.some(keyword => text.includes(keyword));
+    }
+
+    function isServiceApproved(data) {
+      return data.isApproved === true
+        || String(data.approvalStatus || '').toLowerCase() === 'approved'
+        || String(data.status || '').toLowerCase() === 'approved';
+    }
+
+    function extractServiceImage(data) {
+      if (data.serviceImage) return data.serviceImage;
+      if (data.imageUrl) return data.imageUrl;
+      if (data.serviceImageUrl) return data.serviceImageUrl;
+      if (data.businessLogo) return data.businessLogo;
+      if (Array.isArray(data.images) && data.images.length > 0) return data.images[0];
+      return null;
+    }
+
+    async function loadPetServices() {
+      const container = document.getElementById('petServicesContainer');
+      if (!container) return;
+
+      container.innerHTML = '<div class="loading">Loading pet services...</div>';
+
+      try {
+        const [servicesSnapshot, listingsSnapshot] = await Promise.all([
+          getDocs(
+            query(
+              collection(db, 'services'),
+              where('isActive', '==', true)
+            )
+          ),
+          getDocs(
+            query(
+              collection(db, 'listings'),
+              where('status', '==', 'approved'),
+              where('category', '==', 'Services')
+            )
+          )
+        ]);
+
+        const recentServices = servicesSnapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              type: 'service',
+              title: data.serviceName || data.providerName || 'Untitled Service',
+              image: extractServiceImage(data),
+              location: data.serviceArea || data.zipCode || 'Location TBD',
+              priceText: data.priceAmount || 'Contact for price',
+              href: `service-details.html?id=${doc.id}`,
+              createdAtMs: extractTimestampMs(data.createdAt),
+              raw: data
+            };
+          })
+          .filter(item => isServiceApproved(item.raw))
+          .filter(item => isPetServiceProfile(item.raw));
+
+        const legacyListings = listingsSnapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              type: 'listing',
+              title: data.title || 'Untitled Service',
+              image: Array.isArray(data.images) && data.images.length > 0 ? data.images[0] : null,
+              location: data.city || data.pickupLocation || data.zipCode || 'Location TBD',
+              priceText: Number.isFinite(data.price) ? `$${data.price}` : 'Contact for price',
+              href: `single-listing.html?id=${doc.id}`,
+              createdAtMs: extractTimestampMs(data.createdAt),
+              raw: data
+            };
+          })
+          .filter(item => isPetServiceListing(item.raw));
+
+        const petServices = [...recentServices, ...legacyListings]
+          .sort((a, b) => b.createdAtMs - a.createdAtMs)
+          .slice(0, 6);
+
+        renderPetServices(petServices);
+      } catch (error) {
+        console.error('Error loading pet services:', error);
+        container.innerHTML = '<div class="empty-state"><p>Unable to load pet services right now.</p></div>';
+      }
+    }
+
+    function renderPetServices(services) {
+      const container = document.getElementById('petServicesContainer');
+      if (!container) return;
+
+      latestPetServices = Array.isArray(services) ? services : [];
+
+      if (!services.length) {
+        container.innerHTML = '<div class="empty-state"><p>No pet-related services yet. They will appear here once categories and listings are added.</p></div>';
+        return;
+      }
+
+      const columns = window.innerWidth <= 768 ? 2 : 3;
+      const maxCards = columns * 2;
+      const visibleServices = services.slice(0, maxCards);
+      const placeholderSvg = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3E🐾 Pet Service%3C/text%3E%3C/svg%3E';
+
+      const cards = visibleServices.map(service => {
+        const title = escapeHtml(service.title || 'Untitled Service');
+        const image = service.image || placeholderSvg;
+        const location = escapeHtml(service.location || 'Location TBD');
+        const price = escapeHtml(service.priceText || 'Contact for price');
+        const label = service.type === 'service' ? 'Pet Services' : 'Marketplace Services';
+
+        return `
+          <a href="${service.href}" class="service-card">
+            <img src="${image}" alt="${title}" class="service-card-image" onerror="this.src='${placeholderSvg}'">
+            <div class="service-card-content">
+              <div class="service-card-title">${title}</div>
+              <div class="service-card-meta">Recently Posted • ${label}</div>
+              <div class="service-card-meta">📍 ${location}</div>
+              <div class="service-card-price">${price}</div>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      container.innerHTML = `<div class="services-grid">${cards}</div>`;
+    }
+
+    async function loadPets() {
+      try {
+        const petsRef = collection(db, 'pets');
+
+        // Fetch Lost Pets
+        const lostQuery = query(
+          petsRef,
+          where('postType', '==', 'lost'),
+          orderBy('createdAt', 'desc')
+        );
+        const lostSnapshot = await getDocs(lostQuery);
+        allPets.lost = lostSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Fetch Found Pets
+        const foundQuery = query(
+          petsRef,
+          where('postType', '==', 'found'),
+          orderBy('createdAt', 'desc')
+        );
+        const foundSnapshot = await getDocs(foundQuery);
+        allPets.found = foundSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Fetch Adoption Pets
+        const adoptionQuery = query(
+          petsRef,
+          where('postType', '==', 'adoption'),
+          orderBy('createdAt', 'desc')
+        );
+        const adoptionSnapshot = await getDocs(adoptionQuery);
+        allPets.adoption = adoptionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        renderPets();
+      } catch (error) {
+        console.error('Error loading pets:', error);
+        document.getElementById('petsContainer').innerHTML = '<div class="empty-state"><p>Error loading pets. Please try again later.</p></div>';
+      }
+    }
+
+    function renderPets() {
+      const container = document.getElementById('petsContainer');
+      let html = '';
+
+      // Lost Pets Section
+      html += renderSection('🔍', 'Lost Pets', allPets.lost, 'lost');
+
+      // Found Pets Section
+      html += renderSection('✨', 'Found Pets', allPets.found, 'found');
+
+      // Adoption Pets Section
+      html += renderSection('💕', 'Adopt a Pet', allPets.adoption, 'adoption');
+
+      container.innerHTML = html;
+    }
+
+    function renderSection(emoji, title, pets, type) {
+      let html = `
+        <div class="pet-section">
+          <h2>
+            <span>${emoji}</span>
+            ${title}
+            <span class="pet-count">(${pets.length})</span>
+          </h2>
+      `;
+
+      if (pets.length === 0) {
+        html += '<div class="empty-state"><p>No ' + type + ' pets at the moment</p></div>';
+      } else {
+        html += '<div class="pets-grid">';
+        pets.forEach(pet => {
+          html += renderPetCard(pet);
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    function renderPetCard(pet) {
+      const statusBadgeClass = getBadgeClass(pet.petStatus);
+      const statusLabel = getStatusLabel(pet.petStatus);
+      const petTypeLabel = `${pet.petType} • ${pet.petBreed}`;
+      const ageGender = `Age: ${pet.petAge} | ${pet.petGender}`;
+      const imageUrl = (pet.petImages && pet.petImages.length > 0)
+        ? pet.petImages[0]
+        : pet.petPhoto;
+
+      let html = `
+        <a href="pet-details.html?id=${pet.id}" class="pet-card">
+          <div class="pet-image-container">
+      `;
+
+      if (imageUrl) {
+        html += `<img src="${imageUrl}" alt="${pet.petName}" class="pet-image" onerror="this.remove()">`;
+      }
+
+      html += `
+            <div class="pet-placeholder" ${imageUrl ? 'style="display:none;"' : ''}>🐾</div>
+            <div class="pet-badge ${statusBadgeClass}">${statusLabel}</div>
+          </div>
+          <div class="pet-content">
+            <div class="pet-name">${pet.petName}</div>
+            <div class="pet-details">${petTypeLabel}</div>
+            <div class="pet-details">${ageGender}</div>
+            <div class="pet-location">📍 ${pet.petSeenLocation}</div>
+      `;
+
+      if (pet.postType === 'adoption' && pet.petAdoptionFee) {
+        html += `<div class="pet-fee">Fee: $${pet.petAdoptionFee}</div>`;
+      }
+
+      html += `
+          </div>
+        </a>
+      `;
+
+      return html;
+    }
+
+    function getBadgeClass(status) {
+      switch(status) {
+        case 'reunited': return 'badge-reunited';
+        case 'adopted': return 'badge-adopted';
+        case 'lost': return 'badge-lost';
+        case 'found': return 'badge-found';
+        default: return 'badge-found';
+      }
+    }
+
+    function getStatusLabel(status) {
+      switch(status) {
+        case 'reunited': return '✓ Reunited';
+        case 'adopted': return '✓ Adopted';
+        case 'lost': return '🔍 Still Lost';
+        case 'found': return '✓ Found';
+        default: return status;
+      }
+    }
+
+    // Load pets when page loads
+    loadPets();
+    loadPetServices();
+
+    window.addEventListener('resize', () => {
+      if (latestPetServices.length) {
+        renderPetServices(latestPetServices);
+      }
+    });
+  </script>
+</body>
+</html>

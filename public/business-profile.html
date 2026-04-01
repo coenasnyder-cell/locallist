@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Profile - Local List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 60px;
+    }
+
+    .profile-header {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 24px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .business-logo-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .business-logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .business-name {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .business-description {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .business-column {
+      grid-column: 1;
+    }
+
+    .contact-column {
+      grid-column: 2;
+    }
+
+    .info-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: #475569;
+      margin: 16px 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .info-item {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #999;
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .info-value {
+      font-size: 16px;
+      color: #333;
+      word-break: break-word;
+    }
+
+    .info-value a {
+      color: #475569;
+      text-decoration: none;
+    }
+
+    .info-value a:hover {
+      text-decoration: underline;
+    }
+
+    .info-images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .info-images-grid img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #e5e7eb;
+      transition: transform 0.2s ease;
+    }
+
+    .info-images-grid img:hover {
+      transform: scale(1.03);
+    }
+
+    .location-map-card {
+      margin-top: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .location-map-frame {
+      width: 100%;
+      height: 220px;
+      border: 0;
+      display: block;
+      background: #e2e8f0;
+    }
+
+    .location-map-footer {
+      padding: 12px 14px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+    }
+
+    .location-map-link {
+      color: #475569;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .location-map-link:hover {
+      text-decoration: underline;
+    }
+
+    .location-map-empty {
+      padding: 22px 18px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: center;
+      background: #fff;
+    }
+    .map-row-section {
+      margin-bottom: 24px;
+    }
+
+    .map-row-section .location-map-card {
+      margin-top: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .gallery-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    .rating-summary {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .rating-stars {
+      letter-spacing: 1px;
+      color: #f59e0b;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .reviews-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .reviews-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .reviews-subtitle {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .review-login-cta {
+      display: inline-flex;
+      margin-top: 10px;
+    }
+
+    .review-form {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+    }
+
+    .review-form-row {
+      margin-bottom: 12px;
+    }
+
+    .review-form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .star-selector {
+      display: flex;
+      gap: 6px;
+    }
+
+    .star-btn {
+      border: none;
+      background: transparent;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      color: #cbd5e1;
+      padding: 0;
+    }
+
+    .star-btn.active {
+      color: #f59e0b;
+    }
+
+    .review-textarea {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1f2937;
+      background: #fff;
+    }
+
+    .review-textarea:focus {
+      outline: none;
+      border-color: #475569;
+      box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.15);
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .review-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+
+    .review-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .review-author {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .review-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .review-rating {
+      color: #f59e0b;
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .review-text {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3a4654;
+    }
+
+    .btn-secondary {
+      background: #f0f7fa;
+      color: #475569;
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e0eff5;
+    }
+
+    .contact-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .contact-modal.active {
+      display: flex;
+    }
+
+    .contact-modal-card {
+      width: min(100%, 420px);
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    }
+
+    .contact-modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+
+    .contact-modal-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #4b5563;
+      margin-bottom: 16px;
+    }
+
+    .contact-method-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      background: #f8fafc;
+      margin-bottom: 16px;
+    }
+
+    .contact-method-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .contact-method-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      word-break: break-word;
+    }
+
+    .contact-modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid #d1d5db;
+      color: #475569;
+      background: #f8fafc;
+      text-decoration: none;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+
+    .social-link:hover {
+      color: #1f2937;
+      border-color: #94a3b8;
+      background: #eef2f7;
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      background: white;
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
+    }
+
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .image-modal.active {
+      display: flex;
+    }
+
+    .modal-image {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .business-column,
+      .contact-column {
+        grid-column: auto;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .business-name {
+        font-size: 24px;
+      }
+
+      .hero-image {
+        height: 200px;
+      }
+
+      .hero-logo {
+        width: 80px;
+        height: 80px;
+        bottom: 16px;
+        left: 16px;
+      }
+
+      .profile-header {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <div id="profileContent">
+      <div class="loading">Loading business profile...</div>
+    </div>
+  </div>
+
+  <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <button class="modal-close" onclick="closeImageModal()">✕</button>
+    <img id="modalImage" class="modal-image" alt="Enlarged image">
+  </div>
+
+  <div id="contactModal" class="contact-modal" onclick="closeContactModal(event)">
+    <div class="contact-modal-card" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+      <div id="contactModalTitle" class="contact-modal-title">Contact Seller</div>
+      <div id="contactModalText" class="contact-modal-text"></div>
+      <div class="contact-method-card">
+        <div class="contact-method-label" id="contactMethodLabel"></div>
+        <div class="contact-method-value" id="contactMethodValue"></div>
+      </div>
+      <div class="contact-modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Close</button>
+        <a id="contactMethodAction" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Contact Now</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = window.firebaseDb;
+    const auth = window.firebaseAuth || firebase.auth();
+    let currentBusinessProfile = null;
+    let currentUser = null;
+    let selectedReviewRating = 0;
+
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+      if (currentBusinessProfile) {
+        loadReviewsForBusiness(currentBusinessProfile).catch((error) => {
+          console.error('Error refreshing reviews after auth change:', error);
+        });
+      }
+    });
+
+    function getBusinessIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('id') || urlParams.get('businessId');
+    }
+
+    function getTodayDateKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    async function trackDailyViewEvent(entityType, entityId, businessId) {
+      if (!entityType || !entityId || !businessId) return;
+
+      const dateKey = getTodayDateKey();
+      const metricDocId = `${entityType}_${entityId}_${dateKey}`;
+      try {
+        await db.collection('analyticsDailyViews').doc(metricDocId).set({
+          entityType,
+          entityId,
+          businessId,
+          dateKey,
+          viewCount: firebase.firestore.FieldValue.increment(1),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      } catch (error) {
+        const code = String(error?.code || '');
+        if (!code.includes('permission-denied') && !code.includes('unauthenticated')) {
+          console.warn('Could not track daily business profile view analytics:', error);
+        }
+      }
+    }
+
+    async function incrementBusinessProfileViewCount(profile) {
+      if (!profile || !profile.id) return;
+
+      const sessionKey = `business_profile_viewed_${profile.id}`;
+      if (sessionStorage.getItem(sessionKey) === '1') return;
+
+      const viewerUid = auth?.currentUser?.uid || null;
+      if (viewerUid && profile.userId && viewerUid === profile.userId) {
+        sessionStorage.setItem(sessionKey, '1');
+        return;
+      }
+
+      try {
+        if (profile.__sourceCollection === 'users') {
+          return;
+        }
+
+        const targetCollection = profile.__sourceCollection === 'shopLocal' ? 'shopLocal' : 'businessLocal';
+        await db.collection(targetCollection).doc(profile.id).update({
+          viewCount: firebase.firestore.FieldValue.increment(1)
+        });
+        const businessId = profile.userId || profile.id;
+        await trackDailyViewEvent('business_profile', profile.id, businessId);
+        sessionStorage.setItem(sessionKey, '1');
+      } catch (error) {
+        console.warn('Could not increment business profile view count:', error);
+      }
+    }
+
+    async function loadBusinessProfile() {
+      try {
+        const businessId = getBusinessIdFromUrl();
+        
+        if (!businessId) {
+          showEmptyState('No business ID provided');
+          return;
+        }
+
+        // Try to find the business by checking business profile collections
+        let businessProfile = null;
+
+        // First try to get from businessLocal collection
+        try {
+          const businessDoc = await db.collection('businessLocal').doc(businessId).get();
+          if (businessDoc.exists) {
+            businessProfile = { id: businessDoc.id, __sourceCollection: 'businessLocal', ...businessDoc.data() };
+          }
+        } catch (e) {
+          console.log('Not in businessLocal collection');
+        }
+
+        // Fallback to legacy shopLocal collection
+        if (!businessProfile) {
+          try {
+            const shopDoc = await db.collection('shopLocal').doc(businessId).get();
+            if (shopDoc.exists) {
+              businessProfile = { id: shopDoc.id, __sourceCollection: 'shopLocal', ...shopDoc.data() };
+            }
+          } catch (e) {
+            console.log('Not in shopLocal collection');
+          }
+        }
+
+        // If not found, try users collection with business account
+        if (!businessProfile) {
+          try {
+            const userDoc = await db.collection('users').doc(businessId).get();
+            if (userDoc.exists && userDoc.data().accountType === 'business') {
+              businessProfile = { id: userDoc.id, __sourceCollection: 'users', ...userDoc.data() };
+            }
+          } catch (e) {
+            console.log('Not in users collection');
+          }
+        }
+
+        if (!businessProfile) {
+          showEmptyState('Business profile not found');
+          return;
+        }
+
+        currentBusinessProfile = businessProfile;
+  await incrementBusinessProfileViewCount(businessProfile);
+        displayBusinessProfile(businessProfile);
+        try {
+          await loadReviewsForBusiness(businessProfile);
+        } catch (reviewError) {
+          console.warn('Reviews unavailable for this profile:', reviewError);
+          renderReviewRatingSummary({ ratingAverage: 0, ratingCount: 0 });
+          const formContainer = document.getElementById('reviewFormContainer');
+          const reviewsList = document.getElementById('reviewsList');
+          if (formContainer) {
+            formContainer.innerHTML = '<div class="reviews-subtitle">Reviews are currently unavailable.</div>';
+          }
+          if (reviewsList) {
+            reviewsList.innerHTML = '';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading business profile:', error);
+        showEmptyState('Error loading business profile. Please try again.');
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatReviewDate(timestamp) {
+      const dateObj = timestamp && typeof timestamp.toDate === 'function' ? timestamp.toDate() : null;
+      if (!dateObj) return 'Just now';
+      return dateObj.toLocaleDateString();
+    }
+
+    function renderStarsFromRating(rating) {
+      const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+      const full = Math.round(safeRating);
+      return `${'★'.repeat(full)}${'☆'.repeat(5 - full)}`;
+    }
+
+    async function updateBusinessRatingSummary(businessId) {
+      const approvedSnap = await db.collection('businessReviews')
+        .where('businessId', '==', businessId)
+        .where('status', '==', 'approved')
+        .get();
+
+      let total = 0;
+      const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+      approvedSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const rating = Math.max(1, Math.min(5, Number(data.rating) || 0));
+        if (!rating) return;
+        total += rating;
+        breakdown[rating] += 1;
+      });
+
+      const ratingCount = approvedSnap.size;
+      const ratingAverage = ratingCount > 0 ? Number((total / ratingCount).toFixed(2)) : 0;
+
+      try {
+        await db.collection('businessLocal').doc(businessId).set({
+          ratingAverage,
+          ratingCount,
+          ratingBreakdown: breakdown,
+          updatedAt: new Date(),
+        }, { merge: true });
+      } catch (error) {
+        // Allow review submission to proceed even if aggregate write is restricted by rules.
+        console.warn('Could not persist business rating summary:', error);
+      }
+
+      if (currentBusinessProfile && currentBusinessProfile.id === businessId) {
+        currentBusinessProfile.ratingAverage = ratingAverage;
+        currentBusinessProfile.ratingCount = ratingCount;
+        currentBusinessProfile.ratingBreakdown = breakdown;
+      }
+
+      return { ratingAverage, ratingCount };
+    }
+
+    function getCurrentUserDisplayName() {
+      if (!currentUser) return 'Anonymous';
+      return currentUser.displayName || currentUser.email || 'Anonymous';
+    }
+
+    function renderReviewRatingSummary(summary) {
+      const summaryEl = document.getElementById('reviewSummaryInline');
+      if (!summaryEl) return;
+
+      const average = Number(summary?.ratingAverage || 0);
+      const count = Number(summary?.ratingCount || 0);
+      const stars = renderStarsFromRating(average);
+
+      if (count === 0) {
+        summaryEl.innerHTML = '<span>No reviews yet</span>';
+        return;
+      }
+
+      summaryEl.innerHTML = `
+        <span class="rating-stars">${stars}</span>
+        <span>${average.toFixed(1)} (${count} review${count === 1 ? '' : 's'})</span>
+      `;
+    }
+
+    function updateStarSelectorUI(rating) {
+      document.querySelectorAll('.star-btn').forEach((btn) => {
+        const starValue = Number(btn.getAttribute('data-star') || 0);
+        btn.classList.toggle('active', starValue <= rating);
+      });
+    }
+
+    function buildReviewFormMarkup(options) {
+      const { canReview, isOwner, existingReview } = options;
+
+      if (!currentUser) {
+        return `
+          <div class="reviews-subtitle">
+            Sign in to leave a review.
+            <div>
+              <button type="button" class="btn btn-secondary review-login-cta" onclick="window.location.href='login.html?next=' + encodeURIComponent(window.location.href)">Sign In to Review</button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (isOwner) {
+        return '<div class="reviews-subtitle">Business owners cannot review their own profile.</div>';
+      }
+
+      if (!canReview) {
+        return '<div class="reviews-subtitle">Reviews are not available for this profile right now.</div>';
+      }
+
+      if (existingReview) {
+        return '';
+      }
+
+      const presetRating = 0;
+      const presetText = '';
+      const submitLabel = 'Submit Review';
+      const deleteButton = '';
+
+      return `
+        <form id="reviewForm" class="review-form">
+          <div class="review-form-row">
+            <label class="review-label">Your Rating</label>
+            <div class="star-selector" id="starSelector">
+              ${[1, 2, 3, 4, 5].map((star) => `<button type="button" class="star-btn ${star <= presetRating ? 'active' : ''}" data-star="${star}" aria-label="Rate ${star} star${star === 1 ? '' : 's'}">★</button>`).join('')}
+            </div>
+          </div>
+          <div class="review-form-row">
+            <label class="review-label" for="reviewText">Your Review</label>
+            <textarea id="reviewText" class="review-textarea" placeholder="Share your experience with this business...">${presetText}</textarea>
+          </div>
+          <div class="review-actions">
+            <button type="submit" class="btn btn-primary" id="saveReviewBtn">${submitLabel}</button>
+            ${deleteButton}
+          </div>
+        </form>
+      `;
+    }
+
+    function renderReviewsList(reviews) {
+      const listEl = document.getElementById('reviewsList');
+      if (!listEl) return;
+
+      if (!reviews.length) {
+        listEl.innerHTML = '<div class="reviews-subtitle">No reviews yet. Be the first to leave feedback.</div>';
+        return;
+      }
+
+      listEl.innerHTML = reviews.map((review) => `
+        <div class="review-item">
+          <div class="review-item-top">
+            <div class="review-author">${escapeHtml(review.userName || 'Local User')}</div>
+            <div class="review-date">${formatReviewDate(review.updatedAt || review.createdAt)}</div>
+          </div>
+          <div class="review-rating">${renderStarsFromRating(review.rating)}</div>
+          <div class="review-text">${escapeHtml(review.reviewText || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    async function loadReviewsForBusiness(profile) {
+      if (!profile || !profile.id) return;
+
+      const businessId = profile.id;
+      let reviewsSnap;
+      try {
+        reviewsSnap = await db.collection('businessReviews')
+          .where('businessId', '==', businessId)
+          .where('status', '==', 'approved')
+          .orderBy('updatedAt', 'desc')
+          .get();
+      } catch (error) {
+        // Missing composite index is expected on some projects; fallback query keeps page usable.
+        reviewsSnap = await db.collection('businessReviews')
+          .where('businessId', '==', businessId)
+          .where('status', '==', 'approved')
+          .get();
+      }
+
+      const reviews = reviewsSnap.docs
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        .sort((a, b) => {
+          const aTime = a?.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
+          const bTime = b?.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
+          return bTime - aTime;
+        });
+
+      const ratingAverage = reviews.length
+        ? Number((reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0) / reviews.length).toFixed(2))
+        : 0;
+      const ratingCount = reviews.length;
+
+      renderReviewRatingSummary({ ratingAverage, ratingCount });
+      renderReviewsList(reviews);
+
+      const formContainer = document.getElementById('reviewFormContainer');
+      if (!formContainer) return;
+
+      const isOwner = !!(currentUser && profile.userId && currentUser.uid === profile.userId);
+      let existingReview = null;
+
+      if (currentUser) {
+        const existingId = `${businessId}_${currentUser.uid}`;
+        const existingSnap = await db.collection('businessReviews').doc(existingId).get();
+        if (existingSnap.exists) {
+          existingReview = { id: existingSnap.id, ...existingSnap.data() };
+        }
+      }
+
+      formContainer.innerHTML = buildReviewFormMarkup({
+        canReview: true,
+        isOwner,
+        existingReview,
+      });
+
+      selectedReviewRating = 0;
+
+      const reviewForm = document.getElementById('reviewForm');
+      if (!reviewForm) return;
+
+      const starSelector = document.getElementById('starSelector');
+      if (starSelector) {
+        starSelector.querySelectorAll('.star-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            selectedReviewRating = Number(btn.getAttribute('data-star') || 0);
+            updateStarSelectorUI(selectedReviewRating);
+          });
+        });
+      }
+
+      reviewForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentUser) {
+          alert('Please sign in to leave a review.');
+          return;
+        }
+
+        if (isOwner) {
+          alert('Business owners cannot review their own profile.');
+          return;
+        }
+
+        if (!selectedReviewRating || selectedReviewRating < 1 || selectedReviewRating > 5) {
+          alert('Please select a rating from 1 to 5 stars.');
+          return;
+        }
+
+        const reviewText = String(document.getElementById('reviewText')?.value || '').trim();
+        if (!reviewText) {
+          alert('Please add a review message.');
+          return;
+        }
+
+        const reviewId = `${businessId}_${currentUser.uid}`;
+        const now = new Date();
+        const payload = {
+          businessId,
+          userId: currentUser.uid,
+          userName: getCurrentUserDisplayName(),
+          rating: selectedReviewRating,
+          reviewText,
+          status: 'approved',
+          updatedAt: now,
+        };
+
+        const existingSnap = await db.collection('businessReviews').doc(reviewId).get();
+        if (!existingSnap.exists) {
+          payload.createdAt = now;
+        }
+
+        await db.collection('businessReviews').doc(reviewId).set(payload, { merge: true });
+        await updateBusinessRatingSummary(businessId);
+        await loadReviewsForBusiness(profile);
+      });
+
+      const deleteBtn = document.getElementById('deleteReviewBtn');
+      if (deleteBtn && currentUser && existingReview) {
+        deleteBtn.addEventListener('click', async () => {
+          if (!confirm('Delete your review?')) return;
+          const reviewId = `${businessId}_${currentUser.uid}`;
+          await db.collection('businessReviews').doc(reviewId).delete();
+          await updateBusinessRatingSummary(businessId);
+          await loadReviewsForBusiness(profile);
+        });
+      }
+    }
+
+    function getBusinessLocationParts(profile) {
+      const address = String(profile.businessAddress || '').trim();
+      const city = String(profile.businessCity || '').trim();
+      const state = String(profile.businessState || '').trim();
+      const zipcode = String(profile.businessZipcode || '').trim();
+
+      const displayAddress = address || [city, state, zipcode].filter(Boolean).join(', ');
+      const mapQuery = [address, city, state, zipcode].filter(Boolean).join(', ');
+
+      return {
+        displayAddress,
+        mapQuery,
+      };
+    }
+
+    function createLocationMapMarkup(profile) {
+      const { displayAddress, mapQuery } = getBusinessLocationParts(profile);
+      if (!mapQuery) {
+        return `
+          <div class="location-map-card">
+            <div class="location-map-empty">Location details have not been added for this business yet.</div>
+          </div>
+        `;
+      }
+
+      const encodedQuery = encodeURIComponent(mapQuery);
+      const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+
+      return `
+        <div class="location-map-card">
+          <iframe
+            class="location-map-frame"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=${encodedQuery}&output=embed"
+            title="Map for ${profile.businessName || 'business location'}"></iframe>
+          <div class="location-map-footer">
+            <div class="info-label">Location</div>
+            <div class="info-value" style="margin-bottom: 8px;">${displayAddress}</div>
+            <a class="location-map-link" href="${directionsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function getPreferredContactDetails(profile) {
+      const preferredMethod = String(profile.preferredContactMethod || '').trim().toLowerCase();
+      const email = String(profile.businessEmail || profile.userEmail || '').trim();
+      const phone = String(profile.businessPhone || '').trim();
+      const allowLocalListMessaging = profile.allowLocalListMessaging === true || preferredMethod === 'local_list';
+
+      if (preferredMethod === 'local_list' && allowLocalListMessaging) {
+        return {
+          methodLabel: 'Local List Messaging',
+          methodValue: 'Contact in Local List messages',
+          actionLabel: 'Open Messages',
+          actionHref: 'messages.html',
+        };
+      }
+
+      if (preferredMethod === 'phone') {
+        if (!phone) {
+          return null;
+        }
+
+        return {
+          methodLabel: 'Phone',
+          methodValue: phone,
+          actionLabel: 'Call Now',
+          actionHref: `tel:${phone}`,
+        };
+      }
+
+      if (email) {
+        return {
+          methodLabel: 'Email',
+          methodValue: email,
+          actionLabel: 'Send Email',
+          actionHref: `mailto:${email}`,
+        };
+      }
+
+      if (phone) {
+        return {
+          methodLabel: 'Phone',
+          methodValue: phone,
+          actionLabel: 'Call Now',
+          actionHref: `tel:${phone}`,
+        };
+      }
+
+      return null;
+    }
+
+    function getPreferredContactMethodDisplay(profile) {
+      const preferredMethod = String(profile.preferredContactMethod || '').trim().toLowerCase();
+      const email = String(profile.businessEmail || profile.userEmail || '').trim();
+      const phone = String(profile.businessPhone || '').trim();
+
+      if (preferredMethod === 'local_list' && (profile.allowLocalListMessaging === true || preferredMethod === 'local_list')) {
+        return 'Local List Messaging';
+      }
+
+      if (preferredMethod === 'phone' && phone) {
+        return 'Phone';
+      }
+
+      if (preferredMethod === 'phone' && !phone) {
+        return '';
+      }
+
+      if (email) {
+        return 'Email';
+      }
+
+      if (phone) {
+        return 'Phone';
+      }
+
+      return 'Not provided';
+    }
+
+    function displayBusinessProfile(profile) {
+      const mergedImages = [
+        ...(Array.isArray(profile.businessImages) ? profile.businessImages : []),
+        profile.businessCoverImage,
+        profile.businessBanner,
+      ]
+        .filter((img) => typeof img === 'string' && img.trim().length > 0)
+        .filter((img, index, arr) => arr.indexOf(img) === index);
+
+      const logo = profile.businessLogo
+        ? `<div class="business-logo-container"><img src="${profile.businessLogo}" alt="${profile.businessName} Logo"></div>`
+        : '';
+
+      const businessLocationDisplay = getBusinessLocationParts(profile).displayAddress;
+      const preferredContact = getPreferredContactDetails(profile);
+      const preferredMethodDisplay = getPreferredContactMethodDisplay(profile);
+      const socialLinks = [
+        {
+          key: 'facebookUrl',
+          url: profile.facebookUrl,
+          iconClass: 'fab fa-facebook-f',
+          label: 'Facebook',
+        },
+        {
+          key: 'instagramUrl',
+          url: profile.instagramUrl,
+          iconClass: 'fab fa-instagram',
+          label: 'Instagram',
+        },
+        {
+          key: 'tiktokUrl',
+          url: profile.tiktokUrl,
+          iconClass: 'fab fa-tiktok',
+          label: 'TikTok',
+        },
+        {
+          key: 'youtubeUrl',
+          url: profile.youtubeUrl,
+          iconClass: 'fab fa-youtube',
+          label: 'YouTube',
+        },
+      ].filter((item) => typeof item.url === 'string' && item.url.trim() !== '');
+
+      const hasContactInfo = !!(profile.businessWebsite || preferredContact || socialLinks.length > 0);
+
+      let profileHTML = `
+        <div class="profile-header">
+          ${logo}
+          <div class="business-name">${profile.businessName || 'Business Name'}</div>
+          <div class="business-description">
+            ${profile.businessDescription || 'No description available'}
+          </div>
+          <div class="rating-summary" id="reviewSummaryInline">
+            <span>Loading rating...</span>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="info-section business-column">
+            <div class="info-title">ℹ️ Business Information</div>
+      `;
+
+      profileHTML += `
+        <div class="info-item">
+          <div class="info-label">Business Name</div>
+          <div class="info-value">${profile.businessName || 'Not provided'}</div>
+        </div>
+      `;
+
+      profileHTML += `
+        <div class="info-item">
+          <div class="info-label">Location</div>
+          <div class="info-value" style="white-space: pre-wrap;">${businessLocationDisplay || 'Not provided'}</div>
+        </div>
+      `;
+
+      if (profile.businessCategory) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Category</div>
+            <div class="info-value">${profile.businessCategory}</div>
+          </div>
+        `;
+      }
+
+      if (profile.businessHours) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Hours</div>
+            <div class="info-value" style="white-space: pre-wrap;">${profile.businessHours}</div>
+          </div>
+        `;
+      }
+
+      if (profile.businessTier) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Account Tier</div>
+            <div class="info-value">${profile.businessTier === 'premium' ? '⭐ Premium' : 'Free'}</div>
+          </div>
+        `;
+      }
+
+      if (mergedImages.length > 0) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Images</div>
+            <div class="info-images-grid">
+              ${mergedImages.map((img, idx) => `<img src="${img}" alt="Business image ${idx + 1}" onclick="openImageModal('${img}')">`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      profileHTML += `
+          </div>
+
+          <div class="info-section contact-column">
+            <div class="info-title">🔗 Contact Information</div>
+      `;
+
+      if (profile.businessWebsite) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Website</div>
+            <div class="info-value">
+              <a href="${profile.businessWebsite}" target="_blank">${profile.businessWebsite}</a>
+            </div>
+          </div>
+        `;
+      }
+
+      if (preferredContact && preferredMethodDisplay) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Preferred Method of Contact</div>
+            <div class="info-value">${preferredMethodDisplay}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Contact</div>
+            <div class="info-value">${preferredContact.methodValue}</div>
+          </div>
+        `;
+      }
+
+      if (socialLinks.length > 0) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Social Media</div>
+            <div class="social-links">
+              ${socialLinks.map((item) => `
+                <a class="social-link" href="${item.url}" target="_blank" rel="noopener noreferrer" aria-label="${item.label}" title="${item.label}">
+                  <i class="${item.iconClass}"></i>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (!hasContactInfo) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-value">No contact information has been provided.</div>
+          </div>
+        `;
+      }
+
+      profileHTML += `
+          </div>
+        </div>
+      `;
+
+      // Gallery Section
+      if (profile.businessImages && profile.businessImages.length > 0) {
+        profileHTML += `
+          <div class="gallery-section">
+            <div class="gallery-title">📸 Gallery</div>
+            <div class="gallery">
+              ${profile.businessImages.map((img, idx) => 
+                `<img src="${img}" alt="Business photo ${idx + 1}" onclick="openImageModal('${img}')">`
+              ).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      profileHTML += `
+        <section class="reviews-section" id="reviewsSection">
+          <div class="reviews-title">⭐ Ratings & Reviews</div>
+          <div class="reviews-subtitle">Help others by sharing your experience with this business.</div>
+          <div id="reviewFormContainer"></div>
+          <div id="reviewsList"><div class="reviews-subtitle">Loading reviews...</div></div>
+        </section>
+      `;
+
+      profileHTML += `
+        <div class="map-row-section">
+          ${createLocationMapMarkup(profile)}
+        </div>
+      `;
+
+      // Action Buttons
+      profileHTML += `
+        <div class="action-buttons">
+      `;
+
+      if (profile.businessWebsite) {
+        profileHTML += `
+          <button class="btn btn-primary" onclick="window.open('${profile.businessWebsite}', '_blank')">
+            Visit Website
+          </button>
+        `;
+      }
+
+      if (preferredContact) {
+        profileHTML += `
+          <button class="btn btn-secondary" onclick="openContactModal()">
+            Contact Seller
+          </button>
+        `;
+      }
+
+      profileHTML += `
+        </div>
+      `;
+
+      document.getElementById('profileContent').innerHTML = profileHTML;
+    }
+
+    function showEmptyState(message) {
+      document.getElementById('profileContent').innerHTML = `
+        <div class="empty-state">
+          <h2>Not Found</h2>
+          <p>${message}</p>
+          <button class="btn btn-primary" onclick="window.location.href='businesslocallist.html'">
+            Back to Business Local Directory
+          </button>
+        </div>
+      `;
+    }
+
+    function openImageModal(imageSrc) {
+      document.getElementById('modalImage').src = imageSrc;
+      document.getElementById('imageModal').classList.add('active');
+    }
+
+    function closeImageModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    function openContactModal() {
+      if (!currentBusinessProfile) return;
+
+      const contactDetails = getPreferredContactDetails(currentBusinessProfile);
+      if (!contactDetails) {
+        alert('No contact method has been provided for this business yet.');
+        return;
+      }
+
+      document.getElementById('contactModalText').textContent = `Use the seller's preferred contact method for ${currentBusinessProfile.businessName || 'this business'}.`;
+      document.getElementById('contactMethodLabel').textContent = contactDetails.methodLabel;
+      document.getElementById('contactMethodValue').textContent = contactDetails.methodValue;
+
+      const actionLink = document.getElementById('contactMethodAction');
+      actionLink.textContent = contactDetails.actionLabel;
+      actionLink.href = contactDetails.actionHref;
+      actionLink.target = contactDetails.actionHref.startsWith('mailto:') || contactDetails.actionHref.startsWith('tel:') || contactDetails.actionHref === 'messages.html' ? '_self' : '_blank';
+
+      document.getElementById('contactModal').classList.add('active');
+    }
+
+    function closeContactModal(event) {
+      if (event && event.target && event.target.id !== 'contactModal') {
+        return;
+      }
+
+      document.getElementById('contactModal').classList.remove('active');
+    }
+
+    // Load profile on page load
+    document.addEventListener('DOMContentLoaded', loadBusinessProfile);
+  </script>
+</body>
+</html>

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Listings Manager - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 14px 36px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%);
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .hero p {
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .tabs {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .tabs-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tabs-select {
+      width: 100%;
+      max-width: 320px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #1f2937;
+      background: #fff;
+    }
+
+    .listings-section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      margin-bottom: 14px;
+    }
+
+    .pending-disclaimer {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .listings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .listing-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      gap: 16px;
+      align-items: stretch;
+      padding: 14px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .listing-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .listing-image {
+      width: 164px;
+      height: 124px;
+      object-fit: cover;
+      background: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .listing-content {
+      padding: 0;
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .listing-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .listing-price {
+      font-size: 16px;
+      color: #475569;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .listing-meta-line {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 3px;
+    }
+
+    .listing-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .listing-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #eef2f7;
+      color: #475569;
+    }
+
+    .listing-chip-featured {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .listing-chip-pending {
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    .listing-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1f2937;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .loading,
+    .empty-state {
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 24px 12px;
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+      grid-column: 1 / -1;
+    }
+
+    .empty-state-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .top-actions {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .top-link {
+      display: inline-flex;
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid #d1d5db;
+      color: #1f2937;
+      background: #fff;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 700px) {
+      .hero h1 {
+        font-size: 25px;
+      }
+
+      .listing-card {
+        flex-direction: column;
+      }
+
+      .listing-image {
+        width: 100%;
+        height: 220px;
+      }
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Listings Manager</h1>
+      <p>Choose what to display and manage your business listings from one place.</p>
+    </section>
+
+    <div class="top-actions">
+      <a class="top-link" href="business-hub.html">Back to Business Hub</a>
+    </div>
+
+    <section class="tabs">
+      <label class="tabs-label" for="listingTypeSelect">Choose what to display</label>
+      <select id="listingTypeSelect" class="tabs-select" onchange="switchTab(this.value)">
+        <option value="marketplace">Marketplace</option>
+        <option value="services">Services</option>
+        <option value="deals">Deals</option>
+        <option value="featured">Featured</option>
+        <option value="pending">Pending (0)</option>
+        <option value="sold">Sold</option>
+        <option value="archived">Archived</option>
+        <option value="saved">Saved</option>
+      </select>
+    </section>
+
+    <section id="marketplaceTab" class="listings-section">
+      <div id="activeListingsContainer" class="listings-grid">
+        <div class="loading">Loading listings...</div>
+      </div>
+    </section>
+
+    <section id="servicesTab" class="listings-section" style="display:none;">
+      <div id="servicesListingsContainer" class="listings-grid">
+        <div class="loading">Loading services...</div>
+      </div>
+    </section>
+
+    <section id="dealsTab" class="listings-section" style="display:none;">
+      <div id="dealsListingsContainer" class="listings-grid">
+        <div class="loading">Loading deals...</div>
+      </div>
+    </section>
+
+    <section id="petsTab" class="listings-section" style="display:none;">
+      <div id="petListingsContainer" class="listings-grid">
+        <div class="loading">Loading pet listings...</div>
+      </div>
+    </section>
+
+    <section id="featuredTab" class="listings-section" style="display:none;">
+      <div id="featuredListingsContainer" class="listings-grid">
+        <div class="loading">Loading listings...</div>
+      </div>
+    </section>
+
+    <section id="pendingTab" class="listings-section" style="display:none;">
+      <div class="pending-disclaimer">
+        <strong>Pending Review Notice:</strong> Items require admin approval to help prevent fraud and protect our community.
+      </div>
+      <div id="pendingListingsContainer" class="listings-grid">
+        <div class="loading">Loading pending items...</div>
+      </div>
+    </section>
+
+    <section id="soldTab" class="listings-section" style="display:none;">
+      <div id="soldListingsContainer" class="listings-grid">
+        <div class="loading">Loading listings...</div>
+      </div>
+    </section>
+
+    <section id="archivedTab" class="listings-section" style="display:none;">
+      <div id="archivedListingsContainer" class="listings-grid">
+        <div class="loading">Loading archived items...</div>
+      </div>
+    </section>
+
+    <section id="savedTab" class="listings-section" style="display:none;">
+      <div id="savedListingsContainer" class="listings-grid">
+        <div class="loading">Loading listings...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    let currentUser = null;
+    let activeListings = [];
+    let soldListings = [];
+    let archivedListings = [];
+    let savedListings = [];
+    let featuredListings = [];
+    let petListings = [];
+    let pendingListings = [];
+    let pendingPetListings = [];
+    let pendingServices = [];
+    let activeServices = [];
+    let archivedServices = [];
+    let activeDeals = [];
+    let archivedDeals = [];
+    let pendingDeals = [];
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+        const isBusiness = userData.accountType === 'business';
+        const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+
+        if (!isBusiness && !isAdmin) {
+          window.location.href = 'profile.html';
+          return;
+        }
+
+        await loadListings();
+      } catch (error) {
+        console.error('Error validating account:', error);
+      }
+    });
+
+    async function loadListings() {
+      try {
+        const snapshot = await db.collection('listings')
+          .where('userId', '==', currentUser.uid)
+          .orderBy('createdAt', 'desc')
+          .get();
+
+        activeListings = [];
+        soldListings = [];
+        archivedListings = [];
+        featuredListings = [];
+        pendingListings = [];
+
+        snapshot.forEach((doc) => {
+          const listing = { id: doc.id, ...doc.data() };
+          if (listing.status === 'sold') {
+            soldListings.push(listing);
+          } else if (listing.status === 'pending') {
+            pendingListings.push(listing);
+          } else if (listing.status === 'archived') {
+            archivedListings.push(listing);
+          } else {
+            activeListings.push(listing);
+          }
+
+          if (listing.isFeatured && listing.featureExpiresAt) {
+            const expiresAt = listing.featureExpiresAt.toDate ? listing.featureExpiresAt.toDate() : new Date(listing.featureExpiresAt);
+            if (expiresAt > new Date()) {
+              featuredListings.push(listing);
+            }
+          }
+        });
+
+        await loadSavedListings();
+        await loadPetListings();
+        await loadServices();
+        await loadDeals();
+
+        renderListings();
+      } catch (error) {
+        console.error('Error loading listings:', error);
+      }
+    }
+
+    async function loadSavedListings() {
+      try {
+        const savedSnapshot = await db.collection('saveListings').where('userId', '==', currentUser.uid).get();
+        savedListings = [];
+        savedSnapshot.forEach((doc) => {
+          savedListings.push({ id: doc.id, ...doc.data() });
+        });
+      } catch (error) {
+        console.error('Error loading saved listings:', error);
+        savedListings = [];
+      }
+    }
+
+    async function loadPetListings() {
+      try {
+        const petSnapshot = await db.collection('pets').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').get();
+        petListings = [];
+        pendingPetListings = [];
+        petSnapshot.forEach((doc) => {
+          const pet = { id: doc.id, ...doc.data() };
+          const pending = pet.isApproved === false || pet.status === 'pending' || pet.approvalStatus === 'pending';
+          if (pending) {
+            pendingPetListings.push(pet);
+          } else {
+            petListings.push(pet);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading pet listings:', error);
+        petListings = [];
+        pendingPetListings = [];
+      }
+    }
+
+    async function loadServices() {
+      try {
+        const servicesSnapshot = await db.collection('services').where('userId', '==', currentUser.uid).get();
+        activeServices = [];
+        archivedServices = [];
+        pendingServices = [];
+        servicesSnapshot.forEach((doc) => {
+          const service = { id: doc.id, ...doc.data() };
+          const pending = service.isApproved === false || service.status === 'pending' || service.approvalStatus === 'pending';
+          const archived = service.status === 'archived' || service.approvalStatus === 'archived';
+          if (pending) {
+            pendingServices.push(service);
+          } else if (archived) {
+            archivedServices.push(service);
+          } else {
+            activeServices.push(service);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading service listings:', error);
+        activeServices = [];
+        archivedServices = [];
+        pendingServices = [];
+      }
+    }
+
+    async function loadDeals() {
+      try {
+        const dealsSnapshot = await db.collection('deals').where('userId', '==', currentUser.uid).get();
+        activeDeals = [];
+        archivedDeals = [];
+        pendingDeals = [];
+        dealsSnapshot.forEach((doc) => {
+          const deal = { id: doc.id, ...doc.data() };
+          const pending = deal.status === 'pending';
+          const archived = deal.status === 'archived';
+          if (pending) {
+            pendingDeals.push(deal);
+          } else if (archived) {
+            archivedDeals.push(deal);
+          } else {
+            activeDeals.push(deal);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading deals:', error);
+        activeDeals = [];
+        archivedDeals = [];
+        pendingDeals = [];
+      }
+    }
+
+    function renderListings() {
+      const activeContainer = document.getElementById('activeListingsContainer');
+      const activeItems = activeListings.map((item) => ({ type: 'listing', item }));
+      activeContainer.innerHTML = activeItems.length
+        ? activeItems.map((entry) => createItemCard(entry.type, entry.item, 'active')).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No active marketplace listings.</p></div>';
+
+      const servicesContainer = document.getElementById('servicesListingsContainer');
+      servicesContainer.innerHTML = activeServices.length
+        ? activeServices.map((service) => createServiceCard(service)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>No active services.</p></div>';
+
+      const dealsContainer = document.getElementById('dealsListingsContainer');
+      dealsContainer.innerHTML = activeDeals.length
+        ? activeDeals.map((deal) => createDealCard(deal)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">🔥</div><p>No active deals.</p></div>';
+
+      const petContainer = document.getElementById('petListingsContainer');
+      petContainer.innerHTML = petListings.length
+        ? petListings.map((pet) => createPetListingCard(pet)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">🐾</div><p>No pet listings.</p></div>';
+
+      const featuredContainer = document.getElementById('featuredListingsContainer');
+      featuredContainer.innerHTML = featuredListings.length
+        ? featuredListings.map((listing) => createFeaturedListingCard(listing)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">⭐</div><p>No featured listings.</p></div>';
+
+      const soldContainer = document.getElementById('soldListingsContainer');
+      soldContainer.innerHTML = soldListings.length
+        ? soldListings.map((listing) => createListingCard(listing, 'sold')).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">📦</div><p>No sold listings.</p></div>';
+
+      const archivedContainer = document.getElementById('archivedListingsContainer');
+      const archivedItems = [
+        ...archivedListings.map((item) => ({ type: 'listing', item })),
+        ...archivedServices.map((item) => ({ type: 'service', item })),
+        ...archivedDeals.map((item) => ({ type: 'deal', item }))
+      ];
+      archivedContainer.innerHTML = archivedItems.length
+        ? archivedItems.map((entry) => createItemCard(entry.type, entry.item, 'archived')).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">🗄️</div><p>No archived items.</p></div>';
+
+      const savedContainer = document.getElementById('savedListingsContainer');
+      savedContainer.innerHTML = savedListings.length
+        ? savedListings.map((saved) => createSavedListingCard(saved)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">💾</div><p>No saved listings.</p></div>';
+
+      const pendingContainer = document.getElementById('pendingListingsContainer');
+      const pendingItems = [
+        ...pendingListings.map((item) => ({ type: 'listing', item })),
+        ...pendingPetListings.map((item) => ({ type: 'pet', item })),
+        ...pendingServices.map((item) => ({ type: 'service', item })),
+        ...pendingDeals.map((item) => ({ type: 'deal', item }))
+      ];
+
+      updatePendingCountBadge(pendingItems.length);
+      pendingContainer.innerHTML = pendingItems.length
+        ? pendingItems.map((entry) => createPendingItemCard(entry.type, entry.item)).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">⏳</div><p>No pending items.</p></div>';
+    }
+
+    function updatePendingCountBadge(count) {
+      const pendingOption = document.querySelector('#listingTypeSelect option[value="pending"]');
+      if (!pendingOption) return;
+      pendingOption.textContent = `Pending (${count})`;
+    }
+
+    function formatDisplayDate(value) {
+      try {
+        if (!value) return 'Unknown';
+        const date = typeof value.toDate === 'function' ? value.toDate() : new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Unknown';
+        return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return 'Unknown';
+      }
+    }
+
+    function createMetaHtml(options) {
+      const chips = [];
+
+      if (options.isFeatured) {
+        chips.push('<span class="listing-chip listing-chip-featured">Featured</span>');
+      }
+
+      if (options.pendingLabel) {
+        chips.push(`<span class="listing-chip listing-chip-pending">${options.pendingLabel}</span>`);
+      }
+
+      if (options.extraChip) {
+        chips.push(`<span class="listing-chip">${options.extraChip}</span>`);
+      }
+
+      return `
+        <div class="listing-meta-line">Category: ${options.category || 'General'}</div>
+        <div class="listing-meta-line">Date Posted: ${formatDisplayDate(options.createdAt)}</div>
+        ${options.extraLine ? `<div class="listing-meta-line">${options.extraLine}</div>` : ''}
+        ${chips.length ? `<div class="listing-chip-row">${chips.join('')}</div>` : ''}
+      `;
+    }
+
+    function createListingCard(listing, type) {
+      const price = listing.price ? `$${listing.price}` : 'Contact';
+      const image = listing.images && listing.images.length > 0 ? listing.images[0] : 'logo.png';
+      const metaHtml = createMetaHtml({
+        category: listing.category,
+        createdAt: listing.createdAt,
+        isFeatured: listing.isFeatured === true,
+      });
+
+      let actionsHtml = '';
+      if (type === 'active') {
+        actionsHtml = `
+          <button class="btn btn-secondary" onclick="markAsSold('${listing.id}', event)">Mark Sold</button>
+          <button class="btn btn-danger" onclick="archiveListing('${listing.id}', event)">Archive</button>
+        `;
+      }
+
+      return `
+        <div class="listing-card" onclick="viewListing('${listing.id}')">
+          <img src="${image}" alt="${listing.title || 'Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${listing.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+            <div class="listing-actions">${actionsHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createItemCard(type, item, context) {
+      if (type === 'listing') {
+        return createListingCard(item, context);
+      } else if (type === 'service') {
+        return createServiceCard(item, context);
+      } else if (type === 'deal') {
+        return createDealCard(item, context);
+      }
+      return '';
+    }
+
+    function createServiceCard(service, type = 'active') {
+      const image = service.serviceImage || service.businessLogo || 'logo.png';
+      const metaHtml = createMetaHtml({
+        category: service.category || 'Service',
+        createdAt: service.createdAt,
+        extraChip: 'Service',
+      });
+      
+      return `
+        <div class="listing-card" onclick="window.location.href='service-details.html?id=${service.id}'">
+          <img src="${image}" alt="${service.serviceName || 'Service'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${service.serviceName || 'Untitled Service'}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              ${type === 'active' ? `<button class="btn btn-danger" onclick="archiveService('${service.id}', event)">Archive</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createDealCard(deal, type = 'active') {
+      const image = deal.images && deal.images.length > 0 ? deal.images[0] : 'logo.png';
+      const metaHtml = createMetaHtml({
+        category: deal.category || 'Deal',
+        createdAt: deal.createdAt,
+        extraChip: 'Deal',
+      });
+      
+      return `
+        <div class="listing-card" onclick="window.location.href='deal-details.html?id=${deal.id}'">
+          <img src="${image}" alt="${deal.title || 'Deal'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${deal.title || 'Untitled Deal'}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              ${type === 'active' ? `<button class="btn btn-danger" onclick="archiveDeal('${deal.id}', event)">Archive</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createFeaturedListingCard(listing) {
+      const price = listing.price ? `$${listing.price}` : 'Contact';
+      const image = listing.images && listing.images.length > 0 ? listing.images[0] : 'logo.png';
+      let featuredLine = 'Featured listing';
+      if (listing.featureExpiresAt) {
+        const expiresAt = listing.featureExpiresAt.toDate ? listing.featureExpiresAt.toDate() : new Date(listing.featureExpiresAt);
+        const diffDays = Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
+        if (!Number.isNaN(diffDays)) {
+          featuredLine = diffDays <= 1 ? 'Featured Status: Expires today' : `Featured Status: ${diffDays} days left`;
+        }
+      }
+      const metaHtml = createMetaHtml({
+        category: listing.category,
+        createdAt: listing.createdAt,
+        isFeatured: true,
+        extraLine: featuredLine,
+      });
+      return `
+        <div class="listing-card" onclick="viewListing('${listing.id}')" style="border:2px solid #fbbf24;">
+          <img src="${image}" alt="${listing.title || 'Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${listing.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function createSavedListingCard(saved) {
+      const price = saved.price ? `$${saved.price}` : 'Contact';
+      const image = saved.image || 'logo.png';
+      const metaHtml = createMetaHtml({
+        category: saved.category,
+        createdAt: saved.createdAt || saved.savedAt,
+        isFeatured: saved.isFeatured === true,
+      });
+      return `
+        <div class="listing-card" onclick="viewListing('${saved.listingId}')">
+          <img src="${image}" alt="${saved.title || 'Saved listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${saved.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              <button class="btn btn-danger" onclick="removeSavedListing('${saved.id}', event)">Remove</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createPetListingCard(pet) {
+      const image = pet.images && pet.images.length > 0 ? pet.images[0] : 'logo.png';
+      const typeLabel = (pet.postType || 'pet').toString().toLowerCase();
+      const readableType = typeLabel === 'lost' ? 'Lost' : typeLabel === 'found' ? 'Found' : typeLabel === 'adoption' ? 'Adoption' : 'Pet';
+      const metaHtml = createMetaHtml({
+        category: readableType,
+        createdAt: pet.createdAt,
+        extraLine: `Location: ${pet.petSeenLocation || pet.city || 'Location not specified'}`,
+        extraChip: pet.petType || 'Pet',
+      });
+      return `
+        <div class="listing-card" onclick="viewPetListing('${pet.id}')">
+          <img src="${image}" alt="${pet.petName || 'Pet listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${pet.petName || 'Unnamed Pet'}</div>
+            <div class="listing-meta-line">${pet.petType || 'Pet'}${pet.petBreed ? ` • ${pet.petBreed}` : ''}</div>
+            ${metaHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function createPendingItemCard(type, item) {
+      let title = 'Pending Item';
+      let subtitle = 'Awaiting review';
+      let image = 'logo.png';
+      let viewHref = '';
+
+      if (type === 'listing') {
+        title = item.title || 'Untitled Listing';
+        subtitle = item.category || 'Marketplace Listing';
+        image = item.images && item.images.length > 0 ? item.images[0] : image;
+        viewHref = `single-listing.html?id=${item.id}`;
+      } else if (type === 'pet') {
+        title = item.petName || 'Unnamed Pet Post';
+        subtitle = item.postType ? `${item.postType} pet post` : 'Pet Post';
+        image = item.images && item.images.length > 0 ? item.images[0] : image;
+        viewHref = `pet-details.html?id=${item.id}`;
+      } else if (type === 'service') {
+        title = item.serviceName || 'Untitled Service';
+        subtitle = item.category || 'Service Listing';
+        image = item.serviceImage || item.businessLogo || image;
+        viewHref = `service-details.html?id=${item.id}`;
+      } else if (type === 'deal') {
+        title = item.title || 'Untitled Deal';
+        subtitle = item.category || 'Deal';
+        image = item.images && item.images.length > 0 ? item.images[0] : image;
+        viewHref = `deal-details.html?id=${item.id}`;
+      }
+
+      return `
+        <div class="listing-card" onclick="window.location.href='${viewHref}'">
+          <img src="${image}" alt="${title}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${title}</div>
+            ${createMetaHtml({
+              category: subtitle,
+              createdAt: item.createdAt,
+              pendingLabel: 'Pending',
+            })}
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTab(tab) {
+      document.getElementById('marketplaceTab').style.display = tab === 'marketplace' ? 'block' : 'none';
+      document.getElementById('servicesTab').style.display = tab === 'services' ? 'block' : 'none';
+      document.getElementById('dealsTab').style.display = tab === 'deals' ? 'block' : 'none';
+      document.getElementById('petsTab').style.display = tab === 'pets' ? 'block' : 'none';
+      document.getElementById('featuredTab').style.display = tab === 'featured' ? 'block' : 'none';
+      document.getElementById('pendingTab').style.display = tab === 'pending' ? 'block' : 'none';
+      document.getElementById('soldTab').style.display = tab === 'sold' ? 'block' : 'none';
+      document.getElementById('archivedTab').style.display = tab === 'archived' ? 'block' : 'none';
+      document.getElementById('savedTab').style.display = tab === 'saved' ? 'block' : 'none';
+    }
+
+    async function markAsSold(listingId, event) {
+      event.stopPropagation();
+      if (!confirm('Mark this listing as sold?')) return;
+      try {
+        await db.collection('listings').doc(listingId).update({ status: 'sold' });
+        await loadListings();
+      } catch (error) {
+        alert('Error marking listing as sold: ' + error.message);
+      }
+    }
+
+    async function archiveListing(listingId, event) {
+      event.stopPropagation();
+      if (!confirm('Archive this listing?')) return;
+      try {
+        await db.collection('listings').doc(listingId).update({ status: 'archived' });
+        await loadListings();
+      } catch (error) {
+        alert('Error archiving listing: ' + error.message);
+      }
+    }
+
+    async function removeSavedListing(docId, event) {
+      event.stopPropagation();
+      if (!confirm('Remove this listing from saved?')) return;
+      try {
+        await db.collection('saveListings').doc(docId).delete();
+        await loadListings();
+      } catch (error) {
+        alert('Error removing saved listing: ' + error.message);
+      }
+    }
+
+    function viewListing(listingId) {
+      window.location.href = `single-listing.html?id=${listingId}`;
+    }
+
+    function viewPetListing(petId) {
+      window.location.href = `pet-details.html?id=${petId}`;
+    }
+
+    async function archiveService(serviceId, event) {
+      event.stopPropagation();
+      if (!confirm('Archive this service?')) return;
+      try {
+        await db.collection('services').doc(serviceId).update({ status: 'archived', approvalStatus: 'archived' });
+        await loadListings();
+      } catch (error) {
+        alert('Error archiving service: ' + error.message);
+      }
+    }
+
+    async function archiveDeal(dealId, event) {
+      event.stopPropagation();
+      if (!confirm('Archive this deal?')) return;
+      try {
+        await db.collection('deals').doc(dealId).update({ status: 'archived' });
+        await loadListings();
+      } catch (error) {
+        alert('Error archiving deal: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>

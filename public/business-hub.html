@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Hub - Local List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 400;
+      background: #f5f5f5;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      color: #1f2937;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .hero h1 {
+      font-size: 30px;
+      margin-bottom: 0;
+      font-weight: 800;
+    }
+
+    .hero p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .status-banner {
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hub-user-summary {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .hub-user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      background: #475569;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .hub-user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hub-user-text {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .hub-user-name {
+      color: #0f172a;
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .hub-user-email {
+      color: #64748b;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .hub-update-link {
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      width: fit-content;
+    }
+
+    .hub-update-link:hover {
+      color: #0f172a;
+    }
+
+    .hub-action-links {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 18px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.is-open {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #475569;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .blocked-users-list {
+      margin-top: 16px;
+    }
+
+    .blocked-users-list ul {
+      list-style: none;
+      margin-top: 8px;
+    }
+
+    .blocked-users-list li {
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .status-loading {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+
+    .status-access {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+
+    .status-locked {
+      background: #fffbeb;
+      border-color: #fcd34d;
+      color: #92400e;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .welcome-strip {
+      background: #ffffff;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    .welcome-strip h2 {
+      font-size: 24px;
+      color: #0f172a;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .welcome-strip p {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .welcome-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .welcome-stat {
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .welcome-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .welcome-stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 1px 6px rgba(15, 23, 42, 0.05);
+    }
+
+    .section-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .section-card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 130px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      font-size: 20px;
+      color: #334155;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    .card p {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .metric-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+
+    .metric-label {
+      color: #64748b;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      color: #1f2937;
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .metric-sub {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .analytics-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    a.card {
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    a.card:hover {
+      border-color: #475569;
+      box-shadow: 0 3px 10px rgba(71, 85, 105, 0.15);
+    }
+
+    .section-label {
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #475569;
+      margin: 20px 0 10px;
+    }
+
+    .cta-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #475569;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn.secondary {
+      background: #0f766e;
+    }
+
+    .btn.hero-logout {
+      background: #334155;
+      padding: 9px 14px;
+      white-space: nowrap;
+    }
+
+    .btn.hero-logout:hover {
+      background: #1e293b;
+    }
+
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .hub-file-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .hub-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .hub-msg {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .hub-msg-error {
+      background: #fff1f2;
+      border: 1px solid #fecaca;
+      color: #be123c;
+    }
+
+    .hub-msg-success {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    .hint-box {
+      font-size: 13px;
+      color: #334155;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 12px;
+      margin-bottom: 10px;
+    }
+
+    .hint-box.warn {
+      color: #b45309;
+      background: #fffbeb;
+      border-color: #fcd34d;
+    }
+
+    .file-preview {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .file-preview-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .file-preview-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .file-preview-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-preview-size {
+      color: #64748b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .file-remove-btn {
+      border: 1px solid #fecaca;
+      background: #fff1f2;
+      color: #be123c;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .file-remove-btn:hover {
+      background: #ffe4e6;
+    }
+
+    .file-empty {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-top">
+        <h1>Business Hub</h1>
+        <button class="btn hero-logout" type="button" onclick="handleBusinessHubLogout()">Logout</button>
+      </div>
+      <p>Your central place to manage profile, offers, leads, analytics, and growth.</p>
+    </section>
+
+    <section class="hub-user-summary" aria-label="Business account summary">
+      <div class="hub-user-avatar" id="hubUserAvatar">👤</div>
+      <div class="hub-user-text">
+        <div class="hub-user-name" id="hubUserName">Loading...</div>
+        <div class="hub-user-email" id="hubUserEmail">Loading...</div>
+        <div class="hub-action-links">
+          <a class="hub-update-link" href="profile.html">Update Profile</a>
+          <a class="hub-update-link" href="#" onclick="openModal('blockedModal'); return false;">Blocked Users</a>
+        </div>
+      </div>
+    </section>
+
+    <div id="statusBanner" class="status-banner status-loading">Checking your business account access...</div>
+
+    <section id="businessHub" class="hidden" aria-label="Business hub tools">
+      <div class="welcome-strip">
+        <h2 id="hubWelcomeTitle">👋 Welcome back</h2>
+        <p>Here&apos;s what&apos;s happening with your business today:</p>
+        <div class="welcome-stats">
+          <div class="welcome-stat">
+            <div class="welcome-stat-label">Views</div>
+            <div class="welcome-stat-value" id="welcomeViews">-</div>
+          </div>
+          <div class="welcome-stat">
+            <div class="welcome-stat-label">Leads</div>
+            <div class="welcome-stat-value" id="welcomeLeads">-</div>
+          </div>
+          <div class="welcome-stat">
+            <div class="welcome-stat-label">Verification</div>
+            <div class="welcome-stat-value" id="welcomeVerification">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">Quick Actions</p>
+      <div class="quick-actions-grid">
+        <a class="card" href="business-settings.html">
+          <h3>⚙️ Business Settings</h3>
+          <p>Manage your profile &amp; branding.</p>
+        </a>
+        <a class="card" href="business-listings.html">
+          <h3>📦 Listings</h3>
+          <p>View and manage your listings.</p>
+        </a>
+        <a class="card" href="promotion-center.html">
+          <h3>📣 Promotions</h3>
+          <p>Boost visibility and create deals.</p>
+        </a>
+      </div>
+
+      <p class="section-label">Performance Overview</p>
+      <div class="section-card">
+        <div class="metric-grid" id="profileViewsMetrics">
+          <div class="metric-item">
+            <div class="metric-label">All-Time Views</div>
+            <div class="metric-value" id="viewsAllTime">-</div>
+            <div class="metric-sub" id="viewsAllTimeSub">Loading...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">7-Day Views</div>
+            <div class="metric-value" id="views7Day">-</div>
+            <div class="metric-sub" id="views7DaySub">Loading...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">30-Day Views</div>
+            <div class="metric-value" id="views30Day">-</div>
+            <div class="metric-sub" id="views30DaySub">Loading...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Trend</div>
+            <div class="metric-value" id="viewsTrend">-</div>
+            <div class="metric-sub" id="viewsTrendSub">Loading...</div>
+          </div>
+        </div>
+        <div class="analytics-note" id="viewsAnalyticsNote"></div>
+      </div>
+
+      <p class="section-label">Leads &amp; Inbox</p>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Leads &amp; Inbox</div>
+          <a class="btn secondary" href="business-leads.html">Open Leads &amp; Inbox</a>
+        </div>
+        <div class="metric-grid" id="leadsInboxMetrics">
+          <div class="metric-item">
+            <div class="metric-label">Total Leads</div>
+            <div class="metric-value" id="leadTotalThreads">-</div>
+            <div class="metric-sub hidden" id="leadTotalThreadsSub"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Unread</div>
+            <div class="metric-value" id="leadUnreadCount">-</div>
+            <div class="metric-sub hidden" id="leadUnreadCountSub"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Unique Buyers</div>
+            <div class="metric-value" id="leadUniqueBuyers">-</div>
+            <div class="metric-sub hidden" id="leadUniqueBuyersSub"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">New (7 Days)</div>
+            <div class="metric-value" id="leadRecent7d">-</div>
+            <div class="metric-sub hidden" id="leadRecent7dSub"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">Business Status</p>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Verification</div>
+          <span class="status-pill" id="businessVerificationState">Pending</span>
+        </div>
+        <p id="businessVerificationNote" style="color:#64748b; font-size:13px; line-height:1.45;">
+          Submit proof of ownership documents to admin for review.
+        </p>
+        <div class="cta-row" style="margin-top: 10px;">
+          <button type="button" class="btn secondary" onclick="openModal('verificationModal')">Submit Verification</button>
+        </div>
+      </div>
+
+      <p class="section-label">Reputation</p>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Reputation Snapshot</div>
+          <a class="btn secondary" href="business-reputation.html">Open Reputation</a>
+        </div>
+        <div class="metric-grid" id="reviewSnapshotMetrics">
+          <div class="metric-item">
+            <div class="metric-label">Average Rating</div>
+            <div class="metric-value" id="ratingAverage">-</div>
+            <div class="metric-sub hidden" id="ratingStars"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Total Reviews</div>
+            <div class="metric-value" id="ratingCount">-</div>
+            <div class="metric-sub hidden" id="ratingCountSub"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">New This Month</div>
+            <div class="metric-value" id="newReviewsThisMonth">-</div>
+            <div class="metric-sub hidden" id="newReviewsThisMonthSub"></div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Monthly Trend</div>
+            <div class="metric-value" id="monthlyReviewTrend">-</div>
+            <div class="metric-sub hidden" id="monthlyReviewTrendSub"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="upgradeGate" class="hidden" aria-label="Business account required">
+      <div class="card" style="min-height: 0;">
+        <h3>Business Account Required</h3>
+        <p>
+          Business Hub is currently available to business accounts.
+          Upgrade your account type to business to access this page.
+        </p>
+        <div class="cta-row">
+          <a class="btn" href="profile.html">Go to Profile</a>
+          <a class="btn secondary" href="browse.html">Back to Marketplace</a>
+        </div>
+      </div>
+    </section>
+
+    <div id="verificationModal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="verificationModalTitle">
+        <div class="modal-header">
+          <span id="verificationModalTitle">📸 Business Verification</span>
+          <button class="modal-close" type="button" onclick="closeModal('verificationModal')">&#10005;</button>
+        </div>
+        <p style="margin: 12px 0 6px; color: #475569; font-size: 14px;">Upload images or PDFs that prove ownership of your business. These are submitted only to admins and are never shown publicly.</p>
+        <div class="hint-box">Accepted examples: storefront signage, business license screenshots, website admin view, social profile management screenshots.</div>
+        
+        <div class="form-group">
+          <label class="form-label" for="hubVerificationPhone">Phone Number</label>
+          <input type="tel" id="hubVerificationPhone" class="hub-file-input" placeholder="(555) 123-4567" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%;">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="hubVerificationContactTime">Best Time to Contact</label>
+          <select id="hubVerificationContactTime" class="hub-file-input" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; width: 100%;">
+            <option value="">Select a time</option>
+            <option value="morning">Morning (8am - 12pm)</option>
+            <option value="afternoon">Afternoon (12pm - 5pm)</option>
+            <option value="evening">Evening (5pm - 8pm)</option>
+            <option value="anytime">Anytime</option>
+          </select>
+        </div>
+        
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <input type="checkbox" id="hubVerificationContactConsent" style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="hubVerificationContactConsent" style="margin: 0; cursor: pointer; color: #475569; font-size: 14px;">May we contact you to fast-track the verification process?</label>
+        </div>
+        
+        <div class="form-group">
+          <input type="file" id="hubVerificationDocuments" class="hub-file-input" accept="image/*,.pdf" multiple>
+        </div>
+        <div id="hubVerificationDocsPreview" class="file-preview"></div>
+        <div class="form-group" style="margin-top: 12px;">
+          <textarea id="hubVerificationMessage" class="hub-textarea" placeholder="Optional note for admin review" rows="3"></textarea>
+        </div>
+        <div class="hint-box warn">Do not upload tax documents, SSNs, EIN letters, or other sensitive tax records. Claims with tax documents will be rejected.</div>
+        <div id="hubVerificationError" class="hub-msg hub-msg-error" style="display:none;"></div>
+        <div id="hubVerificationSuccess" class="hub-msg hub-msg-success" style="display:none;"></div>
+        <div style="display:flex; gap:10px; margin-top:14px;">
+          <button type="button" class="btn secondary" id="hubClearVerificationBtn">Clear Files</button>
+          <button type="button" class="btn" id="hubSubmitVerificationBtn">Submit Verification</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="blockedModal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="blockedModalTitle">
+        <div class="modal-header">
+          <span id="blockedModalTitle">Blocked Users</span>
+          <button class="modal-close" type="button" onclick="closeModal('blockedModal')">✕</button>
+        </div>
+        <div id="blockedUsersList" class="blocked-users-list">
+          <p style="color: #999; text-align: center;">No blocked users</p>
+        </div>
+      </div>
+    </div>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    function setStatus(type, message) {
+      const banner = document.getElementById('statusBanner');
+      banner.className = `status-banner ${type}`;
+      banner.textContent = message;
+    }
+
+    function showBusinessHub(message) {
+      document.getElementById('businessHub').classList.remove('hidden');
+      document.getElementById('upgradeGate').classList.add('hidden');
+      setStatus('status-access', message || 'Business account access active.');
+    }
+
+    function showAccessDenied() {
+      document.getElementById('businessHub').classList.add('hidden');
+      document.getElementById('upgradeGate').classList.add('hidden');
+      setStatus('status-locked', 'Business Hub is currently available only to business accounts.');
+    }
+
+    function showBusinessRequiredGate() {
+      document.getElementById('businessHub').classList.add('hidden');
+      document.getElementById('upgradeGate').classList.remove('hidden');
+      setStatus('status-locked', 'Business account required to access Business Hub.');
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatNumber(value) {
+      const safe = Number(value || 0);
+      return Number.isFinite(safe) ? safe.toLocaleString() : '0';
+    }
+
+    function renderStarsFromAverage(rating) {
+      const safe = Math.max(0, Math.min(5, Number(rating) || 0));
+      const rounded = Math.round(safe);
+      return `${'★'.repeat(rounded)}${'☆'.repeat(5 - rounded)}`;
+    }
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+
+    function setOptionalCopy(id, value) {
+      const node = document.getElementById(id);
+      if (!node) return;
+
+      if (value) {
+        node.textContent = value;
+        node.classList.remove('hidden');
+      } else {
+        node.textContent = '';
+        node.classList.add('hidden');
+      }
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function loadBlockedUsers(blockedUserIds) {
+      const container = document.getElementById('blockedUsersList');
+      if (!container) return;
+
+      if (!Array.isArray(blockedUserIds) || blockedUserIds.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center;">No blocked users</p>';
+        return;
+      }
+
+      container.innerHTML = '<p>Blocked Users:</p><ul>' +
+        blockedUserIds.map((id) => `<li>${escapeHtml(id)}</li>`).join('') +
+        '</ul>';
+    }
+
+    async function handleBusinessHubLogout() {
+      try {
+        if (auth) {
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error('Logout failed:', error);
+      } finally {
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function renderHubUserSummary(user, userDocData) {
+      const nameNode = document.getElementById('hubUserName');
+      const emailNode = document.getElementById('hubUserEmail');
+      const avatarNode = document.getElementById('hubUserAvatar');
+      const welcomeTitleNode = document.getElementById('hubWelcomeTitle');
+
+      const displayName = userDocData?.displayName || user?.displayName || user?.email || 'Business User';
+      const email = user?.email || '';
+      const profileImage = userDocData?.profileimage || '';
+
+      if (nameNode) nameNode.textContent = displayName;
+      if (emailNode) emailNode.textContent = email;
+      if (welcomeTitleNode) welcomeTitleNode.textContent = `👋 Welcome back, ${displayName}`;
+
+      if (avatarNode) {
+        if (profileImage) {
+          avatarNode.innerHTML = `<img src="${escapeHtml(profileImage)}" alt="${escapeHtml(displayName)}">`;
+        } else {
+          const initial = String(displayName).trim().charAt(0).toUpperCase() || '👤';
+          avatarNode.textContent = initial;
+        }
+      }
+    }
+
+    function parseDateKey(dateKey) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || ''))) return null;
+      const parsed = new Date(`${dateKey}T00:00:00`);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    async function loadProfileRollingViewWindows(businessId) {
+      const result = {
+        sevenDay: 0,
+        thirtyDay: 0,
+        previousSevenDay: 0,
+        hasDailyData: false,
+      };
+
+      try {
+        const now = new Date();
+        now.setHours(23, 59, 59, 999);
+
+        const start7 = new Date(now);
+        start7.setHours(0, 0, 0, 0);
+        start7.setDate(start7.getDate() - 6);
+
+        const start30 = new Date(now);
+        start30.setHours(0, 0, 0, 0);
+        start30.setDate(start30.getDate() - 29);
+
+        const prev7Start = new Date(start7);
+        prev7Start.setDate(prev7Start.getDate() - 7);
+        const prev7End = new Date(start7);
+        prev7End.setMilliseconds(prev7End.getMilliseconds() - 1);
+
+        const snap = await db.collection('analyticsDailyViews')
+          .where('businessId', '==', businessId)
+          .where('entityType', '==', 'business_profile')
+          .get();
+
+        if (!snap.empty) result.hasDailyData = true;
+
+        snap.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          const day = parseDateKey(data.dateKey);
+          if (!day) return;
+
+          const value = Number(data.viewCount || 0);
+          if (!Number.isFinite(value) || value <= 0) return;
+
+          if (day >= start30 && day <= now) result.thirtyDay += value;
+          if (day >= start7 && day <= now) result.sevenDay += value;
+          if (day >= prev7Start && day <= prev7End) result.previousSevenDay += value;
+        });
+      } catch (error) {
+        console.warn('Could not load rolling profile view windows:', error);
+      }
+
+      return result;
+    }
+
+    async function loadLeadsInboxSnapshot(businessId) {
+      setText('leadTotalThreads', '-');
+      setText('leadUnreadCount', '-');
+      setText('leadUniqueBuyers', '-');
+      setText('leadRecent7d', '-');
+
+      const snapshot = {
+        total: 0,
+        unread: 0,
+        uniqueBuyers: 0,
+        recent7d: 0,
+      };
+
+      try {
+        const snap = await db.collection('threads').where('sellerId', '==', businessId).get();
+        const total = snap.size;
+        let unread = 0;
+        let recent7d = 0;
+        const buyers = new Set();
+
+        const now = new Date();
+        const start7 = new Date(now);
+        start7.setDate(start7.getDate() - 6);
+        start7.setHours(0, 0, 0, 0);
+
+        snap.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          const unreadBy = Array.isArray(data.unreadBy) ? data.unreadBy : [];
+          if (unreadBy.includes(businessId)) unread += 1;
+
+          const buyerId = String(data.buyerId || '').trim();
+          if (buyerId) buyers.add(buyerId);
+
+          const ts = data.lastTimestamp && typeof data.lastTimestamp.toDate === 'function'
+            ? data.lastTimestamp.toDate()
+            : null;
+          if (ts && ts >= start7) recent7d += 1;
+        });
+
+        setText('leadTotalThreads', formatNumber(total));
+        setText('leadUnreadCount', formatNumber(unread));
+        setText('leadUniqueBuyers', formatNumber(buyers.size));
+        setText('leadRecent7d', formatNumber(recent7d));
+
+        snapshot.total = total;
+        snapshot.unread = unread;
+        snapshot.uniqueBuyers = buyers.size;
+        snapshot.recent7d = recent7d;
+      } catch (error) {
+        console.warn('Could not load leads/inbox snapshot:', error);
+        setText('leadTotalThreads', '-');
+        setText('leadUnreadCount', '-');
+        setText('leadUniqueBuyers', '-');
+        setText('leadRecent7d', '-');
+      }
+
+      return snapshot;
+    }
+
+    async function loadBusinessHubAnalytics(businessId, businessData) {
+      const leadsSnapshot = await loadLeadsInboxSnapshot(businessId);
+
+      const allTimeViews = Number(businessData?.viewCount || 0);
+      const rolling = await loadProfileRollingViewWindows(businessId);
+      const sevenDayViews = Number(rolling.sevenDay || 0);
+      const thirtyDayViews = Number(rolling.thirtyDay || 0);
+      const prevSevenDayViews = Number(rolling.previousSevenDay || 0);
+
+      setText('welcomeViews', formatNumber(thirtyDayViews));
+      setText('welcomeLeads', formatNumber(leadsSnapshot.total));
+
+      setText('viewsAllTime', formatNumber(allTimeViews));
+      setText('viewsAllTimeSub', 'Total profile views');
+
+      if (rolling.hasDailyData) {
+        setText('views7Day', formatNumber(sevenDayViews));
+        setOptionalCopy('views7DaySub', 'Last 7 days');
+        setText('views30Day', formatNumber(thirtyDayViews));
+        setOptionalCopy('views30DaySub', 'Last 30 days');
+
+        if (prevSevenDayViews > 0) {
+          const delta = sevenDayViews - prevSevenDayViews;
+          const percent = Math.round((delta / prevSevenDayViews) * 100);
+          setText('viewsTrend', `${percent >= 0 ? '+' : ''}${percent}%`);
+          setOptionalCopy('viewsTrendSub', `${delta >= 0 ? '+' : ''}${formatNumber(delta)} vs previous 7 days`);
+          setOptionalCopy('viewsAnalyticsNote', '');
+        } else {
+          setText('viewsTrend', '-');
+          setOptionalCopy('viewsTrendSub', '');
+          setOptionalCopy('viewsAnalyticsNote', '');
+        }
+      } else {
+        setText('views7Day', '-');
+        setOptionalCopy('views7DaySub', '');
+        setText('views30Day', '-');
+        setOptionalCopy('views30DaySub', '');
+        setText('viewsTrend', '-');
+        setOptionalCopy('viewsTrendSub', '');
+        setOptionalCopy('viewsAnalyticsNote', '');
+      }
+
+      const ratingAverage = Number(businessData?.ratingAverage || 0);
+      const ratingCount = Number(businessData?.ratingCount || 0);
+      setText('ratingAverage', ratingCount > 0 ? ratingAverage.toFixed(1) : '0.0');
+      setOptionalCopy('ratingStars', '');
+      setText('ratingCount', formatNumber(ratingCount));
+      setOptionalCopy('ratingCountSub', '');
+
+      try {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+        const reviewsSnap = await db.collection('businessReviews')
+          .where('businessId', '==', businessId)
+          .where('status', '==', 'approved')
+          .get();
+
+        let thisMonthCount = 0;
+        let previousMonthCount = 0;
+        reviewsSnap.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          const ts = data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : null;
+          if (!ts) return;
+
+          if (ts >= monthStart) thisMonthCount += 1;
+          if (ts >= prevMonthStart && ts <= prevMonthEnd) previousMonthCount += 1;
+        });
+
+        setText('newReviewsThisMonth', formatNumber(thisMonthCount));
+        setOptionalCopy('newReviewsThisMonthSub', '');
+
+        if (previousMonthCount > 0) {
+          const delta = thisMonthCount - previousMonthCount;
+          const percent = Math.round((delta / previousMonthCount) * 100);
+          setText('monthlyReviewTrend', `${percent >= 0 ? '+' : ''}${percent}%`);
+          setOptionalCopy('monthlyReviewTrendSub', '');
+        } else {
+          setText('monthlyReviewTrend', thisMonthCount > 0 ? '+100%' : '0%');
+          setOptionalCopy('monthlyReviewTrendSub', '');
+        }
+      } catch (error) {
+        console.warn('Could not load monthly review analytics:', error);
+        setText('newReviewsThisMonth', '-');
+        setOptionalCopy('newReviewsThisMonthSub', '');
+        setText('monthlyReviewTrend', '-');
+        setOptionalCopy('monthlyReviewTrendSub', '');
+      }
+    }
+
+    async function loadBusinessVerificationStatus(businessId, businessData) {
+      const welcomeNode = document.getElementById('welcomeVerification');
+      const stateNode = document.getElementById('businessVerificationState');
+      const noteNode = document.getElementById('businessVerificationNote');
+
+      let label = 'Pending';
+      let note = 'Verification is currently pending review.';
+
+      const userApproved = businessData?.isApproved === true || String(businessData?.approvalStatus || '').toLowerCase() === 'approved';
+      if (userApproved) {
+        label = 'Approved';
+        note = 'Your business verification is approved.';
+      }
+
+      try {
+        const claimsSnap = await db.collection('businessClaims').where('businessId', '==', businessId).get();
+        if (!claimsSnap.empty) {
+          let latestClaim = null;
+          let latestMs = 0;
+
+          claimsSnap.forEach((docSnap) => {
+            const claim = docSnap.data() || {};
+            const createdAt = claim.createdAt && typeof claim.createdAt.toDate === 'function'
+              ? claim.createdAt.toDate().getTime()
+              : 0;
+            if (createdAt >= latestMs) {
+              latestMs = createdAt;
+              latestClaim = claim;
+            }
+          });
+
+          const latestStatus = String(latestClaim?.claimStatus || '').toLowerCase();
+          if (!userApproved) {
+            if (latestStatus === 'approved') {
+              label = 'Approved';
+              note = 'Your most recent business verification claim was approved.';
+            } else if (latestStatus === 'rejected') {
+              label = 'Rejected';
+              note = 'Your latest verification claim was rejected. Please resubmit updated documents.';
+            } else if (latestStatus === 'under_review') {
+              label = 'Under Review';
+              note = 'Your verification claim is under review by the admin team.';
+            } else {
+              label = 'Pending';
+              note = 'Your verification claim has been submitted and is pending admin review.';
+            }
+          }
+        } else if (!userApproved) {
+          label = 'Not Submitted';
+          note = 'Submit your verification documents so admins can approve your business.';
+        }
+      } catch (error) {
+        console.warn('Could not load business verification status:', error);
+      }
+
+      if (welcomeNode) welcomeNode.textContent = label;
+      if (stateNode) stateNode.textContent = label;
+      if (noteNode) noteNode.textContent = note;
+    }
+
+    async function loadBusinessHubAccess() {
+      if (!auth || !db) {
+        setStatus('status-locked', 'Unable to verify access right now. Please refresh and try again.');
+        showAccessDenied();
+        return;
+      }
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'login.html?next=' + encodeURIComponent('business-hub.html');
+          return;
+        }
+
+        try {
+          const userDoc = await db.collection('users').doc(user.uid).get();
+          const data = userDoc.exists ? userDoc.data() : {};
+          const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get();
+          const businessLocalData = businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+          const businessData = { ...data, ...businessLocalData };
+
+          renderHubUserSummary(user, data);
+          loadBlockedUsers(data.blockedUsers || []);
+
+          const isAdminRole = (data.role || '').toLowerCase() === 'admin';
+          const isAdminLocal = localStorage.getItem('isAdmin') === 'true';
+          const isAdmin = isAdminRole || isAdminLocal;
+
+          const isBusiness = data.accountType === 'business';
+
+          if (isBusiness || isAdmin) {
+            await loadBusinessHubAnalytics(user.uid, businessData);
+            await loadBusinessVerificationStatus(user.uid, businessData);
+
+            // Update Add A Business card: always go to businesslocal.html (create or edit)
+            const addBusinessCard = document.getElementById('addBusinessCard');
+            const addBusinessDesc = document.getElementById('addBusinessDesc');
+            if (addBusinessCard) {
+              addBusinessCard.href = 'businesslocal.html';
+              if (addBusinessDesc) {
+                addBusinessDesc.textContent = businessData.businessName
+                  ? 'Edit or update your existing business profile.'
+                  : 'Create your business presence on Local List.';
+              }
+            }
+
+            if (isAdmin && !isBusiness) {
+              showBusinessHub('Admin access active. Business Hub tools are visible for review.');
+            } else {
+              showBusinessHub('Business account access active.');
+            }
+          } else {
+            showBusinessRequiredGate();
+          }
+        } catch (error) {
+          console.error('Business hub access check failed:', error);
+          setStatus('status-locked', 'Unable to verify access right now. Please try again.');
+          showAccessDenied();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadBusinessHubAccess);
+
+    // --- Business Verification ---
+    let hubVerificationFiles = [];
+
+    function hubFormatFileSize(bytes) {
+      const size = Number(bytes || 0);
+      if (!Number.isFinite(size) || size <= 0) return '';
+      if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+      if (size >= 1024) return `${Math.round(size / 1024)} KB`;
+      return `${size} B`;
+    }
+
+    function hubRebuildVerificationInput() {
+      const input = document.getElementById('hubVerificationDocuments');
+      if (!input) return;
+      const dt = new DataTransfer();
+      hubVerificationFiles.forEach((f) => dt.items.add(f));
+      input.files = dt.files;
+    }
+
+    function hubRenderVerificationPreview() {
+      const preview = document.getElementById('hubVerificationDocsPreview');
+      if (!preview) return;
+      if (!hubVerificationFiles.length) {
+        preview.innerHTML = '<div class="file-empty">No files selected yet.</div>';
+        return;
+      }
+      preview.innerHTML = hubVerificationFiles.map((file, index) => `
+        <div class="file-preview-item">
+          <div class="file-preview-left">
+            <span>📎</span>
+            <span class="file-preview-name">${escapeHtml(file.name)}</span>
+            <span class="file-preview-size">${hubFormatFileSize(file.size)} &middot; Ready</span>
+          </div>
+          <button type="button" class="file-remove-btn" onclick="hubRemoveVerificationFile(${index})">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    window.hubRemoveVerificationFile = function (index) {
+      if (!Number.isInteger(index) || index < 0 || index >= hubVerificationFiles.length) return;
+      hubVerificationFiles.splice(index, 1);
+      hubRebuildVerificationInput();
+      hubRenderVerificationPreview();
+    };
+
+    function hubSetVerificationMessage(msg, type) {
+      const errEl = document.getElementById('hubVerificationError');
+      const okEl = document.getElementById('hubVerificationSuccess');
+      if (!errEl || !okEl) return;
+      if (type === 'error') {
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+        okEl.style.display = 'none';
+      } else {
+        okEl.textContent = msg;
+        okEl.style.display = 'block';
+        errEl.style.display = 'none';
+      }
+    }
+
+    async function hubSubmitVerification() {
+      const submitBtn = document.getElementById('hubSubmitVerificationBtn');
+      if (!submitBtn) return;
+
+      const user = auth.currentUser;
+      if (!user) {
+        hubSetVerificationMessage('You must be logged in to submit verification.', 'error');
+        return;
+      }
+
+      if (!hubVerificationFiles.length) {
+        hubSetVerificationMessage('Please select at least one file to submit.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const businessName = (userDoc.data() || {}).businessName || 'Business Verification Submission';
+        const message = (document.getElementById('hubVerificationMessage').value || '').trim();
+        const claimMessage = message || 'Business verification documents submitted for admin review.';
+        const phone = (document.getElementById('hubVerificationPhone').value || '').trim();
+        const contactTime = (document.getElementById('hubVerificationContactTime').value || '').trim();
+        const allowContact = document.getElementById('hubVerificationContactConsent').checked;
+
+        const uploadedUrls = [];
+        for (const file of hubVerificationFiles) {
+          const ref = storage.ref(`businessVerificationDocuments/${user.uid}/${Date.now()}_${file.name}`);
+          await ref.put(file);
+          uploadedUrls.push(await ref.getDownloadURL());
+        }
+
+        await db.collection('businessClaims').add({
+          businessId: user.uid,
+          businessName,
+          claimImages: uploadedUrls,
+          claimMessage,
+          claimStatus: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          userEmail: user.email || '',
+          userId: user.uid,
+          contactPhone: phone || null,
+          contactTime: contactTime || null,
+          allowContact: allowContact,
+        });
+
+        hubVerificationFiles = [];
+        document.getElementById('hubVerificationDocuments').value = '';
+        document.getElementById('hubVerificationMessage').value = '';
+        document.getElementById('hubVerificationPhone').value = '';
+        document.getElementById('hubVerificationContactTime').value = '';
+        document.getElementById('hubVerificationContactConsent').checked = false;
+        hubRenderVerificationPreview();
+        hubSetVerificationMessage('✓ Verification documents submitted successfully. An admin will review them shortly.', 'success');
+      } catch (error) {
+        console.error('Error submitting verification:', error);
+        hubSetVerificationMessage('Failed to submit: ' + (error.message || 'Unknown error'), 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Verification';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const fileInput = document.getElementById('hubVerificationDocuments');
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          hubVerificationFiles = Array.from(e.target.files || []);
+          hubRenderVerificationPreview();
+        });
+      }
+
+      const clearBtn = document.getElementById('hubClearVerificationBtn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          hubVerificationFiles = [];
+          const input = document.getElementById('hubVerificationDocuments');
+          if (input) input.value = '';
+          document.getElementById('hubVerificationMessage').value = '';
+          document.getElementById('hubVerificationPhone').value = '';
+          document.getElementById('hubVerificationContactTime').value = '';
+          document.getElementById('hubVerificationContactConsent').checked = false;
+          hubRenderVerificationPreview();
+        });
+      }
+
+      const submitBtn = document.getElementById('hubSubmitVerificationBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', hubSubmitVerification);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const modal = event.target;
+      if (modal && modal.classList && modal.classList.contains('modal')) {
+        closeModal(modal.id);
+      }
+    });
+  </script>
+</body>
+</html>

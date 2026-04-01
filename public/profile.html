@@ -1,0 +1,3475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .profile-page-shell {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    
+    .profile-header {
+      background: transparent;
+      border-radius: 0;
+      padding: 24px;
+      margin-bottom: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .profile-overview {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .profile-overview-panel {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      margin-bottom: 0;
+    }
+
+    .profile-overview-panel + .profile-overview-panel {
+      border-top: none;
+    }
+    
+    .profile-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .profile-details {
+      text-align: center;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #475569, #3a4654);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    
+    .profile-details h1 {
+      font-size: 24px;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+    
+    .profile-details p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .profile-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+      max-width: 760px;
+      width: 100%;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #3a4654;
+    }
+    
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+    
+    .btn-danger {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #ff5252;
+    }
+    
+    .btn-success {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #45a049;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .listing-browser {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+
+    .tabs {
+      background: transparent;
+      padding: 18px 20px;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .listings-browser-title {
+      margin: 0;
+      padding: 16px 20px 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .tabs-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .tabs-select {
+      min-width: 260px;
+      max-width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: #fff;
+      color: #1f2937;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .tabs-select:focus {
+      outline: none;
+      border-color: #475569;
+      box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.15);
+    }
+    
+    .listings-section {
+      background: transparent;
+      border-radius: 0;
+      padding: 24px;
+      margin-bottom: 0;
+      box-shadow: none;
+    }
+
+    .sectioned-listings {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 20px 24px;
+    }
+
+    .sectioned-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .sectioned-header {
+      width: 100%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .sectioned-header-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      text-align: left;
+    }
+
+    .sectioned-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .sectioned-count {
+      min-width: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .sectioned-chevron {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .sectioned-body {
+      padding: 0 12px 12px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .sectioned-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .sectioned-tab {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sectioned-tab.active {
+      border-color: #1d4ed8;
+      background: #dbeafe;
+      color: #1e3a8a;
+    }
+
+    .listing-browser-panel {
+      background: transparent;
+      border-radius: 0;
+      margin-bottom: 0;
+      box-shadow: none;
+    }
+
+    .biz-promo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .info-promo {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-top: 4px solid #3b82f6;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .info-promo-image {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    }
+
+    .info-promo-media {
+      width: 100%;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .quick-action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      width: 100%;
+    }
+
+    .quick-action-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .quick-action-card .info-promo-image {
+      max-height: 250px;
+    }
+
+    .quick-action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+      border-color: #93c5fd;
+    }
+
+    .quick-action-card:focus-visible {
+      outline: 3px solid rgba(59, 130, 246, 0.35);
+      outline-offset: 2px;
+    }
+
+    .quick-action-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .quick-action-text {
+      margin: 0;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .featured-purchases {
+      margin-top: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 12px;
+    }
+
+    .featured-purchases-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .featured-purchases-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .featured-purchases-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .featured-purchases-tab {
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: #fff;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .featured-purchases-tab.active {
+      border-color: #3b82f6;
+      background: #dbeafe;
+      color: #1e3a8a;
+    }
+
+    .featured-purchase-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .featured-purchase-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .featured-purchase-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .featured-purchase-name {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .featured-purchase-chip {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .featured-purchase-chip.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .featured-purchase-chip.active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .featured-purchase-chip.archived {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .featured-purchase-meta {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .featured-purchases-toggle {
+      width: 100%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .featured-purchases-chevron {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .featured-purchases-body.collapsed {
+      display: none;
+    }
+
+    .featured-purchase-link {
+      align-self: flex-start;
+      margin-top: 4px;
+      text-decoration: none;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: #fff;
+      color: #1e3a8a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .featured-purchase-empty {
+      font-size: 13px;
+      color: #64748b;
+      text-align: center;
+      padding: 12px;
+      margin: 0;
+      background: #fff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+    }
+
+    .info-promo-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .info-promo-header {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2px;
+    }
+
+    .info-promo-main {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .info-promo-left {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .info-promo-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e3a8a;
+      line-height: 1.25;
+      text-align: center;
+      margin: 0;
+    }
+
+    .info-promo-text {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .info-promo-lines {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      margin: 0;
+    }
+
+    .info-promo-guidelines {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin: 0 auto;
+    }
+
+    .info-promo-subtitle {
+      width: 100%;
+      max-width: none;
+      text-align: left;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .info-promo-warning {
+      width: 100%;
+      max-width: none;
+      align-self: stretch;
+      background: #fffbeb;
+      border: 1px solid #fbbf24;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      min-height: 170px;
+    }
+
+    .info-promo-warning-title {
+      color: #92400e;
+      font-weight: 700;
+      font-size: 16px;
+      margin: 0 0 4px 0;
+    }
+
+    .info-promo-warning-text {
+      color: #78350f;
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .info-promo-list {
+      list-style: none;
+      padding: 0 0 0 16px;
+      margin: 0;
+      width: 100%;
+      max-width: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-promo-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .info-promo-list li::before {
+      content: "✓";
+      color: #22c55e;
+      font-weight: 700;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .info-promo-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: color 0.2s;
+      align-self: center;
+    }
+
+    .info-promo-link:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+
+    .biz-promo-image {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .biz-promo-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .biz-promo-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #78716c;
+      line-height: 1.25;
+    }
+
+    .biz-promo-text {
+      font-size: 14px;
+      color: #a8a29e;
+      line-height: 1.6;
+    }
+
+    .biz-promo-btn {
+      align-self: center;
+      padding: 10px 18px;
+      background: #475569;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .biz-promo-btn:hover {
+      background: #3b4a5a;
+    }
+
+    .onboarding-card {
+      margin-top: 12px;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .onboarding-layout {
+      display: grid;
+      grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .onboarding-media {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #dbeafe;
+      background: #fff;
+    }
+
+    .onboarding-image {
+      width: 100%;
+      height: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .onboarding-content {
+      min-width: 0;
+    }
+
+    .onboarding-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .onboarding-subtitle {
+      margin: 6px 0 10px;
+      font-size: 13px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .onboarding-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .onboarding-check {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin-top: 1px;
+      cursor: pointer;
+      color: #64748b;
+      font-size: 16px;
+      line-height: 1;
+      width: 18px;
+      text-align: center;
+    }
+
+    .onboarding-check.done {
+      color: #16a34a;
+    }
+
+    .onboarding-step-text {
+      font-size: 14px;
+      color: #1e293b;
+      line-height: 1.35;
+    }
+
+    .onboarding-link {
+      color: #1d4ed8;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      padding: 0;
+      font: inherit;
+      text-align: left;
+    }
+
+    .onboarding-actions {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .onboarding-progress-text {
+      font-size: 12px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .onboarding-progress-btn {
+      border: none;
+      border-radius: 8px;
+      background: #1d4ed8;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .onboarding-progress-btn:hover {
+      background: #1e40af;
+    }
+
+    #businessHubPromoSection .biz-promo-content {
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .info-promo {
+        grid-template-columns: 1fr;
+      }
+
+      .info-promo-main {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-promo-warning {
+        min-height: auto;
+      }
+
+      .biz-promo {
+        grid-template-columns: 1fr;
+      }
+
+      .onboarding-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .onboarding-image {
+        max-height: 210px;
+      }
+    }
+    
+    .listings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    
+    .listing-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      padding: 14px;
+      cursor: pointer;
+    }
+    
+    .listing-image {
+      width: 164px;
+      height: 124px;
+      border-radius: 12px;
+      background: #f0f0f0;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .listing-content {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .listing-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    
+    .listing-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .listing-meta-line {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 3px;
+    }
+
+    .listing-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .listing-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: #eef2f7;
+      color: #475569;
+    }
+
+    .listing-chip-featured {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .listing-chip-pending {
+      background: #fff7ed;
+      color: #9a3412;
+    }
+    
+    .listing-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .listing-actions button {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      font-size: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .pending-disclaimer {
+      display: block;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-left: 4px solid #f97316;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      color: #7c2d12;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      font-size: 20px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+      display: block;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f8f8f8;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #475569;
+      background: #fff;
+    }
+    
+    .photo-upload {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #475569, #3a4654);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto 16px;
+      border: 2px solid #ddd;
+    }
+    
+    .photo-upload:hover {
+      opacity: 0.9;
+    }
+    
+    .photo-upload img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-hint {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 16px;
+    }
+    
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .switch-label {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      background: #ccc;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .toggle-switch.active {
+      background: #475569;
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s;
+    }
+    
+    .toggle-switch.active::after {
+      left: 24px;
+    }
+    
+    .section-divider {
+      margin: 20px 0;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .profile-info {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .listing-card {
+        flex-direction: column;
+      }
+
+      .listing-image {
+        width: 100%;
+        height: 220px;
+      }
+
+      .listing-actions button {
+        flex: 1 1 140px;
+      }
+      
+      .profile-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK (Compat for HTML/JS) -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <!-- Email Verification Banner -->
+  <div id="verificationBanner" style="display: none; background: #fff3e0; border-bottom: 4px solid #ff9800; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 16px; justify-content: space-between;">
+      <div style="display: flex; gap: 12px;">
+        <span style="font-size: 20px;">⚠️</span>
+        <div>
+          <p style="color: #e65100; font-weight: 600; margin: 0 0 4px 0;">Email Verification Required</p>
+          <p style="color: #555; font-size: 14px; margin: 0;">Please verify your email address to unlock all features.</p>
+        </div>
+      </div>
+      <button onclick="sendVerificationEmailFromProfile()" style="background: #ff9800; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.3s;">
+        Send Email
+      </button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="profile-page-shell">
+      <div class="profile-overview">
+      <!-- Profile Header -->
+      <div class="profile-header profile-overview-panel">
+        <div class="profile-info">
+          <div class="profile-avatar" id="profileAvatar">👤</div>
+          <div class="profile-details">
+            <h1 id="profileName">Loading...</h1>
+            <p id="profileEmail">Loading...</p>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-secondary" onclick="openModal('settingsModal')">Update Profile</button>
+          <button id="businessHubBtn" class="btn btn-secondary" onclick="window.location.href='business-hub.html'" style="display:none;">Business Hub</button>
+          <button id="adminPanelBtn" class="btn btn-secondary" onclick="window.location.href='admin.html'" style="display:none;">Admin Panel</button>
+          <button class="btn btn-secondary" onclick="openModal('blockedModal')">Blocked Users</button>
+          <button class="btn btn-primary" onclick="window.location.href='create-listing.html'">List Hub</button>
+          <button class="btn btn-secondary" onclick="window.location.href='messages.html'">Messages</button>
+          <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+
+      <section class="onboarding-card" id="onboardingSection" aria-label="Onboarding progress" style="display: none;">
+        <div class="onboarding-layout">
+          <div class="onboarding-media">
+            <img class="onboarding-image" src="welcomeprof.png" alt="Welcome to Local List profile onboarding">
+          </div>
+
+          <div class="onboarding-content">
+            <h3 class="onboarding-title">Welcome to Local List! We are happy to have you here!</h3>
+            <p class="onboarding-subtitle">Here are some action steps to help:</p>
+
+            <div class="onboarding-step">
+              <button id="stepCheckVerifyEmail" class="onboarding-check" onclick="toggleOnboardingStep('verifyEmail')" aria-label="Toggle verify email">○</button>
+              <div class="onboarding-step-text">Verify your email</div>
+            </div>
+
+            <div class="onboarding-step">
+              <button id="stepCheckCompleteProfile" class="onboarding-check" onclick="toggleOnboardingStep('completeProfile')" aria-label="Toggle complete profile">○</button>
+              <div class="onboarding-step-text">Complete your profile</div>
+            </div>
+
+            <div class="onboarding-step">
+              <button id="stepCheckPostFirstItem" class="onboarding-check" onclick="toggleOnboardingStep('postFirstItem')" aria-label="Toggle post first item">○</button>
+              <button class="onboarding-link" onclick="openListHubFromOnboarding()">Post your first item (List Hub)</button>
+            </div>
+
+            <div class="onboarding-step">
+              <button id="stepCheckReadMessages" class="onboarding-check" onclick="toggleOnboardingStep('readMessages')" aria-label="Toggle read messages">○</button>
+              <button class="onboarding-link" onclick="openMessagesFromOnboarding()">Read your messages</button>
+            </div>
+
+            <div class="onboarding-step">
+              <button id="stepCheckFirstSale" class="onboarding-check" onclick="toggleOnboardingStep('firstSale')" aria-label="Toggle first sale">○</button>
+              <div class="onboarding-step-text">Get your first sale (auto-completes when a listing is sold)</div>
+            </div>
+
+            <div class="onboarding-actions">
+              <div id="onboardingProgressText" class="onboarding-progress-text">Progress: 0/5 steps complete</div>
+              <button class="onboarding-progress-btn" onclick="showOnboardingProgress()">View Progress</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="info-promo" aria-label="Profile management information">
+        <div class="info-promo-content">
+          <div class="info-promo-header">
+            <h2 class="info-promo-title">Community Guidelines</h2>
+          </div>
+          <div class="info-promo-main">
+            <div class="info-promo-left">
+              <p class="info-promo-subtitle">Keep Local List safe and friendly for everyone:</p>
+              <ul class="info-promo-list">
+                <li>Be respectful and meet in safe, public places every time.</li>
+                <li>Be honest in your descriptions and provide clear photos.</li>
+                <li>No illegal items, scams, or offensive content are allowed.</li>
+                <li>Report suspicious activity and block users if needed.</li>
+              </ul>
+              <a href="community-guidelines.html" class="info-promo-link">Read full community guidelines →</a>
+
+            </div>
+            <div class="info-promo-warning">
+              <p class="info-promo-warning-title">⚠️ Violations May Result In Suspension</p>
+              <p class="info-promo-warning-text">Repeated or serious violations can lead to account suspension or removal.</p>
+            </div>
+          </div>
+        </div>
+        <div class="info-promo-media" id="infoPromoMedia">
+          <div class="quick-action-grid" aria-label="Quick actions">
+            <button class="quick-action-card" onclick="window.location.href='list-hub.html'" aria-label="Open List Hub">
+              <img class="info-promo-image" src="listhub.png" alt="Go to List Hub">
+              <h3 class="quick-action-title">List Hub</h3>
+              <p class="quick-action-text">Post Marketplace items, Yard Sales, Events, Pets, and Services.</p>
+            </button>
+            <button class="quick-action-card" onclick="openModal('upgradeModal')" aria-label="Upgrade to a business account">
+              <img class="info-promo-image" src="businsshub.png" alt="Upgrade to a business account">
+              <h3 class="quick-action-title">Upgrade to a Business</h3>
+              <p class="quick-action-text">Unlock business tools, profile visibility, and promotion options.</p>
+            </button>
+          </div>
+          <section class="featured-purchases" id="featuredPurchasesSection" aria-label="Featured purchases">
+            <div class="featured-purchases-header">
+              <button class="featured-purchases-toggle" onclick="toggleFeaturedPurchasesCollapsed()" aria-expanded="true" id="featuredPurchasesToggle">
+                <h3 class="featured-purchases-title">Featured Purchases</h3>
+                <span class="featured-purchases-chevron" id="featuredPurchasesChevron">▲</span>
+              </button>
+            </div>
+            <div id="featuredPurchasesBody" class="featured-purchases-body">
+              <div class="featured-purchases-tabs" role="tablist" aria-label="Featured purchase status">
+                <button id="featuredPurchaseTabPending" class="featured-purchases-tab active" role="tab" onclick="setFeaturedPurchaseTab('pending')">Pending</button>
+                <button id="featuredPurchaseTabActive" class="featured-purchases-tab" role="tab" onclick="setFeaturedPurchaseTab('active')">Active</button>
+                <button id="featuredPurchaseTabArchived" class="featured-purchases-tab" role="tab" onclick="setFeaturedPurchaseTab('archived')">Archived</button>
+              </div>
+              <div id="featuredPurchasesList" class="featured-purchase-list">
+                <p class="featured-purchase-empty">Loading featured purchases...</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+      </div>
+
+      <!-- Business Hub Row (business users only) -->
+      <section class="biz-promo" id="businessHubPromoSection" aria-label="Business hub quick access" style="display: none;">
+        <img class="biz-promo-image" src="businesshubs.png" alt="Open your business hub on Local List">
+        <div class="biz-promo-content">
+          <h2 class="biz-promo-title">Business Hub Access</h2>
+          <p class="biz-promo-text">Manage your business tools, promotions, analytics, and listings from one place.</p>
+          <button class="biz-promo-btn" onclick="window.location.href='business-hub.html'">Go To The Hub</button>
+        </div>
+      </section>
+
+      <div class="listing-browser" id="profileListingsBrowser">
+        <h2 class="listings-browser-title">Your Listing Types</h2>
+        <div id="sectionedListingsContainer" class="sectioned-listings"></div>
+
+        <div id="legacyListingsBrowser" style="display: none;">
+        <!-- Listings Filter -->
+        <div class="tabs">
+          <label class="tabs-label" for="listingTypeSelect">Choose what to display</label>
+          <select id="listingTypeSelect" class="tabs-select" onchange="switchTab(this.value)">
+            <option value="active">Active</option>
+            <option value="marketplace">Marketplace</option>
+            <option value="yardSales">Yard Sales</option>
+            <option value="events">Events</option>
+            <option value="pets">Pets</option>
+            <option value="services">My Services</option>
+            <option value="featured">Featured</option>
+            <option value="pending">Pending (0)</option>
+            <option value="sold">Sold</option>
+            <option value="expired">Archived (0)</option>
+          </select>
+        </div>
+      
+        <!-- Active Listings Tab -->
+        <div id="activeTab" class="listings-section listing-browser-panel">
+          <div id="activeListingsContainer" class="listings-grid">
+            <div class="loading">Loading listings...</div>
+          </div>
+        </div>
+
+        <!-- Marketplace Tab -->
+        <div id="marketplaceTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="marketplaceListingsContainer" class="listings-grid">
+            <div class="loading">Loading marketplace listings...</div>
+          </div>
+        </div>
+
+        <!-- Yard Sales Tab -->
+        <div id="yardSalesTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="yardSalesListingsContainer" class="listings-grid">
+            <div class="loading">Loading yard sales...</div>
+          </div>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="eventsTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="eventsListingsContainer" class="listings-grid">
+            <div class="loading">Loading events...</div>
+          </div>
+        </div>
+
+        <!-- Pending Tab -->
+        <div id="pendingTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="pendingDisclaimer" class="pending-disclaimer">
+            <strong>Pending Review Notice:</strong> Service posts require admin approval to help prevent fraud and protect our community. If you opted in for a featured listing and your listing is rejected, we will process a refund for the transaction. We will also email you with more information and details on the decision.
+          </div>
+          <div id="pendingListingsContainer" class="listings-grid">
+            <div class="loading">Loading pending items...</div>
+          </div>
+        </div>
+      
+        <!-- Featured Listings Tab -->
+        <div id="featuredTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="featuredListingsContainer" class="listings-grid">
+            <div class="loading">Loading listings...</div>
+          </div>
+        </div>
+      
+        <!-- Sold Listings Tab -->
+        <div id="soldTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="soldListingsContainer" class="listings-grid">
+            <div class="loading">Loading listings...</div>
+          </div>
+        </div>
+
+        <!-- Expired Listings Tab -->
+        <div id="expiredTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="expiredListingsContainer" class="listings-grid">
+            <div class="loading">Loading listings...</div>
+          </div>
+        </div>
+      
+        <!-- Saved Listings Tab -->
+        <div id="savedTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="savedListingsContainer" class="listings-grid">
+            <div class="loading">Loading listings...</div>
+          </div>
+        </div>
+
+        <!-- Pet Listings Tab -->
+        <div id="petsTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="petListingsContainer" class="listings-grid">
+            <div class="loading">Loading pet listings...</div>
+          </div>
+        </div>
+
+        <!-- Services Tab -->
+        <div id="servicesTab" class="listings-section listing-browser-panel" style="display: none;">
+          <div id="servicesListingsContainer" class="listings-grid">
+            <div class="loading">Loading services...</div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        Update Your Profile
+        <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+      </div>
+      
+      <!-- Profile Photo -->
+      <div onclick="document.getElementById('photoInput').click()" class="photo-upload" id="profilePhotoUpload" title="Click to upload">
+        <span id="photoPlaceholder">📷</span>
+        <img id="uploadedPhoto" style="display: none;">
+      </div>
+      <p class="photo-hint">Click to change your profile photo</p>
+      <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+      
+      <div class="form-group">
+        <label class="form-label" for="settingName">Display Name</label>
+        <input type="text" class="form-input" id="settingName" placeholder="Enter the name you want shown publicly">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="settingEmail">Email</label>
+        <input type="email" class="form-input" id="settingEmail" disabled style="background: #f0f0f0;">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="settingPhone">Phone Number</label>
+        <input type="tel" class="form-input" id="settingPhone" placeholder="(555) 123-4567">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="settingZipCode">Zip Code</label>
+        <input type="text" class="form-input" id="settingZipCode" placeholder="12345">
+      </div>
+      
+      <div class="section-divider">
+        <h3 style="color: #475569; font-size: 16px; margin-bottom: 16px;">Notification Preferences</h3>
+        
+        <div class="switch-row">
+          <span class="switch-label">Message Notifications</span>
+          <div class="toggle-switch" id="messageNotifToggle" onclick="toggleNotif('message')"></div>
+        </div>
+        
+        <div class="switch-row">
+          <span class="switch-label">Daily Digest</span>
+          <div class="toggle-switch" id="digestNotifToggle" onclick="toggleNotif('digest')"></div>
+        </div>
+        
+        <div class="switch-row">
+          <span class="switch-label">Listing Notifications</span>
+          <div class="toggle-switch" id="listingNotifToggle" onclick="toggleNotif('listing')"></div>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="saveSettings()">Save Changes</button>
+    </div>
+  </div>
+  <!-- Community Guidelines Modal -->
+  <div id="guidelinesModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        Community Guidelines
+        <button class="modal-close" onclick="closeModal('guidelinesModal')">✕</button>
+      </div>
+      <h3 style="margin-top: 16px; color: #475569;">Be Safe & Respectful</h3>
+      <ul style="margin: 12px 0 12px 20px; line-height: 1.8;">
+        <li>Treat all community members with respect</li>
+        <li>No hate speech, harassment, or discrimination</li>
+        <li>Don't post prohibited items or illegal content</li>
+        <li>Be honest in your listings and descriptions</li>
+        <li>Meet in safe, public places for transactions</li>
+        <li>Report suspicious activity immediately</li>
+      </ul>
+      <p style="color: #666; font-size: 14px;">Violation of these guidelines may result in your account being suspended or terminated.</p>
+    </div>
+  </div>
+  
+  
+  <!-- Blocked Users Modal -->
+  <div id="blockedModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        Blocked Users
+        <button class="modal-close" onclick="closeModal('blockedModal')">✕</button>
+      </div>
+      <div id="blockedUsersList" style="margin-top: 16px;">
+        <p style="color: #999; text-align: center;">No blocked users</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Upgrade to Business Modal -->
+  <div id="upgradeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        💼 Upgrade to Business Account
+        <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
+      </div>
+      <p style="color: #666; margin: 16px 0; line-height: 1.6;">
+        Upgrade your account to a business account to access additional features and showcase your business information.
+      </p>
+      
+      <div class="form-group">
+        <label class="form-label" for="upgradeBusinessName">Business Name *</label>
+        <input type="text" class="form-input" id="upgradeBusinessName" placeholder="Enter your business name">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="upgradeBusinessDescription">Business Description</label>
+        <textarea class="form-input" id="upgradeBusinessDescription" rows="4" placeholder="Describe your business"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="upgradeBusinessPhone">Business Phone</label>
+        <input type="tel" class="form-input" id="upgradeBusinessPhone" placeholder="(555) 123-4567">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="upgradeBusinessWebsite">Business Website</label>
+        <input type="url" class="form-input" id="upgradeBusinessWebsite" placeholder="https://www.example.com">
+      </div>
+      
+      <div class="form-group">
+        <div class="form-label">Business Tier</div>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <button type="button" class="tier-option" id="upgradeTierFree" onclick="setUpgradeTier('free')" style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 600; color: #666;" data-selected="true">Free</button>
+          <button type="button" class="tier-option" id="upgradeTierPremium" onclick="setUpgradeTier('premium')" style="flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 600; color: #666;">Premium</button>
+        </div>
+      </div>
+      
+      <button class="btn btn-success" style="width: 100%; margin-top: 20px;" onclick="handleUpgradeToBusiness()">
+        Complete Upgrade
+      </button>
+    </div>
+  </div>
+  
+  <!-- Edit Business Modal -->
+  <div id="editBusinessModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        📝 Edit Business Profile
+        <button class="modal-close" onclick="closeModal('editBusinessModal')">✕</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editBusinessName">Business Name *</label>
+        <input type="text" class="form-input" id="editBusinessName" placeholder="Enter your business name">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editBusinessDescription">Business Description</label>
+        <textarea class="form-input" id="editBusinessDescription" rows="4" placeholder="Describe your business"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editBusinessPhone">Business Phone</label>
+        <input type="tel" class="form-input" id="editBusinessPhone" placeholder="(555) 123-4567">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editBusinessWebsite">Business Website</label>
+        <input type="url" class="form-input" id="editBusinessWebsite" placeholder="https://www.example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editBusinessAddress">Business Address</label>
+        <textarea class="form-input" id="editBusinessAddress" rows="3" placeholder="123 Main Street, Suite 100&#10;Your City, State 12345"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editBusinessCategory">Business Category</label>
+        <input type="text" class="form-input" id="editBusinessCategory" placeholder="e.g., Restaurant, Retail, Services">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editBusinessHours">Business Hours</label>
+        <textarea class="form-input" id="editBusinessHours" rows="3" placeholder="Mon-Fri: 9am-5pm&#10;Sat: 10am-2pm&#10;Sun: Closed"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editBusinessLogo">Business Logo</label>
+        <input type="file" class="form-input" id="editBusinessLogo" accept="image/*">
+        <small style="color: #888; margin-top: 4px; display: block;">PNG, JPG, GIF, or WebP (Max 5MB)</small>
+        <img id="editBusinessLogoPreview" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 12px; display: none;">
+      </div>
+      
+      <button class="btn btn-success" style="width: 100%; margin-top: 20px;" onclick="handleSaveBusinessProfile()">
+        Save Business Profile
+      </button>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const app = window.firebaseApp;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+
+    let currentUser = null;
+    let userData = null;
+    let activeListings = [];
+    let marketplaceListings = [];
+    let yardSaleListings = [];
+    let eventListings = [];
+    let soldListings = [];
+    let expiredListings = [];
+    let savedListings = [];
+    let featuredListings = [];
+    let petListings = [];
+    let pendingListings = [];
+    let pendingPetListings = [];
+    let pendingServices = [];
+    let activeServices = [];
+    let featuredPurchases = [];
+    let activeFeaturedPurchaseTab = 'pending';
+    let featuredPurchasesCollapsed = false;
+    let sectionedListingState = {
+      marketplace: { tab: 'active', collapsed: false },
+      eventsYardSales: { tab: 'active', collapsed: false },
+      pets: { tab: 'active', collapsed: false },
+      services: { tab: 'active', collapsed: false },
+    };
+    let showPendingDisclaimerFromCheckout = false;
+    let verificationPollIntervalId = null;
+    const ONBOARDING_STORAGE_KEY_PREFIX = 'profile-onboarding-checks-v1';
+    let onboardingManualChecks = {
+      verifyEmail: false,
+      completeProfile: false,
+      postFirstItem: false,
+      readMessages: false,
+      firstSale: false,
+    };
+    let notificationPrefs = {
+      message: false,
+      digest: false,
+      listing: false
+    };
+
+    function getOnboardingStorageKey() {
+      if (!currentUser?.uid) return null;
+      return `${ONBOARDING_STORAGE_KEY_PREFIX}:${currentUser.uid}`;
+    }
+
+    function loadOnboardingManualChecks() {
+      const key = getOnboardingStorageKey();
+      if (!key) {
+        onboardingManualChecks = {
+          verifyEmail: false,
+          completeProfile: false,
+          postFirstItem: false,
+          readMessages: false,
+          firstSale: false,
+        };
+        return;
+      }
+
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        onboardingManualChecks = {
+          verifyEmail: Boolean(parsed.verifyEmail),
+          completeProfile: Boolean(parsed.completeProfile),
+          postFirstItem: Boolean(parsed.postFirstItem),
+          readMessages: Boolean(parsed.readMessages),
+          firstSale: Boolean(parsed.firstSale),
+        };
+      } catch {
+        onboardingManualChecks = {
+          verifyEmail: false,
+          completeProfile: false,
+          postFirstItem: false,
+          readMessages: false,
+          firstSale: false,
+        };
+      }
+    }
+
+    function persistOnboardingManualChecks() {
+      const key = getOnboardingStorageKey();
+      if (!key) return;
+      try {
+        localStorage.setItem(key, JSON.stringify(onboardingManualChecks));
+      } catch {}
+    }
+
+    function getOnboardingStatus() {
+      const hasVerifiedEmail = Boolean(currentUser?.emailVerified) || onboardingManualChecks.verifyEmail;
+      const hasCompletedProfile = Boolean(
+        (userData?.displayName || userData?.name) &&
+        (userData?.zipCode || userData?.zip || userData?.city)
+      ) || onboardingManualChecks.completeProfile;
+
+      const totalOwnedPosts =
+        marketplaceListings.length +
+        yardSaleListings.length +
+        eventListings.length +
+        pendingListings.length +
+        expiredListings.length +
+        soldListings.length +
+        petListings.length +
+        pendingPetListings.length +
+        activeServices.length +
+        pendingServices.length;
+
+      const hasPostedFirstItem = totalOwnedPosts > 0 || onboardingManualChecks.postFirstItem;
+      const hasReadMessages = onboardingManualChecks.readMessages;
+      const hasFirstSale = soldListings.length > 0 || onboardingManualChecks.firstSale;
+
+      return {
+        hasVerifiedEmail,
+        hasCompletedProfile,
+        hasPostedFirstItem,
+        hasReadMessages,
+        hasFirstSale,
+      };
+    }
+
+    function setStepVisual(elementId, completed) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.textContent = completed ? '✓' : '○';
+      el.classList.toggle('done', completed);
+    }
+
+    function updateOnboardingUI() {
+      const section = document.getElementById('onboardingSection');
+      if (!section) return;
+
+      const isBusiness = userData?.accountType === 'business';
+      section.style.display = isBusiness ? 'none' : 'block';
+      if (isBusiness) return;
+
+      const status = getOnboardingStatus();
+      const completed = [
+        status.hasVerifiedEmail,
+        status.hasCompletedProfile,
+        status.hasPostedFirstItem,
+        status.hasReadMessages,
+        status.hasFirstSale,
+      ].filter(Boolean).length;
+
+      setStepVisual('stepCheckVerifyEmail', status.hasVerifiedEmail);
+      setStepVisual('stepCheckCompleteProfile', status.hasCompletedProfile);
+      setStepVisual('stepCheckPostFirstItem', status.hasPostedFirstItem);
+      setStepVisual('stepCheckReadMessages', status.hasReadMessages);
+      setStepVisual('stepCheckFirstSale', status.hasFirstSale);
+
+      const progressText = document.getElementById('onboardingProgressText');
+      if (progressText) {
+        progressText.textContent = `Progress: ${completed}/5 steps complete`;
+      }
+    }
+
+    function toggleOnboardingStep(stepKey) {
+      if (!Object.prototype.hasOwnProperty.call(onboardingManualChecks, stepKey)) return;
+      onboardingManualChecks[stepKey] = !Boolean(onboardingManualChecks[stepKey]);
+      persistOnboardingManualChecks();
+      updateOnboardingUI();
+    }
+
+    function openListHubFromOnboarding() {
+      onboardingManualChecks.postFirstItem = true;
+      persistOnboardingManualChecks();
+      updateOnboardingUI();
+      window.location.href = 'list-hub.html';
+    }
+
+    function openMessagesFromOnboarding() {
+      onboardingManualChecks.readMessages = true;
+      persistOnboardingManualChecks();
+      updateOnboardingUI();
+      window.location.href = 'messages.html';
+    }
+
+    function showOnboardingProgress() {
+      const status = getOnboardingStatus();
+      const steps = [
+        ['Verify your email', status.hasVerifiedEmail],
+        ['Complete your profile', status.hasCompletedProfile],
+        ['Post your first item', status.hasPostedFirstItem],
+        ['Read your messages', status.hasReadMessages],
+        ['Get your first sale', status.hasFirstSale],
+      ];
+      const completed = steps.filter(([, done]) => done).length;
+      const lines = steps.map(([name, done]) => `${done ? '✓' : '○'} ${name}`).join('\n');
+      alert(`You have completed ${completed}/5 setup steps.\n\n${lines}`);
+    }
+
+    function startEmailVerificationPolling() {
+      if (verificationPollIntervalId) return;
+      verificationPollIntervalId = window.setInterval(async () => {
+        if (!currentUser) return;
+        try {
+          await currentUser.reload();
+          const shouldContinuePolling = checkEmailVerification(currentUser);
+          if (!shouldContinuePolling) {
+            stopEmailVerificationPolling();
+          }
+        } catch (error) {
+          console.error('Error checking email verification:', error);
+        }
+      }, 30000);
+    }
+
+    function stopEmailVerificationPolling() {
+      if (!verificationPollIntervalId) return;
+      clearInterval(verificationPollIntervalId);
+      verificationPollIntervalId = null;
+    }
+
+    function isExpiredListing(listing) {
+      if (!listing || !listing.expiresAt) return false;
+      const expiresAt = listing.expiresAt.toDate
+        ? listing.expiresAt.toDate()
+        : new Date(listing.expiresAt);
+      if (!(expiresAt instanceof Date) || Number.isNaN(expiresAt.getTime())) {
+        return false;
+      }
+      return expiresAt < new Date();
+    }
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        loadOnboardingManualChecks();
+        const checkoutParam = new URLSearchParams(window.location.search).get('checkout');
+        showPendingDisclaimerFromCheckout = checkoutParam === 'featured';
+        
+        // Reload to get latest email verification status
+        await user.reload();
+        
+        // Force refresh of ID token to ensure latest auth state
+        await user.getIdToken(true);
+        
+        // Show verification banner if email not verified
+        const shouldPoll = checkEmailVerification(user);
+        if (shouldPoll) {
+          startEmailVerificationPolling();
+        } else {
+          stopEmailVerificationPolling();
+        }
+        
+        loadProfileData();
+        loadListings();
+        loadFeaturedPurchases();
+        
+        // Check if we need to switch to saved listings tab
+        if (window.location.hash === '#saved') {
+          setTimeout(() => {
+            switchTab('saved');
+          }, 500);
+        } else if (window.location.hash === '#pending') {
+          setTimeout(() => {
+            switchTab('pending');
+          }, 500);
+        } else if (showPendingDisclaimerFromCheckout) {
+          setTimeout(() => {
+            switchTab('pending');
+          }, 500);
+        }
+      } else {
+        stopEmailVerificationPolling();
+        // Not logged in, redirect to login
+        window.location.href = 'login.html';
+      }
+    });
+
+    function updateProfileAvatar(initials, imageUrl) {
+      const avatar = document.getElementById('profileAvatar');
+      if (imageUrl) {
+        avatar.innerHTML = `<img src="${imageUrl}" alt="Profile photo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        avatar.style.background = 'transparent';
+      } else {
+        avatar.textContent = initials;
+        avatar.style.background = '';
+      }
+    }
+
+    function checkEmailVerification(user) {
+      const banner = document.getElementById('verificationBanner');
+      if (!user) {
+        banner.style.display = 'none';
+        return false;
+      }
+
+      const isPasswordAuth = user.providerData && user.providerData.length > 0 &&
+                           user.providerData[0].providerId === 'password';
+      const requiresVerification = isPasswordAuth && !user.emailVerified;
+
+      if (requiresVerification) {
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+
+      return requiresVerification;
+    }
+
+    async function sendVerificationEmailFromProfile() {
+      try {
+        await currentUser.sendEmailVerification({
+          url: 'https://app.locallist.biz/verify-email.html'
+        });
+        alert('Verification email sent! Please check your inbox.');
+      } catch (error) {
+        console.error('Error sending verification email:', error);
+        alert('Error sending verification email: ' + error.message);
+      }
+    }
+
+    async function loadProfileData() {
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        userData = userDoc.data() || {};
+        
+        // Update profile header
+        document.getElementById('profileName').textContent = userData.displayName || currentUser.email;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        
+        // Set avatar initials or image
+        const initials = (userData.displayName || currentUser.email).charAt(0).toUpperCase();
+        updateProfileAvatar(initials, userData.profileimage);
+        
+        // Show/hide admin panel button
+        const adminPanelBtn = document.getElementById('adminPanelBtn');
+        if (userData.role === 'admin') {
+          adminPanelBtn.style.display = 'inline-block';
+        }
+
+        // Show/hide business controls based on account type
+        const businessHubBtn = document.getElementById('businessHubBtn');
+        const bizPromoSection = document.getElementById('bizPromoSection');
+        const businessHubPromoSection = document.getElementById('businessHubPromoSection');
+        const infoPromoMedia = document.getElementById('infoPromoMedia');
+        const profileListingsBrowser = document.getElementById('profileListingsBrowser');
+        if (userData.accountType !== 'business') {
+          businessHubBtn.style.display = 'none';
+          if (bizPromoSection) bizPromoSection.style.display = 'grid';
+          if (businessHubPromoSection) businessHubPromoSection.style.display = 'none';
+          if (infoPromoMedia) infoPromoMedia.style.display = 'block';
+          if (profileListingsBrowser) profileListingsBrowser.style.display = 'block';
+        } else {
+          businessHubBtn.style.display = 'inline-block';
+          if (bizPromoSection) bizPromoSection.style.display = 'none';
+          if (businessHubPromoSection) businessHubPromoSection.style.display = 'grid';
+          if (infoPromoMedia) infoPromoMedia.style.display = 'none';
+          if (profileListingsBrowser) profileListingsBrowser.style.display = 'none';
+        }
+        
+        // Load settings fields
+        document.getElementById('settingName').value = userData.displayName || currentUser.displayName || 'User';
+        document.getElementById('settingEmail').value = currentUser.email;
+        document.getElementById('settingPhone').value = userData.phone || '';
+        document.getElementById('settingZipCode').value = userData.zipCode || '';
+        
+        // Load notification preferences
+        notificationPrefs.message = userData.messageNotification ?? false;
+        notificationPrefs.digest = userData.digestNotification ?? false;
+        notificationPrefs.listing = userData.listingUpNotification ?? false;
+        updateToggleSwitches();
+        
+        // Load profile photo if exists
+        if (userData.profileimage) {
+          const photoImg = document.getElementById('uploadedPhoto');
+          photoImg.src = userData.profileimage;
+          photoImg.style.display = 'block';
+          document.getElementById('photoPlaceholder').style.display = 'none';
+        }
+        
+        // Load blocked users
+        loadBlockedUsers(userData.blockedUsers || []);
+        updateOnboardingUI();
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    }
+
+    async function loadListings() {
+      try {
+        // Load user's listings
+        const snapshot = await db.collection('listings')
+          .where('userId', '==', currentUser.uid)
+          .orderBy('createdAt', 'desc')
+          .get();
+
+        activeListings = [];
+        marketplaceListings = [];
+        yardSaleListings = [];
+        eventListings = [];
+        soldListings = [];
+        expiredListings = [];
+
+        featuredListings = [];
+        pendingListings = [];
+        
+        snapshot.forEach(doc => {
+          const listing = { id: doc.id, ...doc.data() };
+          if (listing.status === 'sold') {
+            soldListings.push(listing);
+          } else if (listing.status === 'pending') {
+            pendingListings.push(listing);
+          } else if (isExpiredListing(listing)) {
+            expiredListings.push(listing);
+          } else {
+            marketplaceListings.push(listing);
+          }
+          
+          // Check if listing is currently featured and not expired
+          if (listing.isFeatured && listing.featureExpiresAt) {
+            const expiresAt = listing.featureExpiresAt.toDate ? listing.featureExpiresAt.toDate() : new Date(listing.featureExpiresAt);
+            if (expiresAt > new Date()) {
+              featuredListings.push(listing);
+            }
+          }
+        });
+
+        // Load saved listings
+        try {
+          const savedSnapshot = await db.collection('saveListings')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+          savedListings = [];
+          savedSnapshot.forEach(doc => {
+            const saved = { id: doc.id, ...doc.data() };
+            savedListings.push(saved);
+          });
+
+          // Sort by savedAt descending
+          savedListings.sort((a, b) => {
+            const timeA = a.savedAt?.toDate?.() || new Date(a.savedAt) || 0;
+            const timeB = b.savedAt?.toDate?.() || new Date(b.savedAt) || 0;
+            return timeB - timeA;
+          });
+        } catch (saveError) {
+          console.error('Error loading saved listings:', saveError);
+          savedListings = [];
+        }
+
+        // Load pet listings
+        try {
+          const petSnapshot = await db.collection('pets')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('createdAt', 'desc')
+            .get();
+
+          petListings = [];
+          pendingPetListings = [];
+          petSnapshot.forEach(doc => {
+            const pet = { id: doc.id, ...doc.data() };
+            const pending = pet.isApproved === false || pet.status === 'pending' || pet.approvalStatus === 'pending';
+            if (pending) {
+              pendingPetListings.push(pet);
+            } else {
+              petListings.push(pet);
+            }
+          });
+        } catch (petError) {
+          console.error('Error loading pet listings:', petError);
+          petListings = [];
+          pendingPetListings = [];
+        }
+
+        // Load yard sales
+        try {
+          const yardSalesSnapshot = await db.collection('yardSales')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+          yardSaleListings = [];
+          yardSalesSnapshot.forEach(doc => {
+            const yardSale = { id: doc.id, ...doc.data() };
+            if (yardSale.yardsalestatus !== 'archived' && yardSale.yardsalestatus !== 'deleted') {
+              yardSaleListings.push(yardSale);
+            }
+          });
+
+          yardSaleListings.sort((a, b) => {
+            const aTime = a?.yardsaleCreatedat?.toDate ? a.yardsaleCreatedat.toDate().getTime() : 0;
+            const bTime = b?.yardsaleCreatedat?.toDate ? b.yardsaleCreatedat.toDate().getTime() : 0;
+            return bTime - aTime;
+          });
+        } catch (yardError) {
+          console.error('Error loading yard sales:', yardError);
+          yardSaleListings = [];
+        }
+
+        // Load events
+        try {
+          const eventsSnapshot = await db.collection('events')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+          eventListings = [];
+          eventsSnapshot.forEach(doc => {
+            const eventItem = { id: doc.id, ...doc.data() };
+            if (eventItem.eventStatus !== 'archived' && eventItem.eventStatus !== 'deleted') {
+              eventListings.push(eventItem);
+            }
+          });
+
+          eventListings.sort((a, b) => {
+            const aTime = a?.eventCreatedat?.toDate ? a.eventCreatedat.toDate().getTime() : 0;
+            const bTime = b?.eventCreatedat?.toDate ? b.eventCreatedat.toDate().getTime() : 0;
+            return bTime - aTime;
+          });
+        } catch (eventError) {
+          console.error('Error loading events:', eventError);
+          eventListings = [];
+        }
+
+        // Load service listings and separate pending services
+        try {
+          const servicesSnapshot = await db.collection('services')
+            .where('userId', '==', currentUser.uid)
+            .get();
+
+          pendingServices = [];
+          activeServices = [];
+          servicesSnapshot.forEach(doc => {
+            const service = { id: doc.id, ...doc.data() };
+            const pending = service.isApproved === false || service.status === 'pending' || service.approvalStatus === 'pending';
+            if (pending) {
+              pendingServices.push(service);
+            } else {
+              activeServices.push(service);
+            }
+          });
+
+          activeServices.sort((a, b) => {
+            const aTime = a?.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const bTime = b?.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return bTime - aTime;
+          });
+
+          pendingServices.sort((a, b) => {
+            const aTime = a?.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const bTime = b?.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return bTime - aTime;
+          });
+        } catch (serviceError) {
+          console.error('Error loading service listings:', serviceError);
+          pendingServices = [];
+          activeServices = [];
+        }
+
+        const activeItems = [
+          ...marketplaceListings.map(item => ({ type: 'listing', item })),
+          ...yardSaleListings.map(item => ({ type: 'yardSale', item })),
+          ...eventListings.map(item => ({ type: 'event', item })),
+          ...petListings.map(item => ({ type: 'pet', item })),
+          ...activeServices.map(item => ({ type: 'service', item })),
+        ];
+
+        activeItems.sort((a, b) => {
+          const getTime = (entry) => {
+            if (entry.type === 'yardSale') {
+              return entry.item?.yardsaleCreatedat?.toDate ? entry.item.yardsaleCreatedat.toDate().getTime() : 0;
+            }
+            if (entry.type === 'event') {
+              return entry.item?.eventCreatedat?.toDate ? entry.item.eventCreatedat.toDate().getTime() : 0;
+            }
+            return entry.item?.createdAt?.toDate ? entry.item.createdAt.toDate().getTime() : 0;
+          };
+          return getTime(b) - getTime(a);
+        });
+
+        activeListings = activeItems;
+
+        renderListings();
+        updateOnboardingUI();
+      } catch (error) {
+        console.error('Error loading listings:', error);
+      }
+    }
+
+    async function loadFeaturedPurchases() {
+      try {
+        let purchasesSnapshot;
+        try {
+          purchasesSnapshot = await db.collection('featurePurchases')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('purchasedAt', 'desc')
+            .get();
+        } catch (indexedQueryError) {
+          purchasesSnapshot = await db.collection('featurePurchases')
+            .where('userId', '==', currentUser.uid)
+            .get();
+        }
+
+        featuredPurchases = await Promise.all(purchasesSnapshot.docs.map(async (doc) => {
+          const data = doc.data() || {};
+          const itemType = String(data.itemType || (data.serviceId ? 'service' : 'listing')).toLowerCase();
+          const targetId = itemType === 'service' ? data.serviceId : data.listingId;
+          let itemTitle = itemType === 'service' ? 'Service Listing' : 'Marketplace Listing';
+          let itemLink = '';
+
+          try {
+            if (itemType === 'service' && targetId) {
+              itemLink = `service-details.html?id=${targetId}`;
+              const serviceDoc = await db.collection('services').doc(String(targetId)).get();
+              if (serviceDoc.exists) {
+                const serviceData = serviceDoc.data() || {};
+                itemTitle = serviceData.serviceName || serviceData.providerName || 'Untitled Service';
+              }
+            } else if (targetId) {
+              itemLink = `single-listing.html?id=${targetId}`;
+              const listingDoc = await db.collection('listings').doc(String(targetId)).get();
+              if (listingDoc.exists) {
+                const listingData = listingDoc.data() || {};
+                itemTitle = listingData.title || 'Untitled Listing';
+              }
+            }
+          } catch (relatedDocError) {
+            console.error('Error loading featured purchase related item:', relatedDocError);
+          }
+
+          return {
+            id: doc.id,
+            ...data,
+            itemType,
+            itemTitle,
+            itemLink,
+          };
+        }));
+
+        featuredPurchases.sort((a, b) => {
+          const aDate = new Date(a.purchasedAt || 0).getTime();
+          const bDate = new Date(b.purchasedAt || 0).getTime();
+          return bDate - aDate;
+        });
+
+        renderFeaturedPurchases();
+      } catch (error) {
+        console.error('Error loading featured purchases:', error);
+        const list = document.getElementById('featuredPurchasesList');
+        if (list) {
+          list.innerHTML = '<p class="featured-purchase-empty">Unable to load featured purchases right now.</p>';
+        }
+      }
+    }
+
+    function resolveFeaturedPurchaseBucket(purchase) {
+      const status = String(purchase.status || '').toLowerCase();
+      const expiresAt = purchase.expiresAt ? new Date(purchase.expiresAt) : null;
+      const isExpired = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime())
+        ? expiresAt <= new Date()
+        : false;
+
+      if (status === 'pending') return 'pending';
+      if (status === 'completed' && !isExpired) return 'active';
+      return 'archived';
+    }
+
+    function normalizeSavedSectionWeb(item) {
+      const listingType = String(item?.listingType || '').toLowerCase();
+      const category = String(item?.category || '').toLowerCase();
+
+      if (listingType === 'event' || category.includes('yard sale') || category.includes('yardsale') || category.includes('yard-sale')) {
+        return 'eventsYardSales';
+      }
+
+      if (listingType === 'pet' || category.includes('pet')) {
+        return 'pets';
+      }
+
+      if (listingType === 'service' || category.includes('service')) {
+        return 'services';
+      }
+
+      return 'marketplace';
+    }
+
+    function getSectionedRows(section, tab) {
+      if (section === 'marketplace') {
+        if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSectionWeb(item) === 'marketplace');
+        if (tab === 'sold') return soldListings;
+        if (tab === 'archived') return expiredListings;
+        return marketplaceListings;
+      }
+
+      if (section === 'eventsYardSales') {
+        const combined = [
+          ...yardSaleListings.map((item) => ({ __kind: 'yardsale', ...item })),
+          ...eventListings.map((item) => ({ __kind: 'event', ...item })),
+        ];
+
+        if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSectionWeb(item) === 'eventsYardSales');
+        if (tab === 'sold' || tab === 'archived') return [];
+        return combined;
+      }
+
+      if (section === 'pets') {
+        if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSectionWeb(item) === 'pets');
+        if (tab === 'sold') {
+          return petListings.filter((item) => {
+            const status = String(item?.petStatus || '').toLowerCase();
+            return status === 'adopted' || status === 'reunited';
+          });
+        }
+        if (tab === 'archived') {
+          return petListings.filter((item) => {
+            const status = String(item?.petStatus || '').toLowerCase();
+            return status === 'archived' || status === 'expired' || status === 'closed';
+          });
+        }
+        return petListings.filter((item) => {
+          const status = String(item?.petStatus || '').toLowerCase();
+          return status !== 'adopted' && status !== 'reunited' && status !== 'archived' && status !== 'expired' && status !== 'closed';
+        });
+      }
+
+      if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSectionWeb(item) === 'services');
+      if (tab === 'sold') {
+        return activeServices.filter((item) => {
+          const status = String(item?.status || '').toLowerCase();
+          return status === 'sold' || status === 'completed';
+        });
+      }
+      if (tab === 'archived') {
+        return activeServices.filter((item) => {
+          const status = String(item?.status || '').toLowerCase();
+          return status === 'archived' || status === 'expired' || status === 'inactive' || status === 'rejected';
+        });
+      }
+      return activeServices;
+    }
+
+    function getSectionedRowHtml(section, tab, item) {
+      if (tab === 'saved') return createSavedListingCard(item);
+
+      if (section === 'marketplace') {
+        const listingType = tab === 'sold' ? 'sold' : tab === 'archived' ? 'expired' : 'active';
+        return createListingCard(item, listingType);
+      }
+
+      if (section === 'eventsYardSales') {
+        if (item.__kind === 'event') return createEventListingCard(item);
+        return createYardSaleListingCard(item);
+      }
+
+      if (section === 'pets') {
+        return createPetListingCard(item);
+      }
+
+      return createServiceListingCard(item);
+    }
+
+    function setSectionTab(section, tab) {
+      if (!sectionedListingState[section]) return;
+      sectionedListingState[section].tab = tab;
+      renderSectionedListings();
+    }
+
+    function toggleSection(section) {
+      if (!sectionedListingState[section]) return;
+      sectionedListingState[section].collapsed = !sectionedListingState[section].collapsed;
+      renderSectionedListings();
+    }
+
+    function renderSectionedListings() {
+      const container = document.getElementById('sectionedListingsContainer');
+      if (!container) return;
+
+      const sections = [
+        { key: 'marketplace', label: 'Marketplace' },
+        { key: 'eventsYardSales', label: 'Events / Yard Sales' },
+        { key: 'pets', label: 'Pets' },
+        { key: 'services', label: 'Services' },
+      ];
+
+      const tabOptions = [
+        { key: 'active', label: 'Active' },
+        { key: 'saved', label: 'Saved' },
+        { key: 'sold', label: 'Sold' },
+        { key: 'archived', label: 'Archived' },
+      ];
+
+      container.innerHTML = sections.map((section) => {
+        const state = sectionedListingState[section.key];
+        const rows = getSectionedRows(section.key, state.tab);
+
+        const tabsHtml = tabOptions.map((tab) => {
+          const active = state.tab === tab.key ? 'active' : '';
+          return `<button class="sectioned-tab ${active}" onclick="setSectionTab('${section.key}','${tab.key}')">${tab.label}</button>`;
+        }).join('');
+
+        const rowsHtml = rows.length
+          ? `<div class="listings-grid">${rows.map((item) => getSectionedRowHtml(section.key, state.tab, item)).join('')}</div>`
+          : '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No posts yet in this section.</p></div>';
+
+        return `
+          <section class="sectioned-card" aria-label="${section.label}">
+            <button class="sectioned-header" onclick="toggleSection('${section.key}')">
+              <h3 class="sectioned-header-title">${section.label}</h3>
+              <span class="sectioned-header-right">
+                <span class="sectioned-count">${rows.length}</span>
+                <span class="sectioned-chevron">${state.collapsed ? '▼' : '▲'}</span>
+              </span>
+            </button>
+            ${state.collapsed ? '' : `<div class="sectioned-body"><div class="sectioned-tabs">${tabsHtml}</div>${rowsHtml}</div>`}
+          </section>
+        `;
+      }).join('');
+    }
+
+    function setFeaturedPurchaseTab(tab) {
+      activeFeaturedPurchaseTab = tab;
+      const pendingTab = document.getElementById('featuredPurchaseTabPending');
+      const activeTab = document.getElementById('featuredPurchaseTabActive');
+      const archivedTab = document.getElementById('featuredPurchaseTabArchived');
+
+      if (pendingTab) pendingTab.classList.toggle('active', tab === 'pending');
+      if (activeTab) activeTab.classList.toggle('active', tab === 'active');
+      if (archivedTab) archivedTab.classList.toggle('active', tab === 'archived');
+
+      renderFeaturedPurchases();
+    }
+
+    function toggleFeaturedPurchasesCollapsed() {
+      featuredPurchasesCollapsed = !featuredPurchasesCollapsed;
+      const body = document.getElementById('featuredPurchasesBody');
+      const chevron = document.getElementById('featuredPurchasesChevron');
+      const toggle = document.getElementById('featuredPurchasesToggle');
+
+      if (body) body.classList.toggle('collapsed', featuredPurchasesCollapsed);
+      if (chevron) chevron.textContent = featuredPurchasesCollapsed ? '▼' : '▲';
+      if (toggle) toggle.setAttribute('aria-expanded', featuredPurchasesCollapsed ? 'false' : 'true');
+    }
+
+    function renderFeaturedPurchases() {
+      const list = document.getElementById('featuredPurchasesList');
+      if (!list) return;
+
+      const selectedBucket = activeFeaturedPurchaseTab;
+      const rows = featuredPurchases.filter((purchase) => resolveFeaturedPurchaseBucket(purchase) === selectedBucket);
+
+      if (rows.length === 0) {
+        const emptyText = selectedBucket === 'pending'
+          ? 'No pending featured purchases.'
+          : selectedBucket === 'active'
+            ? 'No active featured purchases.'
+            : 'No archived featured purchases.';
+        list.innerHTML = `<p class="featured-purchase-empty">${emptyText}</p>`;
+        return;
+      }
+
+      list.innerHTML = rows.map((purchase) => {
+        const statusBucket = resolveFeaturedPurchaseBucket(purchase);
+        const statusLabel = statusBucket === 'pending' ? 'Pending' : statusBucket === 'active' ? 'Active' : 'Archived';
+        const amount = Number(purchase.amount || 0).toFixed(2);
+        const currency = String(purchase.currency || 'USD').toUpperCase();
+        const expiresText = purchase.expiresAt ? formatDisplayDate(purchase.expiresAt) : 'N/A';
+        const purchasedText = purchase.purchasedAt ? formatDisplayDate(purchase.purchasedAt) : 'Unknown';
+        const itemTypeLabel = purchase.itemType === 'service' ? 'Service' : 'Listing';
+
+        return `
+          <div class="featured-purchase-card">
+            <div class="featured-purchase-top">
+              <p class="featured-purchase-name">${purchase.itemTitle || 'Featured Purchase'}</p>
+              <span class="featured-purchase-chip ${statusBucket}">${statusLabel}</span>
+            </div>
+            <p class="featured-purchase-meta">Type: ${itemTypeLabel} | Amount: $${amount} ${currency}</p>
+            <p class="featured-purchase-meta">Purchased: ${purchasedText}</p>
+            <p class="featured-purchase-meta">Expiration Date: ${expiresText}</p>
+            ${purchase.itemLink
+              ? `<a class="featured-purchase-link" href="${purchase.itemLink}">Open ${itemTypeLabel}</a>`
+              : '<p class="featured-purchase-meta">Linked listing not available.</p>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderListings() {
+      const sectionedContainer = document.getElementById('sectionedListingsContainer');
+      if (sectionedContainer) {
+        renderSectionedListings();
+        return;
+      }
+
+      // Render active listings
+      const activeContainer = document.getElementById('activeListingsContainer');
+      if (activeListings.length === 0) {
+        activeContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No active listings. <a href="create-listing.html" style="color: #475569; text-decoration: underline;">Create one now!</a></p></div>';
+      } else {
+        activeContainer.innerHTML = activeListings.map(entry => createActiveItemCard(entry.type, entry.item)).join('');
+      }
+
+      // Render marketplace listings
+      const marketplaceContainer = document.getElementById('marketplaceListingsContainer');
+      if (marketplaceListings.length === 0) {
+        marketplaceContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛍️</div><p>No marketplace listings yet.</p></div>';
+      } else {
+        marketplaceContainer.innerHTML = marketplaceListings.map(listing => createListingCard(listing, 'active')).join('');
+      }
+
+      // Render yard sales
+      const yardSalesContainer = document.getElementById('yardSalesListingsContainer');
+      if (yardSaleListings.length === 0) {
+        yardSalesContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏷️</div><p>No yard sales posted yet.</p></div>';
+      } else {
+        yardSalesContainer.innerHTML = yardSaleListings.map(yardSale => createYardSaleListingCard(yardSale)).join('');
+      }
+
+      // Render events
+      const eventsContainer = document.getElementById('eventsListingsContainer');
+      if (eventListings.length === 0) {
+        eventsContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><p>No events posted yet.</p></div>';
+      } else {
+        eventsContainer.innerHTML = eventListings.map(eventItem => createEventListingCard(eventItem)).join('');
+      }
+
+      // Render sold listings
+      const soldContainer = document.getElementById('soldListingsContainer');
+      if (soldListings.length === 0) {
+        soldContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><p>No sold listings yet</p></div>';
+      } else {
+        soldContainer.innerHTML = soldListings.map(listing => createListingCard(listing, 'sold')).join('');
+      }
+
+      // Render expired listings
+      const expiredContainer = document.getElementById('expiredListingsContainer');
+      if (expiredListings.length === 0) {
+        expiredContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏰</div><p>No expired listings.</p></div>';
+      } else {
+        expiredContainer.innerHTML = expiredListings.map(listing => createListingCard(listing, 'expired')).join('');
+      }
+
+      // Render pending items
+      const pendingContainer = document.getElementById('pendingListingsContainer');
+      const pendingItems = [
+        ...pendingListings.map(item => ({ type: 'listing', item })),
+        ...pendingPetListings.map(item => ({ type: 'pet', item })),
+        ...pendingServices.map(item => ({ type: 'service', item }))
+      ];
+
+      updatePendingCountBadge(pendingItems.length);
+
+      if (pendingItems.length === 0) {
+        pendingContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><p>No pending items right now.</p></div>';
+      } else {
+        pendingContainer.innerHTML = pendingItems.map(entry => createPendingItemCard(entry.type, entry.item)).join('');
+      }
+
+      // Render featured listings
+      const featuredContainer = document.getElementById('featuredListingsContainer');
+      if (featuredListings.length === 0) {
+        featuredContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⭐</div><p>No featured listings. <a href="create-listing.html" style="color: #475569; text-decoration: underline;">Create a featured listing!</a></p></div>';
+      } else {
+        featuredContainer.innerHTML = featuredListings.map(listing => createFeaturedListingCard(listing)).join('');
+      }
+      
+      // Render saved listings
+      const savedContainer = document.getElementById('savedListingsContainer');
+      if (savedListings.length === 0) {
+        savedContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💾</div><p>No saved listings yet</p></div>';
+      } else {
+        savedContainer.innerHTML = savedListings.map(saved => createSavedListingCard(saved)).join('');
+      }
+
+      // Render pet listings
+      const petContainer = document.getElementById('petListingsContainer');
+      if (petListings.length === 0) {
+        petContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🐾</div><p>No pet listings yet. <a href="list-hub.html" style="color: #475569; text-decoration: underline;">Create one from List Hub</a></p></div>';
+      } else {
+        petContainer.innerHTML = petListings.map(pet => createPetListingCard(pet)).join('');
+      }
+
+      // Render services
+      const servicesContainer = document.getElementById('servicesListingsContainer');
+      if (activeServices.length === 0) {
+        servicesContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛠️</div><p>No active services yet. <a href="create-service-listing.html" style="color: #475569; text-decoration: underline;">Post a service!</a></p></div>';
+      } else {
+        servicesContainer.innerHTML = activeServices.map(service => createServiceListingCard(service)).join('');
+      }
+    }
+
+    function updatePendingCountBadge(count) {
+      const listingTypeSelect = document.getElementById('listingTypeSelect');
+      if (!listingTypeSelect) return;
+
+      const pendingOption = listingTypeSelect.querySelector('option[value="pending"]');
+      if (!pendingOption) return;
+
+      pendingOption.textContent = `Pending (${count})`;
+
+      const expiredOption = listingTypeSelect.querySelector('option[value="expired"]');
+      if (expiredOption) {
+        expiredOption.textContent = `Archived (${expiredListings.length})`;
+      }
+    }
+
+    function formatDisplayDate(value) {
+      try {
+        if (!value) return 'Unknown';
+        const date = typeof value.toDate === 'function' ? value.toDate() : new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Unknown';
+        return date.toLocaleDateString([], {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      } catch {
+        return 'Unknown';
+      }
+    }
+
+    function createListingMetaHtml(options) {
+      const categoryText = options.category || 'General';
+      const postedText = formatDisplayDate(options.createdAt);
+      const chips = [];
+
+      if (options.isFeatured) {
+        chips.push('<span class="listing-chip listing-chip-featured">Featured</span>');
+      }
+
+      if (options.pendingLabel) {
+        chips.push(`<span class="listing-chip listing-chip-pending">${options.pendingLabel}</span>`);
+      }
+
+      if (options.extraChip) {
+        chips.push(`<span class="listing-chip">${options.extraChip}</span>`);
+      }
+
+      return `
+        <div class="listing-meta-line">Category: ${categoryText}</div>
+        <div class="listing-meta-line">Date Posted: ${postedText}</div>
+        ${options.extraLine ? `<div class="listing-meta-line">${options.extraLine}</div>` : ''}
+        ${chips.length ? `<div class="listing-chip-row">${chips.join('')}</div>` : ''}
+      `;
+    }
+
+    function createListingCard(listing, type) {
+      const price = listing.price ? `$${listing.price}` : 'Contact';
+      const image = listing.images && listing.images.length > 0 
+        ? listing.images[0] 
+        : 'logo.png';
+
+      const expiredOnText = type === 'expired' && listing.expiresAt
+        ? `Expired On: ${formatDisplayDate(listing.expiresAt)}`
+        : '';
+
+      const metaHtml = createListingMetaHtml({
+        category: listing.category,
+        createdAt: listing.createdAt,
+        isFeatured: listing.isFeatured === true,
+        extraLine: expiredOnText,
+      });
+      
+      let actionsHtml = '';
+      if (type === 'active') {
+        actionsHtml = `
+          <button class="btn btn-secondary" onclick="markAsSold('${listing.id}', event)">✓ Mark Sold</button>
+          <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
+        `;
+      } else if (type === 'expired') {
+        actionsHtml = `
+          <button class="btn btn-success" onclick="repostListing('${listing.id}', event)">↻ Repost</button>
+          <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
+        `;
+      }
+
+      return `
+        <div class="listing-card" onclick="viewListing('${listing.id}')">
+          <img src="${image}" alt="${listing.title}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${listing.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              ${actionsHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createSavedListingCard(saved) {
+      const price = saved.price ? `$${saved.price}` : 'Contact';
+      const image = saved.image || 'logo.png';
+      const metaHtml = createListingMetaHtml({
+        category: saved.category,
+        createdAt: saved.createdAt || saved.savedAt,
+        isFeatured: saved.isFeatured === true,
+      });
+      
+      return `
+        <div class="listing-card" onclick="viewListing('${saved.listingId}')">
+          <img src="${image}" alt="${saved.title}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${saved.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              <button class="btn btn-danger" onclick="removeSavedListing('${saved.id}', event)">🗑️ Remove</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createFeaturedListingCard(listing) {
+      const price = listing.price ? `$${listing.price}` : 'Contact';
+      const image = listing.images && listing.images.length > 0 
+        ? listing.images[0] 
+        : 'logo.png';
+      
+      // Calculate days remaining
+      let daysRemaining = 'N/A';
+      let expiresText = '';
+      if (listing.featureExpiresAt) {
+        const expiresAt = listing.featureExpiresAt.toDate ? listing.featureExpiresAt.toDate() : new Date(listing.featureExpiresAt);
+        const now = new Date();
+        const diffMs = expiresAt - now;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        daysRemaining = diffDays;
+        expiresText = diffDays === 1 ? 'Expires today' : `${diffDays} days left`;
+      }
+      const metaHtml = createListingMetaHtml({
+        category: listing.category,
+        createdAt: listing.createdAt,
+        isFeatured: true,
+        extraLine: expiresText ? `Featured Status: ${expiresText}` : '',
+      });
+      
+      return `
+        <div class="listing-card" onclick="viewListing('${listing.id}')" style="border: 2px solid #FFD700;">
+          <img src="${image}" alt="${listing.title}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${listing.title || 'Untitled'}</div>
+            <div class="listing-price">${price}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              <button class="btn btn-secondary" onclick="markAsSold('${listing.id}', event)">✓ Mark Sold</button>
+              <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createPetListingCard(pet) {
+      const image = pet.images && pet.images.length > 0
+        ? pet.images[0]
+        : 'logo.png';
+
+      const typeLabel = (pet.postType || 'pet').toString().toLowerCase();
+      const readableType = typeLabel === 'lost' ? 'Lost' : typeLabel === 'found' ? 'Found' : typeLabel === 'adoption' ? 'Adoption' : 'Pet';
+
+      const feeText = typeLabel === 'adoption' && pet.petAdoptionFee
+        ? `<div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 6px;">Adoption Fee: $${pet.petAdoptionFee}</div>`
+        : '';
+      const metaHtml = createListingMetaHtml({
+        category: readableType,
+        createdAt: pet.createdAt,
+        extraLine: `Location: ${pet.petSeenLocation || pet.city || 'Location not specified'}`,
+        extraChip: pet.petType || 'Pet',
+      });
+
+      return `
+        <div class="listing-card" onclick="viewPetListing('${pet.id}')">
+          <img src="${image}" alt="${pet.petName || 'Pet listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${pet.petName || 'Unnamed Pet'}</div>
+            <div style="font-size: 14px; color: #4b5563; margin-bottom: 8px;">${pet.petType || 'Pet'}${pet.petBreed ? ` • ${pet.petBreed}` : ''}</div>
+            ${metaHtml}
+            ${feeText}
+          </div>
+        </div>
+      `;
+    }
+
+    function createYardSaleListingCard(yardSale) {
+      const image = yardSale.yardsaleImage || 'logo.png';
+      const metaHtml = createListingMetaHtml({
+        category: 'Yard Sale',
+        createdAt: yardSale.yardsaleCreatedat,
+        extraLine: `Location: ${yardSale.yardsalelocation || 'Location not specified'}`,
+      });
+
+      return `
+        <div class="listing-card" onclick="window.location.href='yard-sales.html'">
+          <img src="${image}" alt="${yardSale.yardsaleTitle || 'Yard Sale'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${yardSale.yardsaleTitle || 'Untitled Yard Sale'}</div>
+            ${metaHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function createEventListingCard(eventItem) {
+      const image = eventItem.eventImage || 'logo.png';
+      const eventHref = eventItem.eventId
+        ? `event-details.html?eventId=${encodeURIComponent(eventItem.eventId)}`
+        : 'events.html';
+      const metaHtml = createListingMetaHtml({
+        category: 'Event',
+        createdAt: eventItem.eventCreatedat || eventItem.createdAt,
+        extraLine: `City: ${eventItem.eventCity || 'Not specified'}`,
+      });
+
+      return `
+        <div class="listing-card" onclick="window.location.href='${eventHref}'">
+          <img src="${image}" alt="${eventItem.eventTitle || 'Event'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${eventItem.eventTitle || 'Untitled Event'}</div>
+            ${metaHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function createActiveItemCard(type, item) {
+      if (type === 'listing') {
+        return createListingCard(item, 'active');
+      }
+      if (type === 'yardSale') {
+        return createYardSaleListingCard(item);
+      }
+      if (type === 'event') {
+        return createEventListingCard(item);
+      }
+      if (type === 'pet') {
+        return createPetListingCard(item);
+      }
+      if (type === 'service') {
+        return createServiceListingCard(item);
+      }
+      return '';
+    }
+
+    function createServiceListingCard(service) {
+      const image = service.serviceImage || service.businessLogo || 'logo.png';
+      const priceText = service.priceType === 'free'
+        ? 'Free'
+        : service.priceType === 'contact'
+          ? 'Contact for Price'
+          : service.priceAmount
+            ? `$${service.priceAmount}`
+            : 'Contact for Price';
+
+      const metaHtml = createListingMetaHtml({
+        category: service.category || 'Service',
+        createdAt: service.createdAt,
+        isFeatured: service.isFeatured === true,
+        extraLine: service.serviceArea ? `Area: ${service.serviceArea}` : (service.zipCode ? `Zip: ${service.zipCode}` : ''),
+        extraChip: service.categoryIcon ? service.categoryIcon : null,
+      });
+
+      return `
+        <div class="listing-card" onclick="window.location.href='service-details.html?id=${service.id}'">
+          <img src="${image}" alt="${service.serviceName || 'Service'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${service.serviceName || 'Untitled Service'}</div>
+            <div class="listing-price">${priceText}</div>
+            ${metaHtml}
+            <div class="listing-actions">
+              <button class="btn btn-danger" onclick="deleteService('${service.id}', event)">🗑️ Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createPendingItemCard(type, item) {
+      let title = 'Pending Item';
+      let subtitle = 'Awaiting review';
+      let image = 'logo.png';
+      let viewHref = '';
+      let badge = 'Pending';
+
+      if (type === 'listing') {
+        title = item.title || 'Untitled Listing';
+        subtitle = item.category || 'Marketplace Listing';
+        image = item.images && item.images.length > 0 ? item.images[0] : image;
+        viewHref = `single-listing.html?id=${item.id}`;
+        badge = 'Listing Pending';
+      } else if (type === 'pet') {
+        title = item.petName || 'Unnamed Pet Post';
+        subtitle = item.postType ? `${item.postType} pet post` : 'Pet Post';
+        image = item.images && item.images.length > 0 ? item.images[0] : image;
+        viewHref = `pet-details.html?id=${item.id}`;
+        badge = 'Pet Post Pending';
+      } else if (type === 'service') {
+        title = item.serviceName || 'Untitled Service';
+        subtitle = item.category || 'Service Listing';
+        image = item.serviceImage || item.businessLogo || image;
+        viewHref = `service-details.html?id=${item.id}`;
+        badge = 'Service Pending';
+      }
+
+      return `
+        <div class="listing-card" onclick="window.location.href='${viewHref}'">
+          <img src="${image}" alt="${title}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+          <div class="listing-content">
+            <div class="listing-title">${title}</div>
+            ${createListingMetaHtml({
+              category: subtitle,
+              createdAt: item.createdAt,
+              pendingLabel: badge,
+            })}
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTab(tab) {
+      const listingTypeSelect = document.getElementById('listingTypeSelect');
+      if (listingTypeSelect && listingTypeSelect.value !== tab) {
+        listingTypeSelect.value = tab;
+      }
+
+      // Update tabs
+      document.getElementById('activeTab').style.display = tab === 'active' ? 'block' : 'none';
+      document.getElementById('marketplaceTab').style.display = tab === 'marketplace' ? 'block' : 'none';
+      document.getElementById('yardSalesTab').style.display = tab === 'yardSales' ? 'block' : 'none';
+      document.getElementById('eventsTab').style.display = tab === 'events' ? 'block' : 'none';
+      document.getElementById('pendingTab').style.display = tab === 'pending' ? 'block' : 'none';
+      document.getElementById('featuredTab').style.display = tab === 'featured' ? 'block' : 'none';
+      document.getElementById('soldTab').style.display = tab === 'sold' ? 'block' : 'none';
+      document.getElementById('expiredTab').style.display = tab === 'expired' ? 'block' : 'none';
+      document.getElementById('savedTab').style.display = tab === 'saved' ? 'block' : 'none';
+      document.getElementById('petsTab').style.display = tab === 'pets' ? 'block' : 'none';
+      document.getElementById('servicesTab').style.display = tab === 'services' ? 'block' : 'none';
+    }
+
+    async function repostListing(listingId, event) {
+      if (event) event.stopPropagation();
+
+      const sourceListing = expiredListings.find((listing) => listing.id === listingId);
+      if (!sourceListing) {
+        alert('Could not find this expired listing to repost.');
+        return;
+      }
+
+      if (!confirm('Repost this listing as a new active listing?')) return;
+
+      try {
+        const repostData = { ...sourceListing };
+
+        delete repostData.id;
+        delete repostData.createdAt;
+        delete repostData.updatedAt;
+        delete repostData.expiresAt;
+        delete repostData.featureExpiresAt;
+        delete repostData.featureRequested;
+        delete repostData.featurePaymentStatus;
+
+        repostData.status = 'approved';
+        repostData.isActive = true;
+        repostData.isFeatured = false;
+        repostData.viewCount = 0;
+        repostData.favoritesCount = 0;
+        repostData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+        const category = String(repostData.category || '').trim();
+        if (category !== 'Services' && category !== 'Shop Local') {
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30);
+          repostData.expiresAt = firebase.firestore.Timestamp.fromDate(expiresAt);
+        }
+
+        await db.collection('listings').add(repostData);
+        alert('Listing reposted successfully.');
+        loadListings();
+      } catch (error) {
+        alert('Error reposting listing: ' + error.message);
+      }
+    }
+
+    async function markAsSold(listingId, event) {
+      if (event) event.stopPropagation();
+      if (!confirm('Mark this listing as sold?')) return;
+      
+      try {
+        await db.collection('listings').doc(listingId).update({ status: 'sold' });
+        loadListings();
+      } catch (error) {
+        alert('Error marking listing as sold: ' + error.message);
+      }
+    }
+
+    async function deleteListing(listingId, event) {
+      if (event) event.stopPropagation();
+      if (!confirm('Are you sure you want to delete this listing? This cannot be undone.')) return;
+      
+      try {
+        await db.collection('listings').doc(listingId).delete();
+        loadListings();
+      } catch (error) {
+        alert('Error deleting listing: ' + error.message);
+      }
+    }
+
+    async function removeSavedListing(docId, event) {
+      event.stopPropagation();
+      if (!confirm('Remove this listing from saved?')) return;
+      
+      try {
+        await db.collection('saveListings').doc(docId).delete();
+        loadListings();
+      } catch (error) {
+        alert('Error removing saved listing: ' + error.message);
+      }
+    }
+
+    async function deleteService(serviceId, event) {
+      if (event) event.stopPropagation();
+      if (!confirm('Are you sure you want to delete this service? This cannot be undone.')) return;
+
+      try {
+        await db.collection('services').doc(serviceId).delete();
+        loadListings();
+      } catch (error) {
+        alert('Error deleting service: ' + error.message);
+      }
+    }
+
+    function viewListing(listingId) {
+      window.location.href = `single-listing.html?id=${listingId}`;
+    }
+
+    function viewPetListing(petId) {
+      window.location.href = `pet-details.html?id=${petId}`;
+    }
+
+    function loadBlockedUsers(blockedUserIds) {
+      const container = document.getElementById('blockedUsersList');
+      if (blockedUserIds.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center;">No blocked users</p>';
+        return;
+      }
+
+      container.innerHTML = '<p>Blocked Users:</p><ul style="list-style: none; margin-top: 8px;">' +
+        blockedUserIds.map(id => `<li style="padding: 8px 0; padding-left: 12px;">${id}</li>`).join('') +
+        '</ul>';
+    }
+
+    function updateToggleSwitches() {
+      // Update toggle switch UI based on current values
+      const messageToggle = document.getElementById('messageNotifToggle');
+      const digestToggle = document.getElementById('digestNotifToggle');
+      const listingToggle = document.getElementById('listingNotifToggle');
+      
+      messageToggle.classList.toggle('active', notificationPrefs.message);
+      digestToggle.classList.toggle('active', notificationPrefs.digest);
+      listingToggle.classList.toggle('active', notificationPrefs.listing);
+    }
+
+    function toggleNotif(type) {
+      notificationPrefs[type] = !notificationPrefs[type];
+      updateToggleSwitches();
+    }
+
+    async function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        // Show image preview immediately
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const dataUrl = e.target.result;
+          document.getElementById('uploadedPhoto').src = dataUrl;
+          document.getElementById('uploadedPhoto').style.display = 'block';
+          document.getElementById('photoPlaceholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to Firebase Storage
+        const storageRef = storage.ref(`profilePhotos/${currentUser.uid}/picture`);
+        await storageRef.put(file);
+        
+        // Get download URL
+        const downloadUrl = await storageRef.getDownloadURL();
+        
+        // Update Firestore with download URL (not the full image)
+        await db.collection('users').doc(currentUser.uid).update({
+          profileimage: downloadUrl
+        });
+
+        const initials = (currentUser.displayName || currentUser.email).charAt(0).toUpperCase();
+        updateProfileAvatar(initials, downloadUrl);
+        
+        alert('Profile photo uploaded successfully!');
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading photo: ' + error.message);
+      }
+    }
+
+    async function saveSettings() {
+      try {
+        const displayName = document.getElementById('settingName').value.trim();
+        const phone = document.getElementById('settingPhone').value;
+        const zipCode = document.getElementById('settingZipCode').value;
+
+        if (!displayName) {
+          alert('Please enter a display name.');
+          return;
+        }
+
+        if (displayName.length < 2) {
+          alert('Display name must be at least 2 characters.');
+          return;
+        }
+        
+        // Allow users to update display name, phone, zipCode, and notification preferences.
+        await db.collection('users').doc(currentUser.uid).update({
+          displayName,
+          name: displayName,
+          phone,
+          zipCode,
+          messageNotification: notificationPrefs.message,
+          digestNotification: notificationPrefs.digest,
+          listingUpNotification: notificationPrefs.listing
+        });
+
+        if (typeof currentUser.updateProfile === 'function') {
+          await currentUser.updateProfile({ displayName });
+        }
+
+        document.getElementById('profileName').textContent = displayName;
+        const initials = displayName.charAt(0).toUpperCase();
+        updateProfileAvatar(initials, userData.profileimage);
+        userData.displayName = displayName;
+        userData.name = displayName;
+        
+        alert('Settings saved successfully!');
+        closeModal('settingsModal');
+      } catch (error) {
+        alert('Error saving settings: ' + error.message);
+      }
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    let currentBusinessTier = 'free';
+
+    function setUpgradeTier(tier) {
+      currentBusinessTier = tier;
+      const freeBtn = document.getElementById('upgradeTierFree');
+      const premiumBtn = document.getElementById('upgradeTierPremium');
+      
+      if (tier === 'free') {
+        freeBtn.style.borderColor = '#4CAF50';
+        freeBtn.style.backgroundColor = '#f1f8f6';
+        freeBtn.style.color = '#4CAF50';
+        premiumBtn.style.borderColor = '#ddd';
+        premiumBtn.style.backgroundColor = '#fff';
+        premiumBtn.style.color = '#666';
+      } else {
+        premiumBtn.style.borderColor = '#4CAF50';
+        premiumBtn.style.backgroundColor = '#f1f8f6';
+        premiumBtn.style.color = '#4CAF50';
+        freeBtn.style.borderColor = '#ddd';
+        freeBtn.style.backgroundColor = '#fff';
+        freeBtn.style.color = '#666';
+      }
+    }
+
+    async function handleUpgradeToBusiness() {
+      const businessName = document.getElementById('upgradeBusinessName').value.trim();
+      const businessDescription = document.getElementById('upgradeBusinessDescription').value.trim();
+      const businessPhone = document.getElementById('upgradeBusinessPhone').value.trim();
+      const businessWebsite = document.getElementById('upgradeBusinessWebsite').value.trim();
+
+      if (!businessName) {
+        alert('Business name is required to upgrade.');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to upgrade to a business account?')) {
+        return;
+      }
+
+      try {
+        // Users can only upgrade their own account type to business with business details
+        // Protected fields (cannot be modified by users): email, name, status, role/admin, bannedZip,
+        // subscription plan/status (managed by admin/payment system)
+        await db.collection('users').doc(currentUser.uid).update({
+          accountType: 'business',
+          businessTier: currentBusinessTier,
+          upgradedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          businessName: businessName,
+          businessDescription: businessDescription || null,
+          businessPhone: businessPhone || null,
+          businessWebsite: businessWebsite || null
+        });
+
+        alert('Success! Your account has been upgraded to a business account.');
+        closeModal('upgradeModal');
+        
+        // Clear form
+        document.getElementById('upgradeBusinessName').value = '';
+        document.getElementById('upgradeBusinessDescription').value = '';
+        document.getElementById('upgradeBusinessPhone').value = '';
+        document.getElementById('upgradeBusinessWebsite').value = '';
+        
+        // Reload profile to reflect changes
+        loadProfileData();
+      } catch (error) {
+        console.error('Error upgrading account:', error);
+        alert('Error upgrading account: ' + error.message);
+      }
+    }
+
+    async function openEditBusinessModal() {
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const userData = userDoc.data() || {};
+        
+        // Only allow business users to edit business profile
+        if (userData.accountType !== 'business') {
+          alert('Only business accounts can edit business profile information.');
+          return;
+        }
+        
+        // Populate form with current business info
+        document.getElementById('editBusinessName').value = userData.businessName || '';
+        document.getElementById('editBusinessDescription').value = userData.businessDescription || '';
+        document.getElementById('editBusinessPhone').value = userData.businessPhone || '';
+        document.getElementById('editBusinessWebsite').value = userData.businessWebsite || '';
+        document.getElementById('editBusinessAddress').value = userData.businessAddress || '';
+        document.getElementById('editBusinessCategory').value = userData.businessCategory || '';
+        document.getElementById('editBusinessHours').value = userData.businessHours || '';
+        
+        // Show logo preview if it exists
+        const logoPreview = document.getElementById('editBusinessLogoPreview');
+        if (userData.businessLogo) {
+          logoPreview.src = userData.businessLogo;
+          logoPreview.style.display = 'block';
+        } else {
+          logoPreview.style.display = 'none';
+        }
+        
+        // Open modal
+        openModal('editBusinessModal');
+      } catch (error) {
+        console.error('Error loading business info:', error);
+        alert('Error loading business info: ' + error.message);
+      }
+    }
+
+    async function handleSaveBusinessProfile() {
+      const businessName = document.getElementById('editBusinessName').value.trim();
+      const businessDescription = document.getElementById('editBusinessDescription').value.trim();
+      const businessPhone = document.getElementById('editBusinessPhone').value.trim();
+      const businessWebsite = document.getElementById('editBusinessWebsite').value.trim();
+      const businessAddress = document.getElementById('editBusinessAddress').value.trim();
+      const businessCategory = document.getElementById('editBusinessCategory').value.trim();
+      const businessHours = document.getElementById('editBusinessHours').value.trim();
+      const logoFile = document.getElementById('editBusinessLogo').files[0];
+
+      if (!businessName) {
+        alert('Business name is required.');
+        return;
+      }
+
+      try {
+        const updateData = {
+          businessName: businessName,
+          businessDescription: businessDescription || null,
+          businessPhone: businessPhone || null,
+          businessWebsite: businessWebsite || null,
+          businessAddress: businessAddress || null,
+          businessCategory: businessCategory || null,
+          businessHours: businessHours || null
+        };
+
+        // Handle logo upload if a new file was selected
+        if (logoFile) {
+          const storageRef = firebase.storage().ref();
+          const logoRef = storageRef.child(`businessLogos/${currentUser.uid}/${logoFile.name}`);
+          await logoRef.put(logoFile);
+          const logoUrl = await logoRef.getDownloadURL();
+          updateData.businessLogo = logoUrl;
+        }
+
+        // Business users can only update business profile fields
+        // Protected fields (cannot be modified by users): email, name, status, role/admin, bannedZip, account type
+        await db.collection('users').doc(currentUser.uid).update(updateData);
+
+        alert('Business profile updated successfully!');
+        closeModal('editBusinessModal');
+        
+        // Clear form
+        document.getElementById('editBusinessName').value = '';
+        document.getElementById('editBusinessDescription').value = '';
+        document.getElementById('editBusinessPhone').value = '';
+        document.getElementById('editBusinessWebsite').value = '';
+        document.getElementById('editBusinessAddress').value = '';
+        document.getElementById('editBusinessCategory').value = '';
+        document.getElementById('editBusinessHours').value = '';
+        document.getElementById('editBusinessLogo').value = '';
+        document.getElementById('editBusinessLogoPreview').style.display = 'none';
+        
+        // Reload profile to reflect changes
+        loadProfileData();
+      } catch (error) {
+        console.error('Error saving business profile:', error);
+        alert('Error saving business profile: ' + error.message);
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        });
+      }
+    }
+
+    function viewMyShopLocalProfile() {
+      const user = auth.currentUser;
+      if (user) {
+        window.location.href = `businesslocallist.html?userId=${user.uid}`;
+      }
+    }
+
+    // Handle logo file preview
+    document.getElementById('editBusinessLogo')?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const preview = document.getElementById('editBusinessLogoPreview');
+          preview.src = event.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Close modals on background click
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

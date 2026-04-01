@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post & Promote - Local List</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f3f5f7;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    }
+    .hero h1 {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+    .hero p { color: #64748b; font-size: 14px; }
+    .cta-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      margin-bottom: 12px;
+    }
+    .panel-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    .panel-subtitle {
+      color: #64748b;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .status-banner {
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .status-loading { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    .status-access { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .status-locked { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    .hidden { display: none; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .input, .select, .textarea {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #fff;
+      font-family: inherit;
+    }
+    .textarea { min-height: 86px; resize: vertical; }
+    .input:focus, .select:focus, .textarea:focus {
+      outline: none;
+      border-color: #334155;
+      box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.13);
+    }
+    .btn {
+      display: inline-block;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: #334155; color: #fff; }
+    .btn-secondary { background: #0f766e; color: #fff; }
+    .btn-light { background: #e2e8f0; color: #1f2937; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .metric {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 10px;
+    }
+    .metric-label {
+      color: #64748b;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      color: #0f172a;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .campaign-list {
+      display: grid;
+      gap: 10px;
+    }
+    .campaign-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
+    .campaign-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .campaign-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .pill {
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid;
+      padding: 4px 9px;
+    }
+    .pill-active { background: #ecfdf5; border-color: #86efac; color: #166534; }
+    .pill-draft { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+    .pill-paused { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+    .tiny { color: #64748b; font-size: 12px; }
+    .empty {
+      text-align: center;
+      color: #64748b;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 130px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    .card h3 {
+      font-size: 16px;
+      color: #334155;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+    .card p {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    a.card {
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    a.card:hover {
+      border-color: #475569;
+      box-shadow: 0 3px 10px rgba(71, 85, 105, 0.15);
+    }
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #475569;
+      margin: 20px 0 10px;
+    }
+    footer {
+      margin-top: 26px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+    }
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Post &amp; Promote</h1>
+      <p>Build and launch local promotions in minutes, then monitor impressions, clicks, and leads.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="business-hub.html">Back to Business Hub</a>
+      </div>
+    </section>
+
+    <div id="statusBanner" class="status-banner status-loading">Checking account access...</div>
+
+    <section id="promotionSection" class="hidden">
+
+      <p class="section-label">Post &amp; Promote</p>
+      <div class="grid">
+        <a class="card" href="businesslocal.html">
+          <h3>🏪 Add A Business</h3>
+          <p>Edit or update your existing business profile.</p>
+        </a>
+        <a class="card" href="create-job-listing.html">
+          <h3>💼 Job Post</h3>
+          <p>Post hiring opportunities to reach local candidates.</p>
+        </a>
+        <a class="card" href="create-deal-listing.html">
+          <h3>🔥 Deals</h3>
+          <p>Promote discounts and special offers to local shoppers.</p>
+        </a>
+        <a class="card" href="create-service-listing.html">
+          <h3>🧰 Add A Service</h3>
+          <p>List your professional services for local customers to find.</p>
+        </a>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Want To Manage Your Current Listings and Promotions?</div>
+        <div class="panel-subtitle">To view all your promotions and listings, go to Listings Manager.</div>
+        <div class="cta-row">
+          <a class="btn btn-secondary" href="business-listings.html">Open Listings Manager</a>
+        </div>
+      </div>
+
+    </section>
+
+    <section id="upgradeGate" class="hidden">
+      <div class="panel">
+        <div class="panel-title">Business Account Required</div>
+        <p class="panel-subtitle">Only business accounts can create and launch promotions.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="profile.html">Go to Profile</a>
+          <a class="btn btn-secondary" href="browse.html">Back to Marketplace</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    const state = {
+      userId: '',
+      businessTier: 'free',
+      isAdmin: false,
+      promotions: [],
+      assets: {
+        marketplace: [],
+        service: [],
+        job: [],
+        profile: [],
+      },
+    };
+
+    const FREE_ACTIVE_PROMOTION_LIMIT = 2;
+
+    function setStatus(type, message) {
+      const banner = document.getElementById('statusBanner');
+      banner.className = `status-banner ${type}`;
+      banner.textContent = message;
+    }
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+
+    function showCenter() {
+      document.getElementById('promotionSection').classList.remove('hidden');
+      document.getElementById('upgradeGate').classList.add('hidden');
+    }
+
+    function showGate() {
+      document.getElementById('promotionSection').classList.add('hidden');
+      document.getElementById('upgradeGate').classList.remove('hidden');
+    }
+
+    function formatNumber(value) {
+      const n = Number(value || 0);
+      return Number.isFinite(n) ? n.toLocaleString() : '0';
+    }
+
+    function getStatusPill(status) {
+      if (status === 'active') return '<span class="pill pill-active">Active</span>';
+      if (status === 'paused') return '<span class="pill pill-paused">Paused</span>';
+      return '<span class="pill pill-draft">Draft</span>';
+    }
+
+    function parseDateKey(dateKey) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey || ''))) return null;
+      const parsed = new Date(`${dateKey}T00:00:00`);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function isFreePlan() {
+      return !state.isAdmin && state.businessTier === 'free';
+    }
+
+    function getFreeActivePromotionCount() {
+      return state.promotions.filter((promotion) => String(promotion.status || '') === 'active').length;
+    }
+
+    function normalizeBusinessTier(userData, businessLocalData) {
+      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
+      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
+      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
+      const tier = fromUser || fromLocal || fromSubscription || 'free';
+      return tier === 'premium' ? 'premium' : 'free';
+    }
+
+    async function loadMyPromotions() {
+      if (!state.userId) return;
+
+      const snap = await db.collection('promotions')
+        .where('businessId', '==', state.userId)
+        .limit(40)
+        .get();
+
+      const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      rows.sort((a, b) => {
+        const aT = a.updatedAt && a.updatedAt.toDate ? a.updatedAt.toDate().getTime() : 0;
+        const bT = b.updatedAt && b.updatedAt.toDate ? b.updatedAt.toDate().getTime() : 0;
+        return bT - aT;
+      });
+
+      state.promotions = rows;
+      await renderPromotions();
+    }
+
+    async function loadPromotionStats7d(promotionId) {
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+
+      let impressions = 0;
+      let clicks = 0;
+      let leads = 0;
+
+      const snap = await db.collection('promotionDailyStats')
+        .where('promotionId', '==', promotionId)
+        .get()
+        .catch(() => null);
+
+      if (!snap || snap.empty) {
+        return { impressions: 0, clicks: 0, leads: 0 };
+      }
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const date = parseDateKey(data.dateKey);
+        if (!date || date < start || date > now) return;
+
+        impressions += Number(data.impressions || 0);
+        clicks += Number(data.clicks || 0);
+        leads += Number(data.leads || 0);
+      });
+
+      return { impressions, clicks, leads };
+    }
+
+    async function renderPromotions() {
+      const list = document.getElementById('campaignList');
+      if (!list) return;
+      if (!state.promotions.length) {
+        list.innerHTML = '<div class="empty">No promotions yet. Create your first campaign above.</div>';
+        setText('metricImpressions', '0');
+        setText('metricClicks', '0');
+        setText('metricLeads', '0');
+        setText('metricCtr', '0%');
+        return;
+      }
+
+      let totalImpressions = 0;
+      let totalClicks = 0;
+      let totalLeads = 0;
+
+      const cards = [];
+      for (const campaign of state.promotions.slice(0, 15)) {
+        const stats = await loadPromotionStats7d(campaign.id);
+        totalImpressions += stats.impressions;
+        totalClicks += stats.clicks;
+        totalLeads += stats.leads;
+
+        const ctr = stats.impressions > 0 ? Math.round((stats.clicks / stats.impressions) * 100) : 0;
+        cards.push(`
+          <article class="campaign-card">
+            <div class="campaign-top">
+              <div class="campaign-title">${String(campaign.headline || 'Untitled Promotion').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+              ${getStatusPill(campaign.status || 'draft')}
+            </div>
+            <div class="tiny">Goal: ${campaign.goalType || 'n/a'} • Target: ${campaign.targetCollection || 'n/a'}/${campaign.targetId || '-'}</div>
+            <div class="tiny" style="margin-top:4px;">7d: ${formatNumber(stats.impressions)} impressions • ${formatNumber(stats.clicks)} clicks • ${formatNumber(stats.leads)} leads • CTR ${ctr}%</div>
+          </article>
+        `);
+      }
+
+      list.innerHTML = cards.join('');
+
+      const ctrTotal = totalImpressions > 0 ? Math.round((totalClicks / totalImpressions) * 100) : 0;
+      setText('metricImpressions', formatNumber(totalImpressions));
+      setText('metricClicks', formatNumber(totalClicks));
+      setText('metricLeads', formatNumber(totalLeads));
+      setText('metricCtr', `${ctrTotal}%`);
+    }
+
+    async function boot() {
+      if (!auth || !db) {
+        setStatus('status-locked', 'Could not initialize Post & Promote right now.');
+        showGate();
+        return;
+      }
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'login.html?next=' + encodeURIComponent('promotion-center.html');
+          return;
+        }
+
+        state.userId = user.uid;
+
+        try {
+          const [userDoc, businessLocalDoc] = await Promise.all([
+            db.collection('users').doc(user.uid).get(),
+            db.collection('businessLocal').doc(user.uid).get().catch(() => null)
+          ]);
+          const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+          const businessLocalData = businessLocalDoc && businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+          const isBusiness = userData.accountType === 'business';
+          const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+
+          state.isAdmin = isAdmin;
+          state.businessTier = normalizeBusinessTier(userData, businessLocalData);
+
+          if (!isBusiness && !isAdmin) {
+            setStatus('status-locked', 'Business account required to use Post & Promote.');
+            showGate();
+            return;
+          }
+
+          showCenter();
+          setStatus('status-access', isBusiness ? 'Post & Promote loaded.' : 'Admin preview mode: Post & Promote loaded.');
+          await loadMyPromotions();
+        } catch (error) {
+          console.error('Failed to load Post & Promote:', error);
+          setStatus('status-locked', 'Could not load promotions right now. Please try again.');
+          showGate();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 32px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+
+    .success-icon svg {
+      width: 48px;
+      height: 48px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      color: #2d3748;
+      font-size: 28px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .info-box {
+      background: #f7fafc;
+      border-left: 4px solid #4299e1;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: left;
+      margin-bottom: 32px;
+    }
+
+    .info-box h3 {
+      color: #2d3748;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .info-box ul {
+      margin-left: 20px;
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #f7fafc;
+    }
+
+    .listing-id {
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <h1>Featured Listing Submitted! 🎉</h1>
+    <p class="subtitle">Your payment was successful and your listing is now waiting for admin approval.</p>
+
+    <div class="info-box">
+      <h3>What happens next?</h3>
+      <ul>
+        <li><strong>Payment Confirmation:</strong> Your featured payment has been recorded</li>
+        <li><strong>Admin Review:</strong> Your listing is pending moderation and approval</li>
+        <li><strong>Expected Timeframe:</strong> Approval typically takes 24 hours (up to 48 hours)</li>
+        <li><strong>Featured Activation:</strong> After approval, your listing is featured for 7 days</li>
+      </ul>
+    </div>
+
+    <div class="buttons">
+      <a href="profile.html" class="btn btn-primary">View My Listings</a>
+      <a href="browse.html" class="btn btn-secondary">Browse Listings</a>
+    </div>
+
+    <p class="listing-id" id="listingIdDisplay"></p>
+  </div>
+
+  <script>
+    // Extract listing ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('listingId');
+    
+    if (listingId) {
+      document.getElementById('listingIdDisplay').textContent = `Listing ID: ${listingId}`;
+    }
+
+    // Keep user on confirmation page so they can read approval details
+  </script>
+</body>
+</html>

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Leads & Inbox - Local List</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    }
+
+    .hero h1 {
+      font-size: 29px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .hero p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .cta-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: #334155; color: #fff; }
+    .btn-secondary { background: #0f766e; color: #fff; }
+
+    .status-banner {
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .status-loading { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    .status-access { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .status-locked { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+
+    .hidden { display: none; }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      margin-bottom: 12px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .metric-label {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      color: #0f172a;
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+
+    .metric-sub {
+      margin-top: 4px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .panel-subtitle {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .tiny-note {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #475569;
+      margin-right: 4px;
+      align-self: center;
+    }
+
+    .filter-btn {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: #334155;
+      color: #fff;
+      border-color: #334155;
+    }
+
+    .threads-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .thread-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .thread-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .thread-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .thread-time {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .thread-meta {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .thread-message {
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thread-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid;
+    }
+
+    .pill-unread { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+    .pill-read { background: #ecfdf5; border-color: #86efac; color: #166534; }
+    .pill-type { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 24px 10px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+    }
+
+    footer {
+      margin-top: 28px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .summary-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Leads & Inbox</h1>
+      <p>Monitor incoming conversations, unread messages, and buyer activity.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="business-hub.html">Back to Business Hub</a>
+        <a class="btn btn-secondary" href="messages.html">Open Full Inbox</a>
+      </div>
+    </section>
+
+    <div id="statusBanner" class="status-banner status-loading">Checking account access and loading leads...</div>
+
+    <section id="leadsSection" class="hidden">
+      <div class="panel">
+        <div class="panel-head" style="margin-bottom: 12px;">
+          <div>
+            <div class="panel-title">Lead Performance</div>
+            <div class="panel-subtitle">Inbox health and response metrics for your business.</div>
+            <div class="tiny-note" id="responseBaselineNote">Response baseline: all conversation history</div>
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary" id="resetResponseMetricsBtn">Reset Response Metrics</button>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="metric">
+            <div class="metric-label">Total Leads</div>
+            <div class="metric-value" id="metricTotalLeads">0</div>
+            <div class="metric-sub">Conversation threads</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Unread Threads</div>
+            <div class="metric-value" id="metricUnread">0</div>
+            <div class="metric-sub">Need response</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Unique Buyers</div>
+            <div class="metric-value" id="metricUniqueBuyers">0</div>
+            <div class="metric-sub">Distinct contacts</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Recent Activity (7d)</div>
+            <div class="metric-value" id="metricRecent7d">0</div>
+            <div class="metric-sub">Threads with recent messages</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Avg First Response</div>
+            <div class="metric-value" id="metricAvgResponse">-</div>
+            <div class="metric-sub">Time from first buyer message to first seller reply</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Response Rate</div>
+            <div class="metric-value" id="metricResponseRate">-</div>
+            <div class="metric-sub" id="metricResponseRateSub">Threads with at least one seller reply</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Recent Leads</div>
+            <div class="panel-subtitle">Your most recent conversations as the seller.</div>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">Read Status:</span>
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="unread">Unread</button>
+          <button class="filter-btn" data-filter="read">Read</button>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">Lead Type:</span>
+          <button class="filter-btn active" data-type-filter="all">All Types</button>
+          <button class="filter-btn" data-type-filter="business_profile">Business Profile</button>
+          <button class="filter-btn" data-type-filter="marketplace">Marketplace</button>
+          <button class="filter-btn" data-type-filter="job">Jobs</button>
+          <button class="filter-btn" data-type-filter="service">Services</button>
+        </div>
+
+        <div id="threadsList" class="threads-list"></div>
+      </div>
+    </section>
+
+    <section id="upgradeGate" class="hidden">
+      <div class="panel">
+        <div class="panel-title">Business Account Required</div>
+        <p class="panel-subtitle" style="margin-top: 6px;">Only business accounts can access leads and inbox tools.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="profile.html">Go to Profile</a>
+          <a class="btn btn-secondary" href="browse.html">Back to Marketplace</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    const state = {
+      threads: [],
+      filter: 'all',
+      typeFilter: 'all',
+      currentUserId: '',
+      responseBaselineAt: null,
+    };
+
+    function setStatus(type, message) {
+      const banner = document.getElementById('statusBanner');
+      banner.className = `status-banner ${type}`;
+      banner.textContent = message;
+    }
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+
+    function formatNumber(value) {
+      const safe = Number(value || 0);
+      return Number.isFinite(safe) ? safe.toLocaleString() : '0';
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return 'No activity yet';
+      if (typeof timestamp.toDate === 'function') {
+        return timestamp.toDate().toLocaleString();
+      }
+      const parsed = new Date(timestamp);
+      if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleString();
+      return 'No activity yet';
+    }
+
+    function formatShortDate(value) {
+      const dateObj = toDate(value);
+      return dateObj ? dateObj.toLocaleString() : 'all conversation history';
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showLeads() {
+      document.getElementById('leadsSection').classList.remove('hidden');
+      document.getElementById('upgradeGate').classList.add('hidden');
+    }
+
+    function showGate() {
+      document.getElementById('leadsSection').classList.add('hidden');
+      document.getElementById('upgradeGate').classList.remove('hidden');
+    }
+
+    function parseThreadTimestamp(thread) {
+      const ts = thread.lastTimestamp;
+      if (ts && typeof ts.toDate === 'function') return ts.toDate();
+      return null;
+    }
+
+    function toDate(value) {
+      if (!value) return null;
+      if (typeof value.toDate === 'function') return value.toDate();
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatDurationMinutes(minutes) {
+      const safe = Number(minutes || 0);
+      if (!Number.isFinite(safe) || safe <= 0) return '0m';
+      if (safe < 60) return `${Math.round(safe)}m`;
+      const hours = Math.floor(safe / 60);
+      const remaining = Math.round(safe % 60);
+      if (hours < 24) return remaining > 0 ? `${hours}h ${remaining}m` : `${hours}h`;
+      const days = Math.floor(hours / 24);
+      const remHours = hours % 24;
+      return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+    }
+
+    function isUnreadThread(thread) {
+      const unreadBy = Array.isArray(thread.unreadBy) ? thread.unreadBy : [];
+      return unreadBy.includes(state.currentUserId);
+    }
+
+    function applyThreadFilter(rows) {
+      let filtered = rows;
+      if (state.filter === 'unread') filtered = filtered.filter((row) => isUnreadThread(row));
+      if (state.filter === 'read') filtered = filtered.filter((row) => !isUnreadThread(row));
+      if (state.typeFilter !== 'all') filtered = filtered.filter((row) => row.leadType === state.typeFilter);
+      return filtered;
+    }
+
+    function getLeadTypeLabel(type) {
+      switch (String(type || '').toLowerCase()) {
+        case 'marketplace': return 'Marketplace';
+        case 'job': return 'Job';
+        case 'service': return 'Service';
+        case 'business_profile': return 'Business Profile';
+        default: return 'Other';
+      }
+    }
+
+    async function classifyLeadType(thread) {
+      const listingId = String(thread.listingId || '').trim();
+      if (!listingId) return 'business_profile';
+
+      try {
+        const listingDoc = await db.collection('listings').doc(listingId).get();
+        if (listingDoc.exists) return 'marketplace';
+      } catch (error) {
+        console.warn('Could not classify listing lead type (listings):', listingId, error);
+      }
+
+      try {
+        const serviceDoc = await db.collection('services').doc(listingId).get();
+        if (serviceDoc.exists) return 'service';
+      } catch (error) {
+        console.warn('Could not classify listing lead type (services):', listingId, error);
+      }
+
+      try {
+        const jobDoc = await db.collection('jobBoard').doc(listingId).get();
+        if (jobDoc.exists) return 'job';
+      } catch (error) {
+        console.warn('Could not classify listing lead type (jobBoard):', listingId, error);
+      }
+
+      return 'business_profile';
+    }
+
+    function renderSummary() {
+      const rows = state.threads;
+      const now = new Date();
+      const start7 = new Date(now);
+      start7.setDate(start7.getDate() - 6);
+      start7.setHours(0, 0, 0, 0);
+
+      let unreadCount = 0;
+      let recent7d = 0;
+      const buyers = new Set();
+
+      rows.forEach((thread) => {
+        if (isUnreadThread(thread)) unreadCount += 1;
+        const buyerId = String(thread.buyerId || '').trim();
+        if (buyerId) buyers.add(buyerId);
+        const last = parseThreadTimestamp(thread);
+        if (last && last >= start7) recent7d += 1;
+      });
+
+      setText('metricTotalLeads', formatNumber(rows.length));
+      setText('metricUnread', formatNumber(unreadCount));
+      setText('metricUniqueBuyers', formatNumber(buyers.size));
+      setText('metricRecent7d', formatNumber(recent7d));
+
+      const baselineText = state.responseBaselineAt
+        ? `Response baseline: ${formatShortDate(state.responseBaselineAt)} (older messages excluded)`
+        : 'Response baseline: all conversation history';
+      setText('responseBaselineNote', baselineText);
+    }
+
+    async function renderResponseAnalytics() {
+      const threads = state.threads.slice(0, 40); // Cap reads for responsiveness.
+      let respondedThreads = 0;
+      let totalResponseMinutes = 0;
+      let measuredThreads = 0;
+
+      for (const thread of threads) {
+        try {
+          const messagesSnap = await db.collection('threads')
+            .doc(thread.id)
+            .collection('messages')
+            .orderBy('createdAt', 'asc')
+            .get();
+
+          if (messagesSnap.empty) continue;
+
+          const buyerId = String(thread.buyerId || '').trim();
+          const sellerId = state.currentUserId;
+          if (!buyerId || !sellerId) continue;
+
+          let firstBuyerMessageAt = null;
+          let firstSellerReplyAt = null;
+
+          messagesSnap.forEach((docSnap) => {
+            const msg = docSnap.data() || {};
+            const senderId = String(msg.senderId || '').trim();
+            const createdAt = toDate(msg.createdAt);
+            if (!createdAt) return;
+
+            if (state.responseBaselineAt && createdAt < state.responseBaselineAt) {
+              return;
+            }
+
+            if (!firstBuyerMessageAt && senderId === buyerId) {
+              firstBuyerMessageAt = createdAt;
+              return;
+            }
+
+            if (firstBuyerMessageAt && !firstSellerReplyAt && senderId === sellerId && createdAt >= firstBuyerMessageAt) {
+              firstSellerReplyAt = createdAt;
+            }
+          });
+
+          if (firstBuyerMessageAt) measuredThreads += 1;
+          if (firstBuyerMessageAt && firstSellerReplyAt) {
+            respondedThreads += 1;
+            const diffMinutes = (firstSellerReplyAt.getTime() - firstBuyerMessageAt.getTime()) / (1000 * 60);
+            if (Number.isFinite(diffMinutes) && diffMinutes >= 0) {
+              totalResponseMinutes += diffMinutes;
+            }
+          }
+        } catch (error) {
+          console.warn('Could not calculate response metric for thread:', thread.id, error);
+        }
+      }
+
+      if (respondedThreads > 0) {
+        const avgMinutes = totalResponseMinutes / respondedThreads;
+        setText('metricAvgResponse', formatDurationMinutes(avgMinutes));
+      } else {
+        setText('metricAvgResponse', '-');
+      }
+
+      if (measuredThreads > 0) {
+        const rate = Math.round((respondedThreads / measuredThreads) * 100);
+        setText('metricResponseRate', `${rate}%`);
+        setText('metricResponseRateSub', `${respondedThreads} of ${measuredThreads} measured threads replied`);
+      } else {
+        setText('metricResponseRate', '-');
+        setText('metricResponseRateSub', 'No buyer-started threads to measure yet');
+      }
+    }
+
+    async function resetResponseMetricsBaseline() {
+      if (!state.currentUserId) return;
+
+      const confirmed = confirm('Reset response-time metrics starting now? Older messages will no longer count toward the average.');
+      if (!confirmed) return;
+
+      const resetBtn = document.getElementById('resetResponseMetricsBtn');
+      if (resetBtn) {
+        resetBtn.disabled = true;
+        resetBtn.textContent = 'Resetting...';
+      }
+
+      try {
+        await db.collection('users').doc(state.currentUserId).update({
+          leadsMetricsResetAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        state.responseBaselineAt = new Date();
+        renderSummary();
+        await renderResponseAnalytics();
+        setStatus('status-access', 'Leads and inbox loaded. Response metrics baseline reset successfully.');
+      } catch (error) {
+        console.error('Failed to reset response metrics baseline:', error);
+        alert('Could not reset response metrics right now. Please try again.');
+      } finally {
+        if (resetBtn) {
+          resetBtn.disabled = false;
+          resetBtn.textContent = 'Reset Response Metrics';
+        }
+      }
+    }
+
+    function renderThreads() {
+      const list = document.getElementById('threadsList');
+      if (!list) return;
+
+      const rows = applyThreadFilter(state.threads);
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty">No lead conversations found for this filter.</div>';
+        return;
+      }
+
+      list.innerHTML = rows.map((thread) => {
+        const unread = isUnreadThread(thread);
+        const statusPill = unread
+          ? '<span class="pill pill-unread">Unread</span>'
+          : '<span class="pill pill-read">Read</span>';
+        const leadTypePill = `<span class="pill pill-type">${escapeHtml(getLeadTypeLabel(thread.leadType))}</span>`;
+
+        const title = thread.listingTitle || 'Conversation';
+        const buyer = thread.buyerName || thread.buyerEmail || thread.buyerId || 'Buyer';
+        const lastMessage = thread.lastMessage || 'No messages yet';
+        const when = formatDate(thread.lastTimestamp || thread.createdAt);
+
+        return `
+          <article class="thread-card">
+            <div class="thread-top">
+              <div class="thread-title">${escapeHtml(title)}</div>
+              <div class="thread-time">${escapeHtml(when)}</div>
+            </div>
+            <div class="thread-meta">Buyer: ${escapeHtml(buyer)} • ${statusPill} • ${leadTypePill}</div>
+            <div class="thread-message">${escapeHtml(lastMessage)}</div>
+            <div class="thread-actions">
+              <a class="btn btn-primary" href="messages.html?threadId=${encodeURIComponent(thread.id)}">Open Thread</a>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function initFilters() {
+      document.querySelectorAll('.filter-btn').forEach((btn) => {
+        const readFilter = btn.getAttribute('data-filter');
+        if (readFilter) {
+          btn.addEventListener('click', () => {
+            state.filter = readFilter;
+            document.querySelectorAll('[data-filter]').forEach((item) => item.classList.toggle('active', item === btn));
+            renderThreads();
+          });
+        }
+
+        const typeFilter = btn.getAttribute('data-type-filter');
+        if (typeFilter) {
+          btn.addEventListener('click', () => {
+            state.typeFilter = typeFilter;
+            document.querySelectorAll('[data-type-filter]').forEach((item) => item.classList.toggle('active', item === btn));
+            renderThreads();
+          });
+        }
+      });
+    }
+
+    async function loadLeadThreads(userId) {
+      const snap = await db.collection('threads')
+        .where('sellerId', '==', userId)
+        .get();
+
+      const rows = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+      rows.sort((a, b) => {
+        const aTs = parseThreadTimestamp(a);
+        const bTs = parseThreadTimestamp(b);
+        const aT = aTs ? aTs.getTime() : 0;
+        const bT = bTs ? bTs.getTime() : 0;
+        return bT - aT;
+      });
+
+      const typeCache = new Map();
+      for (const row of rows) {
+        const existingType = String(row.leadType || '').trim().toLowerCase();
+        if (existingType === 'business_profile' || existingType === 'marketplace' || existingType === 'job' || existingType === 'service') {
+          row.leadType = existingType;
+          continue;
+        }
+
+        const listingId = String(row.listingId || '').trim();
+        if (!listingId) {
+          row.leadType = 'business_profile';
+          continue;
+        }
+
+        if (typeCache.has(listingId)) {
+          row.leadType = typeCache.get(listingId);
+          continue;
+        }
+
+        const type = await classifyLeadType(row);
+        typeCache.set(listingId, type);
+        row.leadType = type;
+      }
+
+      state.threads = rows;
+      renderSummary();
+      renderThreads();
+      await renderResponseAnalytics();
+    }
+
+    function boot() {
+      if (!auth || !db) {
+        setStatus('status-locked', 'Unable to initialize leads tools right now.');
+        showGate();
+        return;
+      }
+
+      initFilters();
+      document.getElementById('resetResponseMetricsBtn')?.addEventListener('click', resetResponseMetricsBaseline);
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'login.html?next=' + encodeURIComponent('business-leads.html');
+          return;
+        }
+
+        state.currentUserId = user.uid;
+
+        try {
+          const userDoc = await db.collection('users').doc(user.uid).get();
+          const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+          state.responseBaselineAt = toDate(userData.leadsMetricsResetAt);
+          const isBusiness = userData.accountType === 'business';
+          const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+
+          if (!isBusiness && !isAdmin) {
+            setStatus('status-locked', 'Business account required to access leads and inbox tools.');
+            showGate();
+            return;
+          }
+
+          showLeads();
+          setStatus('status-access', isBusiness ? 'Leads and inbox loaded.' : 'Admin preview mode: leads tools loaded.');
+          await loadLeadThreads(user.uid);
+        } catch (error) {
+          console.error('Failed to load leads/inbox tools:', error);
+          setStatus('status-locked', 'Could not load leads right now. Please try again.');
+          showGate();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+</html>

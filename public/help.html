@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & FAQ - Local List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .back-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .back-to-hub {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      background: #475569;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .back-to-hub:hover {
+      background: #3a4654;
+    }
+    
+    h1 {
+      color: #475569;
+      font-size: 28px;
+      margin-bottom: 0;
+      text-align: center;
+    }
+    
+    .intro-text {
+      margin-bottom: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      border-top: 4px solid #475569;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .intro-copy {
+      font-size: 14px;
+      color: #444;
+      line-height: 22px;
+      text-align: center;
+    }
+    
+    .faq-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border-top: 4px solid #475569;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #475569;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f8fc;
+      text-align: center;
+    }
+    
+    .faq-item {
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .faq-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .question-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .question-row:hover {
+      background: #f9f9f9;
+      padding-left: 8px;
+      padding-right: 8px;
+      margin-left: -8px;
+      margin-right: -8px;
+      border-radius: 6px;
+    }
+    
+    .question {
+      font-size: 14px;
+      font-weight: 500;
+      flex: 1;
+      padding-right: 10px;
+      color: #333;
+    }
+    
+    .arrow {
+      font-size: 14px;
+      color: #666;
+      transition: transform 0.3s;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    .arrow.open {
+      transform: rotate(180deg);
+    }
+    
+    .answer {
+      font-size: 14px;
+      color: #555;
+      line-height: 20px;
+      padding: 0 0 12px 0;
+      display: none;
+    }
+    
+    .answer.show {
+      display: block;
+    }
+    
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px;
+      }
+      
+      .faq-section {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+  
+  <div class="container">
+    <div class="back-row">
+      <a class="back-to-hub" href="support-legal-hub.html">&lt; Back To The Support Hub</a>
+    </div>
+
+    <div class="intro-text">
+      <div class="title-row">
+        <h1>Help & FAQ</h1>
+      </div>
+      <p class="intro-copy">
+        Here you'll find answers to common questions about using the app, posting listings, and promoting your items.
+        If you need more help, just reach out; we're always happy to help neighbors.
+      </p>
+    </div>
+    
+    <!-- Getting Started Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Getting Started</h2>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">What is Local List?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Local List is a local marketplace designed to help people in the Harrison area buy, sell, and discover items, services, and events nearby.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Do I need an account to browse?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">No. You can browse listings without an account, but you must create an account to post listings or message sellers.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How do I create an account?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Tap Sign Up, enter your email, ZIP code, and create a password.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Why do you ask for my ZIP code?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">ZIP codes help keep listings local, relevant, and reduce spam from outside the area.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How long does a featured listing stay featured?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Featured listings remain highlighted for the duration of the listing or selected promotion period.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Are featured listing fees refundable?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Featured listing payments are generally non-refundable unless a technical error or duplicate charge occurs.</div>
+      </div>
+    </div>
+    
+    <!-- Messaging & Safety Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Messaging & Safety</h2>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How do I contact a seller?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Open a listing and tap the Message button to start a conversation.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Is Local List responsible for transactions?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">No. Transactions are arranged directly between buyers and sellers.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How can I stay safe when meeting buyers or sellers?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Meet in public places, bring a friend if possible, and avoid sharing sensitive information.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How do I report a listing or user?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Use the Report option on a listing or contact support.</div>
+      </div>
+    </div>
+    
+    <!-- Payments & Refunds Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Payments & Refunds</h2>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Does Local List handle payments between buyers and sellers?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">No. Payments for items are handled directly between buyers and sellers. Local List only processes payments for optional features.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">What payments does Local List process?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Local List may process payments for optional features such as Featured Listings.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">What is the refund policy?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Refunds are issued only for duplicate charges, technical issues, or payment errors.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How do I request a refund?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Contact support with your account email and transaction details.</div>
+      </div>
+    </div>
+    
+    <!-- Policies & Prohibited Items Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Policies & Prohibited Items</h2>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">What items are not allowed?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Illegal items, stolen property, adult content, restricted weapons, or anything violating laws are not allowed.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Can businesses post listings?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Yes, as long as listings follow policies and remain relevant to the local community.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">Can my account be suspended?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Accounts that repeatedly violate policies or misuse the platform may be restricted or suspended.</div>
+      </div>
+    </div>
+    
+    <!-- Contact Support Section -->
+    <div class="faq-section">
+      <h2 class="section-title">Contact Support</h2>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">How do I contact support?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Use the Contact page in the app or email support at support@locallist.com.</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="question-row" onclick="toggleAnswer(this)">
+          <div class="question">What information should I include?</div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="answer">Include your account email, description of the issue, and any relevant details.</div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+  </footer>
+  
+  <script src="header.js"></script>
+  <script>
+    function toggleAnswer(element) {
+      const answer = element.nextElementSibling;
+      const arrow = element.querySelector('.arrow');
+      
+      // Close all other answers
+      document.querySelectorAll('.answer').forEach(ans => {
+        if (ans !== answer) {
+          ans.classList.remove('show');
+        }
+      });
+      document.querySelectorAll('.arrow').forEach(arr => {
+        if (arr !== arrow) {
+          arr.classList.remove('open');
+        }
+      });
+      
+      // Toggle the clicked answer
+      answer.classList.toggle('show');
+      arrow.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

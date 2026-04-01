@@ -1,0 +1,24 @@
+// Centralized Firebase config for web (compat SDK)
+(function () {
+  const firebaseConfig = {
+    apiKey: "AIzaSyDGaAN-Fg1mK3KZANo88t__OEoJA8SJAD0",
+    authDomain: "local-list-wski21.firebaseapp.com",
+    projectId: "local-list-wski21",
+    storageBucket: "local-list-wski21.firebasestorage.app",
+    messagingSenderId: "280253430618",
+    appId: "1:280253430618:web:f1110d0f205e619fea9163"
+  };
+
+  const app = firebase.apps && firebase.apps.length
+    ? firebase.app()
+    : firebase.initializeApp(firebaseConfig);
+
+  const auth = firebase.auth ? firebase.auth() : null;
+  const db = firebase.firestore ? firebase.firestore() : null;
+  const storage = firebase.storage ? firebase.storage() : null;
+
+  window.firebaseApp = app;
+  window.firebaseAuth = auth;
+  window.firebaseDb = db;
+  window.firebaseStorage = storage;
+})();
