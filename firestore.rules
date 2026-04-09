@@ -33,6 +33,12 @@ service cloud.firestore {
       return isActiveAccount();
     }
 
+    /** Other signed-in users may read a user doc only after onboarding sets this to true. Missing field = legacy (treat as public). */
+    function userProfileVisibleToSignedInPeers() {
+      return !resource.data.keys().hasAny(['publicProfileEnabled'])
+        || resource.data.publicProfileEnabled == true;
+    }
+
     function canCreateListing() {
       return signedIn()
         && (
@@ -151,13 +157,27 @@ service cloud.firestore {
         && (!('isDisabled' in request.resource.data.keys()) || request.resource.data.isDisabled == false)
         && (!('isBanned' in request.resource.data.keys()) || request.resource.data.isBanned == false)
         && (!('zipApproved' in request.resource.data.keys()) || request.resource.data.zipApproved == false)
-        && (!('accountType' in request.resource.data.keys()) || request.resource.data.accountType in ['personal', 'user']);
-      allow read: if signedIn(); // Allow authenticated users to read user documents (needed for block checking)
+        && (!('accountType' in request.resource.data.keys()) || request.resource.data.accountType in ['personal', 'user'])
+        && (!('publicProfileEnabled' in request.resource.data.keys()) || request.resource.data.publicProfileEnabled is bool);
+      allow read: if signedIn()
+        && (
+          request.auth.uid == document
+          || isAdmin()
+          || userProfileVisibleToSignedInPeers()
+        );
       allow update: if request.auth.uid == document
         && (
           // Protect critical fields - they cannot be changed by users
           (request.resource.data.role == resource.data.role || !('role' in request.resource.data.keys()))
-          && (request.resource.data.status == resource.data.status || !('status' in request.resource.data.keys()))
+          // Allow first-time status (e.g. Google stub doc without status) when completing onboarding.
+          && (
+            request.resource.data.status == resource.data.status
+            || !('status' in request.resource.data.keys())
+            || (
+              !(resource.data.keys().hasAny(['status']))
+              && request.resource.data.status in ['pending', 'approved']
+            )
+          )
           && (request.resource.data.isDisabled == resource.data.isDisabled || !('isDisabled' in request.resource.data.keys()))
           && (request.resource.data.isBanned == resource.data.isBanned || !('isBanned' in request.resource.data.keys()))
           && (request.resource.data.zipApproved == resource.data.zipApproved || !('zipApproved' in request.resource.data.keys()))

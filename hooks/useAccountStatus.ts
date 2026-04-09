@@ -9,9 +9,43 @@ type UserProfile = BaseUserProfile & {
   role?: string;
   zipApproved?: boolean;
   name?: string;
+  zipCode?: string;
   businessTier?: 'free' | 'premium';
   accountType?: 'personal' | 'user' | 'business';
+  /** Set when user completes the service-area + terms gate (Firestore timestamp). */
+  termsAcceptedAt?: unknown;
 };
+
+function isPersonalScopeAccount(profile: UserProfile | null): boolean {
+  if (!profile) return true;
+  const t = String(profile.accountType || '').toLowerCase();
+  return t === '' || t === 'personal' || t === 'user';
+}
+
+/**
+ * True until the user has finished the mandatory onboarding flow: valid ZIP + name in Firestore
+ * and termsAcceptedAt from the ZIP screen (Continue). Google/Firebase Auth displayName alone does not count.
+ * Email/password signup sets termsAcceptedAt when the profile is first written with ZIP + name.
+ *
+ * Google sign-in creates a stub with publicProfileEnabled: false; we keep showing the gate until ZIP screen
+ * completion sets publicProfileEnabled true (even if stale name/zip/terms exist on the document).
+ */
+export function profileNeedsServiceArea(profile: UserProfile | null): boolean {
+  if (!profile) return true;
+
+  if (profile.publicProfileEnabled === false) {
+    return true;
+  }
+
+  const zip = String(profile.zipCode || '').trim();
+  const name = String(profile.name || profile.displayName || '').trim();
+
+  const zipOk = /^[0-9]{5}$/.test(zip);
+  const nameOk = name.length > 0;
+  const termsOk = profile.termsAcceptedAt != null;
+
+  return !(zipOk && nameOk && termsOk);
+}
 
 type AccountStatus = {
   user: User | null;
@@ -24,6 +58,8 @@ type AccountStatus = {
   isAdmin: boolean;
   isBusinessAccount: boolean;
   isRegularAccount: boolean;
+  /** True when signed-in, verified, but name/ZIP still missing (show mandatory service-area screen). */
+  needsServiceAreaProfile: boolean;
 };
 
 export function useAccountStatus(): AccountStatus {
@@ -35,7 +71,9 @@ export function useAccountStatus(): AccountStatus {
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       setUser(authUser);
-      setLoading(false);
+      if (!authUser) {
+        setLoading(false);
+      }
     });
     return unsubscribe;
   }, []);
@@ -48,9 +86,17 @@ export function useAccountStatus(): AccountStatus {
 
     const db = getFirestore(app);
     const userRef = doc(db, 'users', user.uid);
-    const unsubscribe = onSnapshot(userRef, (snapshot) => {
-      setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
-    });
+    const unsubscribe = onSnapshot(
+      userRef,
+      (snapshot) => {
+        setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
+        setLoading(false);
+      },
+      () => {
+        setProfile(null);
+        setLoading(false);
+      }
+    );
 
     return unsubscribe;
   }, [user]);
@@ -66,6 +112,7 @@ export function useAccountStatus(): AccountStatus {
   const isAdmin = normalizedRole === 'admin';
   const isBusinessAccount = normalizedAccountType === 'business';
   const isRegularAccount = !!user && (!!profile ? !isBusinessAccount : false);
+  const needsServiceAreaProfile = !!user && isVerified && profileNeedsServiceArea(profile);
 
   return {
     user,
@@ -78,5 +125,6 @@ export function useAccountStatus(): AccountStatus {
     isAdmin,
     isBusinessAccount,
     isRegularAccount,
+    needsServiceAreaProfile,
   };
 }

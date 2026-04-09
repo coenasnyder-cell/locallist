@@ -96,7 +96,6 @@ export default function UpgradeBusinessScreen() {
     router.push({
       pathname: '/signInOrSignUp' as any,
       params: {
-        mode: 'login',
         returnTo: '/upgrade-business',
       },
     });

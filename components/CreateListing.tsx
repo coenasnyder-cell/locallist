@@ -281,7 +281,6 @@ const styles = StyleSheet.create({
 			router.push({
 				pathname: '/signInOrSignUp',
 				params: {
-					mode: 'login',
 					returnTo: '/create-listing',
 				},
 			} as any);

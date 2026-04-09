@@ -18,4 +18,8 @@ export interface UserProfile {
   blockedUsers?: string[]; // Array of blocked user UIDs
   createdAt?: any;
   updatedAt?: any;
+  /** Firestore timestamp when user accepted Terms / Privacy on onboarding. */
+  termsAcceptedAt?: any;
+  /** When false, other signed-in users cannot read this user doc (pre-onboarding stub). */
+  publicProfileEnabled?: boolean;
 }

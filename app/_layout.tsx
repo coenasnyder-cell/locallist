@@ -11,7 +11,16 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-const AUTH_ROUTES = new Set(['login', 'signInOrSignUp', 'forgot-password', 'verify-email', 'auth-action', 'account-restricted']);
+const AUTH_ROUTES = new Set([
+  'login',
+  'signup',
+  'signInOrSignUp',
+  'zipCodeverify',
+  'forgot-password',
+  'verify-email',
+  'auth-action',
+  'account-restricted',
+]);
 const PUBLIC_TAB_ROUTES = new Set(['index', 'browsebutton', 'communitybutton', 'supporthubbutton']);
 
 export default function RootLayout() {
@@ -19,55 +28,49 @@ export default function RootLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const segments = useSegments();
-  const { user, loading, isVerified, isBanned, isDisabled } = useAccountStatus();
-
+  const { user, loading, isVerified, isBanned, isDisabled, needsServiceAreaProfile } = useAccountStatus();
   useEffect(() => {
     if (loading) return;
 
-    const topSegment = segments[0] || '';
-    const childSegment = segments[1] || 'index';
-    const inAuthRoute = AUTH_ROUTES.has(topSegment);
-    const inTabsGroup = topSegment === '(tabs)';
-    const inAppGroup = topSegment === '(app)';
-
+    // Not logged in → allow auth/onboarding screens; otherwise send to login
     if (!user) {
-      if (inAppGroup || (inTabsGroup && !PUBLIC_TAB_ROUTES.has(childSegment))) {
-        if (pathname !== '/login') {
-          router.replace('/login');
-        }
+      const segment = (pathname ?? '').replace(/^\//, '').split('/')[0] ?? '';
+      if (!AUTH_ROUTES.has(segment)) {
+        router.replace('/login');
       }
       return;
     }
-
+  
+    // 🚨 Banned / disabled
     if (isBanned || isDisabled) {
       if (pathname !== '/account-restricted') {
         router.replace('/account-restricted');
       }
       return;
     }
-
-    if (pathname === '/account-restricted') {
-      router.replace('/(tabs)');
+  
+    const onZipPage = pathname === '/zipCodeverify';
+  
+    // 🔥 FORCE ZIP PAGE if profile incomplete
+    if (isVerified && needsServiceAreaProfile && !onZipPage) {
+      router.replace('/zipCodeverify');
       return;
     }
-
-    if (!isVerified && topSegment !== 'verify-email' && topSegment !== 'auth-action') {
-      router.replace({
-        pathname: '/verify-email',
-        params: {
-          email: user.email || '',
-          isNewUser: 'false',
-        },
-      });
+  
+    // 🔥 PREVENT leaving ZIP page until complete
+    if (isVerified && needsServiceAreaProfile && onZipPage) {
+      return; // stay here
+    }
+  
+    // 🔥 AFTER completion → go to app
+    if (isVerified && !needsServiceAreaProfile && pathname === '/zipCodeverify') {
+      router.replace('/');
       return;
     }
+  
+  }, [user, loading, isBanned, isDisabled, isVerified, needsServiceAreaProfile, pathname, router]);
 
-    if (isVerified && inAuthRoute && topSegment !== 'auth-action') {
-      router.replace('/(tabs)');
-    }
-  }, [isBanned, isDisabled, isVerified, loading, pathname, router, segments, user]);
-
- return (
+  return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
@@ -88,6 +91,15 @@ export default function RootLayout() {
     headerShown: false,
   }}
 />
+  <Stack.Screen name="signup" options={{ headerShown: false }} />
+  <Stack.Screen
+    name="zipCodeverify"
+    options={{
+      headerShown: false,
+      gestureEnabled: false,
+      animation: 'none',
+    }}
+  />
   <Stack.Screen name="verify-email" options={{ headerShown: false }} />
   <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
   <Stack.Screen name="account-restricted" options={{ headerShown: false }} />

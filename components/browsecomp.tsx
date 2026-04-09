@@ -187,7 +187,7 @@ export default function BrowseComp() {
 					</Text>
 					<TouchableOpacity
 						style={styles.listHubHighlightButton}
-						onPress={() => router.push((user ? '/(tabs)/listbutton' : { pathname: '/signInOrSignUp', params: { mode: 'login' } }) as any)}
+						onPress={() => router.push((user ? '/(tabs)/listbutton' : '/signInOrSignUp') as any)}
 						activeOpacity={0.85}
 					>
 						<Text style={styles.listHubHighlightButtonText}>Open List Hub</Text>

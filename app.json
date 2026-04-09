@@ -17,11 +17,13 @@
       ],
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "We need access to your photo library to let you upload a profile picture.",
+        "NSLocationWhenInUseUsageDescription": "Local List uses your location once to suggest your ZIP code near Harrison, NJ for local listings and service-area matching. We do not store GPS coordinates on your profile.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.mycompany.locallist",
+      "versionCode": 17,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -49,7 +51,11 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -79,7 +85,13 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Local List uses your location once to suggest your ZIP code for Harrison-area listings. GPS is not saved to your profile."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -93,6 +105,12 @@
       "eas": {
         "projectId": "e3717536-736b-40a7-82b6-e4a00a8f1f7d"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e3717536-736b-40a7-82b6-e4a00a8f1f7d"
     }
   }
 }

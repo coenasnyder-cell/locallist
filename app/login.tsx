@@ -26,7 +26,13 @@ import {
 import Header from '../components/Header';
 import { GOOGLE_AUTH_CONFIG } from '../constants/googleAuth';
 import { app, auth } from '../firebase';
-import { getAuthErrorMessage, getPostAuthRoute, isPasswordAccountUnverified } from '../utils/auth-helpers';
+import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
+import {
+  getAuthErrorMessage,
+  getPostAuthRoute,
+  GOOGLE_SIGN_IN_GENERIC_MESSAGE,
+  isPasswordAccountUnverified,
+} from '../utils/auth-helpers';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -43,20 +49,6 @@ export default function LoginPage() {
     iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
   });
 
-  // Clear any persisted auth state when component mounts
-  React.useEffect(() => {
-    const clearAuth = async () => {
-      try {
-        if (auth.currentUser) {
-          await signOut(auth);
-        }
-      } catch (err) {
-        console.log('Note: No user to sign out');
-      }
-    };
-    clearAuth();
-  }, []);
-
   const routeAfterAuth = (isNewUser: boolean) => {
     router.replace(getPostAuthRoute({ isNewUser }) as any);
   };
@@ -68,43 +60,38 @@ export default function LoginPage() {
     const isNewUser = !profileSnapshot.exists();
 
     if (isNewUser && isGoogleUser) {
-      const fallbackName = user.displayName || user.email?.split('@')[0] || 'User';
-      await setDoc(userRef, {
-        email: user.email || '',
-        displayName: fallbackName,
-        name: fallbackName,
-        accountType: 'personal',
-        lastLoginAt: serverTimestamp(),
-      }, { merge: true });
-      router.replace('/(tabs)' as any);
+      await setDoc(
+        userRef,
+        {
+          email: user.email || '',
+          accountType: 'personal',
+          lastLoginAt: serverTimestamp(),
+          publicProfileEnabled: false,
+        },
+        { merge: true }
+      );
+      router.replace('/zipCodeverify' as any);
       return;
     }
 
     if (!profileSnapshot.exists()) {
       router.push({
-        pathname: '/signInOrSignUp',
-        params: { mode: 'signup', email: user.email || email.trim().toLowerCase() },
+        pathname: '/signup',
+        params: { email: user.email || email.trim().toLowerCase() },
       });
       return;
     }
 
-    const profile = profileSnapshot.data() || {};
-    const hasMinimumProfile = Boolean(
-      profile.email && profile.zipCode && (profile.name || profile.displayName)
-    );
+    const firestoreProfile = profileSnapshot.data();
 
     await setDoc(userRef, {
       email: user.email || '',
       lastLoginAt: serverTimestamp(),
     }, { merge: true });
 
-    if (!hasMinimumProfile) {
-      router.replace('/(tabs)/profilebutton');
-      return;
-    }
-
-    if (isGoogleUser) {
-      router.replace('/(tabs)' as any);
+    // Match useAccountStatus / zip gate: 5-digit ZIP + name (not the loose email+zip+name check).
+    if (profileNeedsServiceArea(firestoreProfile as Parameters<typeof profileNeedsServiceArea>[0])) {
+      router.replace('/zipCodeverify' as any);
       return;
     }
 
@@ -112,14 +99,7 @@ export default function LoginPage() {
   };
 
   const goToSignup = () => {
-    const nextEmail = email.trim().toLowerCase();
-    router.push({
-      pathname: '/signInOrSignUp',
-      params: {
-        mode: 'signup',
-        ...(nextEmail ? { email: nextEmail } : {}),
-      },
-    });
+    router.push('/signup');
   };
 
   const handleEmailLogin = async () => {
@@ -157,66 +137,7 @@ export default function LoginPage() {
     }
   };
 
-  React.useEffect(() => {
-    const finishGoogleSignIn = async () => {
-      if (response?.type === 'error') {
-        const googleError = (response as any)?.params?.error_description || 'Google authorization failed. Check OAuth setup and try again.';
-        setError(googleError);
-        return;
-      }
-
-      if (response?.type !== 'success') {
-        return;
-      }
-
-      // Android may return the token in params while iOS/web often provide authentication.idToken.
-      const idToken = response.authentication?.idToken ?? (response as any)?.params?.id_token;
-      if (!idToken) {
-        setError('Google sign-in failed: no ID token received.');
-        return;
-      }
-
-      try {
-        // Sign out any existing session to avoid conflicts
-        try {
-          if (auth.currentUser) {
-            await signOut(auth);
-          }
-        } catch {
-          // Ignore if no user to sign out
-        }
-
-        console.log('GOOGLE RESPONSE:', response);
-        console.log('ID TOKEN:', idToken);
-        const credential = GoogleAuthProvider.credential(idToken);
-        const userCredential = await signInWithCredential(auth, credential);
-        await handleAuthSuccess(userCredential.user, true);
-      } catch (signInError: any) {
-        console.error('Google sign-in error:', signInError?.code || signInError?.message);
-        
-        // Handle various Firebase Auth errors
-        if (signInError?.code === 'auth/account-exists-with-different-credential') {
-          setError('This email is already linked to a different sign-in method. Please use your original method or reset your password.');
-        } else if (signInError?.code === 'auth/email-already-in-use') {
-          setError('This email is already in use. Please log in with your password instead.');
-        } else if (signInError?.code === 'auth/user-disabled') {
-          setError('This account has been disabled. Please contact support.');
-        } else if (signInError?.code === 'auth/invalid-credential') {
-          setError('The authentication failed. Please try again.');
-        } else if (signInError?.code === 'auth/credential-already-in-use') {
-          setError('This Google account is already linked to another account. Please use your original sign-in method.');
-        } else if (signInError?.message?.includes('already exists')) {
-          setError('This account already exists. Please sign in with your email and password instead.');
-        } else {
-          const message = signInError?.message || 'Google sign-in failed. Please try again.';
-          setError(message);
-        }
-      }
-    };
-
-    finishGoogleSignIn();
-  }, [response]);
-
+    
   return (
     <>
       <Header />
@@ -239,7 +160,31 @@ export default function LoginPage() {
 
               <TouchableOpacity
                 style={[styles.googleButton, !request && styles.disabledButton]}
-                onPress={() => promptAsync()}
+                onPress={async () => {
+                  try {
+                    const result = await promptAsync();
+                
+                    console.log("PROMPT RESULT:", result);
+                
+                    if (result?.type !== 'success') return;
+                
+                    const idToken =
+                      result.authentication?.idToken ?? result.params?.id_token;
+                
+                    if (!idToken) {
+                      setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
+                      return;
+                    }
+                
+                    const credential = GoogleAuthProvider.credential(idToken);
+                    const userCredential = await signInWithCredential(auth, credential);
+                
+                    await handleAuthSuccess(userCredential.user, true);
+                
+                  } catch (e) {
+                    setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
+                  }
+                }}
                 disabled={!request || submitting}
               >
                 <View style={styles.googleButtonContent}>

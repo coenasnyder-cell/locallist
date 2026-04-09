@@ -3,13 +3,16 @@ export interface Listing {
   id: string;
   title: string;
   description: string;
-  price: number;
+  price: number | string;
   images: string[];
-  createdAt: string;
-  updatedAt?: string;
+  zipCode?: string;
+  city?: string;
+  status?: 'pending' | 'approved' | 'rejected' | string;
+  createdAt?: any;
+  updatedAt?: any;
   userId: string;
   // Featured listing fields
-  isFeatured: boolean;
+  isFeatured?: boolean;
   featureTier?: 'premium' | 'basic';
   featureExpiresAt?: string; // ISO timestamp when feature expires
   featurePurchaseId?: string; // Reference to purchase record

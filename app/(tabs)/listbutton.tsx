@@ -141,7 +141,7 @@ export default function ListScreen() {
   }
 
   if (!user) {
-    return <Redirect href={{ pathname: '/signInOrSignUp', params: { mode: 'login' } }} />;
+    return <Redirect href="/signInOrSignUp" />;
   }
 
   const visibleItems = HUB_ITEMS.filter((item) => !item.businessOnly || canSeeBusinessItems);

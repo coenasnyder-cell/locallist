@@ -1,6 +1,10 @@
 import type { User } from 'firebase/auth';
+import { sendEmailVerification } from 'firebase/auth';
 
 export type AuthMode = 'login' | 'signup';
+
+/** Use for Google OAuth/Firebase failures so users never see raw vendor text (e.g. insufficient permissions). */
+export const GOOGLE_SIGN_IN_GENERIC_MESSAGE = 'Google sign-in failed. Please try again.';
 
 type PostAuthRouteOptions = {
   isNewUser?: boolean;
@@ -70,4 +74,14 @@ export function isPasswordAccountUnverified(user: Pick<User, 'providerData' | 'e
   const providerIds = user.providerData?.map((provider) => provider.providerId) ?? [];
   const isPasswordUser = providerIds.includes('password');
   return isPasswordUser && !user.emailVerified;
+}
+
+export async function sendVerificationEmailForUser(user: User): Promise<{ ok: true } | { ok: false; message: string }> {
+  try {
+    await sendEmailVerification(user);
+    return { ok: true };
+  } catch (error: any) {
+    const message = typeof error === 'object' && error ? String(error.message || 'Could not send verification email.') : 'Could not send verification email.';
+    return { ok: false, message };
+  }
 }

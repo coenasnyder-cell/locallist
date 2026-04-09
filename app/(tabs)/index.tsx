@@ -189,9 +189,8 @@ export default function HomeScreen() {
     }
 
     router.push({
-      pathname: '/signInOrSignUp',
+      pathname: '/signup',
       params: {
-        mode: 'signup',
         returnTo: '/create-listing',
       },
     } as any);
@@ -337,7 +336,7 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity
               style={{ backgroundColor: '#c2410c', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
-              onPress={() => router.push(user ? '/(tabs)/listbutton' : { pathname: '/signInOrSignUp', params: { mode: 'login' } })}
+              onPress={() => router.push(user ? '/(tabs)/listbutton' : '/signInOrSignUp')}
             >
               <Text style={{ color: '#fff', fontWeight: '500', fontSize: 14 }}>Open List Hub</Text>
             </TouchableOpacity>

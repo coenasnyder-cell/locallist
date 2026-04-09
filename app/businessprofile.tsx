@@ -291,7 +291,6 @@ export default function BusinessProfileScreen() {
             router.push({
               pathname: '/signInOrSignUp' as any,
               params: {
-                mode: 'login',
                 returnTo: `/businessprofile?id=${profile.id}&claim=1`,
               },
             }),
