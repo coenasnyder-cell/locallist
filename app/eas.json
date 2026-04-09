@@ -1,9 +1,15 @@
 {
-    "build": {
-      "production": {
-        "android": {
-          "buildType": "app-bundle"
-        }
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   }
+}

@@ -241,6 +241,9 @@ export default function HomeScreen() {
           >
             Quote of the Day
           </Text>
+<Text style={{ fontSize: 30, textAlign: 'center', marginTop: 100 }}>
+  FINAL BUILD CHECK 1
+</Text>
           <Text style={{ fontSize: 15, lineHeight: 22, fontWeight: '600', color: '#1e293b', textAlign: 'center' }}>
             {(displaySettings?.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."'}
           </Text>
