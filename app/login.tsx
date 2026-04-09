@@ -6,8 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   signInWithEmailAndPassword,
-  signOut,
-  type User,
+  type User
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
@@ -44,14 +43,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: GOOGLE_AUTH_CONFIG.clientId,
-    androidClientId: GOOGLE_AUTH_CONFIG.androidClientId,
-    iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
-  });
+  androidClientId: GOOGLE_AUTH_CONFIG.androidClientId,
+  iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
+  webClientId: GOOGLE_AUTH_CONFIG.clientId,
+});
 
-  const routeAfterAuth = (isNewUser: boolean) => {
+  function routeAfterAuth(isNewUser: boolean) {
     router.replace(getPostAuthRoute({ isNewUser }) as any);
-  };
+  }
 
   const handleAuthSuccess = async (user: User, isGoogleUser: boolean) => {
     const db = getFirestore(app);
@@ -74,13 +73,21 @@ export default function LoginPage() {
       return;
     }
 
-    if (!profileSnapshot.exists()) {
-      router.push({
-        pathname: '/signup',
-        params: { email: user.email || email.trim().toLowerCase() },
-      });
-      return;
-    }
+if (!profileSnapshot.exists()) {
+  await setDoc(
+    userRef,
+    {
+      email: user.email || email.trim().toLowerCase(),
+      accountType: 'personal',
+      createdAt: serverTimestamp(),
+      lastLoginAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+
+  router.replace('/zipCodeverify');
+  return;
+}
 
     const firestoreProfile = profileSnapshot.data();
 

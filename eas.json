@@ -11,7 +11,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development"
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_ANDROID_GOOGLE_CLIENT_ID": "280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com"
       }
     },
     "preview": {
@@ -20,13 +21,15 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "preview"
+        "EXPO_PUBLIC_APP_ENV": "preview",
+        "EXPO_PUBLIC_ANDROID_GOOGLE_CLIENT_ID": "280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "production"
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_ANDROID_GOOGLE_CLIENT_ID": "280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com"
       }
     },
     "production-apk": {

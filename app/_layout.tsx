@@ -11,7 +11,9 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-const AUTH_ROUTES = new Set([
+const PUBLIC_ROUTES = new Set([
+  '', // root "/"
+  'index',
   'login',
   'signup',
   'signInOrSignUp',
@@ -35,7 +37,7 @@ export default function RootLayout() {
     // Not logged in → allow auth/onboarding screens; otherwise send to login
     if (!user) {
       const segment = (pathname ?? '').replace(/^\//, '').split('/')[0] ?? '';
-      if (!AUTH_ROUTES.has(segment)) {
+      if (!PUBLIC_ROUTES.has(segment)) {
         router.replace('/login');
       }
       return;
