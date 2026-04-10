@@ -91,6 +91,11 @@ export function getNativeGoogleSignInErrorMessage(error: unknown): string | null
     return 'Google sign-in took too long. Please try again.';
   }
 
+  const code = typeof error === 'object' && error ? String((error as { code?: string | number }).code ?? '') : '';
+  const rawMessage = typeof error === 'object' && error ? String((error as { message?: string }).message || '') : '';
+  const upperCode = code.toUpperCase();
+  const upperMessage = rawMessage.toUpperCase();
+
   if (isErrorWithCode(error)) {
     if (error.code === statusCodes.IN_PROGRESS) {
       return 'Google sign-in is already in progress. Please wait a moment and try again.';
@@ -101,12 +106,20 @@ export function getNativeGoogleSignInErrorMessage(error: unknown): string | null
     }
   }
 
-  const code = typeof error === 'object' && error ? String((error as { code?: string }).code || '') : '';
   if (code === 'auth/operation-not-allowed') {
     return 'Google sign-in is not enabled for this Firebase project yet.';
   }
+
   if (code === 'auth/account-exists-with-different-credential') {
     return 'An account with this email already exists. Please log in using your original sign-in method.';
+  }
+
+  if (code === '10' || upperCode === 'DEVELOPER_ERROR' || upperMessage.includes('DEVELOPER_ERROR')) {
+    return 'Google sign-in failed with DEVELOPER_ERROR. This usually means the Android OAuth client or SHA fingerprint does not match the installed build.';
+  }
+
+  if (code || rawMessage) {
+    return `Google sign-in failed. Code: ${code || 'unknown'}. ${rawMessage || 'See console log for more details.'}`.trim();
   }
 
   return 'Google sign-in failed. Please try again.';

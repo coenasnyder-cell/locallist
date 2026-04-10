@@ -37,7 +37,7 @@ export default function RootLayout() {
     if (!user) {
       const segment = (pathname ?? '').replace(/^\//, '').split('/')[0] ?? '';
       if (!PUBLIC_ROUTES.has(segment)) {
-        router.replace('/login');
+        router.replace('/signInOrSignUp');
       }
       return;
     }

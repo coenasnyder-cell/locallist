@@ -357,7 +357,7 @@ export default function Header({
 
           {!user && !loading && (
             <TouchableOpacity
-              onPress={() => Platform.OS === 'web' ? handleNavigate('login.html') : router.push('/login')}
+              onPress={() => router.push('/signInOrSignUp')}
               accessibilityLabel="Login"
               style={styles.rightButton}
             >

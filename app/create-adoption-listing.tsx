@@ -49,7 +49,7 @@ export default function CreateAdoptionListingScreen() {
     loginPromptShownRef.current = true;
     Alert.alert('Login Required', 'You need to be logged in to create an adoption listing.', [
       { text: 'Back', style: 'cancel', onPress: navigateToPetHub },
-      { text: 'Log In', onPress: () => router.push('/login') },
+      { text: 'Log In', onPress: () => router.push('/signInOrSignUp') },
     ]);
   }, [user, loading, navigateToPetHub]);
 

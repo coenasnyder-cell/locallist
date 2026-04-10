@@ -13,7 +13,7 @@ export default function AccountRestrictedPage() {
     setSigningOut(true);
     try {
       await signOut(getAuth(app));
-      router.replace('/login');
+      router.replace('/signInOrSignUp');
     } finally {
       setSigningOut(false);
     }

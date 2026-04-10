@@ -240,7 +240,7 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
   }, [isBusinessAccount, profile, user?.uid]);
 
   if (!loading && !user) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/signInOrSignUp" />;
   }
 
   // If this screen is opened as a standalone route, bounce to the tabs route
@@ -536,7 +536,7 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
             } catch (error) {
               Alert.alert('Logout Error', 'Could not sign out right now. Please try again.');
             } finally {
-              router.replace('/login');
+              router.replace('/signInOrSignUp');
             }
           }}
         >
