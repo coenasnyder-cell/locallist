@@ -29,7 +29,7 @@ const PAY_TYPES = ['Hourly', 'Salary', 'Other'];
 
 export default function CreateJobListingPage() {
   const router = useRouter();
-  const { user, profile, loading } = useAccountStatus();
+  const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
   const loginPromptShownRef = useRef(false);
 
   const handleBack = () => {
@@ -52,10 +52,8 @@ export default function CreateJobListingPage() {
   const [jobCategories, setJobCategories] = useState<string[]>(DEFAULT_JOB_CATEGORIES);
   const [submitting, setSubmitting] = useState(false);
 
-  const hasProfile = !!profile;
   const isBusinessAccount = profile?.accountType === 'business';
-  const canPost = hasProfile && !profile.isBanned && !profile.isDisabled;
-  const canCreateJobPost = canPost && isBusinessAccount;
+  const canCreateJobPost = canPostListings && isBusinessAccount;
 
   const normalizedUserName = useMemo(
     () => profile?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Unknown',
@@ -132,18 +130,13 @@ export default function CreateJobListingPage() {
       return;
     }
 
-    if (!hasProfile) {
-      Alert.alert('Profile Required', 'Your account profile is not ready yet. Please try again shortly.');
-      return;
-    }
-
     if (!isBusinessAccount) {
       Alert.alert('Business Account Required', 'Only business accounts can post job listings.');
       return;
     }
 
-    if (!canPost) {
-      Alert.alert('Account Action Required', 'Your account is not eligible to post right now.');
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
       return;
     }
 
@@ -213,6 +206,9 @@ export default function CreateJobListingPage() {
           <Text style={styles.subtitle}>Business accounts can post hiring opportunities to the job board</Text>
           {!loading && user && !isBusinessAccount ? (
             <Text style={styles.notice}>Only business accounts can create job posts.</Text>
+          ) : null}
+          {!loading && user && isBusinessAccount && !canPostListings ? (
+            <Text style={styles.notice}>{postingBlockedReason}</Text>
           ) : null}
 
           <FormInput label="Job Title" value={jobTitle} onChangeText={setJobTitle} required editable={!loading && canCreateJobPost} />

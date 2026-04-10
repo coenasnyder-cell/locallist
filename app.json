@@ -85,6 +85,12 @@
           }
         }
       ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.280253430618-66bopqe6ob2jj555d764mmmodr3thssr"
+        }
+      ],
       "@react-native-community/datetimepicker",
       [
         "expo-location",

@@ -30,7 +30,7 @@ function getDatePickerDate(value: string): Date {
 
 export default function CreateDealListingScreen() {
   const router = useRouter();
-  const { user, profile, loading, isAdmin, isBusinessAccount } = useAccountStatus();
+  const { user, profile, loading, isAdmin, isBusinessAccount, canPostListings, postingBlockedReason } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
 
   const [title, setTitle] = useState('');
@@ -106,6 +106,10 @@ export default function CreateDealListingScreen() {
 
     if (!user?.uid) {
       Alert.alert('Error', 'You must be signed in to post a deal.');
+      return;
+    }
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
       return;
     }
 
@@ -202,6 +206,9 @@ export default function CreateDealListingScreen() {
         </View>
 
         <View style={styles.panel}>
+          {!canPostListings ? (
+            <Text style={styles.notice}>{postingBlockedReason}</Text>
+          ) : null}
           <FormInput
             label="Deal Title"
             value={title}
@@ -286,9 +293,9 @@ export default function CreateDealListingScreen() {
           ) : null}
 
           <TouchableOpacity
-            style={[styles.primaryBtn, submitting ? styles.buttonDisabled : null]}
+            style={[styles.primaryBtn, (submitting || !canPostListings) ? styles.buttonDisabled : null]}
             onPress={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !canPostListings}
           >
             <Text style={styles.primaryBtnText}>{submitting ? 'Posting...' : 'Post Deal'}</Text>
           </TouchableOpacity>
@@ -336,6 +343,16 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     borderRadius: 14,
     padding: 16,
+  },
+  notice: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   dateLabel: {
     fontSize: 14,

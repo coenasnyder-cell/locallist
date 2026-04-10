@@ -119,15 +119,11 @@ const styles = StyleSheet.create({
 		const [flaggedOutOfState, setFlaggedOutOfState] = useState(false);
 		const [wantsFeatured, setWantsFeatured] = useState(false); // Feature listing option
 		const router = useRouter();
-		const { user, profile, isVerified, loading } = useAccountStatus();
+		const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
 		const draftStorageKey = `${DRAFT_STORAGE_KEY_BASE}:${user?.uid || 'anonymous'}`;
-		const canPost = !!profile && !profile?.isBanned && !profile?.isDisabled;
+		const canEditListing = !!user && canPostListings;
 		const accountStatusMessage = () => {
-			if (loading) return 'Checking account status. Please try again in a moment.';
-			if (!profile) return 'Account profile not found. Contact support for help.';
-			if (profile?.isBanned) return 'Your account has been banned. Contact support for help.';
-			if (profile?.isDisabled) return 'Your account is disabled. Contact support for help.';
-			return 'Unable to post. Please contact support.';
+			return postingBlockedReason || 'Unable to post. Please contact support.';
 		};
 		// Keep auth gate in sync: prompt once when signed out, close once signed in.
 		React.useEffect(() => {
@@ -582,7 +578,7 @@ const styles = StyleSheet.create({
 			Alert.alert('Error', 'User email not found. Please check your account.');
 			return;
 		}
-		if (!canPost) {
+		if (!canPostListings) {
 			Alert.alert('Account Action Required', accountStatusMessage());
 			return;
 		}
@@ -698,17 +694,17 @@ const styles = StyleSheet.create({
 									<Text style={styles.clearDraftButtonText}>Clear Draft</Text>
 								</TouchableOpacity>
 							)}
-								<FormInput label="Title" value={title} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setTitle(text); } }} required editable={!!user && canPost} />
-								<FormInput label="Description" value={description} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setDescription(text); } }} required multiline editable={!!user && canPost} />
-								<FormInput label="Price" value={price} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setPrice(text); } }} required keyboardType="numeric" editable={!!user && canPost} />
-								<FormInput label="Category" value={category} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCategory(text); } }} required type="picker" options={CATEGORIES} editable={!!user && canPost} />
-								<FormInput label="Condition" value={condition} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCondition(text); } }} required type="picker" options={CONDITIONS} editable={!!user && canPost} />
-								<FormInput label="Zip Code" value={zipCode} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setZipCode(text); } }} required keyboardType="numeric" editable={!!user && canPost} />
+								<FormInput label="Title" value={title} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setTitle(text); } }} required editable={canEditListing} />
+								<FormInput label="Description" value={description} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setDescription(text); } }} required multiline editable={canEditListing} />
+								<FormInput label="Price" value={price} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setPrice(text); } }} required keyboardType="numeric" editable={canEditListing} />
+								<FormInput label="Category" value={category} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCategory(text); } }} required type="picker" options={CATEGORIES} editable={canEditListing} />
+								<FormInput label="Condition" value={condition} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCondition(text); } }} required type="picker" options={CONDITIONS} editable={canEditListing} />
+								<FormInput label="Zip Code" value={zipCode} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setZipCode(text); } }} required keyboardType="numeric" editable={canEditListing} />
 								<ImageUploader
 									images={images}
 									onChange={imgs => {
 										if (!user) setShowLogin(true);
-										else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage());
+										else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage());
 										else {
 											markListingFormStarted();
 											setImages(imgs);
@@ -729,7 +725,7 @@ const styles = StyleSheet.create({
 											markListingFormStarted();
 											setWantsFeatured(!wantsFeatured);
 										}}
-										disabled={!canPost}
+										disabled={!canEditListing}
 									>
 										<View style={[styles.checkbox, wantsFeatured && styles.checkboxChecked]}>
 											{wantsFeatured && <Text style={styles.checkboxCheck}>✓</Text>}
@@ -743,11 +739,11 @@ const styles = StyleSheet.create({
 									)}
 								</View>
 
-								<TouchableOpacity style={styles.button} onPress={() => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else handleSubmit(wantsFeatured); }} disabled={submitting || !user || !canPost}>
+								<TouchableOpacity style={styles.button} onPress={() => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else handleSubmit(wantsFeatured); }} disabled={submitting || !canEditListing}>
 									<Text style={styles.buttonText}>{submitting ? (openingPayment ? 'Opening Payment...' : 'Submitting...') : wantsFeatured ? 'Continue to Payment' : 'Submit Listing'}</Text>
 								</TouchableOpacity>
 								{wantsFeatured && (
-									<TouchableOpacity style={styles.secondaryButton} onPress={() => { if (!user) setShowLogin(true); else if (!canPost) Alert.alert('Account Action Required', accountStatusMessage()); else handleSubmit(false); }} disabled={submitting || !user || !canPost}>
+									<TouchableOpacity style={styles.secondaryButton} onPress={() => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else handleSubmit(false); }} disabled={submitting || !canEditListing}>
 										<Text style={styles.secondaryButtonText}>List Without Feature</Text>
 									</TouchableOpacity>
 								)}

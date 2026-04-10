@@ -29,12 +29,22 @@ export const screenOptions = {
 
 export default function SignInOrSignUp() {
   const router = useRouter();
-  const { email: emailParam } = useLocalSearchParams();
+  const { email: emailParam, returnTo: returnToParam } = useLocalSearchParams();
   const initialEmail = Array.isArray(emailParam) ? emailParam[0] : emailParam;
+  const returnTo = Array.isArray(returnToParam) ? returnToParam[0] : returnToParam;
 
   const [email, setEmail] = useState(initialEmail || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  const routeAfterAuth = () => {
+    if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+      router.replace(returnTo as any);
+      return;
+    }
+
+    router.replace('/(tabs)/profilebutton' as any);
+  };
 
   const handleAuth = async () => {
     setError('');
@@ -54,6 +64,7 @@ export default function SignInOrSignUp() {
         },
         { merge: true }
       );
+      routeAfterAuth();
     } catch (e: unknown) {
       setError(getAuthErrorMessage(e, 'login'));
     }
@@ -68,6 +79,12 @@ export default function SignInOrSignUp() {
       router.back();
       return;
     }
+
+    if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+      router.replace(returnTo as any);
+      return;
+    }
+
     router.replace('/(tabs)');
   };
 
@@ -128,7 +145,15 @@ export default function SignInOrSignUp() {
               <TouchableOpacity style={styles.troubleLink} onPress={() => router.push('/(app)/contactus')}>
                 <Text style={styles.troubleLinkText}>Trouble logging in? Contact Us</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/signup')}>
+              <TouchableOpacity
+                style={styles.signupLink}
+                onPress={() =>
+                  router.push({
+                    pathname: '/signup' as any,
+                    params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+                  })
+                }
+              >
                 <Text style={styles.signupLinkText}>Don&apos;t have an account? Create one</Text>
               </TouchableOpacity>
             </View>

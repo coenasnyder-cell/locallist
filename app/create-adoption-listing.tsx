@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Tex
 import Header from '../components/Header';
 import ImageUploader from '../components/ImageUploader';
 import { app } from '../firebase';
-import { useAuth } from '../hooks/useAuth';
+import { useAccountStatus } from '../hooks/useAccountStatus';
 
 type PetGender = 'male' | 'female' | 'unknown';
 
@@ -13,7 +13,7 @@ const GENDER_OPTIONS: PetGender[] = ['male', 'female', 'unknown'];
 
 export default function CreateAdoptionListingScreen() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, canPostListings, postingBlockedReason } = useAccountStatus();
 
   const navigateToPetHub = React.useCallback(() => {
     if (router.canGoBack()) {
@@ -54,6 +54,21 @@ export default function CreateAdoptionListingScreen() {
   }, [user, loading, navigateToPetHub]);
 
   const handleSubmit = async () => {
+    if (!user) {
+      Alert.alert('Login Required', 'You need to be logged in to create an adoption listing.');
+      return;
+    }
+
+    if (loading) {
+      Alert.alert('Please Wait', 'Checking account status. Please try again in a moment.');
+      return;
+    }
+
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
+      return;
+    }
+
     if (!petName.trim() || !petType.trim() || !petBreed.trim()) {
       Alert.alert('Missing Information', 'Please fill in all required fields.');
       return;
@@ -109,6 +124,9 @@ export default function CreateAdoptionListingScreen() {
         </View>
 
         <View style={styles.form}>
+        {!loading && user && !canPostListings ? (
+          <Text style={styles.notice}>{postingBlockedReason}</Text>
+        ) : null}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Pet Name *</Text>
           <TextInput style={styles.input} placeholder="e.g., Max, Bella" value={petName} onChangeText={setPetName} placeholderTextColor="#999" />
@@ -174,9 +192,9 @@ export default function CreateAdoptionListingScreen() {
 
         <View style={styles.actionsRow}>
           <TouchableOpacity
-            style={[styles.submitButton, loadingSubmit && styles.submitButtonDisabled]}
+            style={[styles.submitButton, (loadingSubmit || !user || !canPostListings) && styles.submitButtonDisabled]}
             onPress={handleSubmit}
-            disabled={loadingSubmit}
+            disabled={loadingSubmit || !user || !canPostListings}
           >
             {loadingSubmit ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitButtonText}>Submit</Text>}
           </TouchableOpacity>
@@ -251,6 +269,16 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 16,
+  },
+  notice: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 14,
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   actionsRow: {
     flexDirection: 'row',

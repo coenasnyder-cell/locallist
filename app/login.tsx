@@ -1,16 +1,15 @@
 import { AntDesign } from '@expo/vector-icons';
-import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   GoogleAuthProvider,
   signInWithCredential,
   signInWithEmailAndPassword,
-  type User
+  type User,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -23,90 +22,102 @@ import {
   View,
 } from 'react-native';
 import Header from '../components/Header';
-import { GOOGLE_AUTH_CONFIG } from '../constants/googleAuth';
 import { app, auth } from '../firebase';
-import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
 import {
   getAuthErrorMessage,
-  getPostAuthRoute,
   GOOGLE_SIGN_IN_GENERIC_MESSAGE,
-  isPasswordAccountUnverified,
 } from '../utils/auth-helpers';
-
-WebBrowser.maybeCompleteAuthSession();
+import {
+  configureNativeGoogleSignIn,
+  getNativeGoogleIdToken,
+  isNativeGoogleSignInCancelled,
+} from '../utils/nativeGoogleAuth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { returnTo: returnToParam } = useLocalSearchParams();
+  const returnTo = Array.isArray(returnToParam) ? returnToParam[0] : returnToParam;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [error, setError] = useState('');
+  const canUseNativeGoogle = Platform.OS !== 'web';
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-  androidClientId: GOOGLE_AUTH_CONFIG.androidClientId,
-  iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
-  webClientId: GOOGLE_AUTH_CONFIG.clientId,
-});
+  useEffect(() => {
+    if (canUseNativeGoogle) {
+      configureNativeGoogleSignIn();
+    }
+  }, [canUseNativeGoogle]);
 
-  function routeAfterAuth(isNewUser: boolean) {
-    router.replace(getPostAuthRoute({ isNewUser }) as any);
+  function routeAfterAuth() {
+    if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+      router.replace(returnTo as any);
+      return;
+    }
+
+    router.replace('/(tabs)/profilebutton' as any);
   }
 
-  const handleAuthSuccess = async (user: User, isGoogleUser: boolean) => {
+  const handleAuthSuccess = async (user: User) => {
     const db = getFirestore(app);
     const userRef = doc(db, 'users', user.uid);
     const profileSnapshot = await getDoc(userRef);
-    const isNewUser = !profileSnapshot.exists();
+    const fallbackEmail = user.email || email.trim().toLowerCase();
+    const fallbackName = String(user.displayName || fallbackEmail.split('@')[0] || 'User').trim();
 
-    if (isNewUser && isGoogleUser) {
+    if (!profileSnapshot.exists()) {
       await setDoc(
         userRef,
         {
-          email: user.email || '',
+          email: fallbackEmail,
           accountType: 'personal',
+          name: fallbackName,
+          displayName: fallbackName,
+          createdAt: serverTimestamp(),
           lastLoginAt: serverTimestamp(),
           publicProfileEnabled: false,
         },
         { merge: true }
       );
-      router.replace('/zipCodeverify' as any);
-      return;
+    } else {
+      await setDoc(userRef, {
+        email: fallbackEmail,
+        lastLoginAt: serverTimestamp(),
+        ...(fallbackName ? { displayName: fallbackName } : {}),
+      }, { merge: true });
     }
 
-if (!profileSnapshot.exists()) {
-  await setDoc(
-    userRef,
-    {
-      email: user.email || email.trim().toLowerCase(),
-      accountType: 'personal',
-      createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
-
-  router.replace('/zipCodeverify');
-  return;
-}
-
-    const firestoreProfile = profileSnapshot.data();
-
-    await setDoc(userRef, {
-      email: user.email || '',
-      lastLoginAt: serverTimestamp(),
-    }, { merge: true });
-
-    // Match useAccountStatus / zip gate: 5-digit ZIP + name (not the loose email+zip+name check).
-    if (profileNeedsServiceArea(firestoreProfile as Parameters<typeof profileNeedsServiceArea>[0])) {
-      router.replace('/zipCodeverify' as any);
-      return;
-    }
-
-    routeAfterAuth(false);
+    routeAfterAuth();
   };
 
   const goToSignup = () => {
-    router.push('/signup');
+    router.push({
+      pathname: '/signup' as any,
+      params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+    });
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!canUseNativeGoogle || submitting || googleBusy) {
+      return;
+    }
+
+    setError('');
+    setGoogleBusy(true);
+
+    try {
+      const idToken = await getNativeGoogleIdToken();
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      await handleAuthSuccess(userCredential.user);
+    } catch (googleError) {
+      if (!isNativeGoogleSignInCancelled(googleError)) {
+        setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
+      }
+    } finally {
+      setGoogleBusy(false);
+    }
   };
 
   const handleEmailLogin = async () => {
@@ -132,11 +143,7 @@ if (!profileSnapshot.exists()) {
     setSubmitting(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, password);
-      if (isPasswordAccountUnverified(userCredential.user)) {
-        setError('Please verify your email before continuing.');
-        return;
-      }
-      await handleAuthSuccess(userCredential.user, false);
+      await handleAuthSuccess(userCredential.user);
     } catch (authError) {
       setError(getAuthErrorMessage(authError, 'login'));
     } finally {
@@ -144,7 +151,6 @@ if (!profileSnapshot.exists()) {
     }
   };
 
-    
   return (
     <>
       <Header />
@@ -165,42 +171,29 @@ if (!profileSnapshot.exists()) {
               <Text style={styles.title}>Welcome to Local List</Text>
               <Text style={styles.subtitle}>Find everything happening around you</Text>
 
-              <TouchableOpacity
-                style={[styles.googleButton, !request && styles.disabledButton]}
-                onPress={async () => {
-                  try {
-                    const result = await promptAsync();
-                
-                    console.log("PROMPT RESULT:", result);
-                
-                    if (result?.type !== 'success') return;
-                
-                    const idToken =
-                      result.authentication?.idToken ?? result.params?.id_token;
-                
-                    if (!idToken) {
-                      setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
-                      return;
-                    }
-                
-                    const credential = GoogleAuthProvider.credential(idToken);
-                    const userCredential = await signInWithCredential(auth, credential);
-                
-                    await handleAuthSuccess(userCredential.user, true);
-                
-                  } catch (e) {
-                    setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
-                  }
-                }}
-                disabled={!request || submitting}
-              >
-                <View style={styles.googleButtonContent}>
-                  <View style={styles.googleIconBadge}>
-                    <AntDesign name="google" size={18} color="#4285F4" />
+              {canUseNativeGoogle ? (
+                <TouchableOpacity
+                  style={[styles.googleButton, (googleBusy || submitting) && styles.disabledButton]}
+                  onPress={handleGoogleLogin}
+                  disabled={googleBusy || submitting}
+                >
+                  <View style={styles.googleButtonContent}>
+                    <View style={styles.googleIconBadge}>
+                      <AntDesign name="google" size={18} color="#4285F4" />
+                    </View>
+                    <Text style={styles.googleButtonText}>
+                      {googleBusy ? 'Signing in...' : 'Continue with Google'}
+                    </Text>
+                    {googleBusy ? <ActivityIndicator size="small" color="#64748b" /> : null}
                   </View>
-                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.webNotice}>
+                  <Text style={styles.webNoticeText}>
+                    Google sign-in runs in the Local List Android or iOS app. Use email login here on the web.
+                  </Text>
                 </View>
-              </TouchableOpacity>
+              )}
 
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
@@ -223,7 +216,7 @@ if (!profileSnapshot.exists()) {
                   keyboardType="email-address"
                   autoComplete="email"
                   placeholder="Email"
-                  editable={!submitting}
+                  editable={!submitting && !googleBusy}
                 />
               </View>
 
@@ -235,14 +228,14 @@ if (!profileSnapshot.exists()) {
                   secureTextEntry
                   autoComplete="password"
                   placeholder="Password"
-                  editable={!submitting}
+                  editable={!submitting && !googleBusy}
                 />
               </View>
 
               <TouchableOpacity
-                style={[styles.loginButton, submitting && styles.disabledButton]}
+                style={[styles.loginButton, (submitting || googleBusy) && styles.disabledButton]}
                 onPress={handleEmailLogin}
-                disabled={submitting}
+                disabled={submitting || googleBusy}
               >
                 <Text style={styles.loginButtonText}>{submitting ? 'Logging In...' : 'Log In'}</Text>
               </TouchableOpacity>
@@ -328,6 +321,20 @@ const styles = StyleSheet.create({
     color: '#475569',
     fontWeight: '700',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  webNotice: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: 18,
+  },
+  webNoticeText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#475569',
     textAlign: 'center',
   },
   dividerRow: {

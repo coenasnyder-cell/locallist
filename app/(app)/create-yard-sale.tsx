@@ -83,7 +83,7 @@ function getTimePickerDate(value: string): Date {
 
 export default function CreateYardSaleScreen() {
   const router = useRouter();
-  const { user, profile, loading } = useAccountStatus();
+  const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
 
   const [saleTitle, setSaleTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -196,6 +196,10 @@ export default function CreateYardSaleScreen() {
       Alert.alert('Error', 'You must be signed in to post a yard sale.');
       return;
     }
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -293,6 +297,9 @@ export default function CreateYardSaleScreen() {
         </View>
 
         <View style={styles.panel}>
+          {!canPostListings ? (
+            <Text style={styles.notice}>{postingBlockedReason}</Text>
+          ) : null}
           <Text style={styles.sectionDivider}>SALE INFO</Text>
 
           <FormInput
@@ -465,9 +472,9 @@ export default function CreateYardSaleScreen() {
           <ImageUploader images={images} onChange={setImages} />
 
           <TouchableOpacity
-            style={[styles.submitBtn, submitting ? styles.submitDisabled : null]}
+            style={[styles.submitBtn, (submitting || !canPostListings) ? styles.submitDisabled : null]}
             onPress={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !canPostListings}
             activeOpacity={0.85}
           >
             <Text style={styles.submitText}>{submitting ? 'Posting...' : 'Post Yard Sale'}</Text>
@@ -519,6 +526,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     gap: 4,
+  },
+  notice: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   sectionDivider: {
     fontSize: 12,

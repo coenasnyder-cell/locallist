@@ -1,17 +1,15 @@
 import { AntDesign } from '@expo/vector-icons';
-import * as Google from 'expo-auth-session/providers/google';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   sendEmailVerification,
   signInWithCredential,
   updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
@@ -27,14 +25,13 @@ import {
 } from 'react-native';
 import Header from '../components/Header';
 import PasswordTextInputRow from '../components/PasswordTextInputRow';
-import { GOOGLE_AUTH_CONFIG } from '../constants/googleAuth';
 import { app, auth } from '../firebase';
-import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
+import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  getAuthErrorMessage,
-  getPostAuthRoute,
-  GOOGLE_SIGN_IN_GENERIC_MESSAGE,
-} from '../utils/auth-helpers';
+  configureNativeGoogleSignIn,
+  getNativeGoogleIdToken,
+  isNativeGoogleSignInCancelled,
+} from '../utils/nativeGoogleAuth';
 import { writePersonalUserAndPending } from '../utils/signupProfile';
 import { isZipInApprovedServiceArea } from '../utils/zipApproval';
 
@@ -54,8 +51,6 @@ type LocationReview = {
   approved: boolean;
 };
 
-WebBrowser.maybeCompleteAuthSession();
-
 function extractUsZip(postalCode: string | null | undefined): string {
   const digits = String(postalCode || '').replace(/\D/g, '');
   return digits.length >= 5 ? digits.slice(0, 5) : '';
@@ -63,6 +58,8 @@ function extractUsZip(postalCode: string | null | undefined): string {
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { returnTo: returnToParam } = useLocalSearchParams();
+  const returnTo = Array.isArray(returnToParam) ? returnToParam[0] : returnToParam;
   const [error, setError] = useState('');
   const [googleBusy, setGoogleBusy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -81,29 +78,31 @@ export default function SignUpScreen() {
 
   const isNative = Platform.OS !== 'web';
 
-  const [request, , promptAsync] = Google.useAuthRequest({
-    clientId: GOOGLE_AUTH_CONFIG.clientId,
-    androidClientId: GOOGLE_AUTH_CONFIG.androidClientId,
-    iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
-  });
+  const routeAfterAuth = () => {
+    if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+      router.replace(returnTo as any);
+      return;
+    }
+
+    router.replace('/(tabs)/profilebutton' as any);
+  };
+
+  useEffect(() => {
+    if (isNative) {
+      configureNativeGoogleSignIn();
+    }
+  }, [isNative]);
 
   const handleGoogleButtonPress = async () => {
+    if (!isNative || googleBusy || submitting) {
+      return;
+    }
+
     setError('');
     setGoogleBusy(true);
 
     try {
-      const result = await promptAsync();
-
-      if (result?.type !== 'success') {
-        return;
-      }
-
-      const idToken = result.authentication?.idToken ?? result.params?.id_token;
-
-      if (!idToken) {
-        setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
-        return;
-      }
+      const idToken = await getNativeGoogleIdToken();
 
       const credential = GoogleAuthProvider.credential(idToken);
       const { user } = await signInWithCredential(auth, credential);
@@ -124,6 +123,11 @@ export default function SignUpScreen() {
           },
           { merge: true }
         );
+        router.replace({
+          pathname: '/zipCodeverify' as any,
+          params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+        });
+        return;
       }
 
       await setDoc(
@@ -135,17 +139,11 @@ export default function SignUpScreen() {
         { merge: true }
       );
 
-      const latestSnap = await getDoc(userRef);
-      const firestoreProfile = latestSnap.exists() ? latestSnap.data() : null;
-
-      if (profileNeedsServiceArea(firestoreProfile as Parameters<typeof profileNeedsServiceArea>[0])) {
-        router.replace('/zipCodeverify' as any);
-        return;
+      routeAfterAuth();
+    } catch (googleError) {
+      if (!isNativeGoogleSignInCancelled(googleError)) {
+        setError('Google sign-in failed. Please try again.');
       }
-
-      router.replace(getPostAuthRoute({ isNewUser: isNewProfile }) as any);
-    } catch {
-      setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
     } finally {
       setGoogleBusy(false);
     }
@@ -286,7 +284,7 @@ export default function SignUpScreen() {
         locationPermission,
       });
 
-      router.replace('/(tabs)/profilebutton' as any);
+      routeAfterAuth();
     } catch (signupError) {
       setError(getAuthErrorMessage(signupError, 'signup'));
     } finally {
@@ -320,9 +318,9 @@ export default function SignUpScreen() {
 
               {isNative ? (
                 <TouchableOpacity
-                  style={[styles.googleButton, (!request || googleBusy || submitting) && styles.googleButtonDisabled]}
+                  style={[styles.googleButton, (googleBusy || submitting) && styles.googleButtonDisabled]}
                   onPress={handleGoogleButtonPress}
-                  disabled={!request || googleBusy || submitting}
+                  disabled={googleBusy || submitting}
                   activeOpacity={0.88}
                 >
                   <View style={styles.googleButtonContent}>
@@ -477,7 +475,15 @@ export default function SignUpScreen() {
               </Text>
 
               <View style={styles.bottomLinks}>
-                <TouchableOpacity style={styles.inlineLinkRow} onPress={() => router.push('/login')}>
+                <TouchableOpacity
+                  style={styles.inlineLinkRow}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/login' as any,
+                      params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+                    })
+                  }
+                >
                   <Text style={styles.bottomText}>Already have an account? </Text>
                   <Text style={styles.bottomLink}>Sign in</Text>
                 </TouchableOpacity>

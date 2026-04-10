@@ -271,6 +271,115 @@ export const createCheckoutSession = onCall(
 );
 
 /**
+ * Create Stripe Checkout Session for Premium business upgrade.
+ */
+export const createPremiumUpgradeCheckoutSession = onCall(
+  { secrets: ["STRIPE_SECRET_KEY", "STRIPE_PREMIUM_PRICE_ID"] },
+  async (request) => {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const premiumPriceId = process.env.STRIPE_PREMIUM_PRICE_ID?.trim();
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    if (!stripeSecretKey) {
+      logger.error("Missing Stripe secret key");
+      throw new Error("Stripe is not configured");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    const isMobileApp = Boolean(request.data?.mobileApp);
+    const baseUrl = process.env.FUNCTIONS_EMULATOR === "true"
+      ? "http://localhost:8081"
+      : "https://app.locallist.biz";
+
+    const successUrl = isMobileApp
+      ? "myapp://auth-action?checkout=premium"
+      : `${baseUrl}/auth-action?checkout=premium`;
+    const cancelUrl = isMobileApp
+      ? "myapp://auth-action?premiumCanceled=1"
+      : `${baseUrl}/auth-action?premiumCanceled=1`;
+
+    const unitAmount = 1000;
+    let selectedPriceId = premiumPriceId;
+
+    if (selectedPriceId) {
+      try {
+        const configuredPrice = await stripe.prices.retrieve(selectedPriceId);
+        if (configuredPrice.unit_amount !== unitAmount) {
+          logger.warn(
+            `Configured premium price ID '${selectedPriceId}' has unit_amount=${configuredPrice.unit_amount}; expected ${unitAmount}. Falling back to inline price_data.`
+          );
+          selectedPriceId = undefined;
+        }
+      } catch (priceLookupError) {
+        logger.warn(
+          `Could not validate configured premium price ID '${selectedPriceId}'; falling back to inline price_data.`,
+          priceLookupError
+        );
+        selectedPriceId = undefined;
+      }
+    }
+
+    const lineItems = selectedPriceId
+      ? [
+          {
+            price: selectedPriceId,
+            quantity: 1,
+          },
+        ]
+      : [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "Premium Business Upgrade",
+                description: "Monthly Premium upgrade for Local List business tools",
+              },
+              unit_amount: unitAmount,
+            },
+            quantity: 1,
+          },
+        ];
+
+    if (!selectedPriceId) {
+      logger.warn("Missing STRIPE_PREMIUM_PRICE_ID; using fallback inline price_data.");
+    }
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems as Stripe.Checkout.SessionCreateParams.LineItem[],
+        mode: "payment",
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        client_reference_id: String(userId),
+        metadata: {
+          itemType: "premium_upgrade",
+          userId: String(userId),
+          durationDays: "30",
+        },
+      });
+
+      logger.info(`Premium upgrade checkout session created: ${session.id} for user: ${userId}`);
+
+      return {
+        sessionId: session.id,
+        url: session.url,
+      };
+    } catch (error) {
+      logger.error("Error creating premium upgrade checkout session:", error);
+      throw new Error("Failed to create premium upgrade checkout session");
+    }
+  }
+);
+
+/**
  * Scheduled function to expire featured listings after 7 days
  * Runs daily at 2 AM UTC
  */
@@ -370,9 +479,15 @@ export const handleStripeCheckout = onRequest(
         const session = event.data.object;
 
         const itemType = String(session.metadata?.itemType || "listing").toLowerCase();
+        const premiumUserId = session.metadata?.userId || session.client_reference_id;
         const listingId = session.metadata?.listingId;
         const serviceId = session.metadata?.serviceId;
-        const targetId = itemType === "service" ? serviceId : listingId;
+        const targetId =
+          itemType === "service"
+            ? serviceId
+            : itemType === "premium_upgrade"
+              ? premiumUserId
+              : listingId;
 
         if (!targetId) {
           logger.error("checkout.session.completed: Missing targetId in metadata", {
@@ -388,7 +503,34 @@ export const handleStripeCheckout = onRequest(
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + durationDays);
 
-        if (itemType === "service") {
+        if (itemType === "premium_upgrade") {
+          logger.info(`Processing Stripe checkout for premium upgrade: ${targetId}`);
+
+          await db.collection("premiumPurchases").doc(session.id).set({
+            userId: targetId,
+            amount,
+            currency: (session.currency || "usd").toUpperCase(),
+            status: "active",
+            paymentMethod: "stripe",
+            purchasedAt: new Date().toISOString(),
+            expiresAt: expiresAt.toISOString(),
+            stripeSessionId: session.id,
+            stripePaymentIntentId: session.payment_intent || null,
+            updatedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          await db.collection("users").doc(String(targetId)).set({
+            accountType: "business",
+            businessTier: "premium",
+            isPremium: true,
+            premiumStatus: "active",
+            premiumActivatedAt: new Date().toISOString(),
+            premiumUpdatedAt: new Date().toISOString(),
+            upgradedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          logger.info(`User ${targetId} marked as premium business`);
+        } else if (itemType === "service") {
           logger.info(`Processing Stripe checkout for service: ${targetId}`);
 
           const serviceDoc = await db.collection("services").doc(targetId).get();

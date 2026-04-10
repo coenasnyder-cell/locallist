@@ -1,7 +1,7 @@
 import { applyServiceAreaCompletion } from '@/utils/signupProfile';
 import { isZipInApprovedServiceArea } from '@/utils/zipApproval';
 import * as Location from 'expo-location';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { getFirestore } from 'firebase/firestore';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -26,6 +26,8 @@ import { useAccountStatus } from '../hooks/useAccountStatus';
  */
 export default function ZipCodeVerifyScreen() {
   const router = useRouter();
+  const { returnTo: returnToParam } = useLocalSearchParams();
+  const returnTo = Array.isArray(returnToParam) ? returnToParam[0] : returnToParam;
   const insets = useSafeAreaInsets();
   const { user, profile, loading } = useAccountStatus();
 
@@ -156,7 +158,11 @@ export default function ZipCodeVerifyScreen() {
         authProvider: isGoogle ? 'google' : 'password',
       });
 
-      router.replace('/(tabs)/index' as any);
+      if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+        router.replace(returnTo as any);
+      } else {
+        router.replace('/(tabs)/index' as any);
+      }
     } catch (e: unknown) {
       const message =
         e && typeof e === 'object' && 'message' in e ? String((e as { message?: string }).message) : '';

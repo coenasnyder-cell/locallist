@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Tex
 import Header from '../components/Header';
 import ImageUploader from '../components/ImageUploader';
 import { app } from '../firebase';
-import { useAuth } from '../hooks/useAuth';
+import { useAccountStatus } from '../hooks/useAccountStatus';
 
 type PetGender = 'male' | 'female' | 'unknown';
 
@@ -16,7 +16,7 @@ export default function CreatePetPostScreen() {
   const params = useLocalSearchParams<{ type?: string }>();
   const isFoundPost = params.type === 'found';
   const postType: 'lost' | 'found' = isFoundPost ? 'found' : 'lost';
-  const { user, loading } = useAuth();
+  const { user, loading, canPostListings, postingBlockedReason } = useAccountStatus();
   const [petName, setPetName] = React.useState('');
   const [petType, setPetType] = React.useState('');
   const [petBreed, setPetBreed] = React.useState('');
@@ -56,6 +56,21 @@ export default function CreatePetPostScreen() {
   }, [user, loading, navigateToPetHub]);
 
   const handleSubmit = async () => {
+    if (!user) {
+      Alert.alert('Login Required', 'You need to be logged in to create a pet post.');
+      return;
+    }
+
+    if (loading) {
+      Alert.alert('Please Wait', 'Checking account status. Please try again in a moment.');
+      return;
+    }
+
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
+      return;
+    }
+
     if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petSeenLocation.trim()) {
       Alert.alert('Missing Information', 'Please fill in all required fields.');
       return;
@@ -120,6 +135,9 @@ export default function CreatePetPostScreen() {
         </View>
 
         <View style={styles.formCard}>
+          {!loading && user && !canPostListings ? (
+            <Text style={styles.notice}>{postingBlockedReason}</Text>
+          ) : null}
           <View style={styles.formGroup}>
             <Text style={styles.label}>Pet Name *</Text>
             <TextInput
@@ -210,9 +228,9 @@ export default function CreatePetPostScreen() {
 
           <View style={styles.actionsRow}>
             <TouchableOpacity
-              style={[styles.submitButton, loadingSubmit && styles.submitButtonDisabled]}
+              style={[styles.submitButton, (loadingSubmit || !user || !canPostListings) && styles.submitButtonDisabled]}
               onPress={handleSubmit}
-              disabled={loadingSubmit}
+              disabled={loadingSubmit || !user || !canPostListings}
             >
               {loadingSubmit ? (
                 <ActivityIndicator color="#fff" />
@@ -332,6 +350,16 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderWidth: 1,
     borderColor: '#d8e4f2',
+  },
+  notice: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 14,
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   formGroup: {
     marginBottom: 16,

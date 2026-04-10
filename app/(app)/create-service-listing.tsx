@@ -67,7 +67,7 @@ export default function CreateServiceListingScreen() {
     featureCanceled?: string | string[];
     posted?: string | string[];
   }>();
-  const { user, profile, loading } = useAccountStatus();
+  const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
 
   const [serviceName, setServiceName] = useState('');
   const [categoryLabel, setCategoryLabel] = useState('');
@@ -240,6 +240,10 @@ export default function CreateServiceListingScreen() {
       Alert.alert('Error', 'You must be signed in to post a service.');
       return;
     }
+    if (!canPostListings) {
+      Alert.alert('Account Action Required', postingBlockedReason || 'Your account is not eligible to post right now.');
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -361,6 +365,9 @@ export default function CreateServiceListingScreen() {
         </View>
 
         <View style={styles.panel}>
+          {!canPostListings ? (
+            <Text style={styles.notice}>{postingBlockedReason}</Text>
+          ) : null}
           <Text style={styles.sectionDivider}>SERVICE DETAILS</Text>
 
           <FormInput
@@ -530,9 +537,9 @@ export default function CreateServiceListingScreen() {
           )}
 
           <TouchableOpacity
-            style={[styles.submitBtn, submitting && styles.submitDisabled]}
+            style={[styles.submitBtn, (submitting || !canPostListings) && styles.submitDisabled]}
             onPress={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !canPostListings}
             activeOpacity={0.85}
           >
             <Text style={styles.submitText}>{submitting ? 'Submitting...' : 'Post Service'}</Text>
@@ -567,6 +574,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     gap: 4,
+  },
+  notice: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   sectionDivider: {
     fontSize: 12,

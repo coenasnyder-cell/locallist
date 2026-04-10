@@ -60,6 +60,8 @@ type AccountStatus = {
   isRegularAccount: boolean;
   /** True when signed-in, verified, but name/ZIP still missing (show mandatory service-area screen). */
   needsServiceAreaProfile: boolean;
+  canPostListings: boolean;
+  postingBlockedReason: string | null;
 };
 
 export function useAccountStatus(): AccountStatus {
@@ -113,6 +115,30 @@ export function useAccountStatus(): AccountStatus {
   const isBusinessAccount = normalizedAccountType === 'business';
   const isRegularAccount = !!user && (!!profile ? !isBusinessAccount : false);
   const needsServiceAreaProfile = !!user && isVerified && profileNeedsServiceArea(profile);
+  const normalizedStatus = String(profile?.status || '').toLowerCase();
+
+  let postingBlockedReason: string | null = null;
+  if (!user) {
+    postingBlockedReason = 'Please sign in to post a listing.';
+  } else if (loading) {
+    postingBlockedReason = 'Checking account status. Please try again in a moment.';
+  } else if (!profile) {
+    postingBlockedReason = 'Your account profile is not ready yet. Please try again shortly.';
+  } else if (isBanned) {
+    postingBlockedReason = 'Your account has been banned. Contact support for help.';
+  } else if (isDisabled) {
+    postingBlockedReason = 'Your account is disabled. Contact support for help.';
+  } else if (!isVerified) {
+    postingBlockedReason = 'Please verify your email before posting listings.';
+  } else if (profileNeedsServiceArea(profile)) {
+    postingBlockedReason = 'Finish ZIP verification in Update Profile before posting listings.';
+  } else if (normalizedStatus === 'pending') {
+    postingBlockedReason = 'Your ZIP verification is pending admin approval before you can post listings.';
+  } else if (normalizedStatus === 'rejected') {
+    postingBlockedReason = 'Your ZIP was not approved for posting. Please update your profile or contact support.';
+  }
+
+  const canPostListings = !postingBlockedReason;
 
   return {
     user,
@@ -126,5 +152,7 @@ export function useAccountStatus(): AccountStatus {
     isBusinessAccount,
     isRegularAccount,
     needsServiceAreaProfile,
+    canPostListings,
+    postingBlockedReason,
   };
 }

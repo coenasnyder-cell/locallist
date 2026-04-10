@@ -21,6 +21,7 @@ export default function AuthActionPage() {
   const listingId = Array.isArray(params.listingId) ? params.listingId[0] : params.listingId;
   const serviceId = Array.isArray(params.serviceId) ? params.serviceId[0] : params.serviceId;
   const featureCanceled = Array.isArray(params.featureCanceled) ? params.featureCanceled[0] : params.featureCanceled;
+  const premiumCanceled = Array.isArray(params.premiumCanceled) ? params.premiumCanceled[0] : params.premiumCanceled;
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -78,6 +79,20 @@ export default function AuthActionPage() {
       return;
     }
 
+    if (checkout === 'premium') {
+      if (redirectToNativeApp('/premium-upgrade', { checkout: 'premium' })) {
+        return;
+      }
+
+      router.replace({
+        pathname: '/premium-upgrade',
+        params: {
+          checkout: 'premium',
+        },
+      });
+      return;
+    }
+
     if (featureCanceled === '1') {
       if (itemType === 'service') {
         if (redirectToNativeApp('/create-service-listing', {
@@ -114,6 +129,20 @@ export default function AuthActionPage() {
       return;
     }
 
+    if (premiumCanceled === '1') {
+      if (redirectToNativeApp('/premium-upgrade', { premiumCanceled: '1' })) {
+        return;
+      }
+
+      router.replace({
+        pathname: '/premium-upgrade',
+        params: {
+          premiumCanceled: '1',
+        },
+      });
+      return;
+    }
+
     if (!mode || !oobCode) {
       setError('Invalid link. Missing required parameters.');
       setLoading(false);
@@ -121,7 +150,7 @@ export default function AuthActionPage() {
     }
 
     handleAction();
-  }, [checkout, featureCanceled, itemType, listingId, mode, oobCode, router, serviceId]);
+  }, [checkout, featureCanceled, itemType, listingId, mode, oobCode, premiumCanceled, router, serviceId]);
 
   const handleAction = async () => {
     const auth = getAuth(app);
