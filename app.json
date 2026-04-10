@@ -39,6 +39,23 @@
             "BROWSABLE",
             "DEFAULT"
           ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "com.googleusercontent.apps.280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0",
+              "pathPrefix": "/oauthredirect"
+            },
+            {
+              "scheme": "com.googleusercontent.apps.280253430618-tfe8d05h9ge10c5oitlbkh1upfbu8j6r",
+              "pathPrefix": "/oauthredirect"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "adaptiveIcon": {

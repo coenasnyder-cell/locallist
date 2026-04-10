@@ -5,6 +5,13 @@ export class NativeGoogleSignInCancelledError extends Error {
   }
 }
 
+export class NativeGoogleSignInTimedOutError extends Error {
+  constructor() {
+    super('Google sign-in took too long.');
+    this.name = 'NativeGoogleSignInTimedOutError';
+  }
+}
+
 export function configureNativeGoogleSignIn(): void {}
 
 export async function getNativeGoogleIdToken(): Promise<string> {
@@ -13,4 +20,8 @@ export async function getNativeGoogleIdToken(): Promise<string> {
 
 export function isNativeGoogleSignInCancelled(_error: unknown): boolean {
   return false;
+}
+
+export function getNativeGoogleSignInErrorMessage(_error: unknown): string {
+  return 'Google sign-in is only available in the Local List mobile app.';
 }

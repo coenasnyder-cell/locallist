@@ -150,46 +150,58 @@ service cloud.firestore {
     }
 
     match /users/{document} {
-      allow create: if request.auth.uid == document
+      allow create: if signedIn()
+        && request.auth.uid == document
         // Prevent self-seeding privileged account flags on initial profile creation.
-        && (!('role' in request.resource.data.keys()) || request.resource.data.role == 'user')
-        && (!('status' in request.resource.data.keys()) || request.resource.data.status in ['pending', 'approved'])
-        && (!('isDisabled' in request.resource.data.keys()) || request.resource.data.isDisabled == false)
-        && (!('isBanned' in request.resource.data.keys()) || request.resource.data.isBanned == false)
-        && (!('zipApproved' in request.resource.data.keys()) || request.resource.data.zipApproved == false)
-        && (!('accountType' in request.resource.data.keys()) || request.resource.data.accountType in ['personal', 'user'])
-        && (!('publicProfileEnabled' in request.resource.data.keys()) || request.resource.data.publicProfileEnabled is bool);
+        && (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'user')
+        && (!request.resource.data.keys().hasAny(['status']) || request.resource.data.status in ['pending', 'approved'])
+        && (!request.resource.data.keys().hasAny(['isDisabled']) || request.resource.data.isDisabled == false)
+        && (!request.resource.data.keys().hasAny(['isBanned']) || request.resource.data.isBanned == false)
+        && (!request.resource.data.keys().hasAny(['zipApproved']) || request.resource.data.zipApproved == false)
+        && (!request.resource.data.keys().hasAny(['accountType']) || request.resource.data.accountType in ['personal', 'user'])
+        && (!request.resource.data.keys().hasAny(['publicProfileEnabled']) || request.resource.data.publicProfileEnabled is bool);
       allow read: if signedIn()
         && (
           request.auth.uid == document
           || isAdmin()
           || userProfileVisibleToSignedInPeers()
         );
-      allow update: if request.auth.uid == document
+      allow update: if signedIn()
+        && request.auth.uid == document
         && (
-          // Protect critical fields - they cannot be changed by users
-          (request.resource.data.role == resource.data.role || !('role' in request.resource.data.keys()))
-          // Allow first-time status (e.g. Google stub doc without status) when completing onboarding.
+          // Protect critical fields - they cannot be changed by users, but allow first-time initialization on legacy/stub docs.
+          (!request.resource.data.keys().hasAny(['role'])
+            || !resource.data.keys().hasAny(['role'])
+            || request.resource.data.role == resource.data.role)
           && (
-            request.resource.data.status == resource.data.status
-            || !('status' in request.resource.data.keys())
-            || (
-              !(resource.data.keys().hasAny(['status']))
-              && request.resource.data.status in ['pending', 'approved']
-            )
+            !request.resource.data.keys().hasAny(['status'])
+            || !resource.data.keys().hasAny(['status'])
+            || request.resource.data.status == resource.data.status
+            || request.resource.data.status in ['pending', 'approved']
           )
-          && (request.resource.data.isDisabled == resource.data.isDisabled || !('isDisabled' in request.resource.data.keys()))
-          && (request.resource.data.isBanned == resource.data.isBanned || !('isBanned' in request.resource.data.keys()))
-          && (request.resource.data.zipApproved == resource.data.zipApproved || !('zipApproved' in request.resource.data.keys()))
-          && (request.resource.data.accountType == resource.data.accountType || !('accountType' in request.resource.data.keys()))
-          && (request.resource.data.email == resource.data.email || !('email' in request.resource.data.keys()))
+          && (!request.resource.data.keys().hasAny(['isDisabled'])
+            || !resource.data.keys().hasAny(['isDisabled'])
+            || request.resource.data.isDisabled == resource.data.isDisabled)
+          && (!request.resource.data.keys().hasAny(['isBanned'])
+            || !resource.data.keys().hasAny(['isBanned'])
+            || request.resource.data.isBanned == resource.data.isBanned)
+          && (!request.resource.data.keys().hasAny(['zipApproved'])
+            || !resource.data.keys().hasAny(['zipApproved'])
+            || request.resource.data.zipApproved == resource.data.zipApproved)
+          && (!request.resource.data.keys().hasAny(['accountType'])
+            || !resource.data.keys().hasAny(['accountType'])
+            || request.resource.data.accountType == resource.data.accountType
+            || request.resource.data.accountType in ['personal', 'user'])
+          && (!request.resource.data.keys().hasAny(['email'])
+            || !resource.data.keys().hasAny(['email'])
+            || request.resource.data.email == resource.data.email)
           // Users may update their own profile names
-          && (!('displayName' in request.resource.data.keys())
+          && (!request.resource.data.keys().hasAny(['displayName'])
             || request.resource.data.displayName == resource.data.displayName
             || (request.resource.data.displayName is string
               && request.resource.data.displayName.size() >= 2
               && request.resource.data.displayName.size() <= 80))
-          && (!('name' in request.resource.data.keys())
+          && (!request.resource.data.keys().hasAny(['name'])
             || request.resource.data.name == resource.data.name
             || (request.resource.data.name is string
               && request.resource.data.name.size() >= 2
@@ -199,9 +211,17 @@ service cloud.firestore {
     }
 
     match /pendingApprovals/{userId} {
-      allow create: if request.auth.uid == userId;
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.userId == userId
+        && request.resource.data.status == 'pending';
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && resource.data.userId == userId
+        && request.resource.data.userId == userId
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'pending';
       allow read: if request.auth.uid == userId || isAdmin();
-      allow write: if isAdmin();
       allow delete: if isAdmin();
     }
 

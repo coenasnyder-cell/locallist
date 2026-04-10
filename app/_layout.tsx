@@ -29,7 +29,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading, isBanned, isDisabled } = useAccountStatus();
+  const { user, loading, isBanned, isDisabled, needsServiceAreaProfile } = useAccountStatus();
 
   useEffect(() => {
     if (loading) return;
@@ -46,8 +46,13 @@ export default function RootLayout() {
       if (pathname !== '/account-restricted') {
         router.replace('/account-restricted');
       }
+      return;
     }
-  }, [user, loading, isBanned, isDisabled, pathname, router]);
+
+    if (needsServiceAreaProfile && pathname !== '/zipCodeverify') {
+      router.replace('/zipCodeverify');
+    }
+  }, [user, loading, isBanned, isDisabled, needsServiceAreaProfile, pathname, router]);
 
   return (
     <SafeAreaProvider>

@@ -2,35 +2,36 @@ import { AntDesign } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  sendEmailVerification,
-  signInWithCredential,
-  updateProfile,
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    sendEmailVerification,
+    signInWithCredential,
+    updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import Header from '../components/Header';
 import PasswordTextInputRow from '../components/PasswordTextInputRow';
 import { app, auth } from '../firebase';
+import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
 import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  configureNativeGoogleSignIn,
-  getNativeGoogleIdToken,
-  isNativeGoogleSignInCancelled,
+    configureNativeGoogleSignIn,
+    getNativeGoogleIdToken,
+    getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 import { writePersonalUserAndPending } from '../utils/signupProfile';
 import { isZipInApprovedServiceArea } from '../utils/zipApproval';
@@ -110,14 +111,18 @@ export default function SignUpScreen() {
       const db = getFirestore(app);
       const userRef = doc(db, 'users', user.uid);
       const snap = await getDoc(userRef);
-      const isNewProfile = !snap.exists();
+      const profileData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
+      const fallbackName = String(user.displayName || user.email?.split('@')[0] || 'User').trim();
+      const needsSetup = !snap.exists() || profileNeedsServiceArea(profileData as any);
 
-      if (isNewProfile) {
+      if (needsSetup) {
         await setDoc(
           userRef,
           {
             email: user.email || '',
             accountType: 'personal',
+            ...(fallbackName ? { name: fallbackName, displayName: fallbackName } : {}),
+            createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
             publicProfileEnabled: false,
           },
@@ -141,8 +146,9 @@ export default function SignUpScreen() {
 
       routeAfterAuth();
     } catch (googleError) {
-      if (!isNativeGoogleSignInCancelled(googleError)) {
-        setError('Google sign-in failed. Please try again.');
+      const message = getNativeGoogleSignInErrorMessage(googleError);
+      if (message) {
+        setError(message);
       }
     } finally {
       setGoogleBusy(false);

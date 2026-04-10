@@ -1,36 +1,34 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-  type User,
+    GoogleAuthProvider,
+    signInWithCredential,
+    signInWithEmailAndPassword,
+    type User,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import Header from '../components/Header';
 import { app, auth } from '../firebase';
+import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
+import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  getAuthErrorMessage,
-  GOOGLE_SIGN_IN_GENERIC_MESSAGE,
-} from '../utils/auth-helpers';
-import {
-  configureNativeGoogleSignIn,
-  getNativeGoogleIdToken,
-  isNativeGoogleSignInCancelled,
+    configureNativeGoogleSignIn,
+    getNativeGoogleIdToken,
+    getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 
 export default function LoginPage() {
@@ -63,8 +61,10 @@ export default function LoginPage() {
     const db = getFirestore(app);
     const userRef = doc(db, 'users', user.uid);
     const profileSnapshot = await getDoc(userRef);
+    const profileData = profileSnapshot.exists() ? (profileSnapshot.data() as Record<string, unknown>) : null;
     const fallbackEmail = user.email || email.trim().toLowerCase();
     const fallbackName = String(user.displayName || fallbackEmail.split('@')[0] || 'User').trim();
+    const needsSetup = !profileSnapshot.exists() || profileNeedsServiceArea(profileData as any);
 
     if (!profileSnapshot.exists()) {
       await setDoc(
@@ -81,11 +81,23 @@ export default function LoginPage() {
         { merge: true }
       );
     } else {
-      await setDoc(userRef, {
-        email: fallbackEmail,
-        lastLoginAt: serverTimestamp(),
-        ...(fallbackName ? { displayName: fallbackName } : {}),
-      }, { merge: true });
+      await setDoc(
+        userRef,
+        {
+          email: fallbackEmail,
+          lastLoginAt: serverTimestamp(),
+          ...(fallbackName ? { displayName: fallbackName } : {}),
+        },
+        { merge: true }
+      );
+    }
+
+    if (needsSetup) {
+      router.replace({
+        pathname: '/zipCodeverify' as any,
+        params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+      });
+      return;
     }
 
     routeAfterAuth();
@@ -112,8 +124,9 @@ export default function LoginPage() {
       const userCredential = await signInWithCredential(auth, credential);
       await handleAuthSuccess(userCredential.user);
     } catch (googleError) {
-      if (!isNativeGoogleSignInCancelled(googleError)) {
-        setError(GOOGLE_SIGN_IN_GENERIC_MESSAGE);
+      const message = getNativeGoogleSignInErrorMessage(googleError);
+      if (message) {
+        setError(message);
       }
     } finally {
       setGoogleBusy(false);
