@@ -10,7 +10,11 @@ export default function ProfileButtonRoute() {
 		return null;
 	}
 
-	if (user && profile?.accountType === 'business') {
+	if (!user) {
+		return <Redirect href="/signInOrSignUp" />;
+	}
+
+	if (profile?.accountType === 'business') {
 		return <Redirect href="/(tabs)/businesshubbutton" />;
 	}
 

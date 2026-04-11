@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Header from '../components/Header';
 import { app } from '../firebase';
+import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
 
 export default function AccountRestrictedPage() {
   const router = useRouter();
@@ -12,8 +13,8 @@ export default function AccountRestrictedPage() {
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      await signOut(getAuth(app));
-      router.replace('/signInOrSignUp');
+      await Promise.allSettled([signOut(getAuth(app)), signOutNativeGoogle()]);
+      router.replace('/');
     } finally {
       setSigningOut(false);
     }

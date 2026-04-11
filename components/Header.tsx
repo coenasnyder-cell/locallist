@@ -9,6 +9,7 @@ import { Alert, Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpa
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
+import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
 
 
 type HeaderProps = {
@@ -396,7 +397,8 @@ export default function Header({
                 onPress={async () => {
                   try {
                     const auth = getAuth();
-                    await signOut(auth);
+                    await Promise.allSettled([signOut(auth), signOutNativeGoogle()]);
+                    router.replace('/');
                     Alert.alert('Signed out', 'You are now signed out.');
                   } catch (e) {
                     Alert.alert('Error', 'Sign out failed.');

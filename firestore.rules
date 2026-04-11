@@ -14,10 +14,6 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    function emailVerified() {
-      return signedIn() && request.auth.token.email_verified == true;
-    }
-
     function isAdmin() {
       return signedIn() && userDoc().role == 'admin';
     }
@@ -39,24 +35,8 @@ service cloud.firestore {
         || resource.data.publicProfileEnabled == true;
     }
 
-    function canCreateListing() {
-      return signedIn()
-        && (
-          !userDocExists()
-          || (!userDoc().isDisabled && !userDoc().isBanned)
-        );
-    }
-
-    function isBlockedBy(otherUserId) {
-      return get(/databases/$(database)/documents/users/$(otherUserId)).data.blockedUsers.hasAny([request.auth.uid]);
-    }
-
-    function hasBlocked(otherUserId) {
-      return userDoc().blockedUsers.hasAny([otherUserId]);
-    }
-
-    function isValidImageUrl(url) {
-      return url is string && url.matches('^https://.*');
+    function isValidImageUrl(imageUrl) {
+      return imageUrl is string && imageUrl.matches('^https://.*');
     }
 
     function isBusinessOwner(businessId) {
@@ -67,7 +47,7 @@ service cloud.firestore {
     function hasValidImages(data) {
       return data.images is list
         && data.images.size() > 0
-        && data.images.all(url, isValidImageUrl(url));
+        && data.images.all(imageUrl, isValidImageUrl(imageUrl));
     }
 
     function isPublicViewCountIncrement() {
@@ -355,7 +335,7 @@ service cloud.firestore {
       && request.resource.data.userEmail is string
       && request.resource.data.claimImages is list
       && request.resource.data.claimImages.size() <= 10
-      && request.resource.data.claimImages.all(url, url is string && url.matches('^https://.*'))
+      && request.resource.data.claimImages.all(imageUrl, imageUrl is string && imageUrl.matches('^https://.*'))
       && request.resource.data.keys().hasOnly([
         'businessId',
         'businessName',

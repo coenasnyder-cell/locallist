@@ -15,6 +15,7 @@ export const unstable_settings = {
 const PUBLIC_ROUTES = new Set([
   '',
   'index',
+  'publiclanding',
   'login',
   'signup',
   'signInOrSignUp',
@@ -23,6 +24,7 @@ const PUBLIC_ROUTES = new Set([
   'verify-email',
   'auth-action',
   'account-restricted',
+  'contactus',
 ]);
 
 export default function RootLayout() {
@@ -37,7 +39,7 @@ export default function RootLayout() {
     if (!user) {
       const segment = (pathname ?? '').replace(/^\//, '').split('/')[0] ?? '';
       if (!PUBLIC_ROUTES.has(segment)) {
-        router.replace('/signInOrSignUp');
+        router.replace('/');
       }
       return;
     }

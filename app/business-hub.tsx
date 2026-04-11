@@ -5,15 +5,16 @@ import { getAuth } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { app } from '../firebase';
+import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
 
 type HubTool = {
   title: string;
@@ -532,11 +533,11 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
           onPress={async () => {
             try {
               const auth = getAuth(app);
-              await auth.signOut();
+              await Promise.allSettled([auth.signOut(), signOutNativeGoogle()]);
             } catch (error) {
               Alert.alert('Logout Error', 'Could not sign out right now. Please try again.');
             } finally {
-              router.replace('/signInOrSignUp');
+              router.replace('/');
             }
           }}
         >

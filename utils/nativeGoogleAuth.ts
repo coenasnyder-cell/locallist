@@ -14,6 +14,10 @@ export class NativeGoogleSignInTimedOutError extends Error {
 
 export function configureNativeGoogleSignIn(): void {}
 
+export async function signOutNativeGoogle(): Promise<void> {
+  return Promise.resolve();
+}
+
 export async function getNativeGoogleIdToken(): Promise<string> {
   throw new Error('Native Google Sign-In is not available on web.');
 }

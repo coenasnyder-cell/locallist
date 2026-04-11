@@ -64,7 +64,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)/profilebutton' as any);
+    router.replace('/(tabs)/index' as any);
   }
 
   const handleAuthSuccess = async (user: User) => {
@@ -131,7 +131,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)');
+    router.replace('/');
   };
 
   const handleGoogleLogin = async () => {
@@ -290,7 +290,7 @@ export default function SignInOrSignUp() {
                   <Text style={styles.bottomLink}>Forgot password?</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/(app)/contactus')}>
+                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/contactus' as any)}>
                   <Text style={styles.bottomLink}>Trouble logging in? Contact Us</Text>
                 </TouchableOpacity>
 

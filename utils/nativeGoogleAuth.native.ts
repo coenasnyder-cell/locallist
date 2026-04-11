@@ -54,12 +54,25 @@ export function configureNativeGoogleSignIn(): void {
   configured = true;
 }
 
+export async function signOutNativeGoogle(): Promise<void> {
+  configureNativeGoogleSignIn();
+
+  try {
+    await withTimeout(GoogleSignin.signOut(), 5000);
+  } catch {
+    // Ignore: user may not have an active cached Google session yet.
+  }
+}
+
 export async function getNativeGoogleIdToken(): Promise<string> {
   configureNativeGoogleSignIn();
 
   await withTimeout(
     GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
   );
+
+  // Match the web flow's select_account behavior by clearing any cached Google session first.
+  await signOutNativeGoogle();
 
   const response = await withTimeout(GoogleSignin.signIn());
   if (!isSuccessResponse(response)) {

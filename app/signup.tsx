@@ -85,7 +85,7 @@ export default function SignUpScreen() {
       return;
     }
 
-    router.replace('/(tabs)/profilebutton' as any);
+    router.replace('/(tabs)/index' as any);
   };
 
   useEffect(() => {
@@ -275,9 +275,6 @@ export default function SignUpScreen() {
       const { user } = userCredential;
       const db = getFirestore(app);
 
-      await updateProfile(user, { displayName: fullName });
-      await sendEmailVerification(user, { url: ACTION_URL });
-
       await writePersonalUserAndPending(db, user.uid, {
         firstName: trimmedFirstName,
         lastName: trimmedLastName,
@@ -290,6 +287,18 @@ export default function SignUpScreen() {
         locationZip: locationReview?.zip ?? null,
         locationPermission,
       });
+
+      try {
+        await updateProfile(user, { displayName: fullName });
+      } catch (profileError) {
+        console.warn('Profile display name update failed after signup:', profileError);
+      }
+
+      try {
+        await sendEmailVerification(user, { url: ACTION_URL });
+      } catch (verificationError) {
+        console.warn('Verification email failed after signup:', verificationError);
+      }
 
       routeAfterAuth();
     } catch (signupError) {
@@ -478,7 +487,7 @@ export default function SignUpScreen() {
               </TouchableOpacity>
 
               <Text style={styles.verificationText}>
-                We&apos;ll send a verification email after signup. You&apos;ll land on your profile when your account is created.
+                We&apos;ll send a verification email after signup. Please verify your email to access all features and receive updates about your account.
               </Text>
 
               <View style={styles.bottomLinks}>
