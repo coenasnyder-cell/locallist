@@ -285,9 +285,9 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   if (showUpgradePrompt || !canManageBusinessProfile) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.lockedContainer}>
-        <Text style={styles.lockedTitle}>Add Or Claim A Business</Text>
+        <Text style={styles.lockedTitle}>Add Or Update A Business</Text>
         <Text style={styles.lockedText}>
-          Build a profile for your business so local customers can discover, trust, and contact you.
+          Build your business profile so local customers can discover, trust, and contact you.
         </Text>
 
         <View style={styles.benefitsBox}>
@@ -298,7 +298,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         </View>
 
         <Text style={styles.lockedText}>
-          Only business accounts can add a Business Profile or claim a already listed business. Upgrade now by clicking the button below.
+          Only business accounts can add or update a business profile. Upgrade now using the button below.
         </Text>
 
         <TouchableOpacity
@@ -321,11 +321,11 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
-        <Text style={styles.title}>Add Or Claim A Business</Text>
+        <Text style={styles.title}>Business Profile</Text>
       </View>
 
       <Text style={styles.description}>
-        Create or update your business profile with complete details so people can discover and contact your business.
+        Create or update your business profile so people can discover and contact your business.
       </Text>
 
       <View style={styles.benefitsBox}>

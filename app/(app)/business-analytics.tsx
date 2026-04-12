@@ -1,5 +1,5 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -34,6 +34,7 @@ export default function BusinessAnalyticsScreen() {
   const router = useRouter();
   const { user, profile, loading } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
+  const hasBusinessAccess = !!user && profile?.accountType === 'business';
   const [state, setState] = useState<AnalyticsState>({
     loading: true,
     activeListings: 0,
@@ -51,7 +52,7 @@ export default function BusinessAnalyticsScreen() {
     let cancelled = false;
 
     const load = async () => {
-      if (!user?.uid || profile?.accountType !== 'business') {
+      if (!hasBusinessAccess || !user?.uid) {
         if (!cancelled) {
           setState((prev) => ({ ...prev, loading: false }));
         }
@@ -147,21 +148,23 @@ export default function BusinessAnalyticsScreen() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.accountType, user?.uid]);
-
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && profile.accountType !== 'business') {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
+  }, [hasBusinessAccess, user?.uid]);
 
   if (loading || waitingForProfile || state.loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingWrap}>
           <Text style={styles.loadingText}>Loading business analytics...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!hasBusinessAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingWrap}>
+          <Text style={styles.loadingText}>Business analytics are available for business accounts only.</Text>
         </View>
       </SafeAreaView>
     );

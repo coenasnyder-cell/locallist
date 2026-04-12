@@ -13,7 +13,7 @@ export default function BusinessLocalFormScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Feather name="arrow-left" size={22} color="#334155" />
         </TouchableOpacity>
-        <Text style={styles.title}>Add A Business</Text>
+        <Text style={styles.title}>Business Profile</Text>
         <View style={{ width: 22 }} />
       </View>
 

@@ -2,7 +2,6 @@ import { collection, getDocs } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -139,20 +138,10 @@ export default function DealsScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <BackToCommunityHubRow />
-
-      <ImageBackground
-        source={require('../../assets/images/communityhub.png')}
-        imageStyle={styles.heroImage}
-        style={styles.hero}
-      >
-        <View style={styles.heroOverlay}>
-          <Text style={styles.heroTitle}>Local Deals</Text>
-          <Text style={styles.heroSubtitle}>
-            Browse active promotions from businesses, service providers, and admin-curated offers, all in one place.
-          </Text>
-        </View>
-      </ImageBackground>
-
+      <View style={styles.hero}>
+        <Text style={styles.heroTitle}>Deals</Text>
+        <Text style={styles.heroSubtitle}>Browse local deals from businesses and service providers near you.</Text>
+      </View>
       <View style={styles.panel}>
         <Text style={styles.panelTitle}>Featured Deals</Text>
         <Text style={styles.panelText}>
@@ -208,35 +197,14 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   hero: {
-    minHeight: 280,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#f0d8b2',
+    borderRadius: 14,
+    padding: 16,
     marginHorizontal: 14,
     marginTop: 8,
-    marginBottom: 16,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-    borderRadius: 18,
-  },
-  heroImage: {
-    borderRadius: 18,
-  },
-  heroOverlay: {
-    minHeight: 280,
-    justifyContent: 'flex-end',
-    padding: 22,
-    backgroundColor: 'rgba(17, 24, 39, 0.5)',
-  },
-  heroTitle: {
-    fontSize: 32,
-    lineHeight: 36,
-    fontWeight: '800',
-    color: '#ffffff',
-    marginBottom: 10,
-  },
-  heroSubtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: '500',
-    color: '#f8fafc',
+    marginBottom: 12,
   },
   panel: {
     marginHorizontal: 14,
@@ -337,5 +305,16 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '600',
     color: '#6b7280',
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  heroSubtitle: {
+    marginTop: 6,
+    fontSize: 15,
+    lineHeight: 20,
+    color: '#4b5563',
   },
 });

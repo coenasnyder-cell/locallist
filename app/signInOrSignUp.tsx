@@ -2,34 +2,32 @@ import PasswordTextInputRow from '@/components/PasswordTextInputRow';
 import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-  type User,
+    GoogleAuthProvider,
+    signInWithCredential,
+    signInWithEmailAndPassword,
+    type User,
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
-import Header from '../components/Header';
 import { app, auth } from '../firebase';
-import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
 import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  configureNativeGoogleSignIn,
-  getNativeGoogleIdToken,
-  getNativeGoogleSignInErrorMessage,
+    configureNativeGoogleSignIn,
+    getNativeGoogleIdToken,
+    getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 
 export const unstable_settings = {
@@ -67,14 +65,29 @@ export default function SignInOrSignUp() {
     router.replace('/(tabs)/index' as any);
   }
 
+  function requiresZipSetup(profileData: Record<string, unknown> | null): boolean {
+    if (!profileData) return true;
+
+    const zip = String(profileData.zipCode || '').trim();
+    const name = String(profileData.name || profileData.displayName || '').trim();
+    const termsAccepted = profileData.termsAcceptedAt != null;
+
+    return !(zip.length === 5 && /^\d{5}$/.test(zip) && name.length > 0 && termsAccepted);
+  }
+
   const handleAuthSuccess = async (user: User) => {
     const db = getFirestore(app);
     const userRef = doc(db, 'users', user.uid);
-    const profileSnapshot = await getDoc(userRef);
+    let profileSnapshot;
+    try {
+      profileSnapshot = await getDocFromServer(userRef);
+    } catch {
+      profileSnapshot = await getDoc(userRef);
+    }
     const profileData = profileSnapshot.exists() ? (profileSnapshot.data() as Record<string, unknown>) : null;
     const fallbackEmail = user.email || email.trim().toLowerCase();
     const fallbackName = String(user.displayName || fallbackEmail.split('@')[0] || 'User').trim();
-    const needsSetup = !profileSnapshot.exists() || profileNeedsServiceArea(profileData as any);
+    const needsSetup = !profileSnapshot.exists() || requiresZipSetup(profileData);
 
     if (!profileSnapshot.exists()) {
       await setDoc(
@@ -190,22 +203,20 @@ export default function SignInOrSignUp() {
   };
 
   return (
-    <>
-      <Header />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        style={{ flex: 1 }}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView
-            contentContainerStyle={styles.container}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            showsVerticalScrollIndicator={false}
-            onScrollBeginDrag={Keyboard.dismiss}
-          >
-            <View style={styles.card}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+          onScrollBeginDrag={Keyboard.dismiss}
+        >
+          <View style={styles.card}>
               <Text style={styles.title}>Welcome to Local List</Text>
               <Text style={styles.subtitle}>Find everything happening around you</Text>
 
@@ -298,11 +309,10 @@ export default function SignInOrSignUp() {
                   <Text style={styles.cancelLinkText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -2,12 +2,12 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -45,6 +45,7 @@ export default function JobListingsScreen() {
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const router = useRouter();
   const { profile } = useAccountStatus();
   const isBusinessUser = profile?.accountType === 'business';
@@ -90,6 +91,10 @@ export default function JobListingsScreen() {
     return jobs.filter((job) => String(job.jobCategory || '').trim() === selectedCategory);
   }, [jobs, selectedCategory]);
 
+  useEffect(() => {
+    setCategoryDropdownOpen(false);
+  }, [selectedCategory]);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <BackToCommunityHubRow />
@@ -115,21 +120,33 @@ export default function JobListingsScreen() {
       )}
 
       <View style={styles.toolbar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-          {categories.map((category) => {
-            const selected = category === selectedCategory;
-            return (
-              <TouchableOpacity
-                key={category}
-                style={[styles.filterChip, selected ? styles.filterChipActive : null]}
-                activeOpacity={0.86}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Text style={[styles.filterChipText, selected ? styles.filterChipTextActive : null]}>{category}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          activeOpacity={0.86}
+          onPress={() => setCategoryDropdownOpen((prev) => !prev)}
+        >
+          <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
+          <Text style={styles.dropdownChevron}>{categoryDropdownOpen ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {categoryDropdownOpen ? (
+          <View style={styles.dropdownMenu}>
+            <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
+              {categories.map((category) => {
+                const selected = category === selectedCategory;
+                return (
+                  <TouchableOpacity
+                    key={category}
+                    style={[styles.dropdownItem, selected ? styles.dropdownItemActive : null]}
+                    activeOpacity={0.86}
+                    onPress={() => setSelectedCategory(category)}
+                  >
+                    <Text style={[styles.dropdownItemText, selected ? styles.dropdownItemTextActive : null]}>{category}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
       </View>
 
       {loading ? (
@@ -266,30 +283,56 @@ const styles = StyleSheet.create({
   toolbar: {
     marginBottom: 14,
   },
-  filterRow: {
-    gap: 10,
-    paddingRight: 12,
-    marginBottom: 10,
-  },
-  filterChip: {
+  dropdownButton: {
     borderWidth: 1,
     borderColor: '#cbd5e1',
-    borderRadius: 999,
-    paddingVertical: 9,
+    borderRadius: 10,
+    paddingVertical: 11,
     paddingHorizontal: 12,
     backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  filterChipActive: {
-    backgroundColor: '#0f766e',
-    borderColor: '#0f766e',
-  },
-  filterChipText: {
+  dropdownButtonText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#334155',
   },
-  filterChipTextActive: {
-    color: '#ffffff',
+  dropdownChevron: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  dropdownScroll: {
+    maxHeight: 220,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownItemActive: {
+    backgroundColor: '#e8f5f3',
+  },
+  dropdownItemText: {
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  dropdownItemTextActive: {
+    color: '#0f766e',
+    fontWeight: '700',
   },
   emptyState: {
     borderWidth: 1,

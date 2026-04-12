@@ -1,8 +1,7 @@
 import { useRouter } from 'expo-router';
-import { getAuth } from 'firebase/auth';
-import { addDoc, collection, getDocs, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
@@ -70,7 +69,9 @@ export default function ServicesList() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const router = useRouter();
+  const categoryOptions = ['All', ...CATEGORIES.map((c) => c.label)];
 
   useEffect(() => {
     fetchServiceListings();
@@ -96,6 +97,10 @@ export default function ServicesList() {
 
     setFilteredListings(filtered);
   }, [searchQuery, listings, selectedCategory]);
+
+  useEffect(() => {
+    setCategoryDropdownOpen(false);
+  }, [selectedCategory]);
 
   const fetchServiceListings = async () => {
     try {
@@ -160,51 +165,6 @@ export default function ServicesList() {
     return null;
   };
 
-  const submitServiceReport = async (item: ServiceListing, reason: string) => {
-    const currentUser = getAuth().currentUser;
-
-    if (!currentUser) {
-      Alert.alert('Sign in required', 'Please sign in to report listings.');
-      return;
-    }
-
-    if (item.userId && item.userId === currentUser.uid) {
-      Alert.alert('Not allowed', 'You cannot report your own listing.');
-      return;
-    }
-
-    try {
-      const db = getFirestore(app);
-      await addDoc(collection(db, 'reportedListings'), {
-        listingId: item.id,
-        listingType: 'service',
-        listingTitle: item.serviceName || 'Service listing',
-        listingImage: item.serviceImage || '',
-        sellerId: item.userId || '',
-        sellerEmail: item.contactEmail || '',
-        reportedBy: currentUser.uid,
-        reason,
-        details: 'Reported from services list screen',
-        createdAt: serverTimestamp(),
-        status: 'pending',
-      });
-
-      Alert.alert('Report submitted', 'Thanks. Our moderators will review this listing.');
-    } catch {
-      Alert.alert('Error', 'Could not submit report. Please try again.');
-    }
-  };
-
-  const handleReportService = (item: ServiceListing) => {
-    Alert.alert('Report Listing', 'Why are you reporting this service listing?', [
-      { text: 'Spam', onPress: () => submitServiceReport(item, 'spam') },
-      { text: 'Scam/Fraud', onPress: () => submitServiceReport(item, 'scam') },
-      { text: 'Prohibited Content', onPress: () => submitServiceReport(item, 'prohibited_content') },
-      { text: 'Misleading Information', onPress: () => submitServiceReport(item, 'misleading_content') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
   const renderCard = (item: ServiceListing) => {
     const price = formatPrice(item);
 
@@ -261,10 +221,6 @@ export default function ServicesList() {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.reportButton} onPress={() => handleReportService(item)}>
-            <Text style={styles.reportButtonText}>Report Listing</Text>
-          </TouchableOpacity>
-
           <Text style={styles.viewDetailsText}>View details</Text>
         </View>
       </TouchableOpacity>
@@ -304,24 +260,33 @@ export default function ServicesList() {
             onChangeText={setSearchQuery}
           />
           <Text style={styles.categoryLabel}>Category</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.chipScroll}
-            contentContainerStyle={styles.chipRow}
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={() => setCategoryDropdownOpen((prev) => !prev)}
+            activeOpacity={0.85}
           >
-            {['All', ...CATEGORIES.map((c) => c.label)].map((cat) => (
-              <TouchableOpacity
-                key={cat}
-                style={[styles.chip, selectedCategory === cat && styles.chipActive]}
-                onPress={() => setSelectedCategory(cat)}
-              >
-                <Text style={[styles.chipText, selectedCategory === cat && styles.chipTextActive]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+            <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
+            <Text style={styles.dropdownChevron}>{categoryDropdownOpen ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          {categoryDropdownOpen ? (
+            <View style={styles.dropdownMenu}>
+              <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
+                {categoryOptions.map((cat) => {
+                  const active = selectedCategory === cat;
+                  return (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[styles.dropdownItem, active && styles.dropdownItemActive]}
+                      onPress={() => setSelectedCategory(cat)}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={[styles.dropdownItemText, active && styles.dropdownItemTextActive]}>{cat}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -430,34 +395,56 @@ const styles = StyleSheet.create({
     color: '#334155',
     marginBottom: 4,
   },
-  chipScroll: {
+  dropdownButton: {
     marginTop: 4,
-  },
-  chipRow: {
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
     flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 4,
-    paddingRight: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
   },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
+  dropdownButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  dropdownChevron: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    marginTop: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   },
-  chipActive: {
-    backgroundColor: '#0F766E',
-    borderColor: '#0F766E',
+  dropdownScroll: {
+    maxHeight: 220,
   },
-  chipText: {
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownItemActive: {
+    backgroundColor: '#e8f5f3',
+  },
+  dropdownItemText: {
     fontSize: 13,
+    color: '#334155',
     fontWeight: '600',
-    color: '#475569',
   },
-  chipTextActive: {
-    color: '#fff',
+  dropdownItemTextActive: {
+    color: '#0f766e',
+    fontWeight: '700',
   },
   sectionHeader: {
     alignItems: 'center',

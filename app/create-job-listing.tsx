@@ -227,6 +227,7 @@ export default function CreateJobListingPage() {
             type="picker"
             options={jobCategories}
             placeholder="Select category"
+            dropdownZIndex={3000}
             required
             editable={!loading && canCreateJobPost}
           />
@@ -237,6 +238,7 @@ export default function CreateJobListingPage() {
             type="picker"
             options={JOB_TYPES}
             placeholder="Select job type"
+            dropdownZIndex={2000}
             required
             editable={!loading && canCreateJobPost}
           />
@@ -257,6 +259,7 @@ export default function CreateJobListingPage() {
             type="picker"
             options={PAY_TYPES}
             placeholder="Select pay type"
+            dropdownZIndex={1000}
             required
             editable={!loading && canCreateJobPost}
           />

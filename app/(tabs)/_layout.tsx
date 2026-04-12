@@ -3,14 +3,8 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 export default function Layout() {
-  const { user, profile, loading, isBusinessAccount } = useAccountStatus();
-  const waitingForProfile = !!user && !profile;
-  if (!loading && !user) {
-    console.log('User not logged in: hide List and Messages tabs');
-  }
   return (
     <>
       <Header />
@@ -36,11 +30,7 @@ export default function Layout() {
         <Tabs.Screen
           name="listbutton"
           options={{
-            title: 'List',
-            tabBarLabel: user ? 'List' : '',
-            tabBarIcon: ({ color }) =>
-              user ? <IconSymbol size={28} name="list.bullet.rectangle.portrait.fill" color={color} /> : null,
-            tabBarItemStyle: !user ? { display: 'none' } : {},
+            href: null,
           }}
         />
         <Tabs.Screen
@@ -60,10 +50,7 @@ export default function Layout() {
           name="messagesbutton"
           options={{
             title: 'Messages',
-            tabBarIcon: ({ color }) =>
-              user ? <IconSymbol size={28} name="envelope.fill" color={color} /> : null,
-            tabBarLabel: user ? 'Messages' : '',
-            tabBarItemStyle: !user ? { display: 'none' } : {},
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="envelope.fill" color={color} />,
           }}
         />
         <Tabs.Screen
@@ -75,12 +62,7 @@ export default function Layout() {
         <Tabs.Screen
           name="businesshubbutton"
           options={{
-            title: 'Business Hub',
-            href: !user || waitingForProfile || !isBusinessAccount ? null : undefined,
-            tabBarIcon: ({ color }) =>
-              user ? <IconSymbol size={28} name="person.fill" color={color} /> : null,
-            tabBarLabel: user && !waitingForProfile && isBusinessAccount ? 'Business Hub' : '',
-            tabBarItemStyle: !user || waitingForProfile || !isBusinessAccount ? { display: 'none' } : {},
+            href: null,
           }}
         />
         <Tabs.Screen

@@ -15,6 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { app } from "../firebase";
 
 const db = getFirestore(app);
@@ -87,6 +88,7 @@ function SectionTitle({ children }: { children: string }) {
 
 export default function ContactUsComp() {
 	const router = useRouter();
+	const insets = useSafeAreaInsets();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [message, setMessage] = useState("");
@@ -136,8 +138,10 @@ export default function ContactUsComp() {
 			keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
 		>
 			<ScrollView 
-				contentContainerStyle={styles.content}
+				contentContainerStyle={[styles.content, { paddingBottom: Math.max(40, insets.bottom + 24) }]}
 				keyboardDismissMode="on-drag"
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
 			>
 			<InfoBox />
 
@@ -195,7 +199,9 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff",
 	},
 	content: {
+		flexGrow: 1,
 		padding: 16,
+		paddingBottom: 40,
 	},
 	title: {
 		fontSize: 22,

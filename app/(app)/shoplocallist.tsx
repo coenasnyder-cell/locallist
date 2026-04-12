@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 interface ShopLocalProfile {
   id: string;
@@ -19,8 +20,6 @@ interface ShopLocalProfile {
   userId: string;
   displayName?: string;
   isVerified?: boolean | number | string;
-  isClaimed?: boolean | number | string;
-  ownerUserId?: string;
 }
 
 export default function ShopLocalList() {
@@ -31,21 +30,15 @@ export default function ShopLocalList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const router = useRouter();
+  const { isBusinessAccount } = useAccountStatus();
 
   const normalizeValue = (value?: string | null) => String(value || '').trim().toLowerCase();
   const isBusinessVerified = (profile: ShopLocalProfile) => {
     const verifiedValue = profile.isVerified;
     const normalizedVerified = String(verifiedValue ?? '').trim().toLowerCase();
     return verifiedValue === true || verifiedValue === 1 || normalizedVerified === 'true' || normalizedVerified === '1';
-  };
-
-  const isBusinessClaimed = (profile: ShopLocalProfile) => {
-    const claimedValue = profile.isClaimed;
-    const normalizedClaimed = String(claimedValue ?? '').trim().toLowerCase();
-    const hasClaimedFlag = claimedValue === true || claimedValue === 1 || normalizedClaimed === 'true' || normalizedClaimed === '1';
-    const hasOwner = !!(profile.ownerUserId && String(profile.ownerUserId).trim() !== '');
-    return hasClaimedFlag || hasOwner;
   };
 
   useEffect(() => {
@@ -70,6 +63,10 @@ export default function ShopLocalList() {
 
     setFilteredProfiles(filtered);
   }, [searchQuery, profiles, selectedCategory]);
+
+  useEffect(() => {
+    setCategoryDropdownOpen(false);
+  }, [selectedCategory]);
 
   const formatCategoryLabel = (raw: string): string => {
     return raw
@@ -184,8 +181,6 @@ export default function ShopLocalList() {
           userId: profileData.userId,
           displayName: userName,
           isVerified: profileData.isVerified,
-          isClaimed: profileData.isClaimed,
-          ownerUserId: profileData.ownerUserId,
         });
       }
 
@@ -216,6 +211,10 @@ export default function ShopLocalList() {
     });
   };
 
+  const handleAddBusinessPress = () => {
+    router.push(isBusinessAccount ? '/(app)/businesslocal' as any : '/premium-upgrade' as any);
+  };
+
   const handleViewDetailsAlert = (profile: ShopLocalProfile) => {
     Alert.alert(
       profile.businessName,
@@ -234,7 +233,6 @@ export default function ShopLocalList() {
   const renderProfileCard = (profile: ShopLocalProfile) => {
     const isPremium = profile.businessTier === 'premium';
     const isVerified = isBusinessVerified(profile);
-    const isClaimed = isBusinessClaimed(profile);
 
     return (
       <TouchableOpacity 
@@ -286,20 +284,6 @@ export default function ShopLocalList() {
             </TouchableOpacity>
           )}
 
-          {!isClaimed && !isVerified ? (
-            <TouchableOpacity
-              style={styles.claimButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                router.push({
-                  pathname: '/businessprofile',
-                  params: { id: profile.id || profile.userId, claim: '1' },
-                });
-              }}
-            >
-              <Text style={styles.claimButtonText}>Claim This Business</Text>
-            </TouchableOpacity>
-          ) : null}
         </View>
       </TouchableOpacity>
     );
@@ -324,9 +308,11 @@ export default function ShopLocalList() {
           />
           <TouchableOpacity
             style={styles.createProfileButton}
-            onPress={() => router.push('/(app)/businesslocal')}
+            onPress={handleAddBusinessPress}
           >
-            <Text style={styles.createProfileButtonText}>Add Or Claim A Business</Text>
+            <Text style={styles.createProfileButtonText}>
+              {isBusinessAccount ? 'Update Business Profile' : 'Add A Business'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -340,19 +326,33 @@ export default function ShopLocalList() {
           />
 
           <Text style={styles.categoryLabel}>Category</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll} contentContainerStyle={styles.chipRow}>
-            {['All', ...categories].map((category) => (
-              <TouchableOpacity
-                key={category}
-                style={[styles.chip, selectedCategory === category && styles.chipActive]}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Text style={[styles.chipText, selectedCategory === category && styles.chipTextActive]}>
-                  {category}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={() => setCategoryDropdownOpen((prev) => !prev)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
+            <Text style={styles.dropdownChevron}>{categoryDropdownOpen ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          {categoryDropdownOpen ? (
+            <View style={styles.dropdownMenu}>
+              <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
+                {['All', ...categories].map((category) => {
+                  const active = selectedCategory === category;
+                  return (
+                    <TouchableOpacity
+                      key={category}
+                      style={[styles.dropdownItem, active && styles.dropdownItemActive]}
+                      onPress={() => setSelectedCategory(category)}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={[styles.dropdownItemText, active && styles.dropdownItemTextActive]}>{category}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -473,34 +473,56 @@ const styles = StyleSheet.create({
     color: '#334155',
     marginBottom: 4,
   },
-  chipScroll: {
+  dropdownButton: {
     marginTop: 4,
-  },
-  chipRow: {
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
     flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 4,
-    paddingRight: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
   },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
+  dropdownButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  dropdownChevron: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    marginTop: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   },
-  chipActive: {
-    backgroundColor: '#475569',
-    borderColor: '#475569',
+  dropdownScroll: {
+    maxHeight: 220,
   },
-  chipText: {
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownItemActive: {
+    backgroundColor: '#e8f5f3',
+  },
+  dropdownItemText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#475569',
+    color: '#334155',
   },
-  chipTextActive: {
-    color: '#fff',
+  dropdownItemTextActive: {
+    color: '#0f766e',
+    fontWeight: '700',
   },
   gridContainer: {
     paddingHorizontal: 12,

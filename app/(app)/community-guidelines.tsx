@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   backButton: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     backgroundColor: '#334155',
     borderRadius: 8,
     paddingVertical: 9,

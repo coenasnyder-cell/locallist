@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-          <Text style={styles.backLink} onPress={() => router.push('/(app)/support-hub')}>Back to Support Hub</Text>
+          <Text style={styles.backButton} onPress={() => router.push('/(app)/support-hub')}>Back to Support Hub</Text>
           <Text style={styles.mainTitle}>Privacy Policy</Text>
 
           <Text style={styles.updatedDate}>Privacy Policy Updated: 02/08/2026</Text>
@@ -103,10 +103,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: 0.2,
   },
-  backLink: {
+ backButton: {
     alignSelf: 'center',
-    marginBottom: 10,
-    color: '#334155',
+    backgroundColor: '#334155',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+  },
+  backButtonText: {
+    color: '#fff',
     fontSize: 13,
     fontWeight: '700',
   },

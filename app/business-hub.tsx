@@ -5,12 +5,12 @@ import { getAuth } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { app } from '../firebase';
@@ -293,12 +293,6 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
     },
   ];
 
-  const claimOwnershipRequest = Boolean((profile as any)?.claimOwnershipRequest);
-  const claimStatus = String((profile as any)?.claimStatus || '');
-  const claimInProgress = claimOwnershipRequest || claimStatus === 'pending' || claimStatus === 'under_review';
-  const claimApproved = claimStatus === 'approved';
-  const claimDenied = claimStatus === 'denied';
-
   if (loading || waitingForProfile) {
     return (
       <SafeAreaView style={styles.container}>
@@ -337,140 +331,23 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
         </View>
 
         <View style={styles.claimSetupCard}>
-          <Text style={styles.claimSetupTitle}>Finish Your Business Claim</Text>
+          <Text style={styles.claimSetupTitle}>Keep Your Business Profile Current</Text>
           <Text style={styles.claimSetupSub}>
-            Follow these steps to claim an existing listing and submit documentation for admin review.
+            Update your public business details, manage your listings, and review how customers see your profile.
           </Text>
 
-          <View style={styles.claimSetupStepRow}>
-            <View style={[styles.claimSetupStepDot, styles.claimSetupStepDotDone]}>
-              <Text style={styles.claimSetupStepDotText}>1</Text>
-            </View>
-            <View style={styles.claimSetupStepTextWrap}>
-              <Text style={styles.claimSetupStepTitle}>Find the business listing</Text>
-              <Text style={styles.claimSetupStepText}>Open Local Businesses and select your business profile.</Text>
-            </View>
-          </View>
-
-          <View style={styles.claimSetupStepRow}>
-            <View style={[styles.claimSetupStepDot, claimInProgress || claimApproved ? styles.claimSetupStepDotDone : styles.claimSetupStepDotPending]}>
-              <Text style={styles.claimSetupStepDotText}>2</Text>
-            </View>
-            <View style={styles.claimSetupStepTextWrap}>
-              <Text style={styles.claimSetupStepTitle}>Tap Claim This Business</Text>
-              <Text style={styles.claimSetupStepText}>Start the claim flow on the public business profile screen.</Text>
-            </View>
-          </View>
-
-          <View style={styles.claimSetupStepRow}>
-            <View style={[styles.claimSetupStepDot, claimInProgress || claimApproved ? styles.claimSetupStepDotDone : styles.claimSetupStepDotPending]}>
-              <Text style={styles.claimSetupStepDotText}>3</Text>
-            </View>
-            <View style={styles.claimSetupStepTextWrap}>
-              <Text style={styles.claimSetupStepTitle}>Submit documentation</Text>
-              <Text style={styles.claimSetupStepText}>Include ownership proof images and a clear claim message in the claim modal.</Text>
-            </View>
-          </View>
-
-          <View style={styles.claimDocsBox}>
-            <Text style={styles.claimDocsTitle}>Suggested proof documents</Text>
-            <Text style={styles.claimDocsItem}>• Business license or registration certificate</Text>
-            <Text style={styles.claimDocsItem}>• Utility bill or tax document showing business name and address</Text>
-            <Text style={styles.claimDocsItem}>• Government-issued ID matching the business owner or manager</Text>
-          </View>
-
           <View style={styles.claimSetupActions}>
-            <TouchableOpacity style={styles.claimSetupButton} onPress={() => router.push('/(app)/shoplocallist')}>
-              <Text style={styles.claimSetupButtonText}>Open Local Businesses</Text>
+            <TouchableOpacity style={styles.claimSetupButton} onPress={() => router.push('/business-settings')}>
+              <Text style={styles.claimSetupButtonText}>Open Business Settings</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.claimSetupSecondaryButton}
-              onPress={() => router.push('/business-settings')}
+              onPress={() => router.push({ pathname: '/businessprofile', params: { id: user?.uid || '' } })}
             >
-              <Text style={styles.claimSetupSecondaryButtonText}>Update Business Details</Text>
+              <Text style={styles.claimSetupSecondaryButtonText}>View Public Listing</Text>
             </TouchableOpacity>
           </View>
-
-          {claimApproved ? (
-            <Text style={styles.claimSetupSuccess}>Your claim is approved. Your business ownership is now confirmed.</Text>
-          ) : claimDenied ? (
-            <Text style={styles.claimSetupWarning}>Your last claim was denied. You can resubmit with stronger proof documents.</Text>
-          ) : claimInProgress ? (
-            <Text style={styles.claimSetupInfo}>Claim submitted. Monitor status below while admins review your documents.</Text>
-          ) : null}
         </View>
-
-        {claimOwnershipRequest && (
-          <View style={styles.claimProgressCard}>
-            <Text style={styles.claimProgressTitle}>Business Claim Status</Text>
-            <Text style={styles.claimProgressSub}>
-              Our team will review your claim and reach out if additional information is needed.
-            </Text>
-            {[
-              {
-                label: 'Claim Submitted',
-                done: true,
-                active: false,
-                denied: false,
-                note: 'Your claim request has been received.',
-              },
-              {
-                label: 'Admin Review',
-                done: claimStatus === 'approved' || claimStatus === 'denied',
-                active: claimStatus === 'under_review',
-                denied: false,
-                note:
-                  claimStatus === 'approved' || claimStatus === 'denied'
-                    ? 'Review complete.'
-                    : claimStatus === 'under_review'
-                    ? 'Being reviewed by our team.'
-                    : 'Awaiting review.',
-              },
-              {
-                label: 'Claim Decision',
-                done: claimStatus === 'approved',
-                active: false,
-                denied: claimStatus === 'denied',
-                note:
-                  claimStatus === 'approved'
-                    ? 'Your claim has been approved!'
-                    : claimStatus === 'denied'
-                    ? 'Claim not approved. Please contact support.'
-                    : 'Pending a decision.',
-              },
-            ].map((step, i) => (
-              <View key={step.label}>
-                {i > 0 && <View style={styles.claimStepLine} />}
-                <View style={styles.claimStepRow}>
-                  <View
-                    style={[
-                      styles.claimStepDot,
-                      step.done && styles.claimStepDotDone,
-                      step.active && styles.claimStepDotActive,
-                      step.denied && styles.claimStepDotDenied,
-                    ]}
-                  >
-                    <Text style={styles.claimStepDotText}>
-                      {step.done ? '✓' : step.denied ? '✕' : step.active ? '·' : '○'}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={[
-                        styles.claimStepLabel,
-                        (step.done || step.active) && styles.claimStepLabelActive,
-                        step.denied && styles.claimStepLabelDenied,
-                      ]}
-                    >
-                      {step.label}
-                    </Text>
-                    <Text style={styles.claimStepNote}>{step.note}</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
 
         <Text style={styles.sectionLabel}>Analytics Snapshot</Text>
         <View style={styles.analyticsPanel}>

@@ -1,332 +1,249 @@
-
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import { addDoc, arrayRemove, arrayUnion, collection, doc, query as firestoreQuery, getDoc, onSnapshot, orderBy, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { db } from '../firebase'; // Adjust import if needed
+import {
+    addDoc,
+    arrayRemove,
+    arrayUnion,
+    collection,
+    doc,
+    query as firestoreQuery,
+    getDoc,
+    onSnapshot,
+    orderBy,
+    serverTimestamp,
+    updateDoc,
+} from 'firebase/firestore';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+    Alert,
+    Button,
+    FlatList,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { db } from '../firebase';
 import Header from './Header';
 
-const styles = StyleSheet.create({
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 12,
-  },
-  messageRowSender: {
-    justifyContent: 'flex-end',
-  },
-  messageRowReceiver: {
-    justifyContent: 'flex-start',
-  },
-  bubble: {
-    maxWidth: '70%',
-    padding: 12,
-    borderRadius: 18,
-    marginHorizontal: 6,
-  },
-  bubbleSender: {
-    backgroundColor: '#dcf8c6',
-    borderTopRightRadius: 4,
-  },
-  bubbleReceiver: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#ccc',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    paddingBottom: 24,
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: '#fff',
-    position: 'absolute',
-    bottom: 24,
-    left: 0,
-    right: 0,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    padding: 10,
-    marginRight: 8,
-    backgroundColor: '#f5f5f5',
-    fontSize: 16,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#e6f0fa',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#d0d0d0',
-  },
-  backText: {
-    color: '#475569',
-    fontWeight: 'bold',
-    fontSize: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  topRowTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#222',
-  },
-  listingCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 12,
-    marginHorizontal: 8,
-    marginTop: 8,
-    marginBottom: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    gap: 12,
-  },
-  listingImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    backgroundColor: '#eee',
-  },
-  listingImagePlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listingInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  listingTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  viewListingButton: {
-    backgroundColor: '#475569',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  viewListingButtonText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  deleteMessageButton: {
-    padding: 4,
-    marginLeft: 4,
-  },
-  deleteMessageText: {
-    fontSize: 16,
-  },
-  reportMenuButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  reportMenuButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  reportDropdownMenu: {
-    position: 'absolute',
-    right: 8,
-    top: 50,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 5,
-    zIndex: 1000,
-    minWidth: 180,
-  },
-  reportMenuItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  reportMenuItemText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  reportMenuItemLast: {
-    borderBottomWidth: 0,
-  },
-});
+type MessageRecord = {
+  id: string;
+  text?: string;
+  senderId?: string;
+  createdAt?: unknown;
+  deleted?: boolean;
+};
+
+type ThreadRecord = {
+  buyerId?: string;
+  participantIds?: string[];
+  listingId?: string | null;
+  listingImage?: string | null;
+  listingTitle?: string;
+  listingType?: string;
+  sellerId?: string;
+};
+
+type UserSummary = {
+  id: string | null;
+  name: string;
+  profileImage: string | null;
+};
+
+function formatMessageTime(value: unknown): string {
+  try {
+    if (!value) return '';
+    if (typeof (value as { toDate?: () => Date }).toDate === 'function') {
+      return (value as { toDate: () => Date }).toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    const parsed = new Date(value as string | number | Date);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+function getInitials(name: string): string {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) return '?';
+  return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+}
+
+function getOtherParticipantId(thread: ThreadRecord | null, currentUserId: string): string | null {
+  if (!thread) return null;
+
+  const participantIds = Array.isArray(thread.participantIds)
+    ? thread.participantIds.filter((participantId) => typeof participantId === 'string' && participantId.trim().length > 0)
+    : [thread.buyerId, thread.sellerId].filter((participantId): participantId is string => typeof participantId === 'string' && participantId.trim().length > 0);
+
+  return participantIds.find((participantId) => participantId !== currentUserId) || null;
+}
 
 const ThreadChat = () => {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const threadId = typeof params.threadId === 'string' ? params.threadId : Array.isArray(params.threadId) ? params.threadId[0] : '';
-  const [messages, setMessages] = useState<any[]>([]);
-  const [text, setText] = useState('');
-  const [isUserBlocked, setIsUserBlocked] = useState(false);
-  const [otherParticipantId, setOtherParticipantId] = useState<string | null>(null);
-  const [showReportMenu, setShowReportMenu] = useState(false);
-  const [listingData, setListingData] = useState<{title: string, image: string | null, listingId: string | null}>({
-    title: 'Conversation',
-    image: null,
-    listingId: null
-  });
-  const [otherUserProfilePic, setOtherUserProfilePic] = useState<string | null>(null);
-  const [currentUserProfilePic, setCurrentUserProfilePic] = useState<string | null>(null);
-  const [chatError, setChatError] = useState<string>('');
-  const flatListRef = useRef<FlatList>(null);
-  const previousMessageCountRef = useRef(0);
   const user = getAuth().currentUser;
 
-  const formatMessageTime = (value: any): string => {
-    try {
-      if (!value) return '';
-      if (typeof value?.toDate === 'function') {
-        return value.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return '';
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch {
-      return '';
+  const [messages, setMessages] = useState<MessageRecord[]>([]);
+  const [text, setText] = useState('');
+  const [threadData, setThreadData] = useState<ThreadRecord | null>(null);
+  const [showReportMenu, setShowReportMenu] = useState(false);
+  const [chatError, setChatError] = useState('');
+  const [currentUserSummary, setCurrentUserSummary] = useState<UserSummary>({
+    id: user?.uid || null,
+    name: user?.displayName || user?.email || 'You',
+    profileImage: null,
+  });
+  const [otherUserSummary, setOtherUserSummary] = useState<UserSummary>({
+    id: null,
+    name: 'User',
+    profileImage: null,
+  });
+  const [isBlockedByCurrentUser, setIsBlockedByCurrentUser] = useState(false);
+  const [isBlockedByOtherUser, setIsBlockedByOtherUser] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+  const previousMessageCountRef = useRef(0);
+
+  const listingTitle = threadData?.listingTitle || 'Conversation';
+  const listingImage = threadData?.listingImage || null;
+  const listingId = threadData?.listingId || null;
+  const listingType = String(threadData?.listingType || '').toLowerCase();
+  const isMessagingBlocked = isBlockedByCurrentUser || isBlockedByOtherUser;
+
+  const blockedMessage = useMemo(() => {
+    if (isBlockedByCurrentUser) {
+      return 'You have blocked this user. You cannot view or send messages until you unblock them.';
     }
-  };
 
- useEffect(() => {
-  let isMounted = true;
-  let unsubscribe: any;
-  let unsubscribeThread: any;
+    if (isBlockedByOtherUser) {
+      return 'This user has blocked you. You can no longer send messages in this conversation.';
+    }
 
-  // Only proceed if threadId is valid
-  if (!threadId) {
-    return;
-  }
-  
-  // Fetch thread data to get other participant and listing info
-  const fetchThreadData = async () => {
-    if (!user) return;
-    
-    try {
-      const threadDoc = await getDoc(doc(db, 'threads', threadId));
-      if (threadDoc.exists() && isMounted) {
-        const threadData = threadDoc.data();
-        
-        // Set listing data
-        setListingData({
-          title: threadData?.listingTitle || 'Conversation',
-          image: threadData?.listingImage || null,
-          listingId: threadData?.listingId || null
-        });
-        
-        const otherUserId = threadData?.participantIds?.find((id: string) => id !== user.uid);
-        
-        if (otherUserId) {
-          setOtherParticipantId(otherUserId);
-          
-          // Check if current user has blocked other participant
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const userBlockedList = userDoc.data()?.blockedUsers || [];
-          const currentUserPic = userDoc.data()?.profileimage || null;
+    return '';
+  }, [isBlockedByCurrentUser, isBlockedByOtherUser]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadThreadData = async () => {
+      if (!threadId || !user?.uid) return;
+
+      try {
+        const threadSnap = await getDoc(doc(db, 'threads', threadId));
+        if (!threadSnap.exists() || !isMounted) return;
+
+        const nextThreadData = threadSnap.data() as ThreadRecord;
+        setThreadData(nextThreadData);
+
+        const currentUserSnap = await getDoc(doc(db, 'users', user.uid));
+        const currentUserData = currentUserSnap.exists() ? currentUserSnap.data() || {} : {};
+        const otherParticipantId = getOtherParticipantId(nextThreadData, user.uid);
+
+        const currentBlockedUsers = Array.isArray(currentUserData.blockedUsers) ? currentUserData.blockedUsers : [];
+        const currentName = String(currentUserData.name || currentUserData.displayName || user.displayName || user.email || 'You');
+        const currentProfileImage = String(currentUserData.profileimage || user.photoURL || '') || null;
+
+        if (isMounted) {
+          setCurrentUserSummary({
+            id: user.uid,
+            name: currentName,
+            profileImage: currentProfileImage,
+          });
+          setIsBlockedByCurrentUser(Boolean(otherParticipantId && currentBlockedUsers.includes(otherParticipantId)));
+        }
+
+        if (!otherParticipantId) {
           if (isMounted) {
-            setCurrentUserProfilePic(currentUserPic);
+            setOtherUserSummary({ id: null, name: 'User', profileImage: null });
+            setIsBlockedByOtherUser(false);
           }
-          
-          // Check if other participant has blocked current user
-          const otherUserDoc = await getDoc(doc(db, 'users', otherUserId));
-          const otherBlockedList = otherUserDoc.data()?.blockedUsers || [];
-          const otherUserPic = otherUserDoc.data()?.profileimage || null;
-          if (isMounted) {
-            setOtherUserProfilePic(otherUserPic);
-          }
-          
-          if (isMounted && (userBlockedList.includes(otherUserId) || otherBlockedList.includes(user.uid))) {
-            setIsUserBlocked(true);
-          }
+          return;
+        }
+
+        const otherUserSnap = await getDoc(doc(db, 'users', otherParticipantId));
+        const otherUserData = otherUserSnap.exists() ? otherUserSnap.data() || {} : {};
+        const otherBlockedUsers = Array.isArray(otherUserData.blockedUsers) ? otherUserData.blockedUsers : [];
+
+        if (isMounted) {
+          setOtherUserSummary({
+            id: otherParticipantId,
+            name: String(otherUserData.name || otherUserData.displayName || otherUserData.email || 'User'),
+            profileImage: String(otherUserData.profileimage || otherUserData.photoURL || '') || null,
+          });
+          setIsBlockedByOtherUser(otherBlockedUsers.includes(user.uid));
+        }
+      } catch (error) {
+        console.error('Error fetching thread data:', error);
+      }
+    };
+
+    loadThreadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [threadId, user?.displayName, user?.email, user?.photoURL, user?.uid]);
+
+  useEffect(() => {
+    if (!threadId || !user?.uid) return undefined;
+
+    const unsubscribeThread = onSnapshot(doc(db, 'threads', threadId), async (threadSnap) => {
+      if (!threadSnap.exists()) return;
+
+      const nextThreadData = threadSnap.data() as ThreadRecord;
+      setThreadData(nextThreadData);
+
+      const unreadBy = Array.isArray((threadSnap.data() || {}).unreadBy) ? (threadSnap.data() || {}).unreadBy : [];
+      if (unreadBy.includes(user.uid)) {
+        try {
+          await updateDoc(doc(db, 'threads', threadId), {
+            unreadBy: arrayRemove(user.uid),
+          });
+        } catch {
+          // Keep the chat usable if read-state writes fail.
         }
       }
-    } catch (error) {
-      console.error('Error fetching thread data:', error);
-    }
-  };
-  
-  fetchThreadData();
+    });
 
-  // While this chat is open, clear unread state for the current user.
-  unsubscribeThread = onSnapshot(doc(db, 'threads', threadId), async (threadSnap) => {
-    if (!threadSnap.exists() || !user?.uid) return;
-    const unreadBy = (threadSnap.data()?.unreadBy || []) as string[];
-    if (unreadBy.includes(user.uid)) {
-      try {
-        await updateDoc(doc(db, 'threads', threadId), {
-          unreadBy: arrayRemove(user.uid),
-        });
-      } catch {
-        // Keep chat usable even if read-state update fails.
-      }
-    }
-  });
-  
-  const q = firestoreQuery(
-    collection(db, 'threads', threadId, 'messages'),
-    orderBy('createdAt', 'asc')
-  );
+    return () => unsubscribeThread();
+  }, [threadId, user?.uid]);
 
-  unsubscribe = onSnapshot(
-    q,
-    (snapshot: any) => {
-      if (isMounted) {
+  useEffect(() => {
+    if (!threadId) return undefined;
+
+    const messagesQuery = firestoreQuery(collection(db, 'threads', threadId, 'messages'), orderBy('createdAt', 'asc'));
+    const unsubscribeMessages = onSnapshot(
+      messagesQuery,
+      (snapshot) => {
         setChatError('');
-        setMessages(snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })));
+        setMessages(snapshot.docs.map((messageDoc) => ({ id: messageDoc.id, ...(messageDoc.data() as Omit<MessageRecord, 'id'>) })));
+      },
+      (error) => {
+        const code = String(error?.code || '');
+        if (code.includes('permission-denied') || code.includes('unauthenticated')) {
+          setChatError('You no longer have access to this conversation.');
+        } else {
+          setChatError('Messages could not be loaded right now. Please try again.');
+        }
       }
-    },
-    (error: any) => {
-      if (!isMounted) return;
-      const code = String(error?.code || '');
-      if (code.includes('permission-denied') || code.includes('unauthenticated')) {
-        setChatError('You no longer have access to this conversation.');
-      } else {
-        setChatError('Messages could not be loaded right now. Please try again.');
-      }
-    }
-  );
+    );
 
-  return () => {
-    isMounted = false;
-    if (unsubscribe) {
-      unsubscribe();
-    }
-    if (unsubscribeThread) {
-      unsubscribeThread();
-    }
-  };
-}, [threadId, user]);
+    return () => unsubscribeMessages();
+  }, [threadId]);
 
   useEffect(() => {
     const previousCount = previousMessageCountRef.current;
@@ -341,28 +258,136 @@ const ThreadChat = () => {
     return () => clearTimeout(timeoutId);
   }, [messages.length]);
 
-  const sendMessage = async () => {
-    if (!text.trim() || !user || !threadId) return;
-    
-    if (isUserBlocked) {
-      alert('You cannot message this user because they have blocked you or you have blocked them.');
+  const closeReportMenu = () => setShowReportMenu(false);
+
+  const handleBack = () => {
+    closeReportMenu();
+    if (router.canGoBack()) {
+      router.back();
       return;
     }
-    
+    router.replace('/(tabs)/messagesbutton');
+  };
+
+  const handleViewListing = () => {
+    closeReportMenu();
+    if (!listingId) return;
+
+    if (listingType === 'pet') {
+      router.push({ pathname: '/pet-details', params: { id: listingId } });
+      return;
+    }
+
+    router.push({ pathname: '/listing', params: { id: listingId } });
+  };
+
+  const handleOpenReportMessage = () => {
+    if (!threadId) return;
+    closeReportMenu();
+    router.push({
+      pathname: '/(app)/report-message' as any,
+      params: {
+        threadId,
+        listingTitle,
+      },
+    });
+  };
+
+  const handleOpenReportUser = () => {
+    if (!otherUserSummary.id) return;
+    closeReportMenu();
+    router.push({
+      pathname: '/(app)/report-user' as any,
+      params: {
+        threadId,
+        userId: otherUserSummary.id,
+        userName: otherUserSummary.name,
+      },
+    });
+  };
+
+  const handleBlockToggle = async () => {
+    if (!user?.uid || !otherUserSummary.id) return;
+
+    closeReportMenu();
+
+    if (isBlockedByCurrentUser) {
+      Alert.alert('Unblock User', 'Do you want to unblock this user? You will be able to send and receive messages again.', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Unblock',
+          onPress: async () => {
+            try {
+              await updateDoc(doc(db, 'users', user.uid), {
+                blockedUsers: arrayRemove(otherUserSummary.id),
+              });
+              setIsBlockedByCurrentUser(false);
+              Alert.alert('Success', 'User unblocked successfully.');
+            } catch (error) {
+              console.error('Error unblocking user:', error);
+              Alert.alert('Error', 'Failed to unblock user. Please try again.');
+            }
+          },
+        },
+      ]);
+      return;
+    }
+
+    Alert.alert('Block User', 'Are you sure you want to block this user? You will not be able to send or receive messages from them.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Block',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await updateDoc(doc(db, 'users', user.uid), {
+              blockedUsers: arrayUnion(otherUserSummary.id),
+            });
+            setIsBlockedByCurrentUser(true);
+            Alert.alert('Success', 'User blocked successfully.');
+          } catch (error) {
+            console.error('Error blocking user:', error);
+            Alert.alert('Error', 'Failed to block user. Please try again.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const sendMessage = async () => {
+    const trimmedText = text.trim();
+    if (!trimmedText || !user?.uid || !threadId) return;
+
+    if (isBlockedByCurrentUser) {
+      Alert.alert('Messaging Disabled', 'You have blocked this user. Unblock them before sending a new message.');
+      return;
+    }
+
+    if (isBlockedByOtherUser) {
+      Alert.alert('Messaging Disabled', 'This user has blocked you, so you cannot send new messages.');
+      return;
+    }
+
     try {
       await addDoc(collection(db, 'threads', threadId, 'messages'), {
-        text,
+        text: trimmedText,
         senderId: user.uid,
         createdAt: serverTimestamp(),
       });
-      await updateDoc(doc(db, 'threads', threadId), {
-        lastMessage: text,
+
+      const threadUpdate: Record<string, unknown> = {
+        lastMessage: trimmedText,
         lastTimestamp: serverTimestamp(),
-      });
+      };
+
+      if (otherUserSummary.id) {
+        threadUpdate.unreadBy = arrayUnion(otherUserSummary.id);
+      }
+
+      await updateDoc(doc(db, 'threads', threadId), threadUpdate);
       setText('');
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-    } catch (error: any) {
-      const code = String(error?.code || '');
+    } catch (error: unknown) {
+      const code = String((error as { code?: string })?.code || '');
       if (code.includes('permission-denied') || code.includes('unauthenticated')) {
         Alert.alert('Message Failed', 'You are not authorized to send messages in this conversation.');
       } else {
@@ -372,296 +397,513 @@ const ThreadChat = () => {
   };
 
   const deleteMessage = async (messageId: string) => {
-    Alert.alert(
-      'Delete Message',
-      'Are you sure you want to delete this message? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await updateDoc(doc(db, 'threads', threadId, 'messages', messageId), {
-                deleted: true,
-                deletedAt: Timestamp.now()
-              });
-            } catch (error) {
-              console.error('Error deleting message:', error);
-              Alert.alert('Error', 'Failed to delete message. Please try again.');
-            }
+    if (!threadId) return;
+
+    Alert.alert('Delete Message', 'Are you sure you want to delete this message? This action cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await updateDoc(doc(db, 'threads', threadId, 'messages', messageId), {
+              deleted: true,
+              deletedAt: serverTimestamp(),
+            });
+          } catch (error) {
+            console.error('Error deleting message:', error);
+            Alert.alert('Error', 'Failed to delete message. Please try again.');
           }
-        }
-      ]
+        },
+      },
+    ]);
+  };
+
+  const renderAvatar = (summary: UserSummary, variant: 'sender' | 'receiver') => {
+    if (summary.profileImage) {
+      return <Image source={{ uri: summary.profileImage }} style={styles.avatar} />;
+    }
+
+    return (
+      <View style={[styles.avatar, variant === 'sender' ? styles.avatarSenderFallback : styles.avatarReceiverFallback]}>
+        <Text style={styles.avatarFallbackText}>{getInitials(summary.name)}</Text>
+      </View>
     );
   };
 
-  const reportMessage = async () => {
-    Alert.alert('Report Message', 'Report this conversation to our moderators?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Report',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await addDoc(collection(db, 'messageReports'), {
-              threadId,
-              reportedBy: user?.uid,
-              reportedUserId: otherParticipantId,
-              explanation: 'Reported from Messages',
-              createdAt: serverTimestamp(),
-              status: 'pending'
-            });
-            Alert.alert('Success', 'Report submitted successfully.');
-            setShowReportMenu(false);
-          } catch (error) {
-            console.error('Error reporting message:', error);
-            Alert.alert('Error', 'Failed to report. Please try again.');
-          }
-        }
-      }
-    ]);
-  };
-
-  const reportUser = async () => {
-    Alert.alert('Report User', 'Why are you reporting this user?', [
-      {
-        text: 'Spam',
-        onPress: async () => {
-          try {
-            await addDoc(collection(db, 'userReports'), {
-              reportedUserId: otherParticipantId,
-              reportedBy: user?.uid,
-              reason: 'spam',
-              explanation: 'Reported from Messages',
-              createdAt: serverTimestamp(),
-              status: 'pending'
-            });
-            Alert.alert('Success', 'User reported successfully.');
-            setShowReportMenu(false);
-          } catch (error) {
-            console.error('Error reporting user:', error);
-            Alert.alert('Error', 'Failed to report user. Please try again.');
-          }
-        }
-      },
-      { text: 'Harassment', onPress: async () => {
-          try {
-            await addDoc(collection(db, 'userReports'), {
-              reportedUserId: otherParticipantId,
-              reportedBy: user?.uid,
-              reason: 'harassment',
-              explanation: 'Reported from Messages',
-              createdAt: serverTimestamp(),
-              status: 'pending'
-            });
-            Alert.alert('Success', 'User reported successfully.');
-            setShowReportMenu(false);
-          } catch (error) {
-            alert('Error reporting user');
-          }
-        }
-      },
-      { text: 'Scam', onPress: async () => {
-          try {
-            await addDoc(collection(db, 'userReports'), {
-              reportedUserId: otherParticipantId,
-              reportedBy: user?.uid,
-              reason: 'scam',
-              explanation: 'Reported from Messages',
-              createdAt: serverTimestamp(),
-              status: 'pending'
-            });
-            Alert.alert('Success', 'User reported successfully.');
-            setShowReportMenu(false);
-          } catch (error) {
-            alert('Error reporting user');
-          }
-        }
-      },
-      { text: 'Cancel', style: 'cancel', onPress: () => setShowReportMenu(false) }
-    ]);
-  };
-
-  const blockUser = async () => {
-    Alert.alert('Block User', 'Are you sure you want to block this user? You will not be able to send or receive messages from them.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Block',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await updateDoc(doc(db, 'users', user!.uid), {
-              blockedUsers: arrayUnion(otherParticipantId)
-            });
-            setIsUserBlocked(true);
-            setShowReportMenu(false);
-            Alert.alert('Success', 'User blocked successfully.');
-          } catch (error) {
-            console.error('Error blocking user:', error);
-            Alert.alert('Error', 'Failed to block user. Please try again.');
-          }
-        }
-      }
-    ]);
-  };
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.screen}>
       <Header />
-      <View style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
-        {/* Custom row above messages */}
-        <View style={styles.topRow}>
-          <Text style={styles.backText} onPress={() => router.push('/(tabs)/messagesbutton')}>{'< Back To Messages'}</Text>
-          <Text style={styles.topRowTitle}></Text>
-          <TouchableOpacity 
-            style={styles.reportMenuButton}
-            onPress={() => setShowReportMenu(!showReportMenu)}
-          >
-            <Text style={styles.reportMenuButtonText}>⋮</Text>
-          </TouchableOpacity>
-          {showReportMenu && (
-            <View style={styles.reportDropdownMenu}>
-              <TouchableOpacity style={styles.reportMenuItem} onPress={reportMessage}>
-                <Text style={styles.reportMenuItemText}>Report Conversation</Text>
+      {showReportMenu ? <Pressable style={styles.menuBackdrop} onPress={closeReportMenu} /> : null}
+
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 76 : 0}
+      >
+        <View style={styles.chatShell}>
+          <View style={styles.topRow}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton} activeOpacity={0.85}>
+              <Text style={styles.backText}>Back to Messages</Text>
+            </TouchableOpacity>
+            <Text style={styles.topRowTitle} numberOfLines={1}>Messages</Text>
+            <View style={styles.topRowSpacer} />
+          </View>
+
+          <View style={styles.contextCard}>
+            {listingImage ? (
+              <Image source={{ uri: listingImage }} style={styles.listingImage} resizeMode="cover" />
+            ) : (
+              <View style={styles.listingImagePlaceholder}>
+                <Text style={styles.listingImagePlaceholderText}>{getInitials(listingTitle)}</Text>
+              </View>
+            )}
+
+            <View style={styles.listingInfo}>
+              <Text style={styles.listingTitle} numberOfLines={1}>{listingTitle}</Text>
+              <Text style={styles.listingSubtitle} numberOfLines={1}>{otherUserSummary.name}</Text>
+            </View>
+
+            <View style={styles.contextActions}>
+              <TouchableOpacity
+                style={[styles.contextButton, !listingId ? styles.contextButtonDisabled : null]}
+                onPress={handleViewListing}
+                disabled={!listingId}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.contextButtonText, !listingId ? styles.contextButtonTextDisabled : null]}>View Listing</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.reportMenuItem} onPress={reportUser}>
-                <Text style={styles.reportMenuItemText}>Report User</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.reportMenuItem, styles.reportMenuItemLast]} onPress={blockUser}>
-                <Text style={[styles.reportMenuItemText, { color: '#d9534f' }]}>🚫 Block User</Text>
-              </TouchableOpacity>
+
+              <View style={styles.reportMenuWrap}>
+                <TouchableOpacity style={styles.reportButton} onPress={() => setShowReportMenu((open) => !open)} activeOpacity={0.85}>
+                  <Text style={styles.reportButtonText}>Report</Text>
+                </TouchableOpacity>
+
+                {showReportMenu ? (
+                  <View style={styles.reportDropdownMenu}>
+                    <TouchableOpacity style={styles.reportMenuItem} onPress={handleOpenReportMessage} activeOpacity={0.85}>
+                      <Text style={styles.reportMenuItemText}>Report Message</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.reportMenuItem} onPress={handleOpenReportUser} activeOpacity={0.85}>
+                      <Text style={styles.reportMenuItemText}>Report User</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.reportMenuItem, styles.reportMenuItemLast]} onPress={handleBlockToggle} activeOpacity={0.85}>
+                      <Text style={[styles.reportMenuItemText, styles.reportMenuItemDanger]}>
+                        {isBlockedByCurrentUser ? '✅ Unblock User' : '🚫 Block User'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </View>
+
+          {chatError ? (
+            <View style={styles.warningBanner}>
+              <Text style={styles.warningBannerText}>{chatError}</Text>
+            </View>
+          ) : null}
+
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
+            windowSize={10}
+            removeClippedSubviews
+            contentContainerStyle={[
+              styles.messagesContent,
+              { paddingBottom: isMessagingBlocked ? 28 : Math.max(140, insets.bottom + 112) },
+            ]}
+            renderItem={({ item }) => {
+              const isSender = item.senderId === user?.uid;
+              const isDeleted = item.deleted === true;
+              const summary = isSender ? currentUserSummary : otherUserSummary;
+              const timeLabel = formatMessageTime(item.createdAt);
+
+              return (
+                <View style={[styles.messageRow, isSender ? styles.messageRowSender : styles.messageRowReceiver]}>
+                  {!isSender ? renderAvatar(summary, 'receiver') : null}
+
+                  <View style={styles.messageColumn}>
+                    <View style={[styles.bubble, isSender ? styles.bubbleSender : styles.bubbleReceiver]}>
+                      <Text style={[styles.messageText, isDeleted ? styles.deletedMessageText : null]}>
+                        {isDeleted ? 'Message deleted' : item.text || ''}
+                      </Text>
+                      {timeLabel ? <Text style={styles.messageTime}>{timeLabel}</Text> : null}
+                    </View>
+
+                    {isSender && !isDeleted ? (
+                      <TouchableOpacity style={styles.deleteMessageButton} onPress={() => deleteMessage(item.id)} activeOpacity={0.8}>
+                        <Text style={styles.deleteMessageText}>Delete</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+
+                  {isSender ? renderAvatar(summary, 'sender') : null}
+                </View>
+              );
+            }}
+            ListEmptyComponent={
+              <View style={styles.emptyChatState}>
+                <Text style={styles.emptyChatTitle}>No messages yet</Text>
+                <Text style={styles.emptyChatText}>Start the conversation by sending the first message.</Text>
+              </View>
+            }
+          />
+
+          {isMessagingBlocked ? (
+            <View style={[styles.blockedStateCard, { paddingBottom: Math.max(16, insets.bottom + 8) }]}>
+              <Text style={styles.blockedStateIcon}>🚫</Text>
+              <Text style={styles.blockedStateTitle}>{isBlockedByCurrentUser ? 'You blocked this user' : 'Messaging unavailable'}</Text>
+              <Text style={styles.blockedStateText}>{blockedMessage}</Text>
+            </View>
+          ) : (
+            <View style={[styles.inputContainer, { paddingBottom: Math.max(18, insets.bottom + 8) }]}>
+              <TextInput
+                style={styles.input}
+                value={text}
+                onChangeText={setText}
+                placeholder="Type a message..."
+                placeholderTextColor="#94a3b8"
+                returnKeyType="send"
+                onSubmitEditing={sendMessage}
+              />
+              <Button title="Send" onPress={sendMessage} />
             </View>
           )}
         </View>
-        
-        {chatError ? (
-          <View style={{ marginHorizontal: 10, marginTop: 8, backgroundColor: '#fff3cd', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 8, padding: 10 }}>
-            <Text style={{ color: '#92400e', fontSize: 13, fontWeight: '600' }}>{chatError}</Text>
-          </View>
-        ) : null}
-
-        {/* Listing Card */}
-        {listingData.listingId && (
-          <View style={styles.listingCard}>
-            {listingData.image ? (
-              <Image 
-                source={{ uri: listingData.image }} 
-                style={styles.listingImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.listingImagePlaceholder}>
-                <Text style={{ color: '#999', fontSize: 12 }}>No Image</Text>
-              </View>
-            )}
-            <View style={styles.listingInfo}>
-              <Text style={styles.listingTitle} numberOfLines={2}>
-                {listingData.title}
-              </Text>
-              <TouchableOpacity 
-                style={styles.viewListingButton}
-                onPress={() => router.push({
-                  pathname: '/listing',
-                  params: { id: listingData.listingId }
-                })}
-              >
-                <Text style={styles.viewListingButtonText}>View Listing</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-        
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={item => item.id}
-          initialNumToRender={20}
-          maxToRenderPerBatch={20}
-          windowSize={10}
-          removeClippedSubviews
-          renderItem={({ item }) => {
-            const isSender = item.senderId === user?.uid;
-            const isDeleted = item.deleted === true;
-            const profilePic = isSender ? currentUserProfilePic : otherUserProfilePic;
-            
-            return (
-              <View
-                style={[
-                  styles.messageRow,
-                  isSender ? styles.messageRowSender : styles.messageRowReceiver,
-                ]}
-              >
-                {!isSender && (
-                  profilePic ? (
-                    <Image 
-                      source={{ uri: profilePic }} 
-                      style={styles.avatar}
-                    />
-                  ) : (
-                    <View style={[styles.avatar, { backgroundColor: '#bbb' }]} />
-                  )
-                )}
-                <View style={[styles.bubble, isSender ? styles.bubbleSender : styles.bubbleReceiver]}>
-                  <Text style={{ color: isDeleted ? '#999' : '#222', fontStyle: isDeleted ? 'italic' : 'normal' }}>
-                    {isDeleted ? 'Message deleted' : item.text}
-                  </Text>
-                  {!!formatMessageTime(item.createdAt) && (
-                    <Text style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
-                      {formatMessageTime(item.createdAt)}
-                    </Text>
-                  )}
-                </View>
-                {isSender && !isDeleted && (
-                  <TouchableOpacity 
-                    style={styles.deleteMessageButton}
-                    onPress={() => deleteMessage(item.id)}
-                  >
-                    <Text style={styles.deleteMessageText}>🗑️</Text>
-                  </TouchableOpacity>
-                )}
-                {isSender && isDeleted && (
-                  currentUserProfilePic ? (
-                    <Image 
-                      source={{ uri: currentUserProfilePic }} 
-                      style={styles.avatar}
-                    />
-                  ) : (
-                    <View style={[styles.avatar, { backgroundColor: '#bbb' }]} />
-                  )
-                )}
-              </View>
-            );
-          }}
-          contentContainerStyle={{ padding: 16, paddingBottom: 140 }}
-        />
-        {isUserBlocked ? (
-          <View style={[styles.inputContainer, { position: 'relative', height: 'auto', bottom: 0, padding: 16 }]}>
-            <View style={{ alignItems: 'center', padding: 12 }}>
-              <Text style={{ fontSize: 24, marginBottom: 8 }}>🚫</Text>
-              <Text style={{ fontSize: 14, fontWeight: '500', color: '#333' }}>You have blocked this user</Text>
-              <Text style={{ fontSize: 13, color: '#999', marginTop: 6, textAlign: 'center' }}>
-                You cannot view or send messages until you unblock them
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={text}
-              onChangeText={setText}
-              placeholder="Type a message..."
-              placeholderTextColor="#aaa"
-              returnKeyType="send"
-              onSubmitEditing={sendMessage}
-            />
-            <Button title="Send" onPress={sendMessage} />
-          </View>
-        )}
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  chatShell: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
+  menuBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 40,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    backgroundColor: '#ffffff',
+  },
+  backButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  backText: {
+    color: '#334155',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  topRowTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginHorizontal: 8,
+  },
+  topRowSpacer: {
+    width: 110,
+  },
+  contextCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    backgroundColor: '#ffffff',
+    zIndex: 50,
+  },
+  listingImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#e2e8f0',
+  },
+  listingImagePlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listingImagePlaceholderText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1e3a8a',
+  },
+  listingInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  listingTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  listingSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#64748b',
+  },
+  contextActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  contextButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#475569',
+    backgroundColor: '#ffffff',
+  },
+  contextButtonDisabled: {
+    borderColor: '#cbd5e1',
+    backgroundColor: '#f8fafc',
+  },
+  contextButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  contextButtonTextDisabled: {
+    color: '#94a3b8',
+  },
+  reportMenuWrap: {
+    position: 'relative',
+  },
+  reportButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+    backgroundColor: '#ffffff',
+  },
+  reportButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#dc2626',
+  },
+  reportDropdownMenu: {
+    position: 'absolute',
+    top: 44,
+    right: 0,
+    minWidth: 172,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+    zIndex: 60,
+    overflow: 'hidden',
+  },
+  reportMenuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  reportMenuItemLast: {
+    borderBottomWidth: 0,
+  },
+  reportMenuItemText: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  reportMenuItemDanger: {
+    color: '#dc2626',
+  },
+  warningBanner: {
+    marginHorizontal: 14,
+    marginTop: 10,
+    backgroundColor: '#fff7ed',
+    borderWidth: 1,
+    borderColor: '#fdba74',
+    borderRadius: 10,
+    padding: 12,
+  },
+  warningBannerText: {
+    color: '#9a3412',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  messagesContent: {
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    gap: 12,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  messageRowSender: {
+    justifyContent: 'flex-end',
+  },
+  messageRowReceiver: {
+    justifyContent: 'flex-start',
+  },
+  messageColumn: {
+    maxWidth: '78%',
+  },
+  bubble: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+  },
+  bubbleSender: {
+    backgroundColor: '#dcf8c6',
+    borderTopRightRadius: 4,
+  },
+  bubbleReceiver: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  messageText: {
+    color: '#0f172a',
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  deletedMessageText: {
+    color: '#94a3b8',
+    fontStyle: 'italic',
+  },
+  messageTime: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 4,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  avatarSenderFallback: {
+    backgroundColor: '#0f766e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarReceiverFallback: {
+    backgroundColor: '#94a3b8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarFallbackText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  deleteMessageButton: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  deleteMessageText: {
+    fontSize: 12,
+    color: '#ef4444',
+    fontWeight: '700',
+  },
+  emptyChatState: {
+    marginTop: 36,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyChatTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  emptyChatText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  blockedStateCard: {
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    paddingTop: 18,
+    paddingHorizontal: 24,
+  },
+  blockedStateIcon: {
+    fontSize: 30,
+    marginBottom: 8,
+  },
+  blockedStateTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  blockedStateText: {
+    marginTop: 6,
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  inputContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginRight: 8,
+    backgroundColor: '#f8fafc',
+    color: '#0f172a',
+    fontSize: 15,
+  },
+});
 
 export default ThreadChat;

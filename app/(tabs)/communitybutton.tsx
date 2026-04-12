@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 type CommunityItem = {
@@ -25,32 +25,18 @@ const ITEMS: CommunityItem[] = [
     route: '/(tabs)/petbutton',
   },
   {
-    emoji: '💼',
-    title: 'Job Board',
-    subtitle: 'Local job opportunities',
-    accentColor: '#0066cc',
-    route: '/(app)/joblistings',
-  },
-  {
-    emoji: '🛍️',
-    title: 'Deals',
-    subtitle: 'Featured and promoted listings',
-    accentColor: '#D97706',
-    route: '/deals',
-  },
-  {
-    emoji: '🎉',
-    title: 'Events',
-    subtitle: 'Local events & happenings',
-    accentColor: '#059669',
-    route: '/eventslist',
-  },
-  {
     emoji: '🏷️',
     title: 'Yard Sales',
     subtitle: 'Garage & yard sales near you',
     accentColor: '#DC2626',
     route: '/yardsalelistings',
+  },
+    {
+    emoji: '🎉',
+    title: 'Events',
+    subtitle: 'Local events & happenings',
+    accentColor: '#059669',
+    route: '/eventslist',
   },
   {
     emoji: '🛍️',
@@ -65,6 +51,20 @@ const ITEMS: CommunityItem[] = [
     subtitle: 'Find local professionals for hire',
     accentColor: '#0F766E',
     route: '/(app)/serviceslist',
+  },
+  {
+    emoji: '💼',
+    title: 'Job Board',
+    subtitle: 'Local job opportunities',
+    accentColor: '#0066cc',
+    route: '/(app)/joblistings',
+  },
+  {
+    emoji: '🛍️',
+    title: 'Deals',
+    subtitle: 'Featured and promoted listings',
+    accentColor: '#D97706',
+    route: '/deals',
   },
 ];
 

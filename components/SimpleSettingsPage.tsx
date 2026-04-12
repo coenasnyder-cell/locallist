@@ -62,7 +62,12 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
         listingUpNotification,
         messageNotification,
       });
-      Alert.alert('Profile updated', 'Your profile has been updated successfully.');
+      Alert.alert('Profile updated', 'Your profile has been updated successfully.', [
+        {
+          text: 'OK',
+          onPress: onClose,
+        },
+      ]);
     } catch (e) {
       Alert.alert('Error', 'There was a problem updating your profile.');
     }

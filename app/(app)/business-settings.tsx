@@ -1,6 +1,6 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
 import * as ImagePicker from 'expo-image-picker';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -34,11 +34,10 @@ export default function BusinessSettingsScreen() {
   const router = useRouter();
   const { user, profile, loading } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
+  const hasBusinessAccess = !!user && profile?.accountType === 'business';
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settings, setSettings] = useState<BusinessSettingsData | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-
-  const isBusiness = profile?.accountType === 'business';
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -76,14 +75,6 @@ export default function BusinessSettingsScreen() {
   const displayName = useMemo(() => {
     return settings?.displayName || user?.displayName || user?.email || 'Business User';
   }, [settings?.displayName, user?.displayName, user?.email]);
-
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && !isBusiness) {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
 
   const showLoading = loading || waitingForProfile || settingsLoading;
 
@@ -147,6 +138,15 @@ export default function BusinessSettingsScreen() {
           <View style={styles.loadingWrap}>
             <ActivityIndicator size="large" color="#475569" />
             <Text style={styles.loadingText}>Loading your business settings...</Text>
+          </View>
+        ) : !hasBusinessAccess ? (
+          <View style={styles.panel}>
+            <Text style={styles.helperText}>Business settings are available for business accounts only.</Text>
+            <View style={styles.heroActions}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/(tabs)/index')}>
+                <Text style={styles.backBtnText}>Back to Home</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <>

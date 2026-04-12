@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finish Setup - Local List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 18px 34px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 29px;
+      line-height: 1.2;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .lead {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .lead-secondary {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #475569;
+    }
+
+    .harrison {
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .callout {
+      border: 1px solid #fdba74;
+      background: #fff7ed;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .callout-title {
+      margin: 0 0 6px;
+      font-weight: 700;
+      color: #9a3412;
+      font-size: 13px;
+    }
+
+    .callout-body {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #7c2d12;
+    }
+
+    .label {
+      display: block;
+      margin: 14px 0 7px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-size: 15px;
+      color: #0f172a;
+      background: #fff;
+    }
+
+    .input:focus {
+      border-color: #0f766e;
+      outline: 2px solid rgba(15, 118, 110, 0.14);
+    }
+
+    .secondary-button,
+    .primary-button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .secondary-button {
+      margin-top: 12px;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .primary-button {
+      margin-top: 16px;
+      background: #0f766e;
+      color: #ffffff;
+    }
+
+    .secondary-button:disabled,
+    .primary-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #475569;
+    }
+
+    .checkbox-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: #475569;
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      margin: 0;
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.45;
+    }
+
+    .checkbox-link {
+      color: #0f766e;
+      text-decoration: underline;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .checkbox-label a {
+      color: #0f766e;
+      text-decoration: underline;
+      font-weight: 700;
+    }
+
+    .checkbox-label a:visited {
+      color: #0f766e;
+    }
+
+    .checkbox-label a:hover {
+      opacity: 0.8;
+    }
+
+    .disclaimer-box {
+      margin-top: 14px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 10px 11px;
+    }
+
+    .disclaimer-text {
+      margin: 0;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .error {
+      margin-top: 12px;
+      color: #b91c1c;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .result {
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid #bae6fd;
+      background: #f0f9ff;
+      color: #0c4a6e;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 10px 11px;
+      white-space: pre-line;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 16px 12px 22px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+    }
+
+    /* Hide profile, admin, and notifications buttons - only show logout */
+    #adminBtn,
+    #notificationsBtn,
+    #messagesBtn,
+    #signinBtn,
+    .desktop-nav,
+    .menu-sidebar a {
+      display: none !important;
+    }
+
+    .header-right {
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+  <main class="container">
+    <section class="card">
+      <h1>Finish setting up your account</h1>
+      <p class="lead">
+        We'll ask for your name and ZIP code. We also need your agreement to our policies.
+      </p>
+      <p class="lead-secondary">
+        Local List is built for <span class="harrison">Harrison, AR</span> and nearby communities. Your ZIP helps us show you what matters in your area.
+      </p>
+      <div class="callout">
+        <p class="callout-title">Disclaimer (optional)</p>
+        <p class="callout-body">
+          By allowing us to use your device location, we can suggest your ZIP based on where you are. We do not save your GPS coordinates, only the ZIP you confirm.
+        </p>
+      </div>
+
+      <form id="zipForm" novalidate>
+        <label class="label" for="fullName">Full name</label>
+        <input class="input" id="fullName" name="fullName" placeholder="Your name" autocomplete="name" />
+
+        <label class="label" for="zipCode">ZIP code</label>
+        <input class="input" id="zipCode" name="zipCode" placeholder="5-digit ZIP" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
+
+        <button type="button" class="secondary-button" id="suggestZipButton">Suggest ZIP from my location</button>
+        <p class="hint" id="locationHint"></p>
+
+        <div class="checkbox-row">
+          <input id="acceptTerms" class="checkbox" type="checkbox" />
+          <p class="checkbox-label">
+            I agree to the
+            <a href="terms.html" target="_blank" class="checkbox-link">Terms</a>
+            and
+            <a href="privacy.html" target="_blank" class="checkbox-link">Privacy Policy</a>
+          </p>
+        </div>
+
+        <div class="disclaimer-box">
+          <p class="disclaimer-text">
+            Accounts outside our approved ZIP list may be reviewed before listing or messaging. This keeps the marketplace local to Harrison and surrounding towns we support.
+          </p>
+        </div>
+
+        <p class="error" id="errorText"></p>
+        <div class="result" id="resultBox"></div>
+
+        <button type="submit" class="primary-button" id="continueButton">Continue to Local List</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const SERVICE_AREA_ZIPS = [];
+
+    const form = document.getElementById('zipForm');
+    const fullNameInput = document.getElementById('fullName');
+    const zipInput = document.getElementById('zipCode');
+    const acceptTermsInput = document.getElementById('acceptTerms');
+    const suggestZipButton = document.getElementById('suggestZipButton');
+    const continueButton = document.getElementById('continueButton');
+    const locationHint = document.getElementById('locationHint');
+    const errorText = document.getElementById('errorText');
+    const resultBox = document.getElementById('resultBox');
+
+    let locating = false;
+    let submitting = false;
+
+    function setError(message) {
+      errorText.textContent = message || '';
+    }
+
+    function setResult(message) {
+      if (!message) {
+        resultBox.classList.remove('show');
+        resultBox.textContent = '';
+        return;
+      }
+      resultBox.textContent = message;
+      resultBox.classList.add('show');
+    }
+
+    function extractUsZip(value) {
+      const digits = String(value || '').replace(/\D/g, '');
+      return digits.length >= 5 ? digits.slice(0, 5) : '';
+    }
+
+    function isZipInApprovedServiceArea(zip) {
+      if (!/^\d{5}$/.test(zip)) return false;
+      if (!SERVICE_AREA_ZIPS.length) return true;
+      return SERVICE_AREA_ZIPS.includes(zip);
+    }
+
+    function setBusyState() {
+      suggestZipButton.disabled = locating || submitting;
+      continueButton.disabled = submitting;
+      suggestZipButton.textContent = locating ? 'Locating...' : 'Suggest ZIP from my location';
+      continueButton.textContent = submitting ? 'Saving...' : 'Continue to Local List';
+    }
+
+    async function suggestZipFromLocation() {
+      if (!navigator.geolocation) {
+        locationHint.textContent = 'Location-based ZIP is not available in this browser. Please enter your ZIP manually.';
+        return;
+      }
+
+      setError('');
+      setResult('');
+      locationHint.textContent = '';
+      locating = true;
+      setBusyState();
+
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: false,
+            timeout: 12000,
+            maximumAge: 60000,
+          });
+        });
+
+        const { latitude, longitude } = position.coords;
+        const response = await fetch(
+          'https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=' +
+            encodeURIComponent(latitude) +
+            '&lon=' +
+            encodeURIComponent(longitude)
+        );
+
+        if (!response.ok) throw new Error('reverse geocode failed');
+        const data = await response.json();
+        const suggested = extractUsZip(data && data.address ? data.address.postcode : '');
+
+        if (!suggested) {
+          locationHint.textContent = 'We could not read a ZIP from this location. Please enter your 5-digit ZIP manually.';
+          return;
+        }
+
+        zipInput.value = suggested;
+        locationHint.textContent =
+          'We suggested ' + suggested + ' from your area. Confirm or change it if needed.';
+      } catch (_error) {
+        locationHint.textContent = 'Could not detect location. Please enter your ZIP code manually.';
+      } finally {
+        locating = false;
+        setBusyState();
+      }
+    }
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      setError('');
+      setResult('');
+
+      const name = String(fullNameInput.value || '').trim();
+      const zip = String(zipInput.value || '').trim();
+      const accepted = acceptTermsInput.checked;
+
+      if (!name || name.length < 2) {
+        setError('Please enter your name.');
+        return;
+      }
+
+      if (!/^\d{5}$/.test(zip)) {
+        setError('Enter a valid 5-digit ZIP code.');
+        return;
+      }
+
+      if (!accepted) {
+        setError('Please accept the Terms and Privacy Policy to continue.');
+        return;
+      }
+
+      submitting = true;
+      setBusyState();
+
+      try {
+        const approved = isZipInApprovedServiceArea(zip);
+
+        const submitSummary = [
+          'Form is valid. In the app workflow this would now:',
+          '1. Save name and ZIP to the signed-in user profile.',
+          '2. Mark terms acceptance timestamp.',
+          '3. Set ZIP status to ' + (approved ? 'approved' : 'pending review') + '.',
+          '4. Continue to the return route or Local List home.',
+          '',
+          'This HTML page is intentionally not linked to app routing or Firebase yet.'
+        ].join('\n');
+
+        setResult(submitSummary);
+      } catch (_error) {
+        setError('Something went wrong. Please try again.');
+      } finally {
+        submitting = false;
+        setBusyState();
+      }
+    }
+
+    suggestZipButton.addEventListener('click', suggestZipFromLocation);
+    form.addEventListener('submit', handleSubmit);
+    setBusyState();
+  </script>
+  
+  <script src="header.js"></script>
+</body>
+</html>

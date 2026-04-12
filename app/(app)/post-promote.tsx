@@ -1,5 +1,5 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -43,17 +43,26 @@ export default function PostPromoteScreen() {
   const router = useRouter();
   const { user, profile, loading } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
-
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && profile.accountType !== 'business') {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
+  const hasBusinessAccess = !!user && profile?.accountType === 'business';
 
   if (loading || waitingForProfile) {
     return null;
+  }
+
+  if (!hasBusinessAccess) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.hero}>
+          <Text style={styles.title}>Post & Promote</Text>
+          <Text style={styles.subtitle}>Post & Promote is available for business accounts only.</Text>
+          <View style={styles.heroActions}>
+            <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.replace('/(tabs)/index')}>
+              <Text style={styles.heroBackBtnText}>Back to Home</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
   }
 
   return (

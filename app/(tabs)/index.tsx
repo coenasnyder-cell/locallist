@@ -241,9 +241,6 @@ export default function HomeScreen() {
           >
             Quote of the Day
           </Text>
-<Text style={{ fontSize: 30, textAlign: 'center', marginTop: 100 }}>
-  FINAL BUILD CHECK 1
-</Text>
           <Text style={{ fontSize: 15, lineHeight: 22, fontWeight: '600', color: '#1e293b', textAlign: 'center' }}>
             {(displaySettings?.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."'}
           </Text>
@@ -280,7 +277,7 @@ export default function HomeScreen() {
               Explore local events, yard sales, jobs, deals, local businesses, services, and the Pet Corner all in one place.
             </Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#0369a1', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
+              style={{ backgroundColor: '#475569', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
               onPress={() => router.push('/(tabs)/communitybutton')}
             >
               <Text style={{ color: '#fff', fontWeight: '500', fontSize: 14 }}>Open Community Hub</Text>
@@ -338,7 +335,7 @@ export default function HomeScreen() {
               Promote what you offer, post your listing fast, and reach neighbors who are ready to buy.
             </Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#c2410c', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
+              style={{ backgroundColor: '#475569', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
               onPress={() => router.push(user ? '/(tabs)/listbutton' : '/signInOrSignUp')}
             >
               <Text style={{ color: '#fff', fontWeight: '500', fontSize: 14 }}>Open List Hub</Text>

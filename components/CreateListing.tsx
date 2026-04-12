@@ -697,8 +697,28 @@ const styles = StyleSheet.create({
 								<FormInput label="Title" value={title} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setTitle(text); } }} required editable={canEditListing} />
 								<FormInput label="Description" value={description} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setDescription(text); } }} required multiline editable={canEditListing} />
 								<FormInput label="Price" value={price} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setPrice(text); } }} required keyboardType="numeric" editable={canEditListing} />
-								<FormInput label="Category" value={category} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCategory(text); } }} required type="picker" options={CATEGORIES} editable={canEditListing} />
-								<FormInput label="Condition" value={condition} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCondition(text); } }} required type="picker" options={CONDITIONS} editable={canEditListing} />
+								<FormInput
+									label="Category"
+									value={category}
+									onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCategory(text); } }}
+									required
+									type="picker"
+									options={CATEGORIES}
+									placeholder="Select a category"
+									dropdownZIndex={3000}
+									editable={canEditListing}
+								/>
+								<FormInput
+									label="Condition"
+									value={condition}
+									onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setCondition(text); } }}
+									required
+									type="picker"
+									options={CONDITIONS}
+									placeholder="Select condition"
+									dropdownZIndex={2000}
+									editable={canEditListing}
+								/>
 								<FormInput label="Zip Code" value={zipCode} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setZipCode(text); } }} required keyboardType="numeric" editable={canEditListing} />
 								<ImageUploader
 									images={images}

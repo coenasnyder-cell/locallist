@@ -1,13 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
 type ServiceDetails = {
   id: string;
+  userId?: string;
   serviceName?: string;
   providerName?: string;
   category?: string;
@@ -55,6 +57,7 @@ export default function ServiceDetailsScreen() {
 
   const [service, setService] = useState<ServiceDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUser = getAuth().currentUser;
 
   useEffect(() => {
     const loadService = async () => {
@@ -105,6 +108,51 @@ export default function ServiceDetailsScreen() {
   const openWebsite = (website: string) => {
     const url = /^https?:\/\//i.test(website) ? website : `https://${website}`;
     Linking.openURL(url);
+  };
+
+  const submitServiceReport = async (reason: string) => {
+    if (!service) return;
+
+    if (!currentUser) {
+      Alert.alert('Sign in required', 'Please sign in to report listings.');
+      return;
+    }
+
+    if (service.userId && service.userId === currentUser.uid) {
+      Alert.alert('Not allowed', 'You cannot report your own listing.');
+      return;
+    }
+
+    try {
+      const db = getFirestore(app);
+      await addDoc(collection(db, 'reportedListings'), {
+        listingId: service.id,
+        listingType: 'service',
+        listingTitle: service.serviceName || 'Service listing',
+        listingImage: service.serviceImage || '',
+        sellerId: service.userId || '',
+        sellerEmail: service.contactEmail || '',
+        reportedBy: currentUser.uid,
+        reason,
+        details: 'Reported from service details screen',
+        createdAt: serverTimestamp(),
+        status: 'pending',
+      });
+
+      Alert.alert('Report submitted', 'Thanks. Our moderators will review this listing.');
+    } catch {
+      Alert.alert('Error', 'Could not submit report. Please try again.');
+    }
+  };
+
+  const handleReportService = () => {
+    Alert.alert('Report Listing', 'Why are you reporting this service listing?', [
+      { text: 'Spam', onPress: () => submitServiceReport('spam') },
+      { text: 'Scam/Fraud', onPress: () => submitServiceReport('scam') },
+      { text: 'Prohibited Content', onPress: () => submitServiceReport('prohibited_content') },
+      { text: 'Misleading Information', onPress: () => submitServiceReport('misleading_content') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   if (loading) {
@@ -172,6 +220,12 @@ export default function ServiceDetailsScreen() {
             {!!service.contactWebsite && (
               <TouchableOpacity style={styles.actionButton} onPress={() => openWebsite(service.contactWebsite!)}>
                 <Text style={styles.actionButtonText}>Visit Website</Text>
+              </TouchableOpacity>
+            )}
+
+            {(!currentUser || service.userId !== currentUser.uid) && (
+              <TouchableOpacity style={styles.reportButton} onPress={handleReportService}>
+                <Text style={styles.reportButtonText}>Report Listing</Text>
               </TouchableOpacity>
             )}
 
@@ -279,6 +333,21 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: '#ffffff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  reportButton: {
+    marginTop: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fecdd3',
+    backgroundColor: '#fff1f2',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  reportButtonText: {
+    color: '#b91c1c',
     fontWeight: '700',
     fontSize: 13,
   },

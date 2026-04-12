@@ -1,7 +1,7 @@
 import FormInput from '@/components/FormInput';
 import { useAccountStatus } from '@/hooks/useAccountStatus';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -32,6 +32,7 @@ export default function CreateDealListingScreen() {
   const router = useRouter();
   const { user, profile, loading, isAdmin, isBusinessAccount, canPostListings, postingBlockedReason } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
+  const hasBusinessAccess = !!user && (isBusinessAccount || isAdmin);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -47,16 +48,26 @@ export default function CreateDealListingScreen() {
     return isAdmin ? DEAL_CATEGORIES : DEAL_CATEGORIES.filter((item) => item !== 'Admin Deal');
   }, [isAdmin]);
 
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && !isBusinessAccount && !isAdmin) {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
-
   if (loading || waitingForProfile) {
     return null;
+  }
+
+  if (!hasBusinessAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.hero}>
+            <Text style={styles.title}>Create A Deal</Text>
+            <Text style={styles.subtitle}>Deal posting is available for business and admin accounts only.</Text>
+          </View>
+          <View style={styles.panel}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.replace('/(tabs)/index' as any)} activeOpacity={0.85}>
+              <Text style={styles.cancelBtnText}>Back to Home</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   const handleBack = () => {
@@ -231,6 +242,8 @@ export default function CreateDealListingScreen() {
             required
             type="picker"
             options={allowedCategories}
+            placeholder="Select a deal category"
+            dropdownZIndex={2000}
           />
           <Text style={styles.dateLabel}>Start Date *</Text>
           {Platform.OS === 'web' ? (

@@ -159,6 +159,7 @@ export default function EventsListScreen() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [digestEmail, setDigestEmail] = useState('');
   const [weeklyDigest, setWeeklyDigest] = useState(true);
@@ -232,6 +233,12 @@ export default function EventsListScreen() {
     const merged = new Set<string>([...DEFAULT_CATEGORIES, ...Array.from(dynamic)]);
     return Array.from(merged);
   }, [events]);
+
+  const categoryOptionsWithAll = useMemo(() => ['All Categories', ...categoryOptions], [categoryOptions]);
+
+  useEffect(() => {
+    setCategoryDropdownOpen(false);
+  }, [selectedCategory]);
 
   const filteredEvents = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -485,28 +492,33 @@ export default function EventsListScreen() {
           />
 
           <Text style={[styles.filterLabel, { marginTop: 10 }]}>Filter by Category</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-            <TouchableOpacity
-              style={[styles.categoryChip, !selectedCategory ? styles.categoryChipActive : null]}
-              onPress={() => setSelectedCategory('')}
-              activeOpacity={0.86}
-            >
-              <Text style={[styles.categoryText, !selectedCategory ? styles.categoryTextActive : null]}>All Categories</Text>
-            </TouchableOpacity>
-            {categoryOptions.map((category) => {
-              const active = selectedCategory === category;
-              return (
-                <TouchableOpacity
-                  key={category}
-                  style={[styles.categoryChip, active ? styles.categoryChipActive : null]}
-                  onPress={() => setSelectedCategory(category)}
-                  activeOpacity={0.86}
-                >
-                  <Text style={[styles.categoryText, active ? styles.categoryTextActive : null]}>{category}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={() => setCategoryDropdownOpen((prev) => !prev)}
+            activeOpacity={0.86}
+          >
+            <Text style={styles.dropdownButtonText}>{selectedCategory || 'All Categories'}</Text>
+            <Text style={styles.dropdownChevron}>{categoryDropdownOpen ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          {categoryDropdownOpen ? (
+            <View style={styles.dropdownMenu}>
+              <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
+                {categoryOptionsWithAll.map((category) => {
+                  const active = (!selectedCategory && category === 'All Categories') || selectedCategory === category;
+                  return (
+                    <TouchableOpacity
+                      key={category}
+                      style={[styles.dropdownItem, active ? styles.dropdownItemActive : null]}
+                      onPress={() => setSelectedCategory(category === 'All Categories' ? '' : category)}
+                      activeOpacity={0.86}
+                    >
+                      <Text style={[styles.dropdownItemText, active ? styles.dropdownItemTextActive : null]}>{category}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
 
           <Text style={[styles.filterLabel, { marginTop: 10 }]}>Filter by Date</Text>
           <TextInput
@@ -517,22 +529,14 @@ export default function EventsListScreen() {
             placeholderTextColor="#94a3b8"
           />
         </View>
-
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Happening This Week</Text>
-          {loading ? <Text style={styles.emptyState}>Loading events...</Text> : buckets.week.length ? buckets.week.map(renderEventCard) : <Text style={styles.emptyState}>No events found for this week.</Text>}
+                <View style={styles.sectionBlock}>
+          <Text style={styles.sectionTitle}>Upcoming Events</Text>
+          {loading ? <Text style={styles.emptyState}>Loading events...</Text> : buckets.upcoming.length ? buckets.upcoming.map(renderEventCard) : <Text style={styles.emptyState}>No upcoming events found yet.</Text>}
         </View>
-
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionTitle}>This Month</Text>
           {loading ? <Text style={styles.emptyState}>Loading events...</Text> : buckets.month.length ? buckets.month.map(renderEventCard) : <Text style={styles.emptyState}>No additional events found this month.</Text>}
         </View>
-
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Upcoming Events</Text>
-          {loading ? <Text style={styles.emptyState}>Loading events...</Text> : buckets.upcoming.length ? buckets.upcoming.map(renderEventCard) : <Text style={styles.emptyState}>No upcoming events found yet.</Text>}
-        </View>
-
         <View style={styles.digestBanner}>
           <Text style={styles.digestIcon}>📬</Text>
           <View style={styles.digestBody}>
@@ -676,29 +680,56 @@ const styles = StyleSheet.create({
     color: '#0f172a',
     backgroundColor: '#fff',
   },
-  categoryRow: {
-    gap: 8,
-    paddingRight: 10,
-  },
-  categoryChip: {
+  dropdownButton: {
+    marginTop: 2,
     borderWidth: 1,
     borderColor: '#cbd5e1',
-    borderRadius: 999,
-    paddingVertical: 7,
+    borderRadius: 10,
     paddingHorizontal: 12,
+    paddingVertical: 11,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
-  categoryChipActive: {
-    backgroundColor: '#1e3a5f',
-    borderColor: '#1e3a5f',
+  dropdownButtonText: {
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '700',
   },
-  categoryText: {
+  dropdownChevron: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
+  },
+  dropdownMenu: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  dropdownScroll: {
+    maxHeight: 220,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownItemActive: {
+    backgroundColor: '#e8f5f3',
+  },
+  dropdownItemText: {
     fontSize: 13,
     color: '#334155',
     fontWeight: '600',
   },
-  categoryTextActive: {
-    color: '#fff',
+  dropdownItemTextActive: {
+    color: '#0f766e',
+    fontWeight: '700',
   },
   sectionBlock: {
     marginBottom: 18,

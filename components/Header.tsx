@@ -501,13 +501,6 @@ export default function Header({
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavigate(Platform.OS === 'web' ? 'list-hub.html' : '/(tabs)/listbutton')}
-            >
-              <Text style={styles.menuItemText}>List Hub</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
               onPress={() => handleNavigate(Platform.OS === 'web' ? 'featured-listings.html' : '/(tabs)/communitybutton')}
             >
               <Text style={styles.menuItemText}>Community Hub</Text>

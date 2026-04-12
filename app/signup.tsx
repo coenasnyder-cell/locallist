@@ -2,36 +2,35 @@ import { AntDesign } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  sendEmailVerification,
-  signInWithCredential,
-  updateProfile,
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    sendEmailVerification,
+    signInWithCredential,
+    updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
-import Header from '../components/Header';
 import PasswordTextInputRow from '../components/PasswordTextInputRow';
 import { app, auth } from '../firebase';
 import { profileNeedsServiceArea } from '../hooks/useAccountStatus';
 import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  configureNativeGoogleSignIn,
-  getNativeGoogleIdToken,
-  getNativeGoogleSignInErrorMessage,
+    configureNativeGoogleSignIn,
+    getNativeGoogleIdToken,
+    getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 import { writePersonalUserAndPending } from '../utils/signupProfile';
 import { isZipInApprovedServiceArea } from '../utils/zipApproval';
@@ -309,22 +308,20 @@ export default function SignUpScreen() {
   };
 
   return (
-    <>
-      <Header />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        style={styles.flex}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView
-            contentContainerStyle={styles.scroll}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            showsVerticalScrollIndicator={false}
-            onScrollBeginDrag={Keyboard.dismiss}
-          >
-            <View style={styles.card}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      style={styles.flex}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+          onScrollBeginDrag={Keyboard.dismiss}
+        >
+          <View style={styles.card}>
               <Text style={styles.title}>Create account</Text>
               <Text style={styles.subtitle}>Harrison&apos;s local marketplace</Text>
               <Text style={styles.lead}>
@@ -504,11 +501,10 @@ export default function SignUpScreen() {
                   <Text style={styles.bottomLink}>Sign in</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

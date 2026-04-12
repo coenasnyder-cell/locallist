@@ -392,20 +392,20 @@ const styles = StyleSheet.create({
 	listHubHighlightTitle: {
 		fontSize: 20,
 		fontWeight: '800',
-		color: '#7c2d12',
+		color: '#ffffff',
 		marginBottom: 6,
 		textAlign: 'center',
 	},
 	listHubHighlightBody: {
 		fontSize: 13,
 		lineHeight: 19,
-		color: '#7c2d12',
+		color: '#ffffff',
 		marginBottom: 12,
 		textAlign: 'center',
 	},
 	listHubHighlightButton: {
 		alignSelf: 'center',
-		backgroundColor: '#c2410c',
+		backgroundColor: '#475569',
 		borderRadius: 8,
 		paddingVertical: 10,
 		paddingHorizontal: 14,

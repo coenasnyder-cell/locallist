@@ -8,7 +8,6 @@ import {
     Platform,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -26,7 +25,6 @@ export default function UpgradeBusinessScreen() {
   const [businessDescription, setBusinessDescription] = useState('');
   const [businessPhone, setBusinessPhone] = useState('');
   const [businessWebsite, setBusinessWebsite] = useState('');
-  const [claimOwnershipRequest, setClaimOwnershipRequest] = useState(false);
   const [businessTier, setBusinessTier] = useState<'free' | 'premium'>('free');
   const [upgradingAccount, setUpgradingAccount] = useState(false);
   const [error, setError] = useState('');
@@ -40,7 +38,6 @@ export default function UpgradeBusinessScreen() {
     setBusinessDescription(profile.businessDescription || '');
     setBusinessPhone(profile.businessPhone || '');
     setBusinessWebsite(profile.businessWebsite || '');
-    setClaimOwnershipRequest(Boolean((profile as any).claimOwnershipRequest));
     setBusinessTier(profile.businessTier === 'premium' ? 'premium' : 'free');
   }, [profile]);
 
@@ -77,7 +74,6 @@ export default function UpgradeBusinessScreen() {
           businessDescription: businessDescription.trim() || null,
           businessPhone: businessPhone.trim() || null,
           businessWebsite: businessWebsite.trim() || null,
-          claimOwnershipRequest,
         },
         { merge: true }
       );
@@ -176,11 +172,11 @@ export default function UpgradeBusinessScreen() {
           <View style={styles.formCard}>
             <Text style={styles.title}>Upgrade your account</Text>
             <Text style={styles.description}>
-              Keep using your normal sign in. This form adds the business profile details and marks your account as a business account.
+              Keep using your normal sign in. This form upgrades your account and sets up one business profile that you can update anytime.
             </Text>
 
             <Text style={styles.claimInstruction}>
-              If you want to claim a business that is already listed, please upgrade to a business account first.
+              Each business account supports one business profile.
             </Text>
 
             <Text style={styles.label}>Business Name *</Text>
@@ -190,16 +186,6 @@ export default function UpgradeBusinessScreen() {
               onChangeText={setBusinessName}
               placeholder="Enter your business name"
             />
-
-            <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Claim ownership to a business already listed</Text>
-              <Switch
-                value={claimOwnershipRequest}
-                onValueChange={setClaimOwnershipRequest}
-                trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-                thumbColor={claimOwnershipRequest ? '#16a34a' : '#f8fafc'}
-              />
-            </View>
 
             <Text style={styles.label}>Business Description</Text>
             <TextInput

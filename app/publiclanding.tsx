@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FeaturedListings from '../components/FeaturedListings';
 import GridListingCard from '../components/GridListingCard';
-import Header from '../components/Header';
 import { app } from '../firebase';
 import { isListingVisible } from '../utils/listingVisibility';
 
@@ -173,16 +172,15 @@ export default function PublicLanding() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Header />
-
       <View style={styles.heroSection}>
         <View style={styles.heroTopRow}>
           <Text style={styles.logoText}>Local List</Text>
           <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => router.push('/signInOrSignUp')}
+            onPress={() => router.push('/login')}
           >
-            <Ionicons name="person-circle-outline" size={30} color="#334155" />
+            <Ionicons name="log-in-outline" size={18} color="#334155" />
+            <Text style={styles.profileButtonText}>Log In</Text>
           </TouchableOpacity>
         </View>
 
@@ -314,7 +312,20 @@ const styles = StyleSheet.create({
     color: '#0f172a',
   },
   profileButton: {
-    padding: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  profileButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
   },
   heroTitle: {
     marginTop: 12,

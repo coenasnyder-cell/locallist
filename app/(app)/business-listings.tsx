@@ -1,5 +1,5 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -47,6 +47,7 @@ export default function BusinessListingsScreen() {
   const router = useRouter();
   const { user, profile, loading } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
+  const hasBusinessAccess = !!user && profile?.accountType === 'business';
 
   const [activeTab, setActiveTab] = useState<ListingTab>('marketplace');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function BusinessListingsScreen() {
     let cancelled = false;
 
     const loadListings = async () => {
-      if (!user?.uid || profile?.accountType !== 'business') {
+      if (!hasBusinessAccess || !user?.uid) {
         if (!cancelled) {
           setListings([]);
           setLoadingListings(false);
@@ -254,7 +255,7 @@ export default function BusinessListingsScreen() {
     return () => {
       cancelled = true;
     };
-  }, [activeTab, profile?.accountType, user?.uid]);
+  }, [activeTab, hasBusinessAccess, user?.uid]);
 
   const emptyText = useMemo(() => {
     if (activeTab === 'services') return 'No services found for this account.';
@@ -270,19 +271,21 @@ export default function BusinessListingsScreen() {
     return TABS.find((tab) => tab.key === activeTab)?.label || 'Marketplace';
   }, [activeTab]);
 
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && profile.accountType !== 'business') {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
-
   if (loading || waitingForProfile) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingWrap}>
           <Text style={styles.loadingText}>Loading listings manager...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!hasBusinessAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingWrap}>
+          <Text style={styles.loadingText}>Listings Manager is available for business accounts only.</Text>
         </View>
       </SafeAreaView>
     );

@@ -30,11 +30,6 @@ const SUPPORT_CARDS: SupportCard[] = [
     route: '/(app)/privacy',
   },
   {
-    title: 'Beta Testing Program',
-    description: 'Review testing scope, devices, and how to submit structured feedback.',
-    route: '/(app)/beta-testing',
-  },
-  {
     title: 'Contact Us',
     description: 'Reach out to support for help, concerns, or feedback.',
     route: '/(app)/contactus',

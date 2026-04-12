@@ -2,7 +2,7 @@ import FormInput from '@/components/FormInput';
 import ImageUploader from '@/components/ImageUploader';
 import { useAccountStatus } from '@/hooks/useAccountStatus';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -84,6 +84,7 @@ function getTimePickerDate(value: string): Date {
 export default function CreateYardSaleScreen() {
   const router = useRouter();
   const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
+  const hasPostingAccess = !!user;
 
   const [saleTitle, setSaleTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -101,12 +102,26 @@ export default function CreateYardSaleScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [posted, setPosted] = useState(false);
 
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
   if (loading) {
     return null;
+  }
+
+  if (!hasPostingAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.hero}>
+            <Text style={styles.heroTitle}>🏷️ Post a Yard Sale</Text>
+            <Text style={styles.heroSubtitle}>Please sign in to create a yard sale listing.</Text>
+          </View>
+          <View style={styles.panel}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.replace('/login' as any)} activeOpacity={0.85}>
+              <Text style={styles.cancelText}>Go to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   const handleBack = () => {

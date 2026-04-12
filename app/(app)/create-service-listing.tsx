@@ -2,7 +2,7 @@ import FormInput from '@/components/FormInput';
 import ImageUploader from '@/components/ImageUploader';
 import { useAccountStatus } from '@/hooks/useAccountStatus';
 import * as Linking from 'expo-linking';
-import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -68,6 +68,7 @@ export default function CreateServiceListingScreen() {
     posted?: string | string[];
   }>();
   const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
+  const hasPostingAccess = !!user;
 
   const [serviceName, setServiceName] = useState('');
   const [categoryLabel, setCategoryLabel] = useState('');
@@ -117,11 +118,29 @@ export default function CreateServiceListingScreen() {
     }
   }, [featureCanceledParam]);
 
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
   if (loading) return null;
+
+  if (!hasPostingAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.hero}>
+            <Text style={styles.heroTitle}>🧰 List a Service</Text>
+            <Text style={styles.heroSubtitle}>Please sign in to create a service listing.</Text>
+          </View>
+          <View style={styles.panel}>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => router.replace('/login' as any)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.cancelBtnText}>Go to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   const handleBack = () => {
     if (router.canGoBack()) router.back();
@@ -384,6 +403,8 @@ export default function CreateServiceListingScreen() {
             required
             type="picker"
             options={CATEGORY_OPTIONS}
+            placeholder="Select a service category"
+            dropdownZIndex={2000}
           />
           <FormInput
             label="Description"
@@ -437,6 +458,8 @@ export default function CreateServiceListingScreen() {
             required
             type="picker"
             options={['phone', 'email', 'website']}
+            placeholder="Select a contact method"
+            dropdownZIndex={1000}
           />
           {preferredContact === 'phone' && (
             <FormInput

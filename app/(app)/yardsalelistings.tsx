@@ -286,38 +286,7 @@ export default function YardSaleListingsScreen() {
             placeholderTextColor="#94a3b8"
           />
 
-          <Text style={[styles.filterLabel, { marginTop: 10 }]}>From Date</Text>
-          <TextInput
-            style={styles.filterInput}
-            value={fromDate}
-            onChangeText={setFromDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#94a3b8"
-          />
-
-          <Text style={[styles.filterLabel, { marginTop: 10 }]}>To Date</Text>
-          <TextInput
-            style={styles.filterInput}
-            value={toDate}
-            onChangeText={setToDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#94a3b8"
-          />
-        </View>
-
-        <View style={styles.mapBlock}>
-          <Text style={styles.sectionTitle}>This Weekend on the Map</Text>
-          <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapPlaceholderText}>Map view is available on web. Showing list cards below in the app.</Text>
-          </View>
-          <Text style={styles.mapNote}>Showing yard sales happening this weekend.</Text>
-        </View>
-
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>This Weekend</Text>
-          {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.weekend.length ? buckets.weekend.map(renderSaleCard) : <Text style={styles.emptyState}>No yard sales found this weekend.</Text>}
-        </View>
-
+         </View>
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionTitle}>Upcoming Yard Sales</Text>
           {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.upcoming.length ? buckets.upcoming.map(renderSaleCard) : <Text style={styles.emptyState}>No upcoming yard sales found.</Text>}
@@ -407,7 +376,7 @@ const styles = StyleSheet.create({
   promoTitle: {
     fontSize: 21,
     fontWeight: '800',
-    color: '#0f172a',
+    color: '#475569',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -419,7 +388,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   promoButton: {
-    backgroundColor: '#dc2626',
+    backgroundColor: '#475569',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 18,
@@ -573,7 +542,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 18,
-    backgroundColor: '#dc2626',
+    backgroundColor: '#475569',
     alignItems: 'center',
   },
   digestButtonDisabled: {

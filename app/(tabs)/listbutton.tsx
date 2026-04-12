@@ -1,7 +1,6 @@
-import { useAccountStatus } from '@/hooks/useAccountStatus';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type HubItem = {
   title: string;
@@ -9,8 +8,6 @@ type HubItem = {
   emoji: string;
   route: string;
   params?: Record<string, string>;
-  businessOnly?: boolean;
-  businessRedirect?: boolean;
 };
 
 const HUB_ITEMS: HubItem[] = [
@@ -27,12 +24,7 @@ const HUB_ITEMS: HubItem[] = [
     emoji: '🏷️',
     route: '/create-yard-sale',
   },
-  {
-    title: 'Event',
-    subtitle: 'Share upcoming local events',
-    emoji: '🎉',
-    route: '/create-event-listing',
-  },
+ 
   {
     title: 'Pet Lost',
     subtitle: 'Report a lost pet quickly',
@@ -52,19 +44,13 @@ const HUB_ITEMS: HubItem[] = [
     emoji: '💙',
     route: '/create-adoption-listing',
   },
-  {
-    title: 'Services',
-    subtitle: 'Offer your skills locally',
-    emoji: '🧰',
-    route: '/create-service-listing',
+   {
+    title: 'Event',
+    subtitle: 'Share upcoming local events',
+    emoji: '🎉',
+    route: '/create-event-listing',
   },
-  {
-    title: 'Job Post',
-    subtitle: 'Post hiring opportunities',
-    emoji: '💼',
-    route: '/create-job-listing',
-    businessOnly: true,
-  },
+  
 ];
 
 const styles = StyleSheet.create({
@@ -129,22 +115,7 @@ const styles = StyleSheet.create({
 
 export default function ListScreen() {
   const router = useRouter();
-  const { user, loading, isBusinessAccount, isAdmin } = useAccountStatus();
-  const canSeeBusinessItems = isBusinessAccount || isAdmin;
-
-  if (loading) {
-    return (
-      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color="#475569" />
-      </View>
-    );
-  }
-
-  if (!user) {
-    return <Redirect href="/signInOrSignUp" />;
-  }
-
-  const visibleItems = HUB_ITEMS.filter((item) => !item.businessOnly || canSeeBusinessItems);
+  const visibleItems = HUB_ITEMS;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -160,11 +131,6 @@ export default function ListScreen() {
             style={styles.card}
             activeOpacity={0.86}
             onPress={() => {
-              // If user already has a business account, send them to Business Hub instead
-              if (item.businessRedirect && canSeeBusinessItems) {
-                router.push('/(tabs)/businesshubbutton' as any);
-                return;
-              }
               router.push({
                 pathname: item.route as any,
                 params: item.params,
@@ -173,11 +139,7 @@ export default function ListScreen() {
           >
             <Text style={styles.emoji}>{item.emoji}</Text>
             <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardSubtitle}>
-              {item.businessRedirect && canSeeBusinessItems
-                ? 'Go to your Business Hub'
-                : item.subtitle}
-            </Text>
+            <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
           </TouchableOpacity>
         ))}
       </View>

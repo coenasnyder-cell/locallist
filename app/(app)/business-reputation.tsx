@@ -1,5 +1,5 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -25,6 +25,7 @@ export default function BusinessReputationScreen() {
   const router = useRouter();
   const { user, profile, loading } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
+  const hasBusinessAccess = !!user && profile?.accountType === 'business';
   const [state, setState] = useState<ReputationState>({
     loading: true,
     ratingAverage: 0,
@@ -37,7 +38,7 @@ export default function BusinessReputationScreen() {
     let cancelled = false;
 
     const load = async () => {
-      if (!user?.uid || profile?.accountType !== 'business') {
+      if (!hasBusinessAccess || !user?.uid) {
         if (!cancelled) {
           setState((prev) => ({ ...prev, loading: false }));
         }
@@ -108,26 +109,28 @@ export default function BusinessReputationScreen() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.accountType, user?.uid]);
+  }, [hasBusinessAccess, user?.uid]);
 
   const trendLabel = useMemo(() => {
     const value = state.monthlyReviewTrend;
     return `${value >= 0 ? '+' : ''}${value}%`;
   }, [state.monthlyReviewTrend]);
 
-  if (!loading && !user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!loading && user && profile && profile.accountType !== 'business') {
-    return <Redirect href="/(tabs)/profilebutton" />;
-  }
-
   if (loading || waitingForProfile || state.loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingWrap}>
           <Text style={styles.loadingText}>Loading reputation metrics...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!hasBusinessAccess) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingWrap}>
+          <Text style={styles.loadingText}>Business reputation is available for business accounts only.</Text>
         </View>
       </SafeAreaView>
     );
