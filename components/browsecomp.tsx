@@ -267,32 +267,67 @@ export default function BrowseComp() {
 			) : filteredListings.length > 0 ? (
 				<View style={styles.listingsGridContainer}>
 					<View style={styles.listingsGrid}>
-						{filteredListings.map((listing) => (
-							<TouchableOpacity
-								key={listing.id}
-								style={styles.listingCard}
-								onPress={() => router.push({
-									pathname: '/listing',
-									params: { id: listing.id }
-								})}
-								activeOpacity={0.8}
-							>
-								{listing.images && listing.images[0] ? (
-									<Image 
-										source={{ uri: listing.images[0] }}
-										style={styles.listingImage}
-										resizeMode="cover"
-									/>
-								) : (
-									<View style={[styles.listingImage, { backgroundColor: '#eee' }]} />
-								)}
-								<View style={styles.listingInfo}>
-									<Text style={styles.listingTitle} numberOfLines={2}>{listing.title}</Text>
-									<Text style={styles.listingPrice}>${listing.price || 'N/A'}</Text>
-									<Text style={styles.listingLocation}>{listing.zipCode || listing.location || 'Location unavailable'}</Text>
-								</View>
-							</TouchableOpacity>
-						))}
+						{filteredListings.map((listing) => {
+							const timeLabel = listing.createdAt 
+								? (() => {
+									const diffMs = Date.now() - (listing.createdAt.toMillis ? listing.createdAt.toMillis() : new Date(listing.createdAt).getTime());
+									const minutes = Math.floor(diffMs / 60000);
+									if (minutes < 1) return 'Just posted';
+									if (minutes < 60) return `${minutes}m ago`;
+									const hours = Math.floor(minutes / 60);
+									if (hours < 24) return `${hours}h ago`;
+									const days = Math.floor(hours / 24);
+									if (days < 7) return `${days}d ago`;
+									const weeks = Math.floor(days / 7);
+									if (weeks < 5) return `${weeks}w ago`;
+									const months = Math.floor(days / 30);
+									return `${months}mo ago`;
+								})()
+								: '';
+							
+							return (
+								<TouchableOpacity
+									key={listing.id}
+									style={styles.listingCard}
+									onPress={() => router.push({
+										pathname: '/listing',
+										params: { id: listing.id }
+									})}
+									activeOpacity={0.8}
+								>
+									<View style={styles.imageWrapper}>
+										{listing.isFeatured && (
+											<View style={styles.featuredBadge}>
+												<Text style={styles.featuredBadgeText}>⭐ Featured</Text>
+											</View>
+										)}
+										{listing.images && listing.images[0] ? (
+											<Image 
+												source={{ uri: listing.images[0] }}
+												style={styles.listingImage}
+												resizeMode="cover"
+											/>
+										) : (
+											<View style={[styles.listingImage, { backgroundColor: '#eee' }]} />
+										)}
+									</View>
+									<View style={styles.listingInfo}>
+										<Text style={styles.listingTitle} numberOfLines={2}>{listing.title}</Text>
+										<Text style={styles.listingPrice}>${listing.price || 'N/A'}</Text>
+										<View style={styles.metaRow}>
+											{listing.category && <Text style={styles.metaText}>{listing.category}</Text>}
+											{listing.category && timeLabel && <Text style={styles.metaDot}>·</Text>}
+											{timeLabel && <Text style={styles.metaText}>{timeLabel}</Text>}
+										</View>
+										{listing.viewCount != null && <Text style={styles.viewCount}>👀 {listing.viewCount.toLocaleString()} views</Text>}
+										<View style={styles.footer}>
+											{listing.sellerName && <Text style={styles.footerText}>👤 {listing.sellerName}</Text>}
+											{(listing.city || listing.location) && <Text style={styles.footerText}>📍 {listing.city || listing.location}</Text>}
+										</View>
+									</View>
+								</TouchableOpacity>
+							);
+						})}
 					</View>
 				</View>
 			) : (
@@ -600,13 +635,34 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		marginBottom: 12,
 	},
+	imageWrapper: {
+		position: 'relative',
+		overflow: 'hidden',
+	},
 	listingImage: {
 		width: '100%',
 		height: 140,
 		backgroundColor: '#f2f4f7',
 	},
+	featuredBadge: {
+		position: 'absolute',
+		top: 6,
+		left: 6,
+		zIndex: 10,
+		backgroundColor: '#f97316',
+		borderRadius: 4,
+		paddingHorizontal: 6,
+		paddingVertical: 3,
+		opacity: 0.95,
+	},
+	featuredBadgeText: {
+		color: '#fff',
+		fontSize: 10,
+		fontWeight: '700',
+		letterSpacing: 0.3,
+	},
 	listingInfo: {
-		padding: 12,
+		padding: 10,
 		backgroundColor: '#fff',
 	},
 	listingTitle: {
@@ -616,10 +672,39 @@ const styles = StyleSheet.create({
 		marginBottom: 4,
 	},
 	listingPrice: {
-		fontSize: 15,
-		fontWeight: '600',
-		color: '#475569',
+		fontSize: 16,
+		fontWeight: 'bold',
+		color: '#000',
 		marginBottom: 4,
+	},
+	metaRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		marginTop: 4,
+		gap: 4,
+		marginBottom: 4,
+	},
+	metaText: {
+		fontSize: 12,
+		color: '#555',
+	},
+	metaDot: {
+		fontSize: 12,
+		color: '#aaa',
+	},
+	viewCount: {
+		fontSize: 12,
+		color: '#555',
+		marginBottom: 4,
+	},
+	footer: {
+		marginTop: 4,
+		gap: 2,
+	},
+	footerText: {
+		fontSize: 12,
+		color: '#444',
 	},
 	listingLocation: {
 		fontSize: 12,

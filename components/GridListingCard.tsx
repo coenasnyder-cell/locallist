@@ -4,12 +4,44 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 type Props = {
   title: string;
   price: string;
-  location?: string;
+  category?: string;
+  viewCount?: number;
+  sellerName?: string;
+  createdAt?: number;
+  city?: string;
   imageSource?: ImageSourcePropType;
+  isFeatured?: boolean;
   onPress?: () => void;
 };
 
-export default function GridListingCard({ title, price, location, imageSource = require('../assets/images/icon.png'), onPress }: Props) {
+function formatRelativeTime(ms?: number): string {
+  if (!ms) return '';
+  const diffMs = Date.now() - ms;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'Just posted';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
+
+export default function GridListingCard({
+  title,
+  price,
+  category,
+  viewCount,
+  sellerName,
+  createdAt,
+  city,
+  imageSource = require('../assets/images/icon.png'),
+  isFeatured,
+  onPress,
+}: Props) {
   const isValidSource = (src?: ImageSourcePropType) => {
     if (!src) return false;
     if (typeof src === 'number') return true;
@@ -32,9 +64,17 @@ export default function GridListingCard({ title, price, location, imageSource = 
     return trimmed;
   };
 
+  const timeLabel = formatRelativeTime(createdAt);
+  const viewLabel = viewCount != null ? `👀 ${viewCount.toLocaleString()} views` : null;
+
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
+        {isFeatured && (
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredBadgeText}>⭐ Featured</Text>
+          </View>
+        )}
         {isValidSource(imageSource) ? (
           <Image source={normalizedSource(imageSource)} style={styles.image} />
         ) : (
@@ -44,9 +84,18 @@ export default function GridListingCard({ title, price, location, imageSource = 
         )}
       </View>
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        <Text style={styles.title} numberOfLines={2}>{title}</Text>
         <Text style={styles.price}>{formatPrice(price)}</Text>
-        {location && <Text style={styles.location}>{location}</Text>}
+        <View style={styles.metaRow}>
+          {!!category && <Text style={styles.metaText}>{category}</Text>}
+          {!!category && !!timeLabel && <Text style={styles.metaDot}>·</Text>}
+          {!!timeLabel && <Text style={styles.metaText}>{timeLabel}</Text>}
+        </View>
+        {viewLabel ? <Text style={styles.viewCount}>{viewLabel}</Text> : null}
+        <View style={styles.footer}>
+          {!!sellerName && <Text style={styles.footerText}>👤 {sellerName}</Text>}
+          {!!city && <Text style={styles.footerText}>📍 {city}</Text>}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -91,29 +140,68 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: '#ccc',
   },
+  featuredBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    zIndex: 10,
+    backgroundColor: '#f97316',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    opacity: 0.95,
+  },
+  featuredBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
   content: {
     width: '100%',
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     paddingTop: 10,
-    paddingBottom: 12,
+    paddingBottom: 6,
     backgroundColor: '#fff',
   },
   title: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'left',
-    marginTop: 6,
-    color: '#444',
+    color: '#1a1a1a',
   },
   price: {
-    fontSize: 17,
+    fontSize: 18,
     color: '#000',
     fontWeight: 'bold',
+    marginTop: 2,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 4,
+    gap: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#555',
+  },
+  metaDot: {
+    fontSize: 12,
+    color: '#aaa',
+  },
+  viewCount: {
+    fontSize: 12,
+    color: '#555',
     marginTop: 4,
   },
-  location: {
+  footer: {
+    marginTop: 6,
+    gap: 2,
+  },
+  footerText: {
     fontSize: 12,
-    color: '#888',
-    marginTop: 2,
+    color: '#444',
   },
 });

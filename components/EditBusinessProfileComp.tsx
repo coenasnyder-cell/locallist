@@ -16,7 +16,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   const [businessEmail, setBusinessEmail] = useState('');
   const [businessPhone, setBusinessPhone] = useState('');
   const [businessWebsite, setBusinessWebsite] = useState('');
-  const [preferredContactMethod, setPreferredContactMethod] = useState<'email' | 'phone' | 'local_list'>('email');
+  const [preferredContactMethod, setPreferredContactMethod] = useState<'email' | 'phone'>('email');
   const [allowLocalListMessaging, setAllowLocalListMessaging] = useState(false);
   const [facebookUrl, setFacebookUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
@@ -29,7 +29,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   const [businessCategory, setBusinessCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [businessHours, setBusinessHours] = useState('');
-  const [businessLogo, setBusinessLogo] = useState<string[]>([]);
+  const [businessPhotoSingle, setBusinessPhotoSingle] = useState<string[]>([]);
   const [businessImages, setBusinessImages] = useState<string[]>([]);
   const [businessTier, setBusinessTier] = useState('free');
   const [saving, setSaving] = useState(false);
@@ -146,7 +146,8 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
             setBusinessEmail(data.businessEmail || user.email || '');
             setBusinessPhone(data.businessPhone || '');
             setBusinessWebsite(data.businessWebsite || '');
-            setPreferredContactMethod((data.preferredContactMethod as 'email' | 'phone' | 'local_list') || 'email');
+            const storedPreferred = String(data.preferredContactMethod || '').toLowerCase();
+            setPreferredContactMethod(storedPreferred === 'phone' ? 'phone' : 'email');
             setAllowLocalListMessaging(data.allowLocalListMessaging === true || data.preferredContactMethod === 'local_list');
             setFacebookUrl(data.facebookUrl || '');
             setInstagramUrl(data.instagramUrl || '');
@@ -158,7 +159,8 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
             setBusinessZipcode(data.businessZipcode || data.zipcode || '');
             setBusinessCategory(data.businessCategory || '');
             setBusinessHours(data.businessHours || '');
-            setBusinessLogo(data.businessLogo ? [data.businessLogo] : []);
+            const profileImage = data.businessPhotoSingle || data.businessPhotosingle || data.businessLogo || '';
+            setBusinessPhotoSingle(profileImage ? [profileImage] : []);
             setBusinessImages(Array.isArray(data.businessImages) ? data.businessImages : []);
             setBusinessTier(data.businessTier || 'free');
           } else {
@@ -238,7 +240,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         businessPhone: businessPhone.trim() || null,
         businessWebsite: businessWebsite.trim() || null,
         preferredContactMethod,
-        allowLocalListMessaging: allowLocalListMessaging || preferredContactMethod === 'local_list',
+        allowLocalListMessaging,
         facebookUrl: facebookUrl.trim() || null,
         instagramUrl: instagramUrl.trim() || null,
         tiktokUrl: tiktokUrl.trim() || null,
@@ -249,7 +251,8 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         businessZipcode: businessZipcode.trim() || null,
         businessCategory: businessCategory.trim() || null,
         businessHours: businessHours.trim() || null,
-        businessLogo: businessLogo.length > 0 ? businessLogo[0] : null,
+        businessPhotoSingle: businessPhotoSingle.length > 0 ? businessPhotoSingle[0] : null,
+        businessLogo: businessPhotoSingle.length > 0 ? businessPhotoSingle[0] : null,
         businessImages,
       };
 
@@ -366,25 +369,53 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         multiline
         numberOfLines={4}
       />
+<Text style={styles.label}>Preferred Contact Method *</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={preferredContactMethod}
+          onValueChange={(value) => setPreferredContactMethod(value as 'email' | 'phone')}
+          style={styles.picker}
+        >
+          <Picker.Item label="Email" value="email" />
+          <Picker.Item label="Phone" value="phone" />
+        </Picker>
+      </View>
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Allow Local List Messaging</Text>
+        <Switch
+          value={allowLocalListMessaging}
+          onValueChange={setAllowLocalListMessaging}
+          trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+          thumbColor={allowLocalListMessaging ? '#16a34a' : '#f8fafc'}
+        />
+      </View>
 
-      <Text style={styles.label}>Business Contact Email</Text>
-      <TextInput
-        style={styles.input}
-        value={businessEmail}
-        onChangeText={setBusinessEmail}
-        placeholder="your-business@example.com"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      {preferredContactMethod === 'email' ? (
+        <>
+          <Text style={styles.label}>Business Contact Email</Text>
+          <TextInput
+            style={styles.input}
+            value={businessEmail}
+            onChangeText={setBusinessEmail}
+            placeholder="your-business@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </>
+      ) : null}
 
-      <Text style={styles.label}>Business Phone</Text>
-      <TextInput
-        style={styles.input}
-        value={businessPhone}
-        onChangeText={setBusinessPhone}
-        placeholder="(555) 123-4567"
-        keyboardType="phone-pad"
-      />
+      {preferredContactMethod === 'phone' ? (
+        <>
+          <Text style={styles.label}>Business Phone</Text>
+          <TextInput
+            style={styles.input}
+            value={businessPhone}
+            onChangeText={setBusinessPhone}
+            placeholder="(555) 123-4567"
+            keyboardType="phone-pad"
+          />
+        </>
+      ) : null}
 
       <Text style={styles.label}>Business Website</Text>
       <TextInput
@@ -395,29 +426,6 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         keyboardType="url"
         autoCapitalize="none"
       />
-
-      <Text style={styles.label}>Preferred Contact Method *</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={preferredContactMethod}
-          onValueChange={(value) => setPreferredContactMethod(value as 'email' | 'phone' | 'local_list')}
-          style={styles.picker}
-        >
-          <Picker.Item label="Email" value="email" />
-          <Picker.Item label="Phone" value="phone" />
-          <Picker.Item label="Local List Message" value="local_list" />
-        </Picker>
-      </View>
-
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>Allow Local List Messaging</Text>
-        <Switch
-          value={allowLocalListMessaging}
-          onValueChange={setAllowLocalListMessaging}
-          trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-          thumbColor={allowLocalListMessaging ? '#16a34a' : '#f8fafc'}
-        />
-      </View>
 
       <Text style={styles.label}>Facebook URL</Text>
       <TextInput
@@ -436,26 +444,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         placeholder="https://instagram.com/your-handle"
         autoCapitalize="none"
       />
-
-      <Text style={styles.label}>TikTok URL</Text>
-      <TextInput
-        style={styles.input}
-        value={tiktokUrl}
-        onChangeText={setTiktokUrl}
-        placeholder="https://tiktok.com/@your-handle"
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>YouTube URL</Text>
-      <TextInput
-        style={styles.input}
-        value={youtubeUrl}
-        onChangeText={setYoutubeUrl}
-        placeholder="https://youtube.com/@your-channel"
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>Business Address</Text>
+      <Text style={styles.label}>Business Address (Optional)</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
         value={businessAddress}
@@ -513,13 +502,13 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         numberOfLines={3}
       />
 
-      <Text style={styles.label}>Business Logo</Text>
+      <Text style={styles.label}>Business Profile Image</Text>
       <ImageUploader
-        images={businessLogo}
-        onChange={(images: string[]) => setBusinessLogo(images)}
+        images={businessPhotoSingle}
+        onChange={(images: string[]) => setBusinessPhotoSingle(images.slice(0, 1))}
       />
 
-      <Text style={styles.label}>Business Images</Text>
+      <Text style={styles.label}>Business Profile Gallery Images</Text>
       <ImageUploader
         images={businessImages}
         onChange={(images: string[]) => setBusinessImages(images)}

@@ -1,9 +1,8 @@
 import FormInput from '@/components/FormInput';
 import ImageUploader from '@/components/ImageUploader';
 import { useAccountStatus } from '@/hooks/useAccountStatus';
-import * as Linking from 'expo-linking';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import React, { useState } from 'react';
@@ -160,46 +159,46 @@ export default function CreateServiceListingScreen() {
 
   const launchFeaturedCheckout = async (serviceId: string, serviceTitle: string) => {
     const functions = getFunctions(app);
-    const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
+    const createFeaturePaymentSheet = httpsCallable(functions, 'createFeaturePaymentSheet');
+    const finalizeFeaturePurchase = httpsCallable(functions, 'finalizeFeaturePurchase');
+
     const result = await withTimeout(
-      createCheckoutSession({
+      createFeaturePaymentSheet({
         itemType: 'service',
         serviceId,
         serviceTitle,
-        mobileApp: true,
       }),
       20000,
-      'Timed out while creating Stripe checkout session.'
+      'Timed out while creating feature payment sheet.'
     );
 
-    const data = result.data as { url?: string };
-    if (!data?.url) {
-      throw new Error('Missing Stripe checkout URL');
+    const data = result.data as {
+      paymentIntentClientSecret?: string;
+      customerEphemeralKeySecret?: string;
+      customerId?: string;
+      purchaseId?: string;
+      paymentIntentId?: string;
+    };
+
+    if (!data?.paymentIntentClientSecret) {
+      throw new Error('Missing PaymentIntent client secret');
     }
 
-    const nativeReturnUrl = Linking.createURL('/auth-action');
-    const authResult = await withTimeout(
-      WebBrowser.openAuthSessionAsync(
-        data.url,
-        nativeReturnUrl
-      ),
-      180000,
-      'Timed out waiting for checkout to return to the app.'
-    );
+    const { error: initError } = await initPaymentSheet({
+      merchantDisplayName: 'Local List',
+      paymentIntentClientSecret: data.paymentIntentClientSecret,
+      customerId: data.customerId,
+      customerEphemeralKeySecret: data.customerEphemeralKeySecret,
+    });
 
-    if (authResult.type === 'success' && authResult.url) {
-      if (authResult.url.includes('checkout=featured')) {
-        router.replace({
-          pathname: '/create-service-listing' as any,
-          params: {
-            posted: '1',
-            checkout: 'featured',
-          },
-        });
-        return;
-      }
+    if (initError) {
+      throw new Error(initError.message || 'Could not initialize payment sheet.');
+    }
 
-      if (authResult.url.includes('featureCanceled=1')) {
+    const { error: presentError } = await presentPaymentSheet();
+
+    if (presentError) {
+      if (presentError.code === 'Canceled') {
         router.replace({
           pathname: '/create-service-listing' as any,
           params: {
@@ -209,17 +208,29 @@ export default function CreateServiceListingScreen() {
         });
         return;
       }
+      throw new Error(presentError.message || 'Payment failed.');
     }
 
-    if (authResult.type === 'cancel' || authResult.type === 'dismiss') {
-      router.replace({
-        pathname: '/create-service-listing' as any,
-        params: {
-          posted: '1',
-          featureCanceled: '1',
-        },
-      });
-    }
+    await withTimeout(
+      finalizeFeaturePurchase({
+        itemType: 'service',
+        serviceId,
+        serviceTitle,
+        purchaseId: data.purchaseId || null,
+        paymentIntentId: data.paymentIntentId || null,
+        paymentIntentClientSecret: data.paymentIntentClientSecret,
+      }),
+      20000,
+      'Timed out while finalizing featured purchase.'
+    );
+
+    router.replace({
+      pathname: '/create-service-listing' as any,
+      params: {
+        posted: '1',
+        checkout: 'featured',
+      },
+    });
   };
 
   const handleSubmit = async () => {

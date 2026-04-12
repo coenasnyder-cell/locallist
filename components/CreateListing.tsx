@@ -1,10 +1,9 @@
 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Linking from 'expo-linking';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { addDoc, collection, getDocs, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import React, { useRef, useState } from 'react';
@@ -15,8 +14,6 @@ import { trackAppEvent } from '../utils/appAnalytics';
 import { getCityFromZip } from '../utils/zipToCity';
 import FormInput from './FormInput';
 import ImageUploader from './ImageUploader';
-
-WebBrowser.maybeCompleteAuthSession();
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -333,50 +330,47 @@ const styles = StyleSheet.create({
 			source: 'create_listing',
 		});
 
-		const  functions = getFunctions(app);
-		const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
+		const functions = getFunctions(app);
+		const createFeaturePaymentSheet = httpsCallable(functions, 'createFeaturePaymentSheet');
+		const finalizeFeaturePurchase = httpsCallable(functions, 'finalizeFeaturePurchase');
+
 		const result = await withTimeout(
-			createCheckoutSession({
+			createFeaturePaymentSheet({
 				itemType: 'listing',
 				listingId,
 				listingTitle,
-				mobileApp: true,
 			}),
 			20000,
-			'Timed out while creating Stripe checkout session.'
+			'Timed out while creating feature payment sheet.'
 		);
 
-		const data = result.data as { url?: string };
-		if (!data?.url) {
-			throw new Error('Missing Stripe checkout URL');
+		const data = result.data as {
+			paymentIntentClientSecret?: string;
+			customerEphemeralKeySecret?: string;
+			customerId?: string;
+			purchaseId?: string;
+			paymentIntentId?: string;
+		};
+
+		if (!data?.paymentIntentClientSecret) {
+			throw new Error('Missing PaymentIntent client secret');
 		}
 
-		const nativeReturnUrl = Linking.createURL('/auth-action');
-		const authResult = await withTimeout(
-			WebBrowser.openAuthSessionAsync(data.url, nativeReturnUrl),
-			180000,
-			'Timed out waiting for checkout to return to the app.'
-		);
+		const { error: initError } = await initPaymentSheet({
+			merchantDisplayName: 'Local List',
+			paymentIntentClientSecret: data.paymentIntentClientSecret,
+			customerId: data.customerId,
+			customerEphemeralKeySecret: data.customerEphemeralKeySecret,
+		});
 
-		if (authResult.type === 'success' && authResult.url) {
-			if (authResult.url.includes('checkout=featured')) {
-				trackAppEvent('featured_checkout_success', {
-					userId: user?.uid || null,
-					listingId,
-					source: 'create_listing',
-				});
+		if (initError) {
+			throw new Error(initError.message || 'Could not initialize payment sheet.');
+		}
 
-				router.replace({
-					pathname: '/listing-posted' as any,
-					params: {
-						listingId,
-						checkout: 'featured',
-					},
-				});
-				return;
-			}
+		const { error: presentError } = await presentPaymentSheet();
 
-			if (authResult.url.includes('featureCanceled=1')) {
+		if (presentError) {
+			if (presentError.code === 'Canceled') {
 				router.replace({
 					pathname: '/create-listing' as any,
 					params: {
@@ -385,16 +379,35 @@ const styles = StyleSheet.create({
 				});
 				return;
 			}
+			throw new Error(presentError.message || 'Payment failed.');
 		}
 
-		if (authResult.type === 'cancel' || authResult.type === 'dismiss') {
-			router.replace({
-				pathname: '/create-listing' as any,
-				params: {
-					featureCanceled: '1',
-				},
-			});
-		}
+		await withTimeout(
+			finalizeFeaturePurchase({
+				itemType: 'listing',
+				listingId,
+				listingTitle,
+				purchaseId: data.purchaseId || null,
+				paymentIntentId: data.paymentIntentId || null,
+				paymentIntentClientSecret: data.paymentIntentClientSecret,
+			}),
+			20000,
+			'Timed out while finalizing featured purchase.'
+		);
+
+		trackAppEvent('featured_checkout_success', {
+			userId: user?.uid || null,
+			listingId,
+			source: 'create_listing',
+		});
+
+		router.replace({
+			pathname: '/listing-posted' as any,
+			params: {
+				listingId,
+				checkout: 'featured',
+			},
+		});
 	};
 
 	const isZipCodeApproved = async (zip: string): Promise<boolean> => {

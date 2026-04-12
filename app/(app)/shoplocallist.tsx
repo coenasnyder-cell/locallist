@@ -10,9 +10,13 @@ interface ShopLocalProfile {
   id: string;
   businessName: string;
   businessCategory?: string;
+  businessCity?: string;
+  businessMotto?: string;
   listingType?: string;
   businessDescription?: string;
   businessLogo?: string;
+  businessPhotoSingle?: string;
+  businessImages?: string[];
   businessPhone?: string;
   businessWebsite?: string;
   businessAddress?: string;
@@ -171,9 +175,15 @@ export default function ShopLocalList() {
           id: docSnap.id,
           businessName: profileData.businessName || 'Business',
           businessCategory: profileData.businessCategory || '',
+          businessCity: profileData.businessCity || '',
+          businessMotto: profileData.businessMotto || '',
           listingType: profileData.listingType,
           businessDescription: profileData.businessDescription,
           businessLogo: profileData.businessLogo,
+          businessPhotoSingle: profileData.businessPhotoSingle || profileData.businessPhotosingle || '',
+          businessImages: Array.isArray(profileData.businessImages)
+            ? profileData.businessImages.filter((img: unknown) => typeof img === 'string' && img.trim().length > 0)
+            : [],
           businessPhone: profileData.businessPhone,
           businessWebsite: profileData.businessWebsite,
           businessAddress: profileData.businessAddress,
@@ -233,6 +243,13 @@ export default function ShopLocalList() {
   const renderProfileCard = (profile: ShopLocalProfile) => {
     const isPremium = profile.businessTier === 'premium';
     const isVerified = isBusinessVerified(profile);
+    const profileImage =
+      String(profile.businessPhotoSingle || '').trim() ||
+      (Array.isArray(profile.businessImages) && profile.businessImages.length > 0 ? profile.businessImages[0] : '') ||
+      String(profile.businessLogo || '').trim();
+    const categoryLabel = profile.businessCategory ? formatCategoryLabel(profile.businessCategory) : 'Uncategorized';
+    const locationLabel = profile.businessCity || 'Location not listed';
+    const mottoLabel = String(profile.businessMotto || '').trim();
 
     return (
       <TouchableOpacity 
@@ -247,8 +264,8 @@ export default function ShopLocalList() {
           </View>
         )}
 
-        {profile.businessLogo ? (
-          <Image source={{ uri: profile.businessLogo }} style={styles.cardImage} resizeMode="cover" />
+        {profileImage ? (
+          <Image source={{ uri: profileImage }} style={styles.cardImage} resizeMode="cover" />
         ) : (
           <View style={styles.cardImagePlaceholder} />
         )}
@@ -262,27 +279,15 @@ export default function ShopLocalList() {
             </View>
           ) : null}
 
-          <Text style={styles.description} numberOfLines={2}>
-            {profile.businessDescription || 'No description available'}
-          </Text>
+          <Text style={styles.metaLine} numberOfLines={1}>{categoryLabel}</Text>
+          <Text style={styles.metaLine} numberOfLines={1}>📍 {locationLabel}</Text>
+          {mottoLabel ? (
+            <Text style={styles.mottoLine} numberOfLines={2}>{mottoLabel}</Text>
+          ) : null}
 
-          {profile.businessPhone && (
-            <TouchableOpacity 
-              style={styles.contactRow}
-              onPress={(e) => { e.stopPropagation(); handleCall(profile.businessPhone!); }}
-            >
-              <Text style={styles.contactText}>📱 {profile.businessPhone}</Text>
-            </TouchableOpacity>
-          )}
-
-          {profile.businessWebsite && (
-            <TouchableOpacity 
-              style={styles.contactRow}
-              onPress={(e) => { e.stopPropagation(); handleWebsite(profile.businessWebsite!); }}
-            >
-              <Text style={styles.contactText} numberOfLines={1}>🌐 Visit Website</Text>
-            </TouchableOpacity>
-          )}
+          <View style={styles.viewDetailsButton}>
+            <Text style={styles.viewDetailsButtonText}>View Details</Text>
+          </View>
 
         </View>
       </TouchableOpacity>
@@ -612,19 +617,32 @@ const styles = StyleSheet.create({
     color: '#475569',
     marginBottom: 6,
   },
-  description: {
+  metaLine: {
     fontSize: 13,
-    color: '#666',
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  mottoLine: {
+    fontSize: 13,
+    color: '#475569',
     lineHeight: 18,
+    marginTop: 2,
     marginBottom: 10,
   },
-  contactRow: {
+  viewDetailsButton: {
+    marginTop: 4,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingHorizontal: 10,
     paddingVertical: 6,
+    backgroundColor: '#f8fafc',
   },
-  contactText: {
-    fontSize: 14,
-    color: '#475569',
-    textDecorationLine: 'underline',
+  viewDetailsButtonText: {
+    color: '#334155',
+    fontSize: 12,
+    fontWeight: '700',
   },
   claimButton: {
     marginTop: 8,

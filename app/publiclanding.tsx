@@ -13,6 +13,11 @@ type RecentListing = {
   title: string;
   price: string;
   zipCode?: string;
+  city?: string;
+  category?: string;
+  viewCount?: number;
+  sellerName?: string;
+  isFeatured?: boolean;
   imageSource?: import('react-native').ImageSourcePropType;
   createdAt?: number;
 };
@@ -127,6 +132,11 @@ export default function PublicLanding() {
               title: data.title || '',
               price: data.price ? String(data.price) : '',
               zipCode: data.zipCode || '',
+              city: data.city || data.location || '',
+              category: data.category || '',
+              viewCount: typeof data.viewCount === 'number' ? data.viewCount : undefined,
+              sellerName: data.sellerName || '',
+              isFeatured: !!data.isFeatured,
               imageSource: Array.isArray(data.images) && data.images.length > 0 ? { uri: data.images[0] } : undefined,
               createdAt,
             };
@@ -257,7 +267,12 @@ export default function PublicLanding() {
                 <GridListingCard
                   title={item.title}
                   price={item.price}
-                  location={item.zipCode}
+                  category={item.category}
+                  viewCount={item.viewCount}
+                  sellerName={item.sellerName}
+                  createdAt={item.createdAt}
+                  city={item.city}
+                  isFeatured={item.isFeatured}
                   imageSource={item.imageSource}
                   onPress={handlePreviewTap}
                 />
@@ -286,6 +301,8 @@ export default function PublicLanding() {
                 <GridListingCard
                   title={item.title}
                   price={item.subtitle}
+                  category={item.subtitle}
+                  createdAt={item.createdAt}
                   imageSource={item.imageSource}
                   onPress={handlePreviewTap}
                 />

@@ -1,47 +1,12 @@
-import * as Linking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-
 import { app, auth } from '@/firebase';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 
 export const STRIPE_UPGRADE_CANCELED = 'stripe_upgrade_canceled';
 
 type UpgradeResult =
   | { success: true }
   | { success: false; error: string };
-
-type CheckoutSessionResponse = {
-  url?: string;
-};
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(new Error(timeoutMessage));
-    }, timeoutMs);
-  });
-
-  try {
-    return await Promise.race([promise, timeoutPromise]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = String((error as { message?: string }).message || '').trim();
-    if (message) {
-      return message;
-    }
-  }
-
-  return fallback;
-}
 
 export async function handleUpgrade(): Promise<UpgradeResult> {
   const currentUser = auth.currentUser;
@@ -52,51 +17,56 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
 
   try {
     const functions = getFunctions(app);
-    const createPremiumCheckoutSession = httpsCallable<{ mobileApp: boolean }, CheckoutSessionResponse>(
-      functions,
-      'createPremiumUpgradeCheckoutSession'
-    );
 
-    const result = await withTimeout(
-      createPremiumCheckoutSession({ mobileApp: true }),
-      20000,
-      'Timed out while creating the Premium checkout session.'
-    );
+    // 🔥 THIS is the correct function
+    const createSheet = httpsCallable(functions, 'createPremiumPaymentSheet');
 
-    const checkoutUrl = result.data?.url;
-    if (!checkoutUrl) {
-      return { success: false, error: 'Missing Stripe checkout URL.' };
+    const res: any = await createSheet({
+      premiumTestMode: true,
+    });
+
+    const data = res.data;
+
+    if (
+      !data?.paymentIntentClientSecret ||
+      !data?.customerEphemeralKeySecret ||
+      !data?.customerId
+    ) {
+      return { success: false, error: 'Invalid payment setup from server.' };
     }
 
-    const nativeReturnUrl = Linking.createURL('/auth-action');
-    const authResult = await withTimeout(
-      WebBrowser.openAuthSessionAsync(checkoutUrl, nativeReturnUrl),
-      180000,
-      'Timed out waiting for checkout to return to the app.'
-    );
+    // ✅ Initialize PaymentSheet
+    const { error: initError } = await initPaymentSheet({
+      merchantDisplayName: 'Local List',
+      customerId: data.customerId,
+      customerEphemeralKeySecret: data.customerEphemeralKeySecret,
+      paymentIntentClientSecret: data.paymentIntentClientSecret,
+    });
 
-    if (authResult.type === 'success' && authResult.url) {
-      if (authResult.url.includes('checkout=premium')) {
-        return { success: true };
-      }
+    if (initError) {
+      return { success: false, error: initError.message };
+    }
 
-      if (authResult.url.includes('premiumCanceled=1')) {
+    // ✅ Present PaymentSheet
+    const { error: presentError } = await presentPaymentSheet();
+
+    if (presentError) {
+      if (presentError.code === 'Canceled') {
         return { success: false, error: STRIPE_UPGRADE_CANCELED };
       }
+      return { success: false, error: presentError.message };
     }
 
-    if (authResult.type === 'cancel' || authResult.type === 'dismiss') {
-      return { success: false, error: STRIPE_UPGRADE_CANCELED };
-    }
+    // ✅ Finalize subscription
+    const finalize = httpsCallable(functions, 'finalizePremiumSubscription');
+    await finalize({ subscriptionId: data.subscriptionId });
 
+    return { success: true };
+
+  } catch (error: any) {
     return {
       success: false,
-      error: 'Could not confirm the Premium checkout result.',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: getErrorMessage(error, 'Could not start Premium checkout. Please try again.'),
+      error: error?.message || 'Could not start Premium checkout.',
     };
   }
 }
