@@ -355,7 +355,7 @@
       padding: 6px 12px;
       border-radius: 20px;
       font-weight: 600;
-      font-size: 12px;
+      font-size: 16px;
       text-transform: uppercase;
     }
 
@@ -881,7 +881,7 @@
               <button class="btn-view" onclick="viewDetails('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})">View Details</button>
               ${profile.allowMessaging ? `<button class="btn-contact" onclick="navigateToDetail('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})" >💬 Message</button>` : (phone || website ? `<button class="btn-contact" onclick="contactBusiness('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})" >Contact</button>` : '')}
             </div>
-            <div style="padding-top: 8px; border-top: 1px solid #eee; text-align: center; color: #64748b; font-size: 12px;">👁️ ${viewCount.toLocaleString()} ${viewCount === 1 ? 'view' : 'views'}</div>
+            <div style="padding-top: 8px; border-top: 1px solid #eee; text-align: center; color: #64748b; font-size: 16px;">👁️ ${viewCount.toLocaleString()} ${viewCount === 1 ? 'view' : 'views'}</div>
           </div>
         </div>
       `;

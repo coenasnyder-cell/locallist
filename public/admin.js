@@ -1510,7 +1510,7 @@
               <div class="list-meta">Payment Method: ${escapeHtml(purchase.paymentMethod || 'N/A')}</div>
               ${purchase.notes ? `<div class="list-meta">Notes: ${escapeHtml(purchase.notes)}</div>` : ''}
               <div class="list-meta">
-                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 16px; font-weight: 600; 
                   background: ${statusClass === 'success' ? '#eef9f0' : statusClass === 'warning' ? '#fff3cd' : '#fdecec'};
                   color: ${statusClass === 'success' ? '#1f7a3d' : statusClass === 'warning' ? '#856404' : '#b3261e'};">
                   ${purchaseStatus.toUpperCase()}
@@ -1761,7 +1761,7 @@
               <div class="list-meta">Business ID: ${escapeHtml(claim.businessId || 'N/A')}</div>
               <div class="list-meta">Requested By: ${escapeHtml(claim.userEmail || 'Unknown')} (${escapeHtml(claim.userId || 'N/A')})</div>
               <div class="list-meta">Requested: ${formatDate(claim.createdAt)}</div>
-              <div class="list-meta">Status: <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; background: ${statusClass === 'success' ? '#eef9f0' : statusClass === 'warning' ? '#fff3cd' : '#fdecec'}; color: ${statusClass === 'success' ? '#1f7a3d' : statusClass === 'warning' ? '#856404' : '#b3261e'};">${escapeHtml(status.toUpperCase())}</span></div>
+              <div class="list-meta">Status: <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 16px; font-weight: 600; background: ${statusClass === 'success' ? '#eef9f0' : statusClass === 'warning' ? '#fff3cd' : '#fdecec'}; color: ${statusClass === 'success' ? '#1f7a3d' : statusClass === 'warning' ? '#856404' : '#b3261e'};">${escapeHtml(status.toUpperCase())}</span></div>
               <div class="list-meta" style="margin-top: 8px; white-space: pre-wrap;">Claim Message: ${escapeHtml(claim.claimMessage || 'No message')}</div>
               ${claim.contactPhone ? `<div class="list-meta" style="margin-top: 4px;">📞 Phone: ${escapeHtml(claim.contactPhone)}</div>` : ''}
               ${claim.contactTime ? `<div class="list-meta">⏰ Best Time to Contact: ${escapeHtml(claim.contactTime)}</div>` : ''}
@@ -2428,7 +2428,7 @@
                 <div class="list-meta">Location: ${escapeHtml(location)}</div>
                 <div class="list-meta">Category: ${escapeHtml(data.businessCategory || 'N/A')}</div>
                 <div class="list-meta">Submitted: ${formatDate(data.createdAt)}</div>
-                <div class="list-meta" style="font-size: 12px; color: #64748b; margin-top: 4px;">Debug: docId=${escapeHtml(docSnap.id)} | userId=${escapeHtml(debugOwner)} | isApproved=${escapeHtml(debugApproval)} | approvalStatus=${escapeHtml(debugStatus)} | isVerified=${escapeHtml(debugVerified)}</div>
+                <div class="list-meta" style="font-size: 16px; color: #64748b; margin-top: 4px;">Debug: docId=${escapeHtml(docSnap.id)} | userId=${escapeHtml(debugOwner)} | isApproved=${escapeHtml(debugApproval)} | approvalStatus=${escapeHtml(debugStatus)} | isVerified=${escapeHtml(debugVerified)}</div>
                 ${data.businessDescription ? `<div class="list-meta" style="margin-top: 6px;">Description: ${escapeHtml(data.businessDescription.substring(0, 120))}${data.businessDescription.length > 120 ? '...' : ''}</div>` : ''}
                 ${verificationDocs.length > 0
                   ? `<div class="list-meta" style="margin-top: 8px;">Verification Documents: ${verificationDocs.map((url, idx) => `<a href="${encodeURI(url)}" target="_blank" rel="noopener noreferrer">Document ${idx + 1}</a>`).join(' | ')}</div>`

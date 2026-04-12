@@ -403,7 +403,7 @@
         }
 
         .header-btn-text {
-          font-size: 12px;
+          font-size: 16px;
           padding: 6px 8px;
         }
 
