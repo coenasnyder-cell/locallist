@@ -114,7 +114,8 @@
         {
           "locationWhenInUsePermission": "Local List uses your location once to suggest your ZIP code for Harrison-area listings. GPS is not saved to your profile."
         }
-      ]
+      ],
+      "@stripe/stripe-react-native"
     ],
     "experiments": {
       "typedRoutes": true,
