@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { arrayRemove, arrayUnion, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../firebase'; // make sure this exports Firestore
@@ -9,14 +9,37 @@ type Thread = {
   id: string;
   listingTitle?: string;
   listingImage?: string;
+  buyerId?: string;
+  sellerId?: string;
+  participantIds?: string[];
   lastMessage?: string;
   lastTimestamp?: unknown;
   hiddenFor?: string[];
 };
 
+type ParticipantSummary = {
+  profileImage: string | null;
+  name: string;
+};
+
+function getOtherParticipantId(thread: Thread, currentUserId: string): string | null {
+  const participantIds = Array.isArray(thread.participantIds)
+    ? thread.participantIds.filter((participantId) => typeof participantId === 'string' && participantId.trim().length > 0)
+    : [thread.buyerId, thread.sellerId].filter((participantId): participantId is string => typeof participantId === 'string' && participantId.trim().length > 0);
+
+  return participantIds.find((participantId) => participantId !== currentUserId) || null;
+}
+
+function getInitials(name: string): string {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  if (parts.length === 0) return '?';
+  return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+}
+
 export default function ThreadsList() {
   const { user, loading: authLoading } = useAccountStatus();
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [participantByThreadId, setParticipantByThreadId] = useState<Record<string, ParticipantSummary>>({});
   const [showArchived, setShowArchived] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -38,7 +61,7 @@ export default function ThreadsList() {
       where('participantIds', 'array-contains', user.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       const results = snapshot.docs
         .map(doc => ({
           id: doc.id,
@@ -55,10 +78,32 @@ export default function ThreadsList() {
         return bTime - aTime;
       });
 
+      const summaries = await Promise.all(
+        results.map(async (thread) => {
+          const otherParticipantId = getOtherParticipantId(thread, user.uid);
+          if (!otherParticipantId) {
+            return [thread.id, { profileImage: null, name: 'User' } as ParticipantSummary] as const;
+          }
+
+          try {
+            const userSnap = await getDoc(doc(db, 'users', otherParticipantId));
+            const userData = userSnap.exists() ? userSnap.data() || {} : {};
+            const profileImage = String(userData.profileimage || userData.profileImage || userData.photoURL || '').trim() || null;
+            const name = String(userData.name || userData.displayName || userData.email || 'User');
+            return [thread.id, { profileImage, name } as ParticipantSummary] as const;
+          } catch {
+            return [thread.id, { profileImage: null, name: 'User' } as ParticipantSummary] as const;
+          }
+        })
+      );
+
+      setParticipantByThreadId(Object.fromEntries(summaries));
+
       setThreads(results);
       setLoading(false);
     }, () => {
       setThreads([]);
+      setParticipantByThreadId({});
       setLoading(false);
     });
 
@@ -178,12 +223,16 @@ export default function ThreadsList() {
               onPress={() => openThread(item.id)}
               style={styles.threadTouchable}
             >
-              {item.listingImage ? (
+              {participantByThreadId[item.id]?.profileImage ? (
                 <Image
-                  source={{ uri: item.listingImage }}
-                  style={{ width: 50, height: 50, borderRadius: 8, marginRight: 10 }}
+                  source={{ uri: participantByThreadId[item.id].profileImage! }}
+                  style={styles.threadAvatar}
                 />
-              ) : null}
+              ) : (
+                <View style={styles.threadAvatarFallback}>
+                  <Text style={styles.threadAvatarFallbackText}>{getInitials(participantByThreadId[item.id]?.name || 'User')}</Text>
+                </View>
+              )}
 
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: '600' }}>
@@ -289,6 +338,27 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     padding: 12,
+  },
+  threadAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+    backgroundColor: '#e2e8f0',
+  },
+  threadAvatarFallback: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+    backgroundColor: '#cbd5e1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  threadAvatarFallbackText: {
+    color: '#1e293b',
+    fontWeight: '800',
+    fontSize: 14,
   },
   archiveButton: {
     marginRight: 10,

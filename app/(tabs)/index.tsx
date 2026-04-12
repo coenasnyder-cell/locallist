@@ -16,6 +16,7 @@ type RecentListing = {
   title: string;
   price: string;
   zipCode?: string;
+  sellerName?: string;
   userId?: string;
   imageSource?: import('react-native').ImageSourcePropType;
   createdAt?: number; // timestamp in ms
@@ -116,6 +117,7 @@ export default function HomeScreen() {
                 title: data.title || '',
                 price: data.price ? String(data.price) : '',
                 zipCode: data.zipCode || '',
+                sellerName: data.sellerName || data.userName || '',
                 userId: data.userId,
                 imageSource: Array.isArray(data.images) && data.images.length > 0 ? { uri: data.images[0] } : undefined,
                 createdAt,
@@ -386,6 +388,7 @@ export default function HomeScreen() {
                   title={item.title}
                   price={item.price}
                   location={item.zipCode}
+                  sellerName={item.sellerName}
                   imageSource={item.imageSource}
                   onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
                 />

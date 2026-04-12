@@ -66,6 +66,9 @@ export default function SearchListings() {
 								resizeMode="cover"
 							/>
 							<Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
+							{listing.sellerName ? (
+								<Text style={styles.sellerText}>👤 {listing.sellerName}</Text>
+							) : null}
 							<Text style={styles.priceZip}>
 								{listing.price ? `$${listing.price}` : ''}
 								{listing.zipCode ? `  |  ${listing.zipCode}` : ''}
@@ -137,6 +140,12 @@ const styles = StyleSheet.create({
 	priceZip: {
 		fontSize: 14,
 		color: '#475569',
+		textAlign: 'center',
+	},
+	sellerText: {
+		fontSize: 13,
+		color: '#374151',
+		marginBottom: 4,
 		textAlign: 'center',
 	},
 });

@@ -5,6 +5,8 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, incr
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from "../firebase";
+import { submitUserReview } from '../utils/userReviews';
+import UserReviewModal from './UserReviewModal';
 
 export type Listing = {
   id: string;
@@ -34,6 +36,9 @@ export default function SingleListing({ listing }: { listing: Listing }) {
   const router = useRouter();
   const [isSaved, setIsSaved] = useState(false);
   const [savingInProgress, setSavingInProgress] = useState(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [sellerPhotoUrl, setSellerPhotoUrl] = useState<string>('');
   const currentUser = getAuth().currentUser;
   const isOwnListing = !!currentUser && currentUser.uid === listing.userId;
 
@@ -52,6 +57,36 @@ export default function SingleListing({ listing }: { listing: Listing }) {
       .then(snap => { setIsSaved(snap.exists()); })
       .catch(() => {});
   }, [listing.id]);
+
+  useEffect(() => {
+    const loadSellerPhoto = async () => {
+      if (!listing.userId) {
+        setSellerPhotoUrl('');
+        return;
+      }
+
+      try {
+        const db = getFirestore(app);
+        const sellerSnap = await getDoc(doc(db, 'users', listing.userId));
+        if (!sellerSnap.exists()) {
+          setSellerPhotoUrl('');
+          return;
+        }
+
+        const data = sellerSnap.data() as {
+          profileImage?: string;
+          profileimage?: string;
+          photoURL?: string;
+        };
+        const photo = String(data.profileImage || data.profileimage || data.photoURL || '').trim();
+        setSellerPhotoUrl(photo);
+      } catch {
+        setSellerPhotoUrl('');
+      }
+    };
+
+    loadSellerPhoto();
+  }, [listing.userId]);
 
   const toggleSave = async () => {
     if (!currentUser) {
@@ -215,6 +250,38 @@ export default function SingleListing({ listing }: { listing: Listing }) {
     ]);
   };
 
+  const handleSubmitSellerReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
+    if (!currentUser) {
+      Alert.alert('Sign in required', 'Please sign in to review sellers.');
+      return;
+    }
+
+    if (!listing.userId) {
+      Alert.alert('Error', 'Seller account could not be identified for this listing.');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await submitUserReview({
+        currentUser,
+        ratedUserId: listing.userId,
+        rating,
+        reviewText,
+        reviewTargetType: 'seller',
+        reviewTargetId: listing.id,
+      });
+
+      setReviewModalVisible(false);
+      Alert.alert('Review submitted', 'Thanks. Your review is pending admin approval.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not submit your review. Please try again.';
+      Alert.alert('Error', message);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const isExpired = () => {
     if (!listing.expiresAt) return false;
     const expiresAt = listing.expiresAt.toDate
@@ -283,9 +350,37 @@ export default function SingleListing({ listing }: { listing: Listing }) {
           {/* Seller Info */}
           <View style={styles.sellerInfo}>
             <Text style={styles.sellerLabel}>Seller:</Text>
-            <Text style={styles.sellerName}>{listing.sellerName}</Text>
+            <View style={styles.sellerRow}>
+              {sellerPhotoUrl ? (
+                <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} resizeMode="cover" />
+              ) : (
+                <View style={styles.sellerAvatarFallback}>
+                  <Text style={styles.sellerAvatarFallbackText}>{String(listing.sellerName || 'U').trim().charAt(0).toUpperCase() || 'U'}</Text>
+                </View>
+              )}
+              {listing.userId ? (
+                <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}>
+                  <Text style={[styles.sellerName, styles.profileLink]}>{listing.sellerName}</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.sellerName}>{listing.sellerName}</Text>
+              )}
+            </View>
             <Text style={styles.sellerLocation}>Location: {listing.city || 'TBD'}</Text>
           </View>
+          {!!listing.userId && (
+            <TouchableOpacity
+              style={styles.viewProfileButton}
+              onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}
+            >
+              <Text style={styles.viewProfileButtonText}>View Seller Profile</Text>
+            </TouchableOpacity>
+          )}
+          {!!currentUser && !isOwnListing && !!listing.userId && (
+            <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.reviewButtonText}>Leave Seller Review</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.messageButton} onPress={startThread}>
             <Text style={styles.messageButtonText}>Message Seller</Text>
           </TouchableOpacity>
@@ -309,6 +404,16 @@ export default function SingleListing({ listing }: { listing: Listing }) {
           )}
         </View>
       </ScrollView>
+
+      <UserReviewModal
+        visible={reviewModalVisible}
+        title="Review Seller"
+        submitting={submittingReview}
+        onClose={() => {
+          if (!submittingReview) setReviewModalVisible(false);
+        }}
+        onSubmit={handleSubmitSellerReview}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -411,18 +516,79 @@ const styles = StyleSheet.create({
   sellerInfo: {
     marginTop: 12,
   },
+  sellerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
   sellerLabel: {
     fontWeight: '500',
     fontSize: 15,
+  },
+  sellerAvatar: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#e2e8f0',
+  },
+  sellerAvatarFallback: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#ccfbf1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sellerAvatarFallbackText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#115e59',
   },
   sellerName: {
     fontSize: 15,
     color: '#222',
   },
+  profileLink: {
+    color: '#0f766e',
+    textDecorationLine: 'underline',
+  },
   sellerLocation: {
     fontSize: 13,
     color: '#666',
     fontWeight: '500',
+  },
+  viewProfileButton: {
+    marginTop: 10,
+    marginBottom: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#ecfeff',
+    borderColor: '#99f6e4',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  viewProfileButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0f766e',
+  },
+  reviewButton: {
+    marginTop: 8,
+    marginBottom: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: '#eef2ff',
+    borderColor: '#c7d2fe',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  reviewButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3730a3',
   },
   expiredText: {
     color: '#999',

@@ -4,6 +4,7 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 type Props = {
   title: string;
   price: string;
+  location?: string;
   category?: string;
   viewCount?: number;
   sellerName?: string;
@@ -33,6 +34,7 @@ function formatRelativeTime(ms?: number): string {
 export default function GridListingCard({
   title,
   price,
+  location,
   category,
   viewCount,
   sellerName,
@@ -66,6 +68,7 @@ export default function GridListingCard({
 
   const timeLabel = formatRelativeTime(createdAt);
   const viewLabel = viewCount != null ? `👀 ${viewCount.toLocaleString()} views` : null;
+  const locationLabel = city || location;
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
@@ -94,7 +97,7 @@ export default function GridListingCard({
         {viewLabel ? <Text style={styles.viewCount}>{viewLabel}</Text> : null}
         <View style={styles.footer}>
           {!!sellerName && <Text style={styles.footerText}>👤 {sellerName}</Text>}
-          {!!city && <Text style={styles.footerText}>📍 {city}</Text>}
+          {!!locationLabel && <Text style={styles.footerText}>📍 {locationLabel}</Text>}
         </View>
       </View>
     </TouchableOpacity>

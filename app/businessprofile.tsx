@@ -17,8 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../components/Header';
+import UserReviewModal from '../components/UserReviewModal';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
+import { submitUserReview } from '../utils/userReviews';
 
 interface BusinessProfile {
   id: string;
@@ -51,6 +53,8 @@ export default function BusinessProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const profileId = id || businessId;
 
@@ -65,6 +69,7 @@ export default function BusinessProfileScreen() {
     profile.userId === user.uid ||
     profile.ownerUserId === user.uid
   );
+  const ratedBusinessUserId = String(profile?.ownerUserId || profile?.userId || profile?.id || '').trim();
 
   useEffect(() => {
     loadBusinessProfile();
@@ -206,6 +211,44 @@ export default function BusinessProfileScreen() {
       { text: 'Misleading Information', onPress: () => submitBusinessReport('misleading_content') },
       { text: 'Cancel', style: 'cancel' },
     ]);
+  };
+
+  const handleSubmitBusinessReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
+    const currentUser = getAuth().currentUser;
+    if (!currentUser) {
+      Alert.alert('Sign in required', 'Please sign in to review businesses.');
+      return;
+    }
+
+    if (!ratedBusinessUserId) {
+      Alert.alert('Error', 'Business owner account could not be identified for reviews.');
+      return;
+    }
+
+    if (isOwnBusiness) {
+      Alert.alert('Not allowed', 'You cannot review your own business.');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await submitUserReview({
+        currentUser,
+        ratedUserId: ratedBusinessUserId,
+        rating,
+        reviewText,
+        reviewTargetType: 'business',
+        reviewTargetId: String(profile?.id || profileId || ''),
+      });
+
+      setReviewModalVisible(false);
+      Alert.alert('Review submitted', 'Thanks. Your review is pending admin approval.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not submit your review. Please try again.';
+      Alert.alert('Error', message);
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
 
@@ -369,6 +412,12 @@ export default function BusinessProfileScreen() {
             </TouchableOpacity>
           )}
 
+          {!!user && !isOwnBusiness && !!ratedBusinessUserId && (
+            <TouchableOpacity style={styles.buttonReview} onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.buttonReviewText}>⭐ Leave Business Review</Text>
+            </TouchableOpacity>
+          )}
+
           {!isOwnBusiness && (
             <TouchableOpacity style={styles.buttonDanger} onPress={handleReportBusiness}>
               <Text style={styles.buttonDangerText}>🚩 Report Listing</Text>
@@ -403,6 +452,16 @@ export default function BusinessProfileScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
+
+        <UserReviewModal
+          visible={reviewModalVisible}
+          title="Review Business"
+          submitting={submittingReview}
+          onClose={() => {
+            if (!submittingReview) setReviewModalVisible(false);
+          }}
+          onSubmit={handleSubmitBusinessReview}
+        />
     </SafeAreaView>
   );
 }
@@ -582,6 +641,20 @@ const styles = StyleSheet.create({
     color: '#475569',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonReview: {
+    backgroundColor: '#eef2ff',
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonReviewText: {
+    color: '#3730a3',
+    fontSize: 16,
+    fontWeight: '700',
   },
   buttonDanger: {
     backgroundColor: '#fff1f2',

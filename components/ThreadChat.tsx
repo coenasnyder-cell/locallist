@@ -419,15 +419,30 @@ const ThreadChat = () => {
     ]);
   };
 
-  const renderAvatar = (summary: UserSummary, variant: 'sender' | 'receiver') => {
-    if (summary.profileImage) {
-      return <Image source={{ uri: summary.profileImage }} style={styles.avatar} />;
-    }
+  const openUserProfile = (userId: string | null) => {
+    if (!userId) return;
+    router.push({ pathname: '/public-profile', params: { userId } });
+  };
 
-    return (
+  const renderAvatar = (summary: UserSummary, variant: 'sender' | 'receiver') => {
+    const avatarContent = summary.profileImage ? (
+      <Image source={{ uri: summary.profileImage }} style={styles.avatar} />
+    ) : (
       <View style={[styles.avatar, variant === 'sender' ? styles.avatarSenderFallback : styles.avatarReceiverFallback]}>
         <Text style={styles.avatarFallbackText}>{getInitials(summary.name)}</Text>
       </View>
+    );
+
+    if (!summary.id) return avatarContent;
+
+    return (
+      <TouchableOpacity
+        onPress={() => openUserProfile(summary.id)}
+        activeOpacity={0.8}
+        style={styles.avatarTapTarget}
+      >
+        {avatarContent}
+      </TouchableOpacity>
     );
   };
 
@@ -810,6 +825,9 @@ const styles = StyleSheet.create({
   avatar: {
     width: 32,
     height: 32,
+    borderRadius: 16,
+  },
+  avatarTapTarget: {
     borderRadius: 16,
   },
   avatarSenderFallback: {

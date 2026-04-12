@@ -5,7 +5,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import UserReviewModal from '../../components/UserReviewModal';
 import { app } from '../../firebase';
+import { submitUserReview } from '../../utils/userReviews';
 
 type ServiceDetails = {
   id: string;
@@ -102,6 +104,8 @@ export default function ServiceDetailsScreen() {
 
   const [service, setService] = useState<ServiceDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
   const currentUser = getAuth().currentUser;
 
   useEffect(() => {
@@ -200,6 +204,43 @@ export default function ServiceDetailsScreen() {
     ]);
   };
 
+  const handleSubmitServiceReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
+    if (!service?.userId) {
+      Alert.alert('Error', 'Service provider account could not be identified for reviews.');
+      return;
+    }
+
+    if (!currentUser) {
+      Alert.alert('Sign in required', 'Please sign in to review service providers.');
+      return;
+    }
+
+    if (service.userId === currentUser.uid) {
+      Alert.alert('Not allowed', 'You cannot review your own service listing.');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await submitUserReview({
+        currentUser,
+        ratedUserId: service.userId,
+        rating,
+        reviewText,
+        reviewTargetType: 'service',
+        reviewTargetId: service.id,
+      });
+
+      setReviewModalVisible(false);
+      Alert.alert('Review submitted', 'Thanks. Your review is pending admin approval.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not submit your review. Please try again.';
+      Alert.alert('Error', message);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -245,7 +286,15 @@ export default function ServiceDetailsScreen() {
 
           <View style={styles.body}>
             <Text style={styles.title}>{service.serviceName || 'Service'}</Text>
-            {!!service.providerName && <Text style={styles.provider}>by {service.providerName}</Text>}
+            {!!service.providerName && (
+              service.userId ? (
+                <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: service.userId } })}>
+                  <Text style={[styles.provider, styles.profileLink]}>by {service.providerName}</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.provider}>by {service.providerName}</Text>
+              )
+            )}
             <View style={styles.pillRow}>
               {!!service.category && (
                 <Text style={styles.categoryPill}>{service.categoryIcon} {service.category}</Text>
@@ -267,6 +316,7 @@ export default function ServiceDetailsScreen() {
 
             <View style={styles.sectionCard}>
               <Text style={styles.sectionTitle}>Contact Information</Text>
+              {!!service.userId && <Text style={styles.profileLink} onPress={() => router.push({ pathname: '/public-profile', params: { userId: service.userId } })}>View provider profile</Text>}
               {!!service.contactPhone && <Text style={styles.meta}>Phone: {service.contactPhone}</Text>}
               {!!service.contactEmail && <Text style={styles.meta}>Email: {service.contactEmail}</Text>}
               {!!service.contactWebsite && <Text style={styles.meta}>Website: {service.contactWebsite}</Text>}
@@ -297,6 +347,12 @@ export default function ServiceDetailsScreen() {
                 <Text style={styles.actionButtonText}>Visit Website</Text>
               </TouchableOpacity>
 
+              {!!currentUser && service.userId !== currentUser.uid && (
+                <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
+                  <Text style={styles.reviewButtonText}>Leave Service Review</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                 <Text style={styles.backButtonText}>Back to Services</Text>
               </TouchableOpacity>
@@ -310,6 +366,16 @@ export default function ServiceDetailsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <UserReviewModal
+        visible={reviewModalVisible}
+        title="Review Service Provider"
+        submitting={submittingReview}
+        onClose={() => {
+          if (!submittingReview) setReviewModalVisible(false);
+        }}
+        onSubmit={handleSubmitServiceReview}
+      />
     </SafeAreaView>
   );
 }
@@ -370,6 +436,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
     color: '#475569',
+  },
+  profileLink: {
+    marginTop: 4,
+    fontSize: 14,
+    color: '#0f766e',
+    fontWeight: '700',
   },
   pillRow: {
     marginTop: 10,
@@ -454,6 +526,21 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: '#ffffff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  reviewButton: {
+    marginTop: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    backgroundColor: '#eef2ff',
+  },
+  reviewButtonText: {
+    color: '#3730a3',
     fontWeight: '700',
     fontSize: 13,
   },
