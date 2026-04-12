@@ -38,6 +38,22 @@ export const screenOptions = {
   headerShown: false,
 };
 
+function normalizeReturnPath(returnTo: string | undefined): string {
+  if (!returnTo || !returnTo.startsWith('/')) {
+    return '/(tabs)/index';
+  }
+
+  if (returnTo === '/(tabs)' || returnTo === '/(tabs)/') {
+    return '/(tabs)/index';
+  }
+
+  if (returnTo === '/_sitemap' || returnTo === '/+not-found') {
+    return '/(tabs)/index';
+  }
+
+  return returnTo;
+}
+
 export default function SignInOrSignUp() {
   const router = useRouter();
   const { email: emailParam, returnTo: returnToParam } = useLocalSearchParams();
@@ -58,7 +74,7 @@ export default function SignInOrSignUp() {
 
   function routeAfterAuth() {
     if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
-      router.replace(returnTo as any);
+      router.replace(normalizeReturnPath(returnTo) as any);
       return;
     }
 
@@ -140,7 +156,7 @@ export default function SignInOrSignUp() {
     }
 
     if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
-      router.replace(returnTo as any);
+      router.replace(normalizeReturnPath(returnTo) as any);
       return;
     }
 

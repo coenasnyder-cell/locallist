@@ -43,6 +43,22 @@ export const screenOptions = {
   headerShown: false,
 };
 
+function normalizeReturnPath(returnTo: string | undefined): string {
+  if (!returnTo || !returnTo.startsWith('/')) {
+    return '/(tabs)/index';
+  }
+
+  if (returnTo === '/(tabs)' || returnTo === '/(tabs)/') {
+    return '/(tabs)/index';
+  }
+
+  if (returnTo === '/_sitemap' || returnTo === '/+not-found') {
+    return '/(tabs)/index';
+  }
+
+  return returnTo;
+}
+
 const ACTION_URL = 'https://app.locallist.biz/auth-action';
 
 type LocationPermissionState = 'not_requested' | 'granted' | 'denied' | 'unavailable';
@@ -80,7 +96,7 @@ export default function SignUpScreen() {
 
   const routeAfterAuth = () => {
     if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
-      router.replace(returnTo as any);
+      router.replace(normalizeReturnPath(returnTo) as any);
       return;
     }
 

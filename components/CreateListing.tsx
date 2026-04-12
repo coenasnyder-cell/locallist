@@ -681,6 +681,7 @@ const styles = StyleSheet.create({
 						<ScrollView 
 							contentContainerStyle={styles.scrollContainer} 
 							keyboardShouldPersistTaps="handled"
+							nestedScrollEnabled
 							keyboardDismissMode="on-drag"
 							showsVerticalScrollIndicator={false}
 							onScrollBeginDrag={Keyboard.dismiss}

@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
@@ -16,12 +16,22 @@ type ServiceDetails = {
   categoryIcon?: string;
   serviceDescription?: string;
   serviceImage?: string;
+  images?: string[];
+  serviceImages?: string[];
+  galleryImages?: string[];
   priceType?: string;
   priceAmount?: string | null;
   contactPhone?: string | null;
   contactEmail?: string | null;
   contactWebsite?: string | null;
   serviceArea?: string | null;
+  address?: string | null;
+  locationAddress?: string | null;
+  locationCity?: string | null;
+  locationState?: string | null;
+  locationZip?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
   city?: string | null;
   isActive?: boolean;
   status?: string;
@@ -48,6 +58,41 @@ function getPriceLabel(service: ServiceDetails): string | null {
   if (priceType === 'hourly') return `$${amount}/hr`;
   if (priceType === 'fixed') return `$${amount} flat`;
   return `$${amount}`;
+}
+
+function getServiceLocationLabel(service: ServiceDetails): string {
+  const address = String(service.address || service.locationAddress || '').trim();
+  const city = String(service.locationCity || service.city || '').trim();
+  const state = String(service.locationState || service.state || '').trim();
+  const zip = String(service.locationZip || service.zipCode || '').trim();
+
+  // Show full address only when full structured address is available.
+  if (address && city && state && zip) {
+    return `${address}, ${city}, ${state} ${zip}`;
+  }
+
+  const serviceArea = String(service.serviceArea || '').trim();
+  if (serviceArea) return serviceArea;
+  if (city && state) return `${city}, ${state}`;
+  if (city) return city;
+  return 'Location not provided';
+}
+
+function buildGalleryImages(service: ServiceDetails | null): string[] {
+  if (!service) return [];
+
+  const candidates: string[] = [
+    ...(Array.isArray(service.serviceImages) ? service.serviceImages : []),
+    ...(Array.isArray(service.images) ? service.images : []),
+    ...(Array.isArray(service.galleryImages) ? service.galleryImages : []),
+    String(service.serviceImage || '').trim(),
+  ];
+
+  return Array.from(
+    new Set(
+      candidates.filter((value) => typeof value === 'string' && /^https?:\/\//i.test(value.trim()))
+    )
+  );
 }
 
 export default function ServiceDetailsScreen() {
@@ -181,6 +226,8 @@ export default function ServiceDetailsScreen() {
   }
 
   const price = getPriceLabel(service);
+  const locationLabel = getServiceLocationLabel(service);
+  const galleryImages = useMemo(() => buildGalleryImages(service), [service]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -199,43 +246,67 @@ export default function ServiceDetailsScreen() {
           <View style={styles.body}>
             <Text style={styles.title}>{service.serviceName || 'Service'}</Text>
             {!!service.providerName && <Text style={styles.provider}>by {service.providerName}</Text>}
-            {!!service.category && (
-              <Text style={styles.category}>{service.categoryIcon} {service.category}</Text>
-            )}
-            {!!price && <Text style={styles.price}>{price}</Text>}
+            <View style={styles.pillRow}>
+              {!!service.category && (
+                <Text style={styles.categoryPill}>{service.categoryIcon} {service.category}</Text>
+              )}
+              {!!price && <Text style={styles.pricePill}>{price}</Text>}
+            </View>
 
             {!!service.serviceDescription && (
               <Text style={styles.description}>{service.serviceDescription}</Text>
             )}
 
-            {!!service.serviceArea && <Text style={styles.meta}>Service Area: {service.serviceArea}</Text>}
-            {!!service.city && <Text style={styles.meta}>City: {service.city}</Text>}
+            <Text style={styles.ratingText}>Rating: Coming soon</Text>
 
-            {!!service.contactPhone && (
-              <TouchableOpacity style={styles.actionButton} onPress={() => openPhone(service.contactPhone!)}>
-                <Text style={styles.actionButtonText}>Call {service.contactPhone}</Text>
-              </TouchableOpacity>
-            )}
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Service Information</Text>
+              <Text style={styles.meta}>Type of Service: {service.category || 'Other'}</Text>
+              <Text style={styles.meta}>Location: {locationLabel}</Text>
+            </View>
 
-            {!!service.contactWebsite && (
-              <TouchableOpacity style={styles.actionButton} onPress={() => openWebsite(service.contactWebsite!)}>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Contact Information</Text>
+              {!!service.contactPhone && <Text style={styles.meta}>Phone: {service.contactPhone}</Text>}
+              {!!service.contactEmail && <Text style={styles.meta}>Email: {service.contactEmail}</Text>}
+              {!!service.contactWebsite && <Text style={styles.meta}>Website: {service.contactWebsite}</Text>}
+              {!service.contactPhone && !service.contactEmail && !service.contactWebsite && (
+                <Text style={styles.meta}>No contact details provided.</Text>
+              )}
+            </View>
+
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Gallery</Text>
+              {galleryImages.length > 0 ? (
+                <View style={styles.galleryGrid}>
+                  {galleryImages.map((uri, index) => (
+                    <Image key={`${uri}-${index}`} source={{ uri }} style={styles.galleryImage} resizeMode="cover" />
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.meta}>No gallery images yet.</Text>
+              )}
+            </View>
+
+            <View style={styles.bottomActionsWrap}>
+              <TouchableOpacity
+                style={[styles.actionButton, !service.contactWebsite ? styles.actionButtonDisabled : null]}
+                onPress={() => service.contactWebsite && openWebsite(service.contactWebsite)}
+                disabled={!service.contactWebsite}
+              >
                 <Text style={styles.actionButtonText}>Visit Website</Text>
               </TouchableOpacity>
-            )}
 
-            {(!currentUser || service.userId !== currentUser.uid) && (
-              <TouchableOpacity style={styles.reportButton} onPress={handleReportService}>
-                <Text style={styles.reportButtonText}>Report Listing</Text>
+              <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                <Text style={styles.backButtonText}>Back to Services</Text>
               </TouchableOpacity>
-            )}
 
-            {!!service.contactEmail && (
-              <Text style={styles.meta}>Contact Email: {service.contactEmail}</Text>
-            )}
-
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Text style={styles.backButtonText}>Back to Services</Text>
-            </TouchableOpacity>
+              {(!currentUser || service.userId !== currentUser.uid) && (
+                <TouchableOpacity onPress={handleReportService} activeOpacity={0.8}>
+                  <Text style={styles.reportProviderLink}>Report service provider</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -300,17 +371,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#475569',
   },
-  category: {
+  pillRow: {
     marginTop: 10,
-    fontSize: 14,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryPill: {
+    fontSize: 13,
     color: '#0f766e',
     fontWeight: '700',
+    backgroundColor: '#e6f6f4',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  price: {
-    marginTop: 8,
-    fontSize: 16,
+  pricePill: {
+    fontSize: 13,
     fontWeight: '700',
     color: '#1f2937',
+    backgroundColor: '#eef2ff',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  ratingText: {
+    marginTop: 10,
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
   },
   description: {
     marginTop: 12,
@@ -318,41 +407,58 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: '#334155',
   },
+  sectionCard: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    backgroundColor: '#f8fafc',
+    padding: 12,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#334155',
+    marginBottom: 6,
+  },
+  galleryGrid: {
+    marginTop: 4,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  galleryImage: {
+    width: '31%',
+    aspectRatio: 1,
+    borderRadius: 8,
+    backgroundColor: '#e2e8f0',
+  },
   meta: {
-    marginTop: 10,
+    marginTop: 4,
     fontSize: 13,
     color: '#475569',
   },
+  bottomActionsWrap: {
+    marginTop: 14,
+  },
   actionButton: {
-    marginTop: 12,
+    marginTop: 0,
     borderRadius: 8,
     backgroundColor: '#0f766e',
     paddingVertical: 10,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
+  actionButtonDisabled: {
+    backgroundColor: '#94a3b8',
+  },
   actionButtonText: {
     color: '#ffffff',
     fontWeight: '700',
     fontSize: 13,
   },
-  reportButton: {
-    marginTop: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#fecdd3',
-    backgroundColor: '#fff1f2',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-  },
-  reportButtonText: {
-    color: '#b91c1c',
-    fontWeight: '700',
-    fontSize: 13,
-  },
   backButton: {
-    marginTop: 14,
+    marginTop: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#cbd5e1',
@@ -365,5 +471,13 @@ const styles = StyleSheet.create({
     color: '#334155',
     fontWeight: '700',
     fontSize: 13,
+  },
+  reportProviderLink: {
+    marginTop: 12,
+    textAlign: 'center',
+    color: '#0f766e',
+    fontSize: 13,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 });

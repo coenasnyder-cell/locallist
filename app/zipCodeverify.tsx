@@ -44,6 +44,22 @@ export default function ZipCodeVerifyScreen() {
 
   const locationAvailable = Platform.OS !== 'web';
 
+  const normalizeReturnPath = (value: string | undefined): string => {
+    if (!value || !value.startsWith('/')) {
+      return '/(tabs)/index';
+    }
+
+    if (value === '/(tabs)' || value === '/(tabs)/') {
+      return '/(tabs)/index';
+    }
+
+    if (value === '/_sitemap' || value === '/+not-found') {
+      return '/(tabs)/index';
+    }
+
+    return value;
+  };
+
   const openTerms = () => {
     router.push('/(app)/termsOfUse' as any);
   };
@@ -179,7 +195,7 @@ export default function ZipCodeVerifyScreen() {
       });
 
       if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
-        router.replace(returnTo as any);
+        router.replace(normalizeReturnPath(returnTo) as any);
       } else {
         router.replace('/(tabs)/index' as any);
       }

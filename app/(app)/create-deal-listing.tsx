@@ -208,7 +208,7 @@ export default function CreateDealListingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} nestedScrollEnabled>
         <View style={styles.hero}>
           <Text style={styles.title}>Create A Deal</Text>
           <Text style={styles.subtitle}>

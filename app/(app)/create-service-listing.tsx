@@ -377,7 +377,7 @@ export default function CreateServiceListingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} nestedScrollEnabled>
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>🧰 List a Service</Text>
           <Text style={styles.heroSubtitle}>Offer your skills to the local community</Text>

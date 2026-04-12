@@ -66,7 +66,7 @@ export default function ImageUploader({ images, onChange }: ImageUploaderProps) 
 			}
 			const result = await ImagePicker.launchImageLibraryAsync({
 				mediaTypes: ['images'],
-				allowsEditing: true,
+				allowsEditing: false,
 				quality: 0.7,
 			});
 			if (!result.canceled && result.assets && result.assets.length > 0) {

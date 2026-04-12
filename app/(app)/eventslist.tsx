@@ -519,15 +519,7 @@ export default function EventsListScreen() {
               </ScrollView>
             </View>
           ) : null}
-
-          <Text style={[styles.filterLabel, { marginTop: 10 }]}>Filter by Date</Text>
-          <TextInput
-            style={styles.filterInput}
-            value={selectedDate}
-            onChangeText={setSelectedDate}
-            placeholder="MM/DD/YY"
-            placeholderTextColor="#94a3b8"
-          />
+     
         </View>
                 <View style={styles.sectionBlock}>
           <Text style={styles.sectionTitle}>Upcoming Events</Text>

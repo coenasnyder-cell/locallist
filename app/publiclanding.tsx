@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { getAuth, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import FeaturedListings from '../components/FeaturedListings';
 import GridListingCard from '../components/GridListingCard';
 import { app } from '../firebase';
@@ -43,6 +43,8 @@ const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
 
 export default function PublicLanding() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isCompactHeader = width < 360;
   const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [recentPetListings, setRecentPetListings] = useState<RecentPetListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,19 @@ export default function PublicLanding() {
 
   const handlePreviewTap = () => {
     router.push('/signInOrSignUp');
+  };
+
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth(app);
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error signing out from public landing:', error);
+      Alert.alert('Logout Error', 'Could not log out right now. Please try again.');
+    }
   };
 
   useEffect(() => {
@@ -172,23 +187,19 @@ export default function PublicLanding() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.heroSection}>
-        <View style={styles.heroTopRow}>
-          <Text style={styles.logoText}>Local List</Text>
+          <View style={styles.heroTopRow}>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={[styles.logoImage, isCompactHeader ? styles.logoImageCompact : null]}
+              resizeMode="contain"
+            />
           <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => router.push('/login')}
+              style={[styles.profileButton, isCompactHeader ? styles.profileButtonCompact : null]}
+            onPress={handleLogout}
           >
-            <Ionicons name="log-in-outline" size={18} color="#334155" />
-            <Text style={styles.profileButtonText}>Log In</Text>
+              <Text style={[styles.profileButtonText, isCompactHeader ? styles.profileButtonTextCompact : null]}>Log Out</Text>
           </TouchableOpacity>
         </View>
-
-        <Text style={styles.heroTitle}>Discover what’s happening nearby</Text>
-        <Text style={styles.heroSubtitle}>
-          Preview featured posts, recent listings, and pets in your community. Sign in to open full details and connect.
-        </Text>
-      </View>
 
       {displaySettings.showQuoteOfDay && (
         <View style={styles.quoteCard}>
@@ -201,6 +212,22 @@ export default function PublicLanding() {
           ) : null}
         </View>
       )}
+        <View style={styles.ctaSection}>
+        <Text style={styles.ctaTitle}>Ready to join your local community?</Text>
+        <Text style={styles.ctaSubtitle}>
+          Sign in to browse full details, contact sellers, and post your own listings.
+        </Text>
+
+        <View style={styles.ctaButtonRow}>
+          <TouchableOpacity style={[styles.ctaButton, styles.secondaryButton]} onPress={() => router.push('/login')}>
+            <Text style={styles.secondaryButtonText}>Log In</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.ctaButton, styles.primaryButton]} onPress={() => router.push('/signup')}>
+            <Text style={styles.primaryButtonText}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {displaySettings.showFeaturedListings && (
         <FeaturedListings
@@ -284,6 +311,16 @@ export default function PublicLanding() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={() => router.push('/(app)/termsOfUse' as any)} activeOpacity={0.8}>
+          <Text style={styles.footerLink}>Terms of Use</Text>
+        </TouchableOpacity>
+        <Text style={styles.footerDivider}>|</Text>
+        <TouchableOpacity onPress={() => router.push('/(app)/privacy' as any)} activeOpacity={0.8}>
+          <Text style={styles.footerLink}>Privacy Policy</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -298,18 +335,25 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 6,
     paddingBottom: 8,
+    backgroundColor: '#f0f8fc',
   },
   heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    minHeight: 56,
+    gap: 10,
   },
-  logoText: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#0f172a',
+  logoImage: {
+    width: 92,
+    height: 44,
+    flexShrink: 1,
+  },
+  logoImageCompact: {
+    width: 74,
+    height: 36,
   },
   profileButton: {
     flexDirection: 'row',
@@ -321,11 +365,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     borderWidth: 1,
     borderColor: '#cbd5e1',
+    flexShrink: 0,
+  },
+  profileButtonCompact: {
+    paddingVertical: 5,
+    paddingHorizontal: 8,
   },
   profileButtonText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#334155',
+  },
+  profileButtonTextCompact: {
+    fontSize: 12,
   },
   heroTitle: {
     marginTop: 12,
@@ -447,6 +499,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginTop: 16,
+    marginBottom: 8,
   },
   ctaButton: {
     flex: 1,
@@ -469,5 +522,26 @@ const styles = StyleSheet.create({
     color: '#0f172a',
     fontWeight: '800',
     fontSize: 14,
+  },
+  footer: {
+    marginTop: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    gap: 10,
+  },
+  footerLink: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+    paddingVertical: 4,
+  },
+  footerDivider: {
+    color: '#94a3b8',
+    fontSize: 13,
   },
 });

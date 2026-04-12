@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
@@ -142,15 +142,6 @@ export default function ServicesList() {
     }
   };
 
-  const handleCall = (phone: string) => {
-    Linking.openURL(`tel:${phone}`);
-  };
-
-  const handleWebsite = (website: string) => {
-    const url = /^https?:\/\//i.test(website) ? website : `https://${website}`;
-    Linking.openURL(url);
-  };
-
   const handleOpenService = (id: string) => {
     router.push({ pathname: '/(app)/service-details', params: { id } });
   };
@@ -185,43 +176,15 @@ export default function ServicesList() {
         )}
 
         <View style={styles.cardContent}>
-          {item.category ? (
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryBadgeText}>
-                {item.categoryIcon} {item.category}
-              </Text>
-            </View>
-          ) : null}
-
           <Text style={styles.serviceName} numberOfLines={1}>{item.serviceName}</Text>
+          <Text style={styles.cardMetaText}>Price: {price || 'Not listed'}</Text>
+          <Text style={styles.cardMetaText}>Location: {item.serviceArea || 'Not provided'}</Text>
+          <Text style={styles.cardMetaText}>Rating: Coming soon</Text>
+          <Text style={styles.cardMetaText}>Type of Service: {item.category || 'Other'}</Text>
 
-          {item.providerName ? (
-            <Text style={styles.providerName} numberOfLines={1}>by {item.providerName}</Text>
-          ) : null}
-
-          {price ? (
-            <Text style={styles.price}>{price}</Text>
-          ) : null}
-
-          {!!item.serviceDescription && (
-            <Text style={styles.description} numberOfLines={3}>
-              {item.serviceDescription}
-            </Text>
-          )}
-
-          {item.contactPhone && (
-            <TouchableOpacity style={styles.contactRow} onPress={() => handleCall(item.contactPhone!)}>
-              <Text style={styles.contactText}>📱 {item.contactPhone}</Text>
-            </TouchableOpacity>
-          )}
-
-          {item.contactWebsite && (
-            <TouchableOpacity style={styles.contactRow} onPress={() => handleWebsite(item.contactWebsite!)}>
-              <Text style={styles.contactText} numberOfLines={1}>🌐 Visit Website</Text>
-            </TouchableOpacity>
-          )}
-
-          <Text style={styles.viewDetailsText}>View details</Text>
+          <View style={styles.viewDetailsButton}>
+            <Text style={styles.viewDetailsButtonText}>View Details</Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -518,50 +481,11 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 10,
   },
-  categoryBadge: {
-    backgroundColor: '#e8f5f3',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginBottom: 6,
-  },
-  categoryBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#0F766E',
-  },
   serviceName: {
     fontSize: 14,
     fontWeight: '700',
     color: '#1f2937',
-    marginBottom: 2,
-  },
-  providerName: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 4,
-  },
-  price: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0F766E',
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 12,
-    color: '#64748b',
-    lineHeight: 17,
-    marginBottom: 6,
-  },
-  contactRow: {
-    marginTop: 4,
-    paddingVertical: 4,
-  },
-  contactText: {
-    fontSize: 12,
-    color: '#0F766E',
-    fontWeight: '600',
+    marginBottom: 8,
   },
   reportButton: {
     marginTop: 8,
@@ -577,11 +501,23 @@ const styles = StyleSheet.create({
     color: '#b91c1c',
     fontWeight: '700',
   },
-  viewDetailsText: {
+  cardMetaText: {
     fontSize: 12,
-    color: '#0f766e',
-    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 4,
+    lineHeight: 17,
+  },
+  viewDetailsButton: {
     marginTop: 8,
+    borderRadius: 8,
+    backgroundColor: '#0f766e',
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  viewDetailsButtonText: {
+    fontSize: 12,
+    color: '#ffffff',
+    fontWeight: '700',
   },
   emptyState: {
     padding: 40,

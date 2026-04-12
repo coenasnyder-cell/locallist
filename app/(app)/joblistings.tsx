@@ -1,13 +1,13 @@
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -29,8 +29,6 @@ type JobListing = {
   createdAt?: { toMillis?: () => number } | string | number | Date;
 };
 
-const ALL_CATEGORIES = 'All categories';
-
 function getCreatedAtMillis(value: JobListing['createdAt']): number {
   if (!value) return 0;
   if (typeof value === 'object' && value !== null && 'toMillis' in value && typeof value.toMillis === 'function') {
@@ -44,8 +42,6 @@ function getCreatedAtMillis(value: JobListing['createdAt']): number {
 export default function JobListingsScreen() {
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const router = useRouter();
   const { profile } = useAccountStatus();
   const isBusinessUser = profile?.accountType === 'business';
@@ -75,26 +71,6 @@ export default function JobListingsScreen() {
     fetchListings();
   }, []);
 
-  const categories = useMemo(() => {
-    const unique = new Set<string>();
-
-    jobs.forEach((job) => {
-      const category = String(job.jobCategory || '').trim();
-      if (category) unique.add(category);
-    });
-
-    return [ALL_CATEGORIES, ...Array.from(unique).sort((left, right) => left.localeCompare(right))];
-  }, [jobs]);
-
-  const filteredJobs = useMemo(() => {
-    if (selectedCategory === ALL_CATEGORIES) return jobs;
-    return jobs.filter((job) => String(job.jobCategory || '').trim() === selectedCategory);
-  }, [jobs, selectedCategory]);
-
-  useEffect(() => {
-    setCategoryDropdownOpen(false);
-  }, [selectedCategory]);
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <BackToCommunityHubRow />
@@ -119,47 +95,17 @@ export default function JobListingsScreen() {
         </View>
       )}
 
-      <View style={styles.toolbar}>
-        <TouchableOpacity
-          style={styles.dropdownButton}
-          activeOpacity={0.86}
-          onPress={() => setCategoryDropdownOpen((prev) => !prev)}
-        >
-          <Text style={styles.dropdownButtonText}>{selectedCategory}</Text>
-          <Text style={styles.dropdownChevron}>{categoryDropdownOpen ? '▲' : '▼'}</Text>
-        </TouchableOpacity>
-        {categoryDropdownOpen ? (
-          <View style={styles.dropdownMenu}>
-            <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
-              {categories.map((category) => {
-                const selected = category === selectedCategory;
-                return (
-                  <TouchableOpacity
-                    key={category}
-                    style={[styles.dropdownItem, selected ? styles.dropdownItemActive : null]}
-                    activeOpacity={0.86}
-                    onPress={() => setSelectedCategory(category)}
-                  >
-                    <Text style={[styles.dropdownItemText, selected ? styles.dropdownItemTextActive : null]}>{category}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-      </View>
-
       {loading ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>Loading job listings...</Text>
         </View>
-      ) : filteredJobs.length === 0 ? (
+      ) : jobs.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>No job listings found.</Text>
         </View>
       ) : (
         <View style={styles.jobsGrid}>
-          {filteredJobs.map((job) => (
+          {jobs.map((job) => (
             <TouchableOpacity
               key={job.id}
               style={styles.card}
@@ -279,60 +225,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#ffffff',
-  },
-  toolbar: {
-    marginBottom: 14,
-  },
-  dropdownButton: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 10,
-    paddingVertical: 11,
-    paddingHorizontal: 12,
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  dropdownButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  dropdownChevron: {
-    fontSize: 12,
-    color: '#64748b',
-    fontWeight: '700',
-  },
-  dropdownMenu: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-  },
-  dropdownScroll: {
-    maxHeight: 220,
-  },
-  dropdownItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  dropdownItemActive: {
-    backgroundColor: '#e8f5f3',
-  },
-  dropdownItemText: {
-    fontSize: 13,
-    color: '#334155',
-    fontWeight: '600',
-  },
-  dropdownItemTextActive: {
-    color: '#0f766e',
-    fontWeight: '700',
   },
   emptyState: {
     borderWidth: 1,

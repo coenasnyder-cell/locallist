@@ -201,7 +201,7 @@ export default function CreateJobListingPage() {
     <SafeAreaView style={{ flex: 1 }}>
       <Header />
       <ThemedView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
           <Text style={styles.title}>Create Job Listing</Text>
           <Text style={styles.subtitle}>Business accounts can post hiring opportunities to the job board</Text>
           {!loading && user && !isBusinessAccount ? (
