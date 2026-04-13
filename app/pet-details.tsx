@@ -1,108 +1,70 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
     Image,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     useWindowDimensions,
-    View
+    View,
 } from 'react-native';
 import Header from '../components/Header';
 import { db } from '../firebase';
-        </View>
-      </View>
-      </ScrollView>
+import { Pet } from '../types/Pet';
 
-      <Modal
-        visible={reportModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setReportModalVisible(false)}
-      >
-        <View style={styles.reportModalOverlay}>
-          <View style={styles.reportModalContent}>
-            <View style={styles.reportModalHeader}>
-              <Text style={styles.reportModalTitle}>Report Pet Listing</Text>
-              <TouchableOpacity
-                style={styles.reportModalCloseButton}
-                onPress={() => setReportModalVisible(false)}
-              >
-                <Text style={styles.reportModalCloseButtonText}>×</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
-              <Text style={styles.reportModalQuestion}>Why are you reporting this pet listing?</Text>
-              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('spam')}>
-                <Text style={styles.reportReasonText}>Spam</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('scam')}>
-                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('prohibited_content')}>
-                <Text style={styles.reportReasonText}>Prohibited Content</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('misleading_content')}>
-                <Text style={styles.reportReasonText}>Misleading Information</Text>
-              </TouchableOpacity>
-            </ScrollView>
-
-            <View style={styles.reportModalFooter}>
-              <TouchableOpacity style={styles.reportCancelButton} onPress={() => setReportModalVisible(false)}>
-                <Text style={styles.reportCancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
-  );
+export default function PetDetailsScreen() {
+  const router = useRouter();
+  const { petId } = useLocalSearchParams<{ petId: string }>();
   const { width } = useWindowDimensions();
   const isWideLayout = width >= 920;
+
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+
   const currentUser = getAuth().currentUser;
 
-  const navigateToPetHub = React.useCallback(() => {
+  const navigateToPetHub = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
       return;
     }
-
     router.replace('/(tabs)/petbutton' as any);
   }, [router]);
 
   useEffect(() => {
-    if (petId) {
-      fetchPetDetails();
-    }
-  }, [petId]);
-
-  const fetchPetDetails = async () => {
-    try {
-      setLoading(true);
-      const petRef = doc(db, 'pets', petId!);
-      const petSnapshot = await getDoc(petRef);
-
-      if (petSnapshot.exists()) {
-        setPet({
-          id: petSnapshot.id,
-          ...petSnapshot.data(),
-        } as Pet);
+    const fetchPetDetails = async () => {
+      if (!petId) {
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching pet details:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      try {
+        setLoading(true);
+        const petRef = doc(db, 'pets', petId);
+        const petSnapshot = await getDoc(petRef);
+
+        if (petSnapshot.exists()) {
+          setPet({ id: petSnapshot.id, ...(petSnapshot.data() as Omit<Pet, 'id'>) });
+        } else {
+          setPet(null);
+        }
+      } catch (error) {
+        console.error('Error fetching pet details:', error);
+        setPet(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPetDetails();
+  }, [petId]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -146,39 +108,39 @@ import { db } from '../firebase';
     }
   };
 
-  const displayLocation = (() => {
+  const displayLocation = useMemo(() => {
     const rawLocation = typeof pet?.petSeenLocation === 'string' ? pet.petSeenLocation.trim() : '';
-
-    if (!rawLocation) {
-      return '';
-    }
+    if (!rawLocation) return '';
 
     const cleanedLocation = rawLocation.replace(/\s+/g, ' ').split(/\r?\n/)[0].trim();
     const descriptionLikePattern = /\b(friendly|timid|shy|wearing|collar|microchipp|reward|answers to|please call|contact me|description)\b/i;
 
-    if (cleanedLocation.length > 80 || descriptionLikePattern.test(cleanedLocation)) {
-      return '';
-    }
-
+    if (cleanedLocation.length > 80 || descriptionLikePattern.test(cleanedLocation)) return '';
     return cleanedLocation;
-  })();
+  }, [pet?.petSeenLocation]);
 
-  const locationLabel = pet?.postType === 'adoption'
-    ? '📍 Location'
-    : pet?.postType === 'found'
-      ? '📍 Found Location'
-      : '📍 Last Seen Location';
+  const locationLabel =
+    pet?.postType === 'adoption'
+      ? '📍 Location'
+      : pet?.postType === 'found'
+        ? '📍 Found Location'
+        : '📍 Last Seen Location';
 
   const mainImage = pet?.petImages?.[0] || pet?.petPhoto || '';
-  const galleryImages = Array.from(
-    new Set(
-      [
-        ...(Array.isArray(pet?.petImages) ? pet?.petImages : []),
-        String(pet?.petPhoto || '').trim(),
-      ]
-        .map((img) => String(img || '').trim())
-        .filter((img) => img.length > 0)
-    )
+
+  const galleryImages = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [
+            ...(Array.isArray(pet?.petImages) ? pet.petImages : []),
+            String(pet?.petPhoto || '').trim(),
+          ]
+            .map((img) => String(img || '').trim())
+            .filter((img) => img.length > 0)
+        )
+      ),
+    [pet]
   );
 
   const handleSendMessage = async () => {
@@ -214,7 +176,7 @@ import { db } from '../firebase';
       const existingThreadSnapshot = await getDocs(existingThreadQuery);
 
       if (!existingThreadSnapshot.empty) {
-        const match = existingThreadSnapshot.docs.find(d => {
+        const match = existingThreadSnapshot.docs.find((d) => {
           const ids: string[] = d.data().participantIds || [];
           return ids.includes(pet.userId);
         });
@@ -224,7 +186,9 @@ import { db } from '../firebase';
         }
       }
 
-      const postTypeLabel = pet.postType === 'lost' ? 'Lost Pet' : pet.postType === 'found' ? 'Found Pet' : 'For Adoption';
+      const postTypeLabel =
+        pet.postType === 'lost' ? 'Lost Pet' : pet.postType === 'found' ? 'Found Pet' : 'For Adoption';
+
       const threadDoc = await addDoc(threadsRef, {
         participantIds: [user.uid, pet.userId],
         listingId: pet.id,
@@ -237,10 +201,7 @@ import { db } from '../firebase';
         createdAt: serverTimestamp(),
       });
 
-      router.push({
-        pathname: '/threadchat' as any,
-        params: { threadId: threadDoc.id },
-      });
+      router.push({ pathname: '/threadchat' as any, params: { threadId: threadDoc.id } });
     } catch (error) {
       console.error('Error starting message thread:', error);
       Alert.alert('Error', 'Unable to start conversation. Please try again.');
@@ -282,10 +243,6 @@ import { db } from '../firebase';
     }
   };
 
-  const handleReportPet = () => {
-    setReportModalVisible(true);
-  };
-
   const handleReportPetReason = (reason: string) => {
     submitPetReport(reason);
     setReportModalVisible(false);
@@ -303,10 +260,7 @@ import { db } from '../firebase';
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>Pet not found</Text>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={navigateToPetHub}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={navigateToPetHub}>
           <Text style={styles.backButtonText}>← Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -324,120 +278,156 @@ import { db } from '../firebase';
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.backRowWrap}>
-          <TouchableOpacity
-            style={styles.backRowButton}
-            onPress={navigateToPetHub}
-            activeOpacity={0.85}
-          >
+          <TouchableOpacity style={styles.backRowButton} onPress={navigateToPetHub} activeOpacity={0.85}>
             <Text style={styles.backRowButtonText}>{'<Back To The Pet Corner'}</Text>
           </TouchableOpacity>
         </View>
 
-      <View style={[styles.profileCard, isWideLayout ? styles.profileCardWide : null]}>
-        <View style={[styles.mediaColumn, isWideLayout ? styles.mediaColumnWide : null]}>
-          {/* Pet Image */}
-          <View style={[styles.imageSection, isWideLayout ? styles.imageSectionWide : null]}>
-            {mainImage ? (
-              <Image source={{ uri: mainImage }} style={styles.petImage} />
-            ) : (
-              <View style={[styles.petImage, styles.placeholderImage]}>
-                <Text style={styles.placeholderEmoji}>🐾</Text>
+        <View style={[styles.profileCard, isWideLayout ? styles.profileCardWide : null]}>
+          <View style={[styles.mediaColumn, isWideLayout ? styles.mediaColumnWide : null]}>
+            <View style={styles.imageSection}>
+              {mainImage ? (
+                <Image source={{ uri: mainImage }} style={styles.petImage} />
+              ) : (
+                <View style={[styles.petImage, styles.placeholderImage]}>
+                  <Text style={styles.placeholderEmoji}>🐾</Text>
+                </View>
+              )}
+
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(String(pet.petStatus || '')) }]}>
+                <Text style={styles.statusText}>{getStatusLabel(String(pet.petStatus || ''))}</Text>
+              </View>
+            </View>
+
+            {galleryImages.length > 1 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.galleryScroll}
+                contentContainerStyle={styles.galleryRow}
+              >
+                {galleryImages.slice(1).map((imageUrl, index) => (
+                  <Image key={`${imageUrl}-${index}`} source={{ uri: imageUrl }} style={styles.galleryImage} />
+                ))}
+              </ScrollView>
+            ) : null}
+          </View>
+
+          <View style={[styles.content, isWideLayout ? styles.contentWide : null]}>
+            <Text style={styles.petName}>{pet.petName}</Text>
+
+            <View style={styles.infoGrid}>
+              <View style={styles.infoCard}>
+                <Text style={styles.infoLabel}>Type</Text>
+                <Text style={styles.infoValue}>{pet.petType}</Text>
+              </View>
+              <View style={styles.infoCard}>
+                <Text style={styles.infoLabel}>Breed</Text>
+                <Text style={styles.infoValue}>{pet.petBreed}</Text>
+              </View>
+              <View style={styles.infoCard}>
+                <Text style={styles.infoLabel}>Age</Text>
+                <Text style={styles.infoValue}>{pet.petAge}</Text>
+              </View>
+              <View style={styles.infoCard}>
+                <Text style={styles.infoLabel}>Gender</Text>
+                <Text style={styles.infoValue}>{pet.petGender}</Text>
+              </View>
+            </View>
+
+            {!!displayLocation && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{locationLabel}</Text>
+                <Text style={styles.sectionContent}>{displayLocation}</Text>
               </View>
             )}
 
-            <View
-              style={[styles.statusBadge, { backgroundColor: getStatusColor(pet.petStatus) }]}
-            >
-              <Text style={styles.statusText}>{getStatusLabel(pet.petStatus)}</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>ℹ️ Description</Text>
+              <Text style={styles.sectionContent}>{pet.petDescription}</Text>
+            </View>
+
+            {pet.postType === 'adoption' && pet.petAdoptionFee ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>💰 Adoption Fee</Text>
+                <Text style={styles.adoptionFeeText}>${pet.petAdoptionFee}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>📅 Posted On</Text>
+              <Text style={styles.sectionContent}>{formatDate(pet.createdAt)}</Text>
+            </View>
+
+            <View style={styles.postTypeBadge}>
+              <Text style={styles.postTypeText}>
+                {pet.postType === 'lost' ? '🔍 Lost Pet' : ''}
+                {pet.postType === 'found' ? '✨ Found Pet' : ''}
+                {pet.postType === 'adoption' ? '💕 For Adoption' : ''}
+              </Text>
+            </View>
+
+            <TouchableOpacity style={styles.contactButton} onPress={handleSendMessage}>
+              <Text style={styles.contactButtonText}>Send A Message</Text>
+            </TouchableOpacity>
+
+            {!!currentUser && pet.userId !== currentUser.uid ? (
+              <TouchableOpacity style={styles.reportButton} onPress={() => setReportModalVisible(true)}>
+                <Text style={styles.reportButtonText}>Report Listing</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+      </ScrollView>
+
+      <Modal
+        visible={reportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.reportModalOverlay}>
+          <View style={styles.reportModalContent}>
+            <View style={styles.reportModalHeader}>
+              <Text style={styles.reportModalTitle}>Report Pet Listing</Text>
+              <TouchableOpacity
+                style={styles.reportModalCloseButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={styles.reportModalCloseButtonText}>x</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.reportModalQuestion}>Why are you reporting this pet listing?</Text>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('spam')}>
+                <Text style={styles.reportReasonText}>Spam</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportPetReason('scam')}>
+                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportPetReason('prohibited_content')}
+              >
+                <Text style={styles.reportReasonText}>Prohibited Content</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportPetReason('misleading_content')}
+              >
+                <Text style={styles.reportReasonText}>Misleading Information</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.reportModalFooter}>
+              <TouchableOpacity style={styles.reportCancelButton} onPress={() => setReportModalVisible(false)}>
+                <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {galleryImages.length > 1 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.galleryScroll}
-              contentContainerStyle={styles.galleryRow}
-            >
-              {galleryImages.slice(1).map((imageUrl, index) => (
-                <Image key={`${imageUrl}-${index}`} source={{ uri: imageUrl }} style={styles.galleryImage} />
-              ))}
-            </ScrollView>
-          ) : null}
         </View>
-
-        {/* Pet Info */}
-        <View style={[styles.content, isWideLayout ? styles.contentWide : null]}>
-          <Text style={styles.petName}>{pet.petName}</Text>
-
-        <View style={styles.infoGrid}>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Type</Text>
-            <Text style={styles.infoValue}>{pet.petType}</Text>
-          </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Breed</Text>
-            <Text style={styles.infoValue}>{pet.petBreed}</Text>
-          </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Age</Text>
-            <Text style={styles.infoValue}>{pet.petAge}</Text>
-          </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Gender</Text>
-            <Text style={styles.infoValue}>{pet.petGender}</Text>
-          </View>
-        </View>
-
-        {/* Location */}
-        {!!displayLocation && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{locationLabel}</Text>
-            <Text style={styles.sectionContent}>{displayLocation}</Text>
-          </View>
-        )}
-
-        {/* Description */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ℹ️ Description</Text>
-          <Text style={styles.sectionContent}>{pet.petDescription}</Text>
-        </View>
-
-        {/* Adoption Fee */}
-        {pet.postType === 'adoption' && pet.petAdoptionFee && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>💰 Adoption Fee</Text>
-            <Text style={styles.adoptionFeeText}>${pet.petAdoptionFee}</Text>
-          </View>
-        )}
-
-        {/* Date Posted */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📅 Posted On</Text>
-          <Text style={styles.sectionContent}>{formatDate(pet.createdAt)}</Text>
-        </View>
-
-        {/* Post Type Badge */}
-        <View style={styles.postTypeBadge}>
-          <Text style={styles.postTypeText}>
-            {pet.postType === 'lost' ? '🔍 Lost Pet' : ''}
-            {pet.postType === 'found' ? '✨ Found Pet' : ''}
-            {pet.postType === 'adoption' ? '💕 For Adoption' : ''}
-          </Text>
-        </View>
-
-        {/* Contact Button */}
-        <TouchableOpacity style={styles.contactButton} onPress={handleSendMessage}>
-          <Text style={styles.contactButtonText}>Send A Message</Text>
-        </TouchableOpacity>
-          {!!currentUser && pet.userId !== currentUser.uid && (
-            <TouchableOpacity style={styles.reportButton} onPress={handleReportPet}>
-              <Text style={styles.reportButtonText}>Report Listing</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-      </ScrollView>
+      </Modal>
     </View>
   );
 }
@@ -457,109 +447,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f8f8f8',
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
+  backRowWrap: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingTop: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  backArrow: {
-    fontSize: 16,
+  backRowButton: {
+    alignSelf: 'flex-start',
+    minHeight: 34,
+    justifyContent: 'center',
+  },
+  backRowButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#0066cc',
-    fontWeight: '600',
-  },
-  imageSection: {
-    position: 'relative',
-    width: '100%',
-    backButtonText: {
-      color: '#0066cc',
-      fontWeight: '600',
-    },
-    reportModalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 16,
-    },
-    reportModalContent: {
-      backgroundColor: '#fff',
-      borderRadius: 16,
-      maxWidth: 500,
-      width: '100%',
-      maxHeight: '80%',
-      overflow: 'hidden',
-    },
-    reportModalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: 16,
-      paddingBottom: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: '#e5e7eb',
-    },
-    reportModalTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: '#1f2937',
-    },
-    reportModalCloseButton: {
-      padding: 4,
-    },
-    reportModalCloseButtonText: {
-      fontSize: 28,
-      color: '#666',
-      fontWeight: '300',
-    },
-    reportModalBody: {
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-    },
-    reportModalQuestion: {
-      fontSize: 14,
-      color: '#4b5563',
-      marginBottom: 16,
-      fontWeight: '500',
-    },
-    reportReasonButton: {
-      paddingVertical: 12,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: '#e5e7eb',
-      backgroundColor: '#fafbfc',
-      marginBottom: 10,
-    },
-    reportReasonText: {
-      fontSize: 14,
-      color: '#2d3748',
-      fontWeight: '500',
-    },
-    reportModalFooter: {
-      paddingHorizontal: 20,
-      paddingBottom: 16,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: '#e5e7eb',
-    },
-    reportCancelButton: {
-      paddingVertical: 12,
-      borderRadius: 8,
-      backgroundColor: '#f3f4f6',
-      alignItems: 'center',
-    },
-    reportCancelButtonText: {
-      fontSize: 14,
-      color: '#4b5563',
-      fontWeight: '600',
-    },
-  });
-    aspectRatio: undefined,
-    height: 320,
-    maxHeight: 320,
-    borderRadius: 12,
-    overflow: 'hidden',
   },
   profileCard: {
     backgroundColor: '#fff',
@@ -581,29 +485,18 @@ const styles = StyleSheet.create({
     borderRightColor: '#e5e7eb',
     padding: 12,
   },
-  backRowWrap: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingTop: 8,
-    paddingBottom: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backRowButton: {
-    alignSelf: 'flex-start',
-    minHeight: 34,
-    justifyContent: 'center',
-  },
-  backRowButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0066cc',
+  imageSection: {
+    position: 'relative',
+    width: '100%',
+    height: 320,
+    maxHeight: 320,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   petImage: {
     width: '100%',
     height: '100%',
     backgroundColor: '#eee',
-    resizeMode: 'cover',
   },
   placeholderImage: {
     justifyContent: 'center',
@@ -626,16 +519,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  content: {
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 18,
-  },
-  contentWide: {
-    width: '54%',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
   galleryScroll: {
     marginTop: 8,
     maxHeight: 84,
@@ -649,6 +532,16 @@ const styles = StyleSheet.create({
     height: 76,
     borderRadius: 10,
     backgroundColor: '#e5e7eb',
+  },
+  content: {
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 18,
+  },
+  contentWide: {
+    width: '54%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   petName: {
     fontSize: 26,
@@ -680,21 +573,6 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 13,
     color: '#333',
-    fontWeight: '700',
-  },
-  reportButton: {
-    marginTop: 8,
-    backgroundColor: '#fff1f2',
-    borderWidth: 1,
-    borderColor: '#fecdd3',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 42,
-  },
-  reportButtonText: {
-    color: '#b91c1c',
-    fontSize: 14,
     fontWeight: '700',
   },
   section: {
@@ -742,6 +620,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
+  reportButton: {
+    marginTop: 8,
+    backgroundColor: '#fff1f2',
+    borderWidth: 1,
+    borderColor: '#fecdd3',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 42,
+  },
+  reportButtonText: {
+    color: '#b91c1c',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   errorText: {
     fontSize: 16,
     color: '#666',
@@ -755,6 +648,85 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: '#0066cc',
+    fontWeight: '600',
+  },
+  reportModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  reportModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxWidth: 500,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  reportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  reportModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  reportModalCloseButton: {
+    padding: 4,
+  },
+  reportModalCloseButtonText: {
+    fontSize: 24,
+    color: '#666',
+  },
+  reportModalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  reportModalQuestion: {
+    fontSize: 14,
+    color: '#4b5563',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reportReasonButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafbfc',
+    marginBottom: 10,
+  },
+  reportReasonText: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  reportModalFooter: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  reportCancelButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+  },
+  reportCancelButtonText: {
+    fontSize: 14,
+    color: '#4b5563',
     fontWeight: '600',
   },
 });
