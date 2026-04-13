@@ -8,6 +8,25 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
+
+type DigestPreferences = {
+  marketplaceWeeklyDigest: boolean;
+  eventsDigest: boolean;
+  yardSalesDigest: boolean;
+  whatsHappeningMonthlyDigest: boolean;
+  whatsHappeningWeeklyDigest: boolean;
+  jobsWeeklyDigest: boolean;
+};
+
+const DEFAULT_DIGEST_PREFERENCES: DigestPreferences = {
+  marketplaceWeeklyDigest: false,
+  eventsDigest: false,
+  yardSalesDigest: false,
+  whatsHappeningMonthlyDigest: false,
+  whatsHappeningWeeklyDigest: false,
+  jobsWeeklyDigest: false,
+};
+
 export default function SimpleSettingsPage({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const { user } = useAuth();
@@ -18,6 +37,7 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
   const [photoUrl, setPhotoUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [digestNotification, setDigestNotification] = useState(false);
+  const [digestPreferences, setDigestPreferences] = useState<DigestPreferences>(DEFAULT_DIGEST_PREFERENCES);
   const [listingUpNotification, setListingUpNotification] = useState(false);
   const [messageNotification, setMessageNotification] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -36,6 +56,15 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
             setZipCode(data.zipCode || '');
             setPhotoUrl(data.profileimage || '');
             setDigestNotification(data.digestNotification ?? false);
+            const stored = data.digestPreferences || {};
+            setDigestPreferences({
+              marketplaceWeeklyDigest: !!stored?.marketplaceWeeklyDigest || !!stored?.marketplace?.weekly,
+              eventsDigest: !!stored?.eventsDigest || !!stored?.events?.weekly || !!stored?.events?.monthly,
+              yardSalesDigest: !!stored?.yardSalesDigest || !!stored?.yardSale?.weekly || !!stored?.yardSale?.monthly,
+              whatsHappeningMonthlyDigest: !!stored?.whatsHappeningMonthlyDigest,
+              whatsHappeningWeeklyDigest: !!stored?.whatsHappeningWeeklyDigest,
+              jobsWeeklyDigest: !!stored?.jobsWeeklyDigest || !!stored?.jobs?.weekly,
+            });
             setListingUpNotification(data.listingUpNotification ?? false);
             setMessageNotification(data.messageNotification ?? false);
           }
@@ -53,12 +82,14 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
     try {
       const db = getFirestore(app);
       const userRef = doc(db, 'users', user.uid);
+      const hasDigestEnabled = Object.values(digestPreferences).some(Boolean);
       // Only allow users to update: phone, zipCode, and notification preferences
       // Protected fields (cannot be modified by users): email, name, status, role/admin, bannedZip
       await updateDoc(userRef, {
         phone,
         zipCode,
-        digestNotification,
+        digestNotification: hasDigestEnabled || digestNotification,
+        digestPreferences,
         listingUpNotification,
         messageNotification,
       });
@@ -140,6 +171,12 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
     await Promise.all(snapshot.docs.map((item) => deleteDoc(item.ref)));
   };
 
+  const deleteThreadsForUser = async (userId: string) => {
+    const db = getFirestore(app);
+    const snapshot = await getDocs(query(collection(db, 'threads'), where('participantIds', 'array-contains', userId)));
+    await Promise.all(snapshot.docs.map((item) => deleteDoc(item.ref)));
+  };
+
   const handleDeleteAccount = () => {
     if (!user?.uid) return;
 
@@ -171,7 +208,17 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
                       await Promise.all([
                         deleteCollectionDocsForUser('listings', user.uid),
                         deleteCollectionDocsForUser('services', user.uid),
+                        deleteCollectionDocsForUser('jobBoard', user.uid),
+                        deleteCollectionDocsForUser('deals', user.uid),
+                        deleteCollectionDocsForUser('events', user.uid),
+                        deleteCollectionDocsForUser('yardSales', user.uid),
+                        deleteCollectionDocsForUser('pets', user.uid),
+                        deleteCollectionDocsForUser('featurePurchases', user.uid),
+                        deleteCollectionDocsForUser('premiumPurchases', user.uid),
                         deleteCollectionDocsForUser('saveListings', user.uid),
+                        deleteThreadsForUser(user.uid),
+                        deleteDoc(doc(db, 'businessLocal', user.uid)).catch(() => {}),
+                        deleteDoc(doc(db, 'shopLocal', user.uid)).catch(() => {}),
                       ]);
 
                       await deleteDoc(doc(db, 'users', user.uid));
@@ -200,6 +247,13 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
         },
       ]
     );
+  };
+
+  const setDigestToggle = (key: keyof DigestPreferences, value: boolean) => {
+    setDigestPreferences((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   return (
@@ -271,6 +325,58 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
           onValueChange={setDigestNotification}
         />
       </View>
+
+      <Text style={styles.sectionTitle}>Digest Subscriptions</Text>
+      <Text style={styles.digestHelpText}>Choose exactly which digest streams you want.</Text>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Marketplace Weekly Digest</Text>
+        <Switch
+          value={digestPreferences.marketplaceWeeklyDigest}
+          onValueChange={(value) => setDigestToggle('marketplaceWeeklyDigest', value)}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Events Digest</Text>
+        <Switch
+          value={digestPreferences.eventsDigest}
+          onValueChange={(value) => setDigestToggle('eventsDigest', value)}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Yard Sales Digest</Text>
+        <Switch
+          value={digestPreferences.yardSalesDigest}
+          onValueChange={(value) => setDigestToggle('yardSalesDigest', value)}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Monthly What's Happening Digest</Text>
+        <Switch
+          value={digestPreferences.whatsHappeningMonthlyDigest}
+          onValueChange={(value) => setDigestToggle('whatsHappeningMonthlyDigest', value)}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Weekly What's Happening Digest</Text>
+        <Switch
+          value={digestPreferences.whatsHappeningWeeklyDigest}
+          onValueChange={(value) => setDigestToggle('whatsHappeningWeeklyDigest', value)}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>Jobs Digest Weekly</Text>
+        <Switch
+          value={digestPreferences.jobsWeeklyDigest}
+          onValueChange={(value) => setDigestToggle('jobsWeeklyDigest', value)}
+        />
+      </View>
+
       <View style={styles.switchRow}>
         <Text style={styles.switchLabel}>Listing Notifications (Expiration reminders & Updates)</Text>
         <Switch
@@ -392,6 +498,11 @@ const styles = StyleSheet.create({
     fontSize: 12, // Smaller font size
     color: '#333',
     marginRight: 8,
+  },
+  digestHelpText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 10,
   },
   saveButton: {
     marginTop: 24,

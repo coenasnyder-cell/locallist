@@ -387,14 +387,14 @@ export default function Profile() {
       if (section === 'marketplace') {
         const listingId = item.listingId || item.id;
         if (listingId) {
-          router.push({ pathname: '/SingleListing', params: { id: listingId } });
+          router.push({ pathname: '/listing', params: { id: listingId } });
         }
       }
       return;
     }
 
     if (section === 'marketplace') {
-      router.push({ pathname: '/SingleListing', params: { id: item.id } });
+      router.push({ pathname: '/listing', params: { id: item.id } });
       return;
     }
 

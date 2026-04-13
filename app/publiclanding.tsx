@@ -28,6 +28,9 @@ type RecentPetListing = {
   subtitle: string;
   imageSource?: import('react-native').ImageSourcePropType;
   createdAt?: number;
+  viewCount?: number;
+  posterName?: string;
+  location?: string;
 };
 
 type CommunityDisplaySettings = {
@@ -179,6 +182,9 @@ export default function PublicLanding() {
                 ? { uri: data.petPhoto }
                 : undefined,
             createdAt,
+            viewCount: typeof data.viewCount === 'number' ? data.viewCount : undefined,
+            posterName: data.posterName || data.userName || '',
+            location: data.location || data.city || '',
           };
         });
 
@@ -197,19 +203,13 @@ export default function PublicLanding() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.heroTopRow}>
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={[styles.logoImage, isCompactHeader ? styles.logoImageCompact : null]}
-              resizeMode="contain"
-            />
-          <TouchableOpacity
-              style={[styles.profileButton, isCompactHeader ? styles.profileButtonCompact : null]}
-            onPress={handleLogout}
-          >
-              <Text style={[styles.profileButtonText, isCompactHeader ? styles.profileButtonTextCompact : null]}>Log Out</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.logoSection}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.centeredLogo}
+          resizeMode="contain"
+        />
+      </View>
 
       {displaySettings.showQuoteOfDay && (
         <View style={styles.quoteCard}>
@@ -302,7 +302,10 @@ export default function PublicLanding() {
                   title={item.title}
                   price={item.subtitle}
                   category={item.subtitle}
+                  viewCount={item.viewCount}
+                  sellerName={item.posterName}
                   createdAt={item.createdAt}
+                  city={item.location}
                   imageSource={item.imageSource}
                   onPress={handlePreviewTap}
                 />
@@ -312,31 +315,17 @@ export default function PublicLanding() {
         )}
       </View>
 
-      <View style={styles.ctaSection}>
-        <Text style={styles.ctaTitle}>Ready to join your local community?</Text>
-        <Text style={styles.ctaSubtitle}>
-          Sign in to browse full details, contact sellers, and post your own listings.
-        </Text>
-
-        <View style={styles.ctaButtonRow}>
-          <TouchableOpacity style={[styles.ctaButton, styles.secondaryButton]} onPress={() => router.push('/login')}>
-            <Text style={styles.secondaryButtonText}>Log In</Text>
+      <View style={styles.footer}>
+        <Text style={styles.footerCopy}>© 2026 Local List. A local marketplace for Harrison.</Text>
+        <View style={styles.footerLinksRow}>
+          <TouchableOpacity onPress={() => router.push('/(app)/termsOfUse' as any)} activeOpacity={0.8}>
+            <Text style={styles.footerLink}>Terms of Use</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.ctaButton, styles.primaryButton]} onPress={() => router.push('/signup')}>
-            <Text style={styles.primaryButtonText}>Sign Up</Text>
+          <Text style={styles.footerDivider}>|</Text>
+          <TouchableOpacity onPress={() => router.push('/(app)/privacy' as any)} activeOpacity={0.8}>
+            <Text style={styles.footerLink}>Privacy Policy</Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={() => router.push('/(app)/termsOfUse' as any)} activeOpacity={0.8}>
-          <Text style={styles.footerLink}>Terms of Use</Text>
-        </TouchableOpacity>
-        <Text style={styles.footerDivider}>|</Text>
-        <TouchableOpacity onPress={() => router.push('/(app)/privacy' as any)} activeOpacity={0.8}>
-          <Text style={styles.footerLink}>Privacy Policy</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -350,6 +339,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 32,
   },
+  logoSection: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centeredLogo: {
+    width: 120,
+    height: 56,
+    resizeMode: 'contain',
+  },
   heroSection: {
     paddingHorizontal: 16,
     paddingTop: 6,
@@ -357,20 +357,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f8fc',
   },
   heroTopRow: {
-    flexDirection: 'row',
+    paddingTop: 32,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 56,
-    gap: 10,
+    justifyContent: 'center',
   },
   logoImage: {
-    width: 92,
-    height: 44,
+    width: 120,
+    height: 56,
     flexShrink: 1,
   },
   logoImageCompact: {
-    width: 74,
-    height: 36,
+    width: 120,
+    height: 56,
   },
   profileButton: {
     flexDirection: 'row',
@@ -495,21 +495,23 @@ const styles = StyleSheet.create({
   ctaSection: {
     marginTop: 16,
     marginHorizontal: 16,
-    padding: 18,
+    padding: 16,
     borderRadius: 16,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#f3f9fd',
+    borderWidth: 1,
+    borderColor: '#e0f2fe',
   },
   ctaTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#fff',
+    color: '#0f172a',
     textAlign: 'center',
   },
   ctaSubtitle: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 20,
-    color: '#cbd5e1',
+    color: '#475569',
     textAlign: 'center',
   },
   ctaButtonRow: {
@@ -528,27 +530,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#f97316',
   },
   secondaryButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e0f2fe',
+    borderWidth: 1,
+    borderColor: '#0ea5e9',
   },
   primaryButtonText: {
     color: '#fff',
     fontWeight: '800',
-    fontSize: 14,
+    fontSize: 13,
   },
   secondaryButtonText: {
-    color: '#0f172a',
+    color: '#0ea5e9',
     fontWeight: '800',
-    fontSize: 14,
+    fontSize: 13,
   },
   footer: {
     marginTop: 24,
     paddingTop: 16,
     paddingBottom: 24,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  footerCopy: {
+    fontSize: 12,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  footerLinksRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
     gap: 10,
   },
   footerLink: {

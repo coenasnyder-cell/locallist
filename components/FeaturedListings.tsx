@@ -127,17 +127,29 @@ export default function FeaturedListings({
       </View>
       
       <View style={styles.gridContainer}>
-        {listings.slice(0, 6).map((listing) => (
-          <View key={listing.id} style={styles.cardWrapper}>
-            <GridListingCard
-              title={listing.title}
-              price={typeof listing.price === 'number' ? `$${listing.price}` : `$${parseFloat(listing.price || '0').toFixed(2)}`}
-              location={listing.zipCode || ''}
-              imageSource={Array.isArray(listing.images) && listing.images.length > 0 ? { uri: listing.images[0] } : undefined}
-              onPress={() => onListingPress?.(listing.id)}
-            />
-          </View>
-        ))}
+        {listings.slice(0, 6).map((listing) => {
+          const createdAtMs = listing.createdAt
+            ? (listing.createdAt.toMillis ? listing.createdAt.toMillis() : new Date(listing.createdAt).getTime())
+            : undefined;
+          
+          return (
+            <View key={listing.id} style={styles.cardWrapper}>
+              <GridListingCard
+                title={listing.title}
+                price={typeof listing.price === 'number' ? `$${listing.price}` : `$${parseFloat(listing.price || '0').toFixed(2)}`}
+                category={listing.category}
+                viewCount={typeof listing.viewCount === 'number' ? listing.viewCount : undefined}
+                sellerName={listing.sellerName}
+                createdAt={createdAtMs}
+                city={listing.city}
+                location={listing.zipCode}
+                isFeatured={true}
+                imageSource={Array.isArray(listing.images) && listing.images.length > 0 ? { uri: listing.images[0] } : undefined}
+                onPress={() => onListingPress?.(listing.id)}
+              />
+            </View>
+          );
+        })}
       </View>
     </View>
   );

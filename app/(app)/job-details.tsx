@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
@@ -27,6 +27,7 @@ export default function JobDetailsScreen() {
   const router = useRouter();
   const [job, setJob] = useState<JobPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const currentUser = getAuth().currentUser;
 
   useEffect(() => {
@@ -124,19 +125,18 @@ export default function JobDetailsScreen() {
       });
 
       Alert.alert('Report submitted', 'Thanks. Our moderators will review this listing.');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Could not submit report. Please try again.');
     }
   };
 
   const handleReportJob = () => {
-    Alert.alert('Report Listing', 'Why are you reporting this job listing?', [
-      { text: 'Spam', onPress: () => submitJobReport('spam') },
-      { text: 'Scam/Fraud', onPress: () => submitJobReport('scam') },
-      { text: 'Prohibited Content', onPress: () => submitJobReport('prohibited_content') },
-      { text: 'Misleading Information', onPress: () => submitJobReport('misleading_content') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setReportModalVisible(true);
+  };
+
+  const handleReportJobReason = (reason: string) => {
+    submitJobReport(reason);
+    setReportModalVisible(false);
   };
 
   return (
@@ -191,6 +191,49 @@ export default function JobDetailsScreen() {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        visible={reportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.reportModalOverlay}>
+          <View style={styles.reportModalContent}>
+            <View style={styles.reportModalHeader}>
+              <Text style={styles.reportModalTitle}>Report Job Listing</Text>
+              <TouchableOpacity
+                style={styles.reportModalCloseButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={styles.reportModalCloseButtonText}>x</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.reportModalQuestion}>Why are you reporting this job listing?</Text>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportJobReason('spam')}>
+                <Text style={styles.reportReasonText}>Spam</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportJobReason('scam')}>
+                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportJobReason('prohibited_content')}>
+                <Text style={styles.reportReasonText}>Prohibited Content</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportJobReason('misleading_content')}>
+                <Text style={styles.reportReasonText}>Misleading Information</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.reportModalFooter}>
+              <TouchableOpacity style={styles.reportCancelButton} onPress={() => setReportModalVisible(false)}>
+                <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -198,7 +241,7 @@ export default function JobDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8fafc',
   },
   content: {
     padding: 12,
@@ -307,5 +350,85 @@ const styles = StyleSheet.create({
     color: '#b91c1c',
     fontWeight: '700',
     fontSize: 14,
+  },
+  reportModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  reportModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxWidth: 500,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  reportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  reportModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  reportModalCloseButton: {
+    padding: 4,
+  },
+  reportModalCloseButtonText: {
+    fontSize: 24,
+    color: '#666',
+    fontWeight: '400',
+  },
+  reportModalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  reportModalQuestion: {
+    fontSize: 14,
+    color: '#4b5563',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reportReasonButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafbfc',
+    marginBottom: 10,
+  },
+  reportReasonText: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  reportModalFooter: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  reportCancelButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+  },
+  reportCancelButtonText: {
+    fontSize: 14,
+    color: '#4b5563',
+    fontWeight: '600',
   },
 });

@@ -1,11 +1,11 @@
 import { collection, getDocs } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { db } from '../../firebase';
@@ -83,7 +83,7 @@ function isApprovedDeal(deal: DealRecord): boolean {
 }
 
 export default function DealsScreen() {
-  const { profile } = useAccountStatus();
+  const { profile, user, loading: accountLoading } = useAccountStatus();
   const [deals, setDeals] = useState<DealRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -92,7 +92,23 @@ export default function DealsScreen() {
     let isMounted = true;
 
     const loadDeals = async () => {
+      if (accountLoading) {
+        return;
+      }
+
+      if (!user?.uid) {
+        if (isMounted) {
+          setDeals([]);
+          setLoadError('Please sign in to view deals.');
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
+        if (isMounted) {
+          setLoading(true);
+        }
         setLoadError(null);
         const snapshot = await getDocs(collection(db, 'deals'));
         const items = snapshot.docs.map((doc) => ({
@@ -127,7 +143,7 @@ export default function DealsScreen() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [accountLoading, user?.uid]);
 
   const viewerIsAdmin = String(profile?.role || '').toLowerCase() === 'admin';
 

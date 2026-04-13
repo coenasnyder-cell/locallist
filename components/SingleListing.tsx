@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, increment, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { app } from "../firebase";
 import { submitUserReview } from '../utils/userReviews';
 import UserReviewModal from './UserReviewModal';
@@ -34,10 +34,13 @@ export type Listing = {
 
 export default function SingleListing({ listing }: { listing: Listing }) {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWideLayout = width >= 920;
   const [isSaved, setIsSaved] = useState(false);
   const [savingInProgress, setSavingInProgress] = useState(false);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const [sellerPhotoUrl, setSellerPhotoUrl] = useState<string>('');
   const currentUser = getAuth().currentUser;
   const isOwnListing = !!currentUser && currentUser.uid === listing.userId;
@@ -246,8 +249,13 @@ export default function SingleListing({ listing }: { listing: Listing }) {
         text: 'Misleading Content',
         onPress: () => submitListingReport('misleading_content'),
       },
-      { text: 'Cancel', style: 'cancel' },
+      { text: 'Cancel', style: 'cancel', onPress: () => setReportModalVisible(false) },
     ]);
+  };
+
+  const handleReportReason = (reason: string) => {
+    submitListingReport(reason);
+    setReportModalVisible(false);
   };
 
   const handleSubmitSellerReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
@@ -307,101 +315,97 @@ export default function SingleListing({ listing }: { listing: Listing }) {
         </View>
 
         <View style={styles.detailsContainer}>
-          {/* Images */}
-          <View style={styles.gallery}>
-            {listing.images && listing.images.length > 0 ? (
-              <View>
-                <Image source={{ uri: listing.images[0] }} style={styles.image} />
-                {listing.images.length > 1 && (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll}>
-                    {listing.images.slice(1).map((img, idx) => (
-                      <Image key={idx} source={{ uri: img }} style={styles.imageSmall} />
-                    ))}
-                  </ScrollView>
-                )}
-              </View>
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text>No Images</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Details */}
-          <Text style={styles.title}>{listing.title}</Text>
-          <Text style={styles.price}>Price: ${listing.price}</Text>
-          <View style={styles.viewCountRow}>
-            <Feather name="eye" size={13} color="#999" />
-            <Text style={styles.viewCountText}>{(listing.viewCount || 0) + (isOwnListing ? 0 : 1)} views</Text>
-          </View>
-          <Text style={styles.meta}>Category: {listing.category}</Text>
-          <Text style={styles.meta}>Condition: {listing.condition}</Text>
-
-          {listing.eventDate && (
-            <Text style={styles.meta}>Event Date: {listing.eventDate}</Text>
-          )}
-
-          {isExpired() && (
-            <Text style={styles.expiredText}>This listing has expired</Text>
-          )}
-
-          <Text style={styles.description}>{listing.description}</Text>
-
-          {/* Seller Info */}
-          <View style={styles.sellerInfo}>
-            <Text style={styles.sellerLabel}>Seller:</Text>
-            <View style={styles.sellerRow}>
-              {sellerPhotoUrl ? (
-                <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} resizeMode="cover" />
+          <View style={[styles.detailsLayout, isWideLayout ? styles.detailsLayoutWide : null]}>
+            {/* Images */}
+            <View style={[styles.gallery, isWideLayout ? styles.galleryWide : null]}>
+              {listing.images && listing.images.length > 0 ? (
+                <View style={styles.galleryInner}>
+                  <Image source={{ uri: listing.images[0] }} style={[styles.image, isWideLayout ? styles.imageWide : null]} />
+                  {listing.images.length > 1 && (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll} contentContainerStyle={styles.galleryRow}>
+                      {listing.images.slice(1).map((img, idx) => (
+                        <Image key={idx} source={{ uri: img }} style={styles.imageSmall} />
+                      ))}
+                    </ScrollView>
+                  )}
+                </View>
               ) : (
-                <View style={styles.sellerAvatarFallback}>
-                  <Text style={styles.sellerAvatarFallbackText}>{String(listing.sellerName || 'U').trim().charAt(0).toUpperCase() || 'U'}</Text>
+                <View style={[styles.imagePlaceholder, isWideLayout ? styles.imageWide : null]}>
+                  <Text>No Images</Text>
                 </View>
               )}
-              {listing.userId ? (
-                <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}>
-                  <Text style={[styles.sellerName, styles.profileLink]}>{listing.sellerName}</Text>
+            </View>
+
+            <View style={[styles.detailsColumn, isWideLayout ? styles.detailsColumnWide : null]}>
+              {/* Details */}
+              <Text style={styles.title}>{listing.title}</Text>
+              <Text style={styles.price}>Price: ${listing.price}</Text>
+              <View style={styles.viewCountRow}>
+                <Feather name="eye" size={13} color="#999" />
+                <Text style={styles.viewCountText}>{(listing.viewCount || 0) + (isOwnListing ? 0 : 1)} views</Text>
+              </View>
+              <Text style={styles.meta}>Category: {listing.category}</Text>
+              <Text style={styles.meta}>Condition: {listing.condition}</Text>
+
+              {listing.eventDate && (
+                <Text style={styles.meta}>Event Date: {listing.eventDate}</Text>
+              )}
+
+              {isExpired() && (
+                <Text style={styles.expiredText}>This listing has expired</Text>
+              )}
+
+              <Text style={styles.description}>{listing.description}</Text>
+
+              {/* Seller Info */}
+              <View style={styles.sellerInfo}>
+                <Text style={styles.sellerLabel}>Seller:</Text>
+                <View style={styles.sellerRow}>
+                  {sellerPhotoUrl ? (
+                    <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} resizeMode="cover" />
+                  ) : (
+                    <View style={styles.sellerAvatarFallback}>
+                      <Text style={styles.sellerAvatarFallbackText}>{String(listing.sellerName || 'U').trim().charAt(0).toUpperCase() || 'U'}</Text>
+                    </View>
+                  )}
+                  {listing.userId ? (
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}>
+                      <Text style={[styles.sellerName, styles.profileLink]}>{listing.sellerName}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.sellerName}>{listing.sellerName}</Text>
+                  )}
+                </View>
+                <Text style={styles.sellerLocation}>Location: {listing.city || 'TBD'}</Text>
+              </View>
+              {!!currentUser && !isOwnListing && !!listing.userId && (
+                <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
+                  <Text style={styles.reviewButtonText}>Leave Seller Review</Text>
                 </TouchableOpacity>
-              ) : (
-                <Text style={styles.sellerName}>{listing.sellerName}</Text>
+              )}
+              <TouchableOpacity style={styles.messageButton} onPress={startThread}>
+                <Text style={styles.messageButtonText}>Message Seller</Text>
+              </TouchableOpacity>
+              {!!currentUser && !isOwnListing && (
+                <TouchableOpacity
+                  style={[styles.saveButton, isSaved && styles.saveButtonSaved]}
+                  onPress={toggleSave}
+                  disabled={savingInProgress}
+                >
+                  <Feather name="bookmark" size={16} color={isSaved ? '#fff' : '#475569'} />
+                  <Text style={[styles.saveButtonText, isSaved && styles.saveButtonTextSaved]}>
+                    {isSaved ? 'Saved' : 'Save Listing'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {!!currentUser && !isOwnListing && (
+                <TouchableOpacity style={styles.reportButton} onPress={reportListing}>
+                  <Feather name="flag" size={16} color="#dc2626" />
+                  <Text style={styles.reportButtonText}>Report Listing</Text>
+                </TouchableOpacity>
               )}
             </View>
-            <Text style={styles.sellerLocation}>Location: {listing.city || 'TBD'}</Text>
           </View>
-          {!!listing.userId && (
-            <TouchableOpacity
-              style={styles.viewProfileButton}
-              onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}
-            >
-              <Text style={styles.viewProfileButtonText}>View Seller Profile</Text>
-            </TouchableOpacity>
-          )}
-          {!!currentUser && !isOwnListing && !!listing.userId && (
-            <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
-              <Text style={styles.reviewButtonText}>Leave Seller Review</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity style={styles.messageButton} onPress={startThread}>
-            <Text style={styles.messageButtonText}>Message Seller</Text>
-          </TouchableOpacity>
-          {!!currentUser && !isOwnListing && (
-            <TouchableOpacity
-              style={[styles.saveButton, isSaved && styles.saveButtonSaved]}
-              onPress={toggleSave}
-              disabled={savingInProgress}
-            >
-              <Feather name="bookmark" size={16} color={isSaved ? '#fff' : '#475569'} />
-              <Text style={[styles.saveButtonText, isSaved && styles.saveButtonTextSaved]}>
-                {isSaved ? 'Saved' : 'Save Listing'}
-              </Text>
-            </TouchableOpacity>
-          )}
-          {!!currentUser && !isOwnListing && (
-            <TouchableOpacity style={styles.reportButton} onPress={reportListing}>
-              <Feather name="flag" size={16} color="#dc2626" />
-              <Text style={styles.reportButtonText}>Report Listing</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
 
@@ -414,6 +418,68 @@ export default function SingleListing({ listing }: { listing: Listing }) {
         }}
         onSubmit={handleSubmitSellerReview}
       />
+
+      <Modal
+        visible={reportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.reportModalOverlay}>
+          <View style={styles.reportModalContent}>
+            <View style={styles.reportModalHeader}>
+              <Text style={styles.reportModalTitle}>Report Listing</Text>
+              <TouchableOpacity
+                style={styles.reportModalCloseButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Feather name="x" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.reportModalQuestion}>Why are you reporting this listing?</Text>
+
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportReason('spam')}
+              >
+                <Text style={styles.reportReasonText}>Spam</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportReason('scam')}
+              >
+                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportReason('prohibited_item')}
+              >
+                <Text style={styles.reportReasonText}>Prohibited Item</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.reportReasonButton}
+                onPress={() => handleReportReason('misleading_content')}
+              >
+                <Text style={styles.reportReasonText}>Misleading Content</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.reportModalFooter}>
+              <TouchableOpacity
+                style={styles.reportCancelButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -426,6 +492,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     marginBottom: 24,
     // You can adjust/add more styling as needed
+  },
+  detailsLayout: {
+    width: '100%',
+  },
+  detailsLayoutWide: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
   },
   headerSpacer: {
     height: 12,
@@ -456,30 +529,64 @@ const styles = StyleSheet.create({
   gallery: {
     marginBottom: 16,
     minHeight: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+
+  },
+  galleryWide: {
+    width: '42%',
+    marginBottom: 0,
+    marginRight: 14,
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    borderRightWidth: 1,
+    borderRightColor: '#e2e8f0',
+    paddingRight: 12,
+  },
+  galleryInner: {
+    width: '100%',
   },
   galleryScroll: {
     marginTop: 8,
   },
+  galleryRow: {
+    gap: 8,
+    paddingRight: 8,
+  },
   imageSmall: {
-    width: 60,
-    height: 60,
+    width: 84,
+    height: 84,
     borderRadius: 8,
     marginRight: 8,
     backgroundColor: '#eee',
+    alignItems: 'center',
+    justifyContent: 'center',
+
   },
   image: {
-    width: 120,
-    height: 120,
+    width: '100%',
+    height: 240,
     borderRadius: 8,
     backgroundColor: '#eee',
+     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageWide: {
+    height: 320,
   },
   imagePlaceholder: {
-    width: 120,
-    height: 120,
+    width: '100%',
+    height: 240,
     borderRadius: 8,
     backgroundColor: '#eee',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  detailsColumn: {
+    width: '100%',
+  },
+  detailsColumnWide: {
+    width: '58%',
   },
   title: {
     fontSize: 20,
@@ -557,22 +664,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     fontWeight: '500',
-  },
-  viewProfileButton: {
-    marginTop: 10,
-    marginBottom: 6,
-    alignSelf: 'flex-start',
-    backgroundColor: '#ecfeff',
-    borderColor: '#99f6e4',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  viewProfileButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0f766e',
   },
   reviewButton: {
     marginTop: 8,
@@ -659,5 +750,80 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
+  },
+  reportModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  reportModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxWidth: 500,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  reportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  reportModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  reportModalCloseButton: {
+    padding: 4,
+  },
+  reportModalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  reportModalQuestion: {
+    fontSize: 14,
+    color: '#4b5563',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reportReasonButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafbfc',
+    marginBottom: 10,
+  },
+  reportReasonText: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  reportModalFooter: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  reportCancelButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+  },
+  reportCancelButtonText: {
+    fontSize: 14,
+    color: '#4b5563',
+    fontWeight: '600',
   },
 });

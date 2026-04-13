@@ -16,8 +16,12 @@ type RecentListing = {
   title: string;
   price: string;
   zipCode?: string;
+  category?: string;
+  viewCount?: number;
   sellerName?: string;
   userId?: string;
+  city?: string;
+  isFeatured?: boolean;
   imageSource?: import('react-native').ImageSourcePropType;
   createdAt?: number; // timestamp in ms
 };
@@ -117,8 +121,12 @@ export default function HomeScreen() {
                 title: data.title || '',
                 price: data.price ? String(data.price) : '',
                 zipCode: data.zipCode || '',
+                category: data.category || '',
+                viewCount: typeof data.viewCount === 'number' ? data.viewCount : 0,
                 sellerName: data.sellerName || data.userName || '',
                 userId: data.userId,
+                city: data.city || '',
+                isFeatured: Boolean(data.isFeatured),
                 imageSource: Array.isArray(data.images) && data.images.length > 0 ? { uri: data.images[0] } : undefined,
                 createdAt,
               };
@@ -387,8 +395,13 @@ export default function HomeScreen() {
                 <GridListingCard
                   title={item.title}
                   price={item.price}
+                  category={item.category}
+                  viewCount={item.viewCount}
                   location={item.zipCode}
                   sellerName={item.sellerName}
+                  createdAt={item.createdAt}
+                  city={item.city}
+                  isFeatured={item.isFeatured}
                   imageSource={item.imageSource}
                   onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
                 />

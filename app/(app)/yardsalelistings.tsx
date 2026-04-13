@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
 type YardSaleRecord = {
   id: string;
+  yardsaleImage?: string;
   yardsaleTitle?: string;
   yardsaleDescription?: string;
   yardsaleDate?: unknown;
@@ -146,6 +147,8 @@ function getBuckets(sales: YardSaleRecord[]) {
 }
 
 export default function YardSaleListingsScreen() {
+  const { width } = useWindowDimensions();
+  const isWideLayout = width >= 920;
   const [sales, setSales] = useState<YardSaleRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -241,12 +244,24 @@ export default function YardSaleListingsScreen() {
       : 'Time TBD';
 
     return (
-      <View key={sale.id} style={styles.saleCard}>
-        <Text style={styles.saleTitle}>{sale.yardsaleTitle || 'Yard Sale'}</Text>
-        <Text style={styles.saleMeta}>Date: {formatDateRange(sale.yardsaleDate, sale.yardsaleEndDate || sale.yardsaleExpires)}</Text>
-        <Text style={styles.saleMeta}>Time: {timeText}</Text>
-        <Text style={styles.saleMeta}>Location: {getDisplayLocation(sale)}</Text>
-        <Text style={styles.saleDescription}>{sale.yardsaleDescription || ''}</Text>
+      <View key={sale.id} style={[styles.saleCard, isWideLayout ? styles.saleCardWide : null]}>
+        <View style={[styles.saleMediaWrap, isWideLayout ? styles.saleMediaWrapWide : null]}>
+          {sale.yardsaleImage ? (
+            <Image source={{ uri: sale.yardsaleImage }} style={styles.saleMediaImage} resizeMode="cover" />
+          ) : (
+            <View style={[styles.saleMediaImage, styles.saleMediaPlaceholder]}>
+              <Text style={styles.saleMediaPlaceholderText}>🏷️</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={[styles.saleBody, isWideLayout ? styles.saleBodyWide : null]}>
+          <Text style={styles.saleTitle}>{sale.yardsaleTitle || 'Yard Sale'}</Text>
+          <Text style={styles.saleMeta}>Date: {formatDateRange(sale.yardsaleDate, sale.yardsaleEndDate || sale.yardsaleExpires)}</Text>
+          <Text style={styles.saleMeta}>Time: {timeText}</Text>
+          <Text style={styles.saleMeta}>Location: {getDisplayLocation(sale)}</Text>
+          <Text style={styles.saleDescription}>{sale.yardsaleDescription || ''}</Text>
+        </View>
       </View>
     );
   };
@@ -463,6 +478,40 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
+  },
+  saleCardWide: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    padding: 10,
+  },
+  saleMediaWrap: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  saleMediaWrapWide: {
+    width: 220,
+    marginBottom: 0,
+    marginRight: 12,
+  },
+  saleMediaImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#e2e8f0',
+  },
+  saleMediaPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fef2f2',
+  },
+  saleMediaPlaceholderText: {
+    fontSize: 40,
+  },
+  saleBody: {
+    flex: 1,
+  },
+  saleBodyWide: {
+    justifyContent: 'center',
   },
   saleTitle: {
     fontSize: 17,

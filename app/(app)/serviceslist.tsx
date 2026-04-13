@@ -43,6 +43,9 @@ interface ServiceListing {
   contactEmail?: string | null;
   contactWebsite?: string | null;
   serviceArea?: string | null;
+  rating?: number;
+  reviewCount?: number;
+  location?: string;
   isFeatured?: boolean;
   userId: string;
 }
@@ -128,6 +131,9 @@ export default function ServicesList() {
           contactEmail: data.contactEmail || null,
           contactWebsite: data.contactWebsite || null,
           serviceArea: data.serviceArea || null,
+          rating: data.rating || 5.0,
+          reviewCount: data.reviewCount || 0,
+          location: data.location || 'Harrison',
           isFeatured: data.isFeatured || false,
           userId: data.userId,
         });
@@ -178,9 +184,16 @@ export default function ServicesList() {
         <View style={styles.cardContent}>
           <Text style={styles.serviceName} numberOfLines={1}>{item.serviceName}</Text>
           <Text style={styles.cardMetaText}>Price: {price || 'Not listed'}</Text>
-          <Text style={styles.cardMetaText}>Location: {item.serviceArea || 'Not provided'}</Text>
-          <Text style={styles.cardMetaText}>Rating: Coming soon</Text>
-          <Text style={styles.cardMetaText}>Type of Service: {item.category || 'Other'}</Text>
+          <Text style={styles.cardMetaText}>Service Type: {item.category || 'Other'}</Text>
+
+          <View style={styles.ratingLocationRow}>
+            <View style={styles.ratingColumn}>
+              <Text style={styles.ratingText}>⭐ {item.rating || 5.0}</Text>
+            </View>
+            <View style={styles.locationColumn}>
+              <Text style={styles.locationText}>📍 {item.location || 'Harrison'}</Text>
+            </View>
+          </View>
 
           <View style={styles.viewDetailsButton}>
             <Text style={styles.viewDetailsButtonText}>View Details</Text>
@@ -194,7 +207,7 @@ export default function ServicesList() {
   const resultsTitle = selectedCategory === 'All' ? 'All Services' : `${selectedCategory} Services`;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <BackToCommunityHubRow />
 
       <View style={styles.header}>
@@ -295,6 +308,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    paddingBottom: 48,
   },
   header: {
     padding: 16,
@@ -453,7 +469,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 6,
     left: 6,
-    backgroundColor: '#f97316',
+    backgroundColor: '#475569',
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 4,
@@ -482,6 +498,31 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 10,
+  },
+  ratingLocationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  ratingColumn: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  locationColumn: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#f97316',
+  },
+  locationText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0f766e',
   },
   serviceName: {
     fontSize: 14,

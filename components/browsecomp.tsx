@@ -9,6 +9,7 @@ import { useAccountStatus } from '../hooks/useAccountStatus';
 import { isUserBlocked } from '../utils/blockService';
 import { isListingVisible } from '../utils/listingVisibility';
 import FeaturedListings from './FeaturedListings';
+import GridListingCard from './GridListingCard';
 
 const CATEGORIES = [
 	'All',
@@ -181,10 +182,6 @@ export default function BrowseComp() {
 					resizeMode="cover"
 				/>
 				<View style={styles.listHubHighlightTextWrap}>
-					<Text style={styles.listHubHighlightTitle}>List Hub</Text>
-					<Text style={styles.listHubHighlightBody}>
-						Promote what you offer, post your listing fast, and reach neighbors who are ready to buy.
-					</Text>
 					<TouchableOpacity
 						style={styles.listHubHighlightButton}
 						onPress={() => router.push((user ? '/(tabs)/listbutton' : '/signInOrSignUp') as any)}
@@ -268,64 +265,29 @@ export default function BrowseComp() {
 				<View style={styles.listingsGridContainer}>
 					<View style={styles.listingsGrid}>
 						{filteredListings.map((listing) => {
-							const timeLabel = listing.createdAt 
-								? (() => {
-									const diffMs = Date.now() - (listing.createdAt.toMillis ? listing.createdAt.toMillis() : new Date(listing.createdAt).getTime());
-									const minutes = Math.floor(diffMs / 60000);
-									if (minutes < 1) return 'Just posted';
-									if (minutes < 60) return `${minutes}m ago`;
-									const hours = Math.floor(minutes / 60);
-									if (hours < 24) return `${hours}h ago`;
-									const days = Math.floor(hours / 24);
-									if (days < 7) return `${days}d ago`;
-									const weeks = Math.floor(days / 7);
-									if (weeks < 5) return `${weeks}w ago`;
-									const months = Math.floor(days / 30);
-									return `${months}mo ago`;
-								})()
-								: '';
-							
+							const createdAtMs = listing.createdAt
+								? (listing.createdAt.toMillis ? listing.createdAt.toMillis() : new Date(listing.createdAt).getTime())
+								: undefined;
+
 							return (
-								<TouchableOpacity
-									key={listing.id}
-									style={styles.listingCard}
-									onPress={() => router.push({
-										pathname: '/listing',
-										params: { id: listing.id }
-									})}
-									activeOpacity={0.8}
-								>
-									<View style={styles.imageWrapper}>
-										{listing.isFeatured && (
-											<View style={styles.featuredBadge}>
-												<Text style={styles.featuredBadgeText}>⭐ Featured</Text>
-											</View>
-										)}
-										{listing.images && listing.images[0] ? (
-											<Image 
-												source={{ uri: listing.images[0] }}
-												style={styles.listingImage}
-												resizeMode="cover"
-											/>
-										) : (
-											<View style={[styles.listingImage, { backgroundColor: '#eee' }]} />
-										)}
-									</View>
-									<View style={styles.listingInfo}>
-										<Text style={styles.listingTitle} numberOfLines={2}>{listing.title}</Text>
-										<Text style={styles.listingPrice}>${listing.price || 'N/A'}</Text>
-										<View style={styles.metaRow}>
-											{listing.category && <Text style={styles.metaText}>{listing.category}</Text>}
-											{listing.category && timeLabel && <Text style={styles.metaDot}>·</Text>}
-											{timeLabel && <Text style={styles.metaText}>{timeLabel}</Text>}
-										</View>
-										{listing.viewCount != null && <Text style={styles.viewCount}>👀 {listing.viewCount.toLocaleString()} views</Text>}
-										<View style={styles.footer}>
-											{listing.sellerName && <Text style={styles.footerText}>👤 {listing.sellerName}</Text>}
-											{(listing.city || listing.location) && <Text style={styles.footerText}>📍 {listing.city || listing.location}</Text>}
-										</View>
-									</View>
-								</TouchableOpacity>
+								<View key={listing.id} style={styles.listingCard}>
+									<GridListingCard
+										title={listing.title || ''}
+										price={String(listing.price ?? '')}
+										category={listing.category}
+										viewCount={typeof listing.viewCount === 'number' ? listing.viewCount : undefined}
+										sellerName={listing.sellerName}
+										createdAt={createdAtMs}
+										city={listing.city}
+										location={listing.location || listing.zipCode}
+										isFeatured={Boolean(listing.isFeatured)}
+										imageSource={Array.isArray(listing.images) && listing.images[0] ? { uri: listing.images[0] } : undefined}
+										onPress={() => router.push({
+											pathname: '/listing',
+											params: { id: listing.id }
+										})}
+									/>
+								</View>
 							);
 						})}
 					</View>
@@ -649,7 +611,7 @@ const styles = StyleSheet.create({
 		top: 6,
 		left: 6,
 		zIndex: 10,
-		backgroundColor: '#f97316',
+		backgroundColor: '#475569',
 		borderRadius: 4,
 		paddingHorizontal: 6,
 		paddingVertical: 3,

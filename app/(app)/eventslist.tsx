@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 
@@ -10,6 +10,7 @@ type EventRecord = {
   id: string;
   userId?: string;
   contactEmail?: string;
+  eventImage?: string;
   eventTitle?: string;
   eventDescription?: string;
   eventDate?: unknown;
@@ -155,6 +156,8 @@ function getDateBuckets(events: EventRecord[]) {
 }
 
 export default function EventsListScreen() {
+  const { width } = useWindowDimensions();
+  const isWideLayout = width >= 920;
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -356,7 +359,7 @@ export default function EventsListScreen() {
     Alert.alert('Report Listing', 'Why are you reporting this event listing?', [
       { text: 'Spam', onPress: () => submitEventReport(eventItem, 'spam') },
       { text: 'Scam/Fraud', onPress: () => submitEventReport(eventItem, 'scam') },
-      { text: 'Prohibited Content', onPress: () => submitEventReport(eventItem, 'prohibited_content') },
+      { text: 'Inappropriate Content', onPress: () => submitEventReport(eventItem, 'inappropriate_content') },
       { text: 'Misleading Information', onPress: () => submitEventReport(eventItem, 'misleading_content') },
       { text: 'Cancel', style: 'cancel' },
     ]);
@@ -413,43 +416,55 @@ export default function EventsListScreen() {
   };
 
   const renderEventCard = (eventItem: EventRecord) => (
-    <View key={eventItem.id} style={styles.eventCard}>
-      {/** Save/unsave uses the shared saveListings collection with listingType='event'. */}
-      <Text style={styles.eventTitle}>{eventItem.eventTitle || 'Event'}</Text>
-      {!!formatDateRange(eventItem.eventDate, eventItem.eventEndDate) && (
-        <Text style={styles.eventMeta}>{formatDateRange(eventItem.eventDate, eventItem.eventEndDate)}</Text>
-      )}
-      {!!(eventItem.eventCity || eventItem.eventState) && (
-        <Text style={styles.eventMeta}>
-          {eventItem.eventCity || ''}
-          {eventItem.eventState ? `${eventItem.eventCity ? ', ' : ''}${eventItem.eventState}` : ''}
-        </Text>
-      )}
-      {!!(eventItem.eventStarttime || eventItem.eventEndtime) && (
-        <Text style={styles.eventMeta}>
-          {eventItem.eventStarttime || ''}
-          {eventItem.eventEndtime ? `${eventItem.eventStarttime ? ' - ' : ''}${eventItem.eventEndtime}` : ''}
-        </Text>
-      )}
-      {!!eventItem.eventDescription && <Text style={styles.eventDescription}>{eventItem.eventDescription}</Text>}
-      <View style={styles.eventActions}>
-        <TouchableOpacity
-          style={[styles.saveButton, savedEventIds.includes(eventItem.id) ? styles.saveButtonSaved : null]}
-          activeOpacity={0.86}
-          disabled={savingEventId === eventItem.id}
-          onPress={() => toggleSaveEvent(eventItem)}
-        >
-          <Text style={[styles.saveButtonText, savedEventIds.includes(eventItem.id) ? styles.saveButtonTextSaved : null]}>
-            {savedEventIds.includes(eventItem.id) ? 'Saved' : 'Save Listing'}
+    <View key={eventItem.id} style={[styles.eventCard, isWideLayout ? styles.eventCardWide : null]}>
+      <View style={[styles.eventMediaWrap, isWideLayout ? styles.eventMediaWrapWide : null]}>
+        {eventItem.eventImage ? (
+          <Image source={{ uri: eventItem.eventImage }} style={styles.eventMediaImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.eventMediaImage, styles.eventMediaPlaceholder]}>
+            <Text style={styles.eventMediaPlaceholderText}>🎉</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={[styles.eventBody, isWideLayout ? styles.eventBodyWide : null]}>
+        {/** Save/unsave uses the shared saveListings collection with listingType='event'. */}
+        <Text style={styles.eventTitle}>{eventItem.eventTitle || 'Event'}</Text>
+        {!!formatDateRange(eventItem.eventDate, eventItem.eventEndDate) && (
+          <Text style={styles.eventMeta}>{formatDateRange(eventItem.eventDate, eventItem.eventEndDate)}</Text>
+        )}
+        {!!(eventItem.eventCity || eventItem.eventState) && (
+          <Text style={styles.eventMeta}>
+            {eventItem.eventCity || ''}
+            {eventItem.eventState ? `${eventItem.eventCity ? ', ' : ''}${eventItem.eventState}` : ''}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.reportButton}
-          activeOpacity={0.86}
-          onPress={() => handleReportEvent(eventItem)}
-        >
-          <Text style={styles.reportButtonText}>Report</Text>
-        </TouchableOpacity>
+        )}
+        {!!(eventItem.eventStarttime || eventItem.eventEndtime) && (
+          <Text style={styles.eventMeta}>
+            {eventItem.eventStarttime || ''}
+            {eventItem.eventEndtime ? `${eventItem.eventStarttime ? ' - ' : ''}${eventItem.eventEndtime}` : ''}
+          </Text>
+        )}
+        {!!eventItem.eventDescription && <Text style={styles.eventDescription}>{eventItem.eventDescription}</Text>}
+        <View style={styles.eventActions}>
+          <TouchableOpacity
+            style={[styles.saveButton, savedEventIds.includes(eventItem.id) ? styles.saveButtonSaved : null]}
+            activeOpacity={0.86}
+            disabled={savingEventId === eventItem.id}
+            onPress={() => toggleSaveEvent(eventItem)}
+          >
+            <Text style={[styles.saveButtonText, savedEventIds.includes(eventItem.id) ? styles.saveButtonTextSaved : null]}>
+              {savedEventIds.includes(eventItem.id) ? 'Saved' : 'Save Listing'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.reportButton}
+            activeOpacity={0.86}
+            onPress={() => handleReportEvent(eventItem)}
+          >
+            <Text style={styles.reportButtonText}>Report</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -585,7 +600,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 14,
-    paddingBottom: 36,
+    paddingBottom: 64,
   },
   hero: {
     paddingVertical: 24,
@@ -750,6 +765,40 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
+  },
+  eventCardWide: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    padding: 10,
+  },
+  eventMediaWrap: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  eventMediaWrapWide: {
+    width: 220,
+    marginBottom: 0,
+    marginRight: 12,
+  },
+  eventMediaImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#e2e8f0',
+  },
+  eventMediaPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ecfeff',
+  },
+  eventMediaPlaceholderText: {
+    fontSize: 44,
+  },
+  eventBody: {
+    flex: 1,
+  },
+  eventBodyWide: {
+    justifyContent: 'center',
   },
   eventTitle: {
     fontSize: 17,

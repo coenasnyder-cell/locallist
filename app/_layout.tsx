@@ -44,6 +44,8 @@ export default function RootLayout() {
             <Stack.Screen name="verify-email" options={{ headerShown: false }} />
             <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
             <Stack.Screen name="account-restricted" options={{ headerShown: false }} />
+            <Stack.Screen name="privacy" options={{ headerShown: false }} />
+            <Stack.Screen name="termsOfUse" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           </Stack>
           <StatusBar style="auto" />

@@ -271,10 +271,167 @@ export const createCheckoutSession = onCall(
 );
 
 /**
+ * Create PaymentIntent for Featured Listing/Service Payment (Mobile Payment Sheet)
+ * Returns client secret for Stripe Payment Sheet SDK
+ */
+export const createFeaturePaymentSheet = onCall(
+  { secrets: ["STRIPE_SECRET_KEY"] },
+  async (request) => {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+    if (!stripeSecretKey) {
+      logger.error("Missing Stripe secret key");
+      throw new Error("Stripe is not configured");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    const itemType = String(request.data?.itemType || "listing").toLowerCase();
+    const isService = itemType === "service";
+    const listingId = request.data?.listingId;
+    const listingTitle = request.data?.listingTitle;
+    const serviceId = request.data?.serviceId;
+    const serviceTitle = request.data?.serviceTitle;
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    const targetId = isService ? serviceId : listingId;
+    const targetTitle = isService ? serviceTitle : listingTitle;
+
+    if (!targetId || !targetTitle) {
+      throw new Error(
+        isService
+          ? "Missing required parameters: serviceId and serviceTitle"
+          : "Missing required parameters: listingId and listingTitle"
+      );
+    }
+
+    try {
+      const unitAmount = isService ? 1000 : 500; // $10 for service, $5 for listing
+      const itemDescription = isService
+        ? "30 days of featured service placement (activates after admin approval)"
+        : "7 days of featured placement (activates after admin approval)";
+
+      // Create a PaymentIntent for mobile Payment Sheet
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: unitAmount,
+        currency: "usd",
+        payment_method_types: ["card"],
+        description: itemDescription,
+        metadata: {
+          itemType: isService ? "service" : "listing",
+          targetId: String(targetId),
+          userId: String(userId),
+          ...(isService ? { serviceId: String(targetId), serviceTitle } : { listingId: String(targetId), listingTitle }),
+        },
+      });
+
+      if (!paymentIntent.client_secret) {
+        throw new Error("Failed to generate payment intent client secret");
+      }
+
+      logger.info(
+        `Payment intent created: ${paymentIntent.id} for ${isService ? "service" : "listing"}: ${targetId}`
+      );
+
+      return {
+        paymentIntentClientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      };
+    } catch (error) {
+      logger.error("Error creating payment intent:", error);
+      throw new Error("Failed to create payment sheet");
+    }
+  }
+);
+
+/**
+ * Finalize Feature Purchase - called after successful Payment Sheet payment
+ * Updates listing/service status and creates purchase record
+ */
+export const finalizeFeaturePurchase = onCall(
+  { secrets: ["STRIPE_SECRET_KEY"] },
+  async (request) => {
+    const db = getFirestore();
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+    if (!stripeSecretKey) {
+      throw new Error("Stripe is not configured");
+    }
+
+    const itemType = String(request.data?.itemType || "listing").toLowerCase();
+    const isService = itemType === "service";
+    const listingId = request.data?.listingId;
+    const serviceId = request.data?.serviceId;
+    const paymentIntentId = request.data?.paymentIntentId;
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    if (!paymentIntentId) {
+      throw new Error("Missing paymentIntentId");
+    }
+
+    const targetId = isService ? serviceId : listingId;
+
+    if (!targetId) {
+      throw new Error(
+        isService
+          ? "Missing required parameter: serviceId"
+          : "Missing required parameter: listingId"
+      );
+    }
+
+    try {
+      const stripe = new Stripe(stripeSecretKey, {
+        apiVersion: "2026-02-25.clover",
+      });
+
+      // Verify payment intent succeeded
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status !== "succeeded") {
+        throw new Error(`Payment intent status is ${paymentIntent.status}, expected succeeded`);
+      }
+
+      // Update the listing/service with featured purchase info
+      const collectionName = isService ? "services" : "listings";
+      const docRef = db.collection(collectionName).doc(String(targetId));
+
+      await docRef.update({
+        featurePaymentStatus: "completed",
+        featurePaymentIntentId: paymentIntentId,
+        featurePurchasedAt: FieldValue.serverTimestamp(),
+        featureExpiresAt: new Date(Date.now() + (isService ? 30 : 7) * 24 * 60 * 60 * 1000), // 30 or 7 days
+      });
+
+      logger.info(
+        `Featured purchase finalized for ${isService ? "service" : "listing"}: ${targetId} with payment ${paymentIntentId}`
+      );
+
+      return {
+        success: true,
+        message: "Featured purchase completed successfully",
+      };
+    } catch (error) {
+      logger.error("Error finalizing feature purchase:", error);
+      throw new Error("Failed to finalize feature purchase");
+    }
+  }
+);
+
+/**
  * Create Stripe Checkout Session for Premium business upgrade.
  */
 export const createPremiumUpgradeCheckoutSession = onCall(
-  { secrets: ["STRIPE_SECRET_KEY", "STRIPE_PREMIUM_PRICE_ID"] },
+  { secrets: ["STRIPE_SECRET_KEY"] },
   async (request) => {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     const premiumPriceId = process.env.STRIPE_PREMIUM_PRICE_ID?.trim();
@@ -448,6 +605,143 @@ export const expireFeaturedListings = onSchedule("every day 02:00", async (conte
     
   } catch (error) {
     logger.error("Error in expireFeaturedListings:", error);
+    throw error;
+  }
+});
+
+type OrphanCleanupConfig = {
+  collection: string;
+  ownerFields: string[];
+  includeDocIdAsOwner?: boolean;
+  deleteWhenAnyOwnerMissing?: boolean;
+};
+
+function getCandidateOwnerIds(
+  docData: Record<string, unknown>,
+  docId: string,
+  config: OrphanCleanupConfig
+): string[] {
+  const fromFields = config.ownerFields.flatMap((field) => {
+    const value = docData[field];
+
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => String(item || "").trim())
+        .filter((item) => item.length > 0);
+    }
+
+    const normalized = String(value || "").trim();
+    return normalized ? [normalized] : [];
+  });
+
+  const withDocId = config.includeDocIdAsOwner
+    ? [...fromFields, String(docId || "").trim()].filter((value) => value.length > 0)
+    : fromFields;
+
+  return Array.from(new Set(withDocId));
+}
+
+/**
+ * Scheduled cleanup for documents whose owner account no longer exists.
+ * This includes listings (featured or not), services, jobs, business profiles,
+ * pets, events, yard sales, deals, and featured purchase records.
+ */
+export const cleanupOrphanedMarketplaceDocs = onSchedule("every day 03:00", async () => {
+  const db = getFirestore();
+  const cleanupConfig: OrphanCleanupConfig[] = [
+    { collection: "listings", ownerFields: ["userId"] },
+    { collection: "services", ownerFields: ["userId"] },
+    { collection: "threads", ownerFields: ["buyerId", "sellerId", "participantIds"], deleteWhenAnyOwnerMissing: true },
+    { collection: "jobBoard", ownerFields: ["userId", "businessId"] },
+    { collection: "pets", ownerFields: ["userId"] },
+    { collection: "events", ownerFields: ["userId"] },
+    { collection: "yardSales", ownerFields: ["userId"] },
+    { collection: "deals", ownerFields: ["userId", "businessId"] },
+    { collection: "businessLocal", ownerFields: ["userId", "ownerUserId"], includeDocIdAsOwner: true },
+    { collection: "shopLocal", ownerFields: ["userId", "ownerUserId"], includeDocIdAsOwner: true },
+    { collection: "featurePurchases", ownerFields: ["userId"] },
+  ];
+
+  try {
+    logger.info("Starting orphaned marketplace document cleanup");
+
+    const snapshots = await Promise.all(
+      cleanupConfig.map(async (config) => ({
+        config,
+        snapshot: await db.collection(config.collection).get(),
+      }))
+    );
+
+    const allUserIds = new Set<string>();
+    snapshots.forEach(({ config, snapshot }) => {
+      snapshot.docs.forEach((docSnap) => {
+        const candidateIds = getCandidateOwnerIds(
+          docSnap.data() as Record<string, unknown>,
+          docSnap.id,
+          config
+        );
+        candidateIds.forEach((id) => allUserIds.add(id));
+      });
+    });
+
+    const userIds = Array.from(allUserIds);
+
+    const existingUserIds = new Set<string>();
+    const userChunkSize = 300;
+
+    for (let i = 0; i < userIds.length; i += userChunkSize) {
+      const chunk = userIds.slice(i, i + userChunkSize);
+      const userRefs = chunk.map((userId) => db.collection("users").doc(userId));
+      const userSnaps = await db.getAll(...userRefs);
+
+      userSnaps.forEach((userSnap) => {
+        if (userSnap.exists) {
+          existingUserIds.add(userSnap.id);
+        }
+      });
+    }
+
+    const deleteChunkSize = 450;
+    let totalChecked = 0;
+    let totalDeleted = 0;
+
+    for (const { config, snapshot } of snapshots) {
+      const orphanedRefs = snapshot.docs
+        .filter((docSnap) => {
+          const candidateIds = getCandidateOwnerIds(
+            docSnap.data() as Record<string, unknown>,
+            docSnap.id,
+            config
+          );
+
+          if (candidateIds.length === 0) return true;
+          if (config.deleteWhenAnyOwnerMissing) {
+            return candidateIds.some((id) => !existingUserIds.has(id));
+          }
+          return candidateIds.every((id) => !existingUserIds.has(id));
+        })
+        .map((docSnap) => docSnap.ref);
+
+      for (let i = 0; i < orphanedRefs.length; i += deleteChunkSize) {
+        const chunk = orphanedRefs.slice(i, i + deleteChunkSize);
+        const batch = db.batch();
+        chunk.forEach((ref) => batch.delete(ref));
+        await batch.commit();
+      }
+
+      totalChecked += snapshot.size;
+      totalDeleted += orphanedRefs.length;
+
+      logger.info(
+        `Orphan cleanup: ${config.collection} checked ${snapshot.size}, deleted ${orphanedRefs.length}`
+      );
+    }
+
+    logger.info(
+      `Orphaned marketplace cleanup complete: checked ${totalChecked}, deleted ${totalDeleted}`
+    );
+  } catch (error) {
+    logger.error("Error in cleanupOrphanedMarketplaceDocs:", error);
     throw error;
   }
 });
@@ -754,6 +1048,8 @@ export const autoApproveService = onDocumentCreated(
 
       if (!userData) {
         logger.warn("User not found for service creator", { userId, serviceId });
+        await db.collection("services").doc(serviceId).delete();
+        logger.info(`Deleted orphaned service ${serviceId} because creator user was missing`);
         return;
       }
 

@@ -1,6 +1,6 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, auth } from '@/firebase';
-import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { Linking } from 'react-native';
 
 export const STRIPE_UPGRADE_CANCELED = 'stripe_upgrade_canceled';
 
@@ -17,49 +17,20 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
 
   try {
     const functions = getFunctions(app);
+    const createCheckout = httpsCallable(functions, 'createPremiumUpgradeCheckoutSession');
 
-    // 🔥 THIS is the correct function
-    const createSheet = httpsCallable(functions, 'createPremiumPaymentSheet');
-
-    const res: any = await createSheet({
-      premiumTestMode: true,
+    const res: any = await createCheckout({
+      mobileApp: true,
     });
 
-    const data = res.data;
+    const data = res?.data || {};
+    const checkoutUrl = String(data.url || '').trim();
 
-    if (
-      !data?.paymentIntentClientSecret ||
-      !data?.customerEphemeralKeySecret ||
-      !data?.customerId
-    ) {
-      return { success: false, error: 'Invalid payment setup from server.' };
+    if (!checkoutUrl) {
+      return { success: false, error: 'Invalid premium checkout link from server.' };
     }
 
-    // ✅ Initialize PaymentSheet
-    const { error: initError } = await initPaymentSheet({
-      merchantDisplayName: 'Local List',
-      customerId: data.customerId,
-      customerEphemeralKeySecret: data.customerEphemeralKeySecret,
-      paymentIntentClientSecret: data.paymentIntentClientSecret,
-    });
-
-    if (initError) {
-      return { success: false, error: initError.message };
-    }
-
-    // ✅ Present PaymentSheet
-    const { error: presentError } = await presentPaymentSheet();
-
-    if (presentError) {
-      if (presentError.code === 'Canceled') {
-        return { success: false, error: STRIPE_UPGRADE_CANCELED };
-      }
-      return { success: false, error: presentError.message };
-    }
-
-    // ✅ Finalize subscription
-    const finalize = httpsCallable(functions, 'finalizePremiumSubscription');
-    await finalize({ subscriptionId: data.subscriptionId });
+    await Linking.openURL(checkoutUrl);
 
     return { success: true };
 

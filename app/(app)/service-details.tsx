@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import UserReviewModal from '../../components/UserReviewModal';
@@ -15,7 +15,6 @@ type ServiceDetails = {
   serviceName?: string;
   providerName?: string;
   category?: string;
-  categoryIcon?: string;
   serviceDescription?: string;
   serviceImage?: string;
   images?: string[];
@@ -35,7 +34,6 @@ type ServiceDetails = {
   state?: string | null;
   zipCode?: string | null;
   city?: string | null;
-  isActive?: boolean;
   status?: string;
   approvalStatus?: string;
   isApproved?: boolean;
@@ -44,7 +42,6 @@ type ServiceDetails = {
 function isApprovedService(data: any): boolean {
   const status = String(data?.status || '').toLowerCase();
   const approvalStatus = String(data?.approvalStatus || '').toLowerCase();
-
   if (data?.isApproved === true) return true;
   if (approvalStatus === 'approved') return true;
   return status === 'approved';
@@ -53,7 +50,6 @@ function isApprovedService(data: any): boolean {
 function getPriceLabel(service: ServiceDetails): string | null {
   const priceType = String(service.priceType || '').toLowerCase();
   const amount = service.priceAmount;
-
   if (priceType === 'quote') return 'Free Quote';
   if (priceType === 'negotiable') return 'Negotiable';
   if (!amount) return null;
@@ -67,11 +63,7 @@ function getServiceLocationLabel(service: ServiceDetails): string {
   const city = String(service.locationCity || service.city || '').trim();
   const state = String(service.locationState || service.state || '').trim();
   const zip = String(service.locationZip || service.zipCode || '').trim();
-
-  // Show full address only when full structured address is available.
-  if (address && city && state && zip) {
-    return `${address}, ${city}, ${state} ${zip}`;
-  }
+  if (address && city && state && zip) return `${address}, ${city}, ${state} ${zip}`;
 
   const serviceArea = String(service.serviceArea || '').trim();
   if (serviceArea) return serviceArea;
@@ -82,7 +74,6 @@ function getServiceLocationLabel(service: ServiceDetails): string {
 
 function buildGalleryImages(service: ServiceDetails | null): string[] {
   if (!service) return [];
-
   const candidates: string[] = [
     ...(Array.isArray(service.serviceImages) ? service.serviceImages : []),
     ...(Array.isArray(service.images) ? service.images : []),
@@ -90,11 +81,7 @@ function buildGalleryImages(service: ServiceDetails | null): string[] {
     String(service.serviceImage || '').trim(),
   ];
 
-  return Array.from(
-    new Set(
-      candidates.filter((value) => typeof value === 'string' && /^https?:\/\//i.test(value.trim()))
-    )
-  );
+  return Array.from(new Set(candidates.filter((value) => /^https?:\/\//i.test(String(value || '').trim()))));
 }
 
 export default function ServiceDetailsScreen() {
@@ -106,7 +93,9 @@ export default function ServiceDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const currentUser = getAuth().currentUser;
+  const galleryImages = useMemo(() => buildGalleryImages(service), [service]);
 
   useEffect(() => {
     const loadService = async () => {
@@ -118,21 +107,19 @@ export default function ServiceDetailsScreen() {
       try {
         const db = getFirestore(app);
         const snap = await getDoc(doc(db, 'services', idParam));
-
         if (!snap.exists()) {
           setService(null);
           return;
         }
 
-        const data = snap.data();
-        if (data?.isActive === false || !isApprovedService(data)) {
+        const data = snap.data() as ServiceDetails;
+        if (!isApprovedService(data)) {
           setService(null);
           return;
         }
 
-        setService({ id: snap.id, ...(data as Omit<ServiceDetails, 'id'>) });
-      } catch (error) {
-        console.error('Error loading service details:', error);
+        setService({ id: snap.id, ...data });
+      } catch {
         setService(null);
       } finally {
         setLoading(false);
@@ -195,13 +182,12 @@ export default function ServiceDetailsScreen() {
   };
 
   const handleReportService = () => {
-    Alert.alert('Report Listing', 'Why are you reporting this service listing?', [
-      { text: 'Spam', onPress: () => submitServiceReport('spam') },
-      { text: 'Scam/Fraud', onPress: () => submitServiceReport('scam') },
-      { text: 'Prohibited Content', onPress: () => submitServiceReport('prohibited_content') },
-      { text: 'Misleading Information', onPress: () => submitServiceReport('misleading_content') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setReportModalVisible(true);
+  };
+
+  const handleReportServiceReason = (reason: string) => {
+    submitServiceReport(reason);
+    setReportModalVisible(false);
   };
 
   const handleSubmitServiceReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
@@ -257,7 +243,7 @@ export default function ServiceDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <BackToCommunityHubRow />
         <View style={styles.centerState}>
-          <Text style={styles.stateText}>Service not found or not available.</Text>
+          <Text style={styles.stateText}>Service not found.</Text>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Text style={styles.backButtonText}>Back to Services</Text>
           </TouchableOpacity>
@@ -266,13 +252,12 @@ export default function ServiceDetailsScreen() {
     );
   }
 
-  const price = getPriceLabel(service);
+  const priceLabel = getPriceLabel(service);
   const locationLabel = getServiceLocationLabel(service);
-  const galleryImages = useMemo(() => buildGalleryImages(service), [service]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <BackToCommunityHubRow />
 
         <View style={styles.card}>
@@ -280,63 +265,41 @@ export default function ServiceDetailsScreen() {
             <Image source={{ uri: service.serviceImage }} style={styles.heroImage} resizeMode="cover" />
           ) : (
             <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderIcon}>{service.categoryIcon || '🧰'}</Text>
+              <Text style={styles.placeholderIcon}>🛠️</Text>
             </View>
           )}
 
           <View style={styles.body}>
             <Text style={styles.title}>{service.serviceName || 'Service'}</Text>
-            {!!service.providerName && (
-              service.userId ? (
-                <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: service.userId } })}>
-                  <Text style={[styles.provider, styles.profileLink]}>by {service.providerName}</Text>
-                </TouchableOpacity>
-              ) : (
-                <Text style={styles.provider}>by {service.providerName}</Text>
-              )
+            {!!service.providerName && <Text style={styles.provider}>By {service.providerName}</Text>}
+            {!!service.userId && (
+              <TouchableOpacity onPress={() => router.push({ pathname: '/businessprofile', params: { id: service.userId } })}>
+                <Text style={styles.profileLink}>View Provider Profile</Text>
+              </TouchableOpacity>
             )}
+
             <View style={styles.pillRow}>
-              {!!service.category && (
-                <Text style={styles.categoryPill}>{service.categoryIcon} {service.category}</Text>
-              )}
-              {!!price && <Text style={styles.pricePill}>{price}</Text>}
+              {!!service.category && <Text style={styles.categoryPill}>{service.category}</Text>}
+              {!!priceLabel && <Text style={styles.pricePill}>{priceLabel}</Text>}
             </View>
 
-            {!!service.serviceDescription && (
-              <Text style={styles.description}>{service.serviceDescription}</Text>
-            )}
-
-            <Text style={styles.ratingText}>Rating: Coming soon</Text>
+            {!!service.serviceDescription && <Text style={styles.description}>{service.serviceDescription}</Text>}
 
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Service Information</Text>
-              <Text style={styles.meta}>Type of Service: {service.category || 'Other'}</Text>
-              <Text style={styles.meta}>Location: {locationLabel}</Text>
+              <Text style={styles.sectionTitle}>Service Area</Text>
+              <Text style={styles.meta}>{locationLabel}</Text>
             </View>
 
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Contact Information</Text>
-              {!!service.userId && <Text style={styles.profileLink} onPress={() => router.push({ pathname: '/public-profile', params: { userId: service.userId } })}>View provider profile</Text>}
-              {!!service.contactPhone && <Text style={styles.meta}>Phone: {service.contactPhone}</Text>}
-              {!!service.contactEmail && <Text style={styles.meta}>Email: {service.contactEmail}</Text>}
-              {!!service.contactWebsite && <Text style={styles.meta}>Website: {service.contactWebsite}</Text>}
-              {!service.contactPhone && !service.contactEmail && !service.contactWebsite && (
-                <Text style={styles.meta}>No contact details provided.</Text>
-              )}
-            </View>
-
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Gallery</Text>
-              {galleryImages.length > 0 ? (
+            {galleryImages.length > 1 ? (
+              <View style={styles.sectionCard}>
+                <Text style={styles.sectionTitle}>Gallery</Text>
                 <View style={styles.galleryGrid}>
                   {galleryImages.map((uri, index) => (
                     <Image key={`${uri}-${index}`} source={{ uri }} style={styles.galleryImage} resizeMode="cover" />
                   ))}
                 </View>
-              ) : (
-                <Text style={styles.meta}>No gallery images yet.</Text>
-              )}
-            </View>
+              </View>
+            ) : null}
 
             <View style={styles.bottomActionsWrap}>
               <TouchableOpacity
@@ -346,6 +309,12 @@ export default function ServiceDetailsScreen() {
               >
                 <Text style={styles.actionButtonText}>Visit Website</Text>
               </TouchableOpacity>
+
+              {!!service.contactPhone && (
+                <TouchableOpacity style={styles.backButton} onPress={() => openPhone(service.contactPhone as string)}>
+                  <Text style={styles.backButtonText}>Call Provider</Text>
+                </TouchableOpacity>
+              )}
 
               {!!currentUser && service.userId !== currentUser.uid && (
                 <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
@@ -376,6 +345,49 @@ export default function ServiceDetailsScreen() {
         }}
         onSubmit={handleSubmitServiceReview}
       />
+
+      <Modal
+        visible={reportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.reportModalOverlay}>
+          <View style={styles.reportModalContent}>
+            <View style={styles.reportModalHeader}>
+              <Text style={styles.reportModalTitle}>Report Service</Text>
+              <TouchableOpacity
+                style={styles.reportModalCloseButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={styles.reportModalCloseButtonText}>x</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.reportModalQuestion}>Why are you reporting this service?</Text>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportServiceReason('spam')}>
+                <Text style={styles.reportReasonText}>Spam</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportServiceReason('scam')}>
+                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportServiceReason('prohibited_content')}>
+                <Text style={styles.reportReasonText}>Prohibited Content</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportServiceReason('misleading_content')}>
+                <Text style={styles.reportReasonText}>Misleading Information</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.reportModalFooter}>
+              <TouchableOpacity style={styles.reportCancelButton} onPress={() => setReportModalVisible(false)}>
+                <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -386,7 +398,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   content: {
-    paddingBottom: 24,
+    paddingBottom: 56,
   },
   centerState: {
     flex: 1,
@@ -466,12 +478,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 5,
-  },
-  ratingText: {
-    marginTop: 10,
-    fontSize: 13,
-    color: '#64748b',
-    fontWeight: '600',
   },
   description: {
     marginTop: 12,
@@ -566,5 +572,84 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     textDecorationLine: 'underline',
+  },
+  reportModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  reportModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxWidth: 500,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  reportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  reportModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  reportModalCloseButton: {
+    padding: 4,
+  },
+  reportModalCloseButtonText: {
+    fontSize: 24,
+    color: '#666',
+  },
+  reportModalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  reportModalQuestion: {
+    fontSize: 14,
+    color: '#4b5563',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reportReasonButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafbfc',
+    marginBottom: 10,
+  },
+  reportReasonText: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  reportModalFooter: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  reportCancelButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+  },
+  reportCancelButtonText: {
+    fontSize: 14,
+    color: '#4b5563',
+    fontWeight: '600',
   },
 });

@@ -2,12 +2,12 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -135,12 +135,12 @@ export default function JobListingsScreen() {
       <View style={styles.digestBanner}>
         <Text style={styles.digestIcon}>📬</Text>
         <View style={styles.digestBody}>
-          <Text style={styles.digestTitle}>Get Weekly Job Digest Updates</Text>
+          <Text style={styles.digestTitle}>Get Job Digest Updates</Text>
           <Text style={styles.digestText}>
-            Subscribe for a weekly roundup of newly posted local jobs so you can keep up with fresh opportunities.
+            Subscribe for a roundup of newly posted local jobs so you can keep up with fresh opportunities.
           </Text>
           <View style={styles.digestPill}>
-            <Text style={styles.digestPillText}>Weekly Job Digest</Text>
+            <Text style={styles.digestPillText}>Job Digest</Text>
           </View>
         </View>
       </View>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 14,
     paddingTop: 22,
-    paddingBottom: 34,
+    paddingBottom: 60,
   },
   hero: {
     alignItems: 'center',

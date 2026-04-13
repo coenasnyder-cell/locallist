@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 1,
-    backgroundColor: '#0066cc',
+    backgroundColor: '#0f766e',
     minHeight: 46,
     paddingHorizontal: 8,
     paddingVertical: 12,

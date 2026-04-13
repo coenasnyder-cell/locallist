@@ -55,6 +55,7 @@ export default function BusinessProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
 
   const profileId = id || businessId;
 
@@ -204,13 +205,12 @@ export default function BusinessProfileScreen() {
   };
 
   const handleReportBusiness = () => {
-    Alert.alert('Report Listing', 'Why are you reporting this business listing?', [
-      { text: 'Spam', onPress: () => submitBusinessReport('spam') },
-      { text: 'Scam/Fraud', onPress: () => submitBusinessReport('scam') },
-      { text: 'Impersonation', onPress: () => submitBusinessReport('impersonation') },
-      { text: 'Misleading Information', onPress: () => submitBusinessReport('misleading_content') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setReportModalVisible(true);
+  };
+
+  const handleReportBusinessReason = (reason: string) => {
+    submitBusinessReport(reason);
+    setReportModalVisible(false);
   };
 
   const handleSubmitBusinessReview = async ({ rating, reviewText }: { rating: number; reviewText: string }) => {
@@ -284,7 +284,11 @@ export default function BusinessProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header />
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Business Header */}
         <View style={styles.headerSection}>
           {profile.businessLogo && (
@@ -453,7 +457,50 @@ export default function BusinessProfileScreen() {
         </View>
       </Modal>
 
-        <UserReviewModal
+      <Modal
+        visible={reportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.reportModalOverlay}>
+          <View style={styles.reportModalContent}>
+            <View style={styles.reportModalHeader}>
+              <Text style={styles.reportModalTitle}>Report Business Listing</Text>
+              <TouchableOpacity
+                style={styles.reportModalCloseButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={styles.reportModalCloseButtonText}>x</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.reportModalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.reportModalQuestion}>Why are you reporting this business listing?</Text>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportBusinessReason('spam')}>
+                <Text style={styles.reportReasonText}>Spam</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportBusinessReason('scam')}>
+                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportBusinessReason('impersonation')}>
+                <Text style={styles.reportReasonText}>Impersonation</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.reportReasonButton} onPress={() => handleReportBusinessReason('misleading_content')}>
+                <Text style={styles.reportReasonText}>Misleading Information</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.reportModalFooter}>
+              <TouchableOpacity style={styles.reportCancelButton} onPress={() => setReportModalVisible(false)}>
+                <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <UserReviewModal
           visible={reviewModalVisible}
           title="Review Business"
           submitting={submittingReview}
@@ -473,6 +520,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 48,
   },
   loadingContainer: {
     flex: 1,
@@ -703,5 +753,84 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+  },
+  reportModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  reportModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    maxWidth: 500,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  reportModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  reportModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  reportModalCloseButton: {
+    padding: 4,
+  },
+  reportModalCloseButtonText: {
+    fontSize: 24,
+    color: '#666',
+  },
+  reportModalBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  reportModalQuestion: {
+    fontSize: 14,
+    color: '#4b5563',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reportReasonButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fafbfc',
+    marginBottom: 10,
+  },
+  reportReasonText: {
+    fontSize: 14,
+    color: '#2d3748',
+    fontWeight: '500',
+  },
+  reportModalFooter: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  reportCancelButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+  },
+  reportCancelButtonText: {
+    fontSize: 14,
+    color: '#4b5563',
+    fontWeight: '600',
   },
 });

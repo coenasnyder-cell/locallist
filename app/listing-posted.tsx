@@ -34,7 +34,7 @@ export default function ListingPostedScreen() {
   const viewListing = () => {
     if (isMarketplaceListing) {
       router.replace({
-        pathname: '/SingleListing' as any,
+        pathname: '/listing' as any,
         params: { id: listingId },
       });
       return;

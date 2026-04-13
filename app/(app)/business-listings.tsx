@@ -4,6 +4,7 @@ import { collection, getDocs, getFirestore, query, where } from 'firebase/firest
 import React, { useEffect, useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from '../../components/Header';
 import { app } from '../../firebase';
 
 type ListingTab = 'marketplace' | 'services' | 'deals' | 'featured' | 'pending' | 'sold' | 'saved';
@@ -293,6 +294,7 @@ export default function BusinessListingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Listings Manager</Text>
@@ -359,6 +361,9 @@ export default function BusinessListingsScreen() {
                     const id = item.listingId || item.id;
                     router.push({ pathname: '/listing', params: { id } });
                   }
+                  if (item.kind === 'services') {
+                    router.push({ pathname: '/(app)/service-details', params: { id: item.id } });
+                  }
                   if (item.kind === 'saved' && item.listingId) {
                     router.push({ pathname: '/listing', params: { id: item.listingId } });
                   }
@@ -368,6 +373,7 @@ export default function BusinessListingsScreen() {
                   <Image source={{ uri: item.imageUrl }} style={styles.cardImage} resizeMode="cover" />
                 ) : (
                   <View style={styles.cardPlaceholder}>
+                    <Text style={styles.cardPlaceholderText}>No Image</Text>
                   </View>
                 )}
                 <View style={styles.cardBody}>
@@ -386,14 +392,15 @@ export default function BusinessListingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f5f7',
+    backgroundColor: '#f5f5f5',
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 14,
-    paddingBottom: 80,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 28,
     gap: 12,
   },
   loadingWrap: {
@@ -407,10 +414,10 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   hero: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#dbeafe',
-    borderRadius: 14,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
     padding: 16,
   },
   heroTitle: {
@@ -442,10 +449,11 @@ const styles = StyleSheet.create({
   },
   tabsWrap: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     zIndex: 30,
   },
   tabsLabel: {
@@ -506,7 +514,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff7ed',
     borderWidth: 1,
     borderColor: '#fdba74',
-    borderRadius: 10,
+    borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
@@ -520,37 +528,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 12,
+    borderRadius: 8,
     paddingVertical: 24,
     paddingHorizontal: 12,
   },
   stateText: {
-    textAlign: 'center',
+    textAlign: 'left',
     color: '#64748b',
     fontSize: 14,
     fontWeight: '600',
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    gap: 12,
   },
   card: {
-    width: '48%',
+    width: '100%',
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 12,
+    borderRadius: 8,
     overflow: 'hidden',
+    flexDirection: 'row',
   },
   cardImage: {
-    width: '100%',
-    height: 110,
+    width: 112,
+    height: 112,
     backgroundColor: '#e2e8f0',
   },
   cardPlaceholder: {
-    width: '100%',
-    height: 110,
+    width: 112,
+    height: 112,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f1f5f9',
@@ -561,21 +568,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cardBody: {
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingVertical: 10,
   },
   cardTitle: {
     color: '#0f172a',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   cardSubtitle: {
     marginTop: 4,
     color: '#64748b',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
   },
 });

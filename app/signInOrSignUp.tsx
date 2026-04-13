@@ -2,32 +2,32 @@ import PasswordTextInputRow from '@/components/PasswordTextInputRow';
 import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    GoogleAuthProvider,
-    signInWithCredential,
-    signInWithEmailAndPassword,
-    type User,
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  type User,
 } from 'firebase/auth';
 import { doc, getDoc, getDocFromServer, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { app, auth } from '../firebase';
 import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-    configureNativeGoogleSignIn,
-    getNativeGoogleIdToken,
-    getNativeGoogleSignInErrorMessage,
+  configureNativeGoogleSignIn,
+  getNativeGoogleIdToken,
+  getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 
 export const unstable_settings = {
@@ -160,7 +160,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/');
+    router.replace('/(tabs)/index' as any);
   };
 
   const handleGoogleLogin = async () => {

@@ -7,6 +7,9 @@ export interface Listing {
   images: string[];
   zipCode?: string;
   city?: string;
+  category?: string;
+  viewCount?: number;
+  sellerName?: string;
   status?: 'pending' | 'approved' | 'rejected' | string;
   createdAt?: any;
   updatedAt?: any;
