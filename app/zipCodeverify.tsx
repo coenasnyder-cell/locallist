@@ -5,18 +5,18 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { getFirestore } from 'firebase/firestore';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  BackHandler,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    BackHandler,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { app, auth } from '../firebase';
@@ -46,26 +46,28 @@ export default function ZipCodeVerifyScreen() {
 
   const normalizeReturnPath = (value: string | undefined): string => {
     if (!value || !value.startsWith('/')) {
-      return '/(tabs)/index';
+      return '/(tabs)';
     }
 
-    if (value === '/(tabs)' || value === '/(tabs)/') {
-      return '/(tabs)/index';
+    const cleaned = value.replace(/^\/\(app\)(?=\/|$)/, '') || '/';
+
+    if (cleaned === '/(tabs)' || cleaned === '/(tabs)/') {
+      return '/(tabs)';
     }
 
-    if (value === '/_sitemap' || value === '/+not-found') {
-      return '/(tabs)/index';
+    if (cleaned === '/_sitemap' || cleaned === '/+not-found') {
+      return '/(tabs)';
     }
 
-    return value;
+    return cleaned;
   };
 
   const openTerms = () => {
-    router.push('/(app)/termsOfUse' as any);
+    router.push('/termsOfUse' as any);
   };
 
   const openPrivacy = () => {
-    router.push('/(app)/privacy' as any);
+    router.push('/privacy' as any);
   };
 
   const handleLogout = () => {
@@ -197,7 +199,7 @@ export default function ZipCodeVerifyScreen() {
       if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
         router.replace(normalizeReturnPath(returnTo) as any);
       } else {
-        router.replace('/(tabs)/index' as any);
+        router.replace('/(tabs)' as any);
       }
     } catch (e: unknown) {
       const message =

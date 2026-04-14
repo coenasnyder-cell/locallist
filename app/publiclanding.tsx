@@ -3,7 +3,6 @@ import { getAuth, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import FeaturedListings from '../components/FeaturedListings';
 import GridListingCard from '../components/GridListingCard';
 import { app } from '../firebase';
 import { isListingVisible } from '../utils/listingVisibility';
@@ -35,7 +34,6 @@ type RecentPetListing = {
 
 type CommunityDisplaySettings = {
   showEditorsPicks: boolean;
-  showFeaturedListings: boolean;
   showQuoteOfDay: boolean;
   quoteOfDayText: string;
   quoteOfDayAttribution: string;
@@ -43,7 +41,6 @@ type CommunityDisplaySettings = {
 
 const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
   showEditorsPicks: true,
-  showFeaturedListings: true,
   showQuoteOfDay: true,
   quoteOfDayText: '',
   quoteOfDayAttribution: '',
@@ -77,6 +74,8 @@ export default function PublicLanding() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchDisplaySettings = async () => {
       try {
         const db = getFirestore(app);
@@ -86,15 +85,16 @@ export default function PublicLanding() {
           ? (settingsSnapshot.data() as Partial<CommunityDisplaySettings>)
           : {};
 
+        if (!isMounted) return;
         setDisplaySettings({
           showEditorsPicks: settingsData.showEditorsPicks ?? DEFAULT_DISPLAY_SETTINGS.showEditorsPicks,
-          showFeaturedListings: settingsData.showFeaturedListings ?? DEFAULT_DISPLAY_SETTINGS.showFeaturedListings,
           showQuoteOfDay: settingsData.showQuoteOfDay ?? DEFAULT_DISPLAY_SETTINGS.showQuoteOfDay,
           quoteOfDayText: settingsData.quoteOfDayText ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayText,
           quoteOfDayAttribution: settingsData.quoteOfDayAttribution ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayAttribution,
         });
       } catch (error) {
         console.error('Error fetching public display settings:', error);
+        if (!isMounted) return;
         setDisplaySettings(DEFAULT_DISPLAY_SETTINGS);
       }
     };
@@ -146,10 +146,12 @@ export default function PublicLanding() {
           })
           .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+        if (!isMounted) return;
         setRecentListings(listings);
       } catch (error) {
         console.error('Error fetching public recent listings:', error);
       } finally {
+        if (!isMounted) return;
         setLoading(false);
       }
     };
@@ -188,10 +190,12 @@ export default function PublicLanding() {
           };
         });
 
+        if (!isMounted) return;
         setRecentPetListings(pets);
       } catch (error) {
         console.error('Error fetching public pet listings:', error);
       } finally {
+        if (!isMounted) return;
         setPetsLoading(false);
       }
     };
@@ -199,6 +203,10 @@ export default function PublicLanding() {
     fetchDisplaySettings();
     fetchRecentListings();
     fetchRecentPetListings();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -238,15 +246,6 @@ export default function PublicLanding() {
           </TouchableOpacity>
         </View>
       </View>
-
-      {displaySettings.showFeaturedListings && (
-        <FeaturedListings
-          tier="premium"
-          title="✨ Featured"
-          subtitle="View-only preview — tap any card to sign in"
-          onListingPress={handlePreviewTap}
-        />
-      )}
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recent Listings</Text>
@@ -318,11 +317,11 @@ export default function PublicLanding() {
       <View style={styles.footer}>
         <Text style={styles.footerCopy}>© 2026 Local List. A local marketplace for Harrison.</Text>
         <View style={styles.footerLinksRow}>
-          <TouchableOpacity onPress={() => router.push('/(app)/termsOfUse' as any)} activeOpacity={0.8}>
+          <TouchableOpacity onPress={() => router.push('/termsOfUse' as any)} activeOpacity={0.8}>
             <Text style={styles.footerLink}>Terms of Use</Text>
           </TouchableOpacity>
           <Text style={styles.footerDivider}>|</Text>
-          <TouchableOpacity onPress={() => router.push('/(app)/privacy' as any)} activeOpacity={0.8}>
+          <TouchableOpacity onPress={() => router.push('/privacy' as any)} activeOpacity={0.8}>
             <Text style={styles.footerLink}>Privacy Policy</Text>
           </TouchableOpacity>
         </View>

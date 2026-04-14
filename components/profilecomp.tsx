@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
@@ -89,6 +89,8 @@ function normalizeSavedSection(item: AnyItem): SectionKey {
 export default function Profile() {
   const router = useRouter();
   const { user, profile, isAdmin, isBusinessAccount } = useAccountStatus();
+  const isMountedRef = useRef(true);
+  const fetchRequestIdRef = useRef(0);
 
   const [userProfile, setUserProfile] = useState<any>(null);
   const [listings, setListings] = useState<any[]>([]);
@@ -117,12 +119,22 @@ export default function Profile() {
     services: false,
   });
 
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      fetchRequestIdRef.current += 1;
+    };
+  }, []);
+
   const fetchData = async () => {
     if (!user?.uid) return;
+
+    const requestId = ++fetchRequestIdRef.current;
 
     try {
       const db = getFirestore(app);
       const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!isMountedRef.current || requestId !== fetchRequestIdRef.current) return;
       setUserProfile(userDoc.exists() ? userDoc.data() : null);
 
       const [listingsSnap, savedSnap, servicesSnap, eventsSnap, yardsSnap, petsSnap] = await Promise.all([
@@ -134,6 +146,8 @@ export default function Profile() {
         getDocs(query(collection(db, 'pets'), where('userId', '==', user.uid))),
       ]);
 
+      if (!isMountedRef.current || requestId !== fetchRequestIdRef.current) return;
+
       setListings(listingsSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
       setSavedListings(savedSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
       setServices(servicesSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
@@ -141,6 +155,7 @@ export default function Profile() {
       setYardSales(yardsSnap.docs.map((item) => ({ id: item.id, __kind: 'yardsale', ...item.data() })));
       setPets(petsSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
     } catch (error) {
+      if (!isMountedRef.current || requestId !== fetchRequestIdRef.current) return;
       console.error('Error loading profile data:', error);
     }
   };
@@ -158,17 +173,20 @@ export default function Profile() {
   useFocusEffect(
     React.useCallback(() => {
       fetchData();
+      return () => {
+        fetchRequestIdRef.current += 1;
+      };
     }, [user?.uid])
   );
 
   useEffect(() => {
-    if (profile) {
+    if (profile && isMountedRef.current) {
       setUserProfile((prev: any) => ({ ...(prev || {}), ...profile }));
     }
   }, [profile]);
 
   useEffect(() => {
-    if (showEditBusiness && !isBusinessAccount) {
+    if (showEditBusiness && !isBusinessAccount && isMountedRef.current) {
       setShowEditBusiness(false);
     }
   }, [isBusinessAccount, showEditBusiness]);

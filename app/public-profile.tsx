@@ -208,15 +208,32 @@ export default function PublicProfileScreen() {
           return;
         }
 
-        const [listingSnap, serviceSnap, reportedSnap, approvedReviewsSnap] = await Promise.all([
+        const [listingResult, serviceResult, reportedResult, approvedReviewsResult] = await Promise.allSettled([
           getDocs(query(collection(db, 'listings'), where('userId', '==', profileId))),
           getDocs(query(collection(db, 'services'), where('userId', '==', profileId))),
           getDocs(query(collection(db, 'reportedListings'), where('status', 'in', ['pending', 'reviewed', 'action_taken']))),
           getDocs(query(collection(db, 'userReviews'), where('ratedUserId', '==', profileId), where('status', '==', 'approved'))),
         ]);
 
+        if (listingResult.status !== 'fulfilled' || serviceResult.status !== 'fulfilled') {
+          throw new Error('Unable to load profile listings.');
+        }
+
+        const listingSnap = listingResult.value;
+        const serviceSnap = serviceResult.value;
+        const reportedSnap = reportedResult.status === 'fulfilled' ? reportedResult.value : null;
+        const approvedReviewsSnap = approvedReviewsResult.status === 'fulfilled' ? approvedReviewsResult.value : null;
+
+        if (reportedResult.status !== 'fulfilled') {
+          console.warn('Public profile reported-listings filter unavailable:', reportedResult.reason);
+        }
+
+        if (approvedReviewsResult.status !== 'fulfilled') {
+          console.warn('Public profile reviews unavailable:', approvedReviewsResult.reason);
+        }
+
         const excludedListingIds = new Set(
-          reportedSnap.docs
+          (reportedSnap?.docs || [])
             .map((reportDoc) => String(reportDoc.data()?.listingId || '').trim())
             .filter(Boolean)
         );
@@ -234,7 +251,7 @@ export default function PublicProfileScreen() {
           .sort((left, right) => toMillis(right.createdAt) - toMillis(left.createdAt))
           .slice(0, 8);
 
-        const reviews = approvedReviewsSnap.docs
+        const reviews = (approvedReviewsSnap?.docs || [])
           .map((item) => ({ id: item.id, ...(item.data() as Omit<ApprovedUserReview, 'id'>) }))
           .sort((left, right) => toMillis(right.createdAt) - toMillis(left.createdAt));
 

@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ImageSourcePropType, ViewStyle } from 'react-native';
 import { Alert, Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -245,8 +245,16 @@ export default function Header({
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [threadPreviews, setThreadPreviews] = useState<ThreadPreview[]>([]);
   const [slideAnim] = useState(new Animated.Value(-280));
+  const isMountedRef = useRef(true);
   const router = useRouter();
   const { user, loading, isAdmin } = useAccountStatus();
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      slideAnim.stopAnimation();
+    };
+  }, [slideAnim]);
 
   useEffect(() => {
     if (!user?.uid) {
@@ -258,6 +266,7 @@ export default function Header({
     const unsubscribe = onSnapshot(
       threadsQuery,
       (snapshot) => {
+        if (!isMountedRef.current) return;
         const rows = snapshot.docs.map((threadDoc) => ({ id: threadDoc.id, ...(threadDoc.data() as Omit<ThreadPreview, 'id'>) }));
         const unread = rows
           .filter((thread) => (thread.unreadBy || []).includes(user.uid))
@@ -270,6 +279,7 @@ export default function Header({
         setThreadPreviews(unread);
       },
       () => {
+        if (!isMountedRef.current) return;
         setThreadPreviews([]);
       }
     );
@@ -295,7 +305,9 @@ export default function Header({
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setMenuVisible(false);
+      if (isMountedRef.current) {
+        setMenuVisible(false);
+      }
     });
   };
 

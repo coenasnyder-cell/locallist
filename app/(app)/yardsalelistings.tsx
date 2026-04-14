@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -159,8 +159,17 @@ export default function YardSaleListingsScreen() {
   const [digestMessageType, setDigestMessageType] = useState<'success' | 'error' | ''>('');
   const [subscribing, setSubscribing] = useState(false);
   const router = useRouter();
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const fetchSales = async () => {
       try {
         const db = getFirestore(app);
@@ -175,16 +184,26 @@ export default function YardSaleListingsScreen() {
           return leftDate - rightDate;
         });
 
-        setSales(fetched);
+        if (!cancelled) {
+          setSales(fetched);
+        }
       } catch (error) {
         console.error('Error loading yard sales:', error);
-        setSales([]);
+        if (!cancelled) {
+          setSales([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchSales();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredSales = useMemo(() => {
@@ -226,15 +245,19 @@ export default function YardSaleListingsScreen() {
         subscribedAt: serverTimestamp(),
       });
 
+      if (!isMountedRef.current) return;
       setDigestMessage('Subscribed! You will receive the weekly yard sale digest.');
       setDigestMessageType('success');
       setDigestEmail('');
     } catch (error) {
       console.error('Yard sale digest subscription error:', error);
+      if (!isMountedRef.current) return;
       setDigestMessage('Something went wrong. Please try again.');
       setDigestMessageType('error');
     } finally {
-      setSubscribing(false);
+      if (isMountedRef.current) {
+        setSubscribing(false);
+      }
     }
   };
 
@@ -437,36 +460,12 @@ const styles = StyleSheet.create({
     color: '#0f172a',
     backgroundColor: '#fff',
   },
-  mapBlock: {
-    marginBottom: 22,
-  },
   sectionTitle: {
     fontSize: 23,
     fontWeight: '800',
     color: '#0f172a',
     marginBottom: 10,
     textAlign: 'center',
-  },
-  mapPlaceholder: {
-    height: 180,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 14,
-    backgroundColor: '#e5e7eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  mapPlaceholderText: {
-    fontSize: 14,
-    color: '#475569',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  mapNote: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 6,
   },
   sectionBlock: {
     marginBottom: 22,

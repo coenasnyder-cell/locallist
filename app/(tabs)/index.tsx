@@ -60,6 +60,8 @@ export default function HomeScreen() {
   const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchDisplaySettings = async () => {
       try {
         const db = getFirestore(app);
@@ -76,10 +78,12 @@ export default function HomeScreen() {
           quoteOfDayText: settingsData.quoteOfDayText ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayText,
           quoteOfDayAttribution: settingsData.quoteOfDayAttribution ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayAttribution,
         };
+        if (!isMounted) return;
         setDisplaySettings(newSettings);
       } catch (error) {
         console.error('Error fetching display settings:', error);
         // Silently use defaults if fetch fails (e.g., when not logged in)
+        if (!isMounted) return;
         setDisplaySettings(DEFAULT_DISPLAY_SETTINGS);
       }
     };
@@ -132,10 +136,12 @@ export default function HomeScreen() {
               };
             })
         );
+        if (!isMounted) return;
         setRecentListings(listings);
       } catch (error) {
         console.error('Error fetching recent listings:', error);
       } finally {
+        if (!isMounted) return;
         setLoading(false);
       }
     };
@@ -173,10 +179,12 @@ export default function HomeScreen() {
           };
         });
 
+        if (!isMounted) return;
         setRecentPetListings(pets);
       } catch (error) {
         console.error('Error fetching recent pet listings:', error);
       } finally {
+        if (!isMounted) return;
         setPetsLoading(false);
       }
     };
@@ -184,6 +192,10 @@ export default function HomeScreen() {
     fetchDisplaySettings();
     fetchRecentListings();
     fetchRecentPetListings();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleStartFirstListing = () => {

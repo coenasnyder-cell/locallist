@@ -442,6 +442,49 @@ service cloud.firestore {
     allow delete: if signedIn() && resource.data.userId == request.auth.uid;
   }
 
+  // User profile reviews shown on public profiles
+  match /userReviews/{reviewId} {
+    // Public can read only approved reviews; owners/admins can read all statuses.
+    allow read: if resource.data.status == 'approved'
+      || isAdmin()
+      || (signedIn() && (
+        resource.data.userId == request.auth.uid
+        || resource.data.ratedUserId == request.auth.uid
+      ));
+
+    // Any active signed-in user can submit a review for another user.
+    allow create: if signedIn()
+      && canAccessAccount()
+      && request.resource.data.userId == request.auth.uid
+      && request.resource.data.ratedUserId is string
+      && request.resource.data.ratedUserId.size() > 0
+      && request.resource.data.ratedUserId != request.auth.uid
+      && request.resource.data.rating is number
+      && request.resource.data.rating >= 1
+      && request.resource.data.rating <= 5
+      && request.resource.data.reviewText is string
+      && request.resource.data.reviewText.size() > 0
+      && request.resource.data.reviewTargetType in ['seller', 'business', 'service']
+      && request.resource.data.status == 'pending';
+
+    // Author can edit only their own pending review content.
+    allow update: if signedIn()
+      && resource.data.userId == request.auth.uid
+      && resource.data.status == 'pending'
+      && request.resource.data.userId == resource.data.userId
+      && request.resource.data.ratedUserId == resource.data.ratedUserId
+      && request.resource.data.reviewTargetType == resource.data.reviewTargetType
+      && request.resource.data.reviewTargetId == resource.data.reviewTargetId
+      && request.resource.data.status == 'pending'
+      && request.resource.data.rating is number
+      && request.resource.data.rating >= 1
+      && request.resource.data.rating <= 5
+      && request.resource.data.reviewText is string
+      && request.resource.data.reviewText.size() > 0;
+
+    allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+  }
+
   // Community yard sales listings
   match /yardSales/{saleId} {
     allow read: if true;
@@ -617,6 +660,37 @@ service cloud.firestore {
     allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
     allow update: if isAdmin();
     allow delete: if isAdmin();
+  }
+
+  // Contact Us submissions from the Support Hub form
+  match /supportMessages/{document} {
+    allow create: if request.resource.data.keys().hasOnly([
+        'name',
+        'email',
+        'message',
+        'createdAt',
+        'status',
+        'userId',
+        'platform'
+      ])
+      && request.resource.data.name is string
+      && request.resource.data.name.size() > 0
+      && request.resource.data.name.size() <= 120
+      && request.resource.data.email is string
+      && request.resource.data.email.size() > 0
+      && request.resource.data.email.size() <= 160
+      && request.resource.data.message is string
+      && request.resource.data.message.size() >= 3
+      && request.resource.data.message.size() <= 4000
+      && request.resource.data.status == 'new'
+      && request.resource.data.platform is string
+      && request.resource.data.platform in ['ios', 'android', 'web']
+      && request.resource.data.createdAt == request.time
+      && (
+        request.resource.data.userId == null
+        || (signedIn() && request.resource.data.userId == request.auth.uid)
+      );
+    allow read, update, delete: if isAdmin();
   }
 
   // App analytics - authenticated users write funnel events for data-driven decisions

@@ -9,9 +9,10 @@ import {
     updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -45,18 +46,20 @@ export const screenOptions = {
 
 function normalizeReturnPath(returnTo: string | undefined): string {
   if (!returnTo || !returnTo.startsWith('/')) {
-    return '/(tabs)/index';
+    return '/(tabs)';
   }
 
-  if (returnTo === '/(tabs)' || returnTo === '/(tabs)/') {
-    return '/(tabs)/index';
+  const cleaned = returnTo.replace(/^\/\(app\)(?=\/|$)/, '') || '/';
+
+  if (cleaned === '/(tabs)' || cleaned === '/(tabs)/') {
+    return '/(tabs)';
   }
 
-  if (returnTo === '/_sitemap' || returnTo === '/+not-found') {
-    return '/(tabs)/index';
+  if (cleaned === '/_sitemap' || cleaned === '/+not-found' || cleaned.includes('+not-found')) {
+    return '/(tabs)';
   }
 
-  return returnTo;
+  return cleaned;
 }
 
 const ACTION_URL = 'https://app.locallist.biz/auth-action';
@@ -91,6 +94,13 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [zipCode, setZipCode] = useState('');
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const isNative = Platform.OS !== 'web';
 
@@ -100,7 +110,7 @@ export default function SignUpScreen() {
       return;
     }
 
-    router.replace('/(tabs)/index' as any);
+    router.replace('/(tabs)' as any);
   };
 
   useEffect(() => {
@@ -163,11 +173,13 @@ export default function SignUpScreen() {
     } catch (googleError) {
       console.error('Google sign-up error:', googleError);
       const message = getNativeGoogleSignInErrorMessage(googleError);
-      if (message) {
+      if (message && isMountedRef.current) {
         setError(message);
       }
     } finally {
-      setGoogleBusy(false);
+      if (isMountedRef.current) {
+        setGoogleBusy(false);
+      }
     }
   };
 
@@ -312,14 +324,30 @@ export default function SignUpScreen() {
       try {
         await sendEmailVerification(user, { url: ACTION_URL });
       } catch (verificationError) {
-        console.warn('Verification email failed after signup:', verificationError);
+        console.warn('Verification email with action URL failed after signup, retrying default template:', verificationError);
+        try {
+          await sendEmailVerification(user);
+        } catch (fallbackError) {
+          console.warn('Verification email fallback also failed after signup:', fallbackError);
+          Alert.alert(
+            'Verify Email',
+            'Your account was created, but we could not send a verification email right now. Please use "Resend Verification Email" from the verification screen after login.'
+          );
+        }
       }
 
-      routeAfterAuth();
+      router.replace({
+        pathname: '/zipCodeverify' as any,
+        params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
+      });
     } catch (signupError) {
-      setError(getAuthErrorMessage(signupError, 'signup'));
+      if (isMountedRef.current) {
+        setError(getAuthErrorMessage(signupError, 'signup'));
+      }
     } finally {
-      setSubmitting(false);
+      if (isMountedRef.current) {
+        setSubmitting(false);
+      }
     }
   };
 

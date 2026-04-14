@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -70,11 +70,19 @@ export default function ServicesList() {
   const [listings, setListings] = useState<ServiceListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<ServiceListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const router = useRouter();
   const categoryOptions = ['All', ...CATEGORIES.map((c) => c.label)];
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     fetchServiceListings();
@@ -106,6 +114,11 @@ export default function ServicesList() {
   }, [selectedCategory]);
 
   const fetchServiceListings = async () => {
+    if (isMountedRef.current) {
+      setLoading(true);
+      setLoadError(null);
+    }
+
     try {
       const db = getFirestore(app);
       const snapshot = await getDocs(collection(db, 'services'));
@@ -139,12 +152,21 @@ export default function ServicesList() {
         });
       });
 
+      if (!isMountedRef.current) return;
       setListings(results);
       setFilteredListings(results);
     } catch (error) {
       console.error('Error fetching service listings:', error);
+      if (!isMountedRef.current) return;
+      const message =
+        'Could not load services right now. Please check your connection and try again.';
+      setLoadError(message);
+      setListings([]);
+      setFilteredListings([]);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -268,6 +290,14 @@ export default function ServicesList() {
 
       {loading ? (
         <Text style={styles.emptyText}>Loading services...</Text>
+      ) : loadError ? (
+        <View style={styles.errorState}>
+          <Text style={styles.errorTitle}>Service Listings Unavailable</Text>
+          <Text style={styles.errorText}>{loadError}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchServiceListings} activeOpacity={0.85}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       ) : filteredListings.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>No Services Found</Text>
@@ -578,5 +608,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  errorState: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    backgroundColor: '#fff5f5',
+    alignItems: 'center',
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#991b1b',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#7f1d1d',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  retryButton: {
+    backgroundColor: '#991b1b',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

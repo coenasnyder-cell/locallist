@@ -9,6 +9,12 @@ config.resolver.blockList = [
   new RegExp(`^${projectRoot}[\\/]functions[\\/].*`),
   new RegExp(`^${projectRoot}[\\/]backend[\\/].*`),
   new RegExp(`^${projectRoot}[\\/]\\.firebase[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]dist[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]dist-web-check[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]dist-web-check-2[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]\\.expo-export-check[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]git[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]master[\\/].*`),
 ];
 
 module.exports = config;

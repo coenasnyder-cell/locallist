@@ -22,12 +22,12 @@ const SUPPORT_CARDS: SupportCard[] = [
   {
     title: 'Terms of Use',
     description: 'Review the legal terms that apply when using Local List.',
-    route: '/(app)/termsOfUse',
+    route: '/termsOfUse',
   },
   {
     title: 'Privacy Policy',
     description: 'Learn how your information is collected and protected.',
-    route: '/(app)/privacy',
+    route: '/privacy',
   },
   {
     title: 'Contact Us',

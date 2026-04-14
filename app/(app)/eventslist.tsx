@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
@@ -173,8 +173,17 @@ export default function EventsListScreen() {
   const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
   const [savingEventId, setSavingEventId] = useState('');
   const router = useRouter();
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const fetchEvents = async () => {
       try {
         const db = getFirestore(app);
@@ -189,23 +198,37 @@ export default function EventsListScreen() {
           return leftDate - rightDate;
         });
 
-        setEvents(fetched);
+        if (!cancelled) {
+          setEvents(fetched);
+        }
       } catch (error) {
         console.error('Error loading events:', error);
-        setEvents([]);
+        if (!cancelled) {
+          setEvents([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchEvents();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchSavedEvents = async () => {
       const currentUser = getAuth().currentUser;
       if (!currentUser?.uid) {
-        setSavedEventIds([]);
+        if (!cancelled) {
+          setSavedEventIds([]);
+        }
         return;
       }
 
@@ -216,14 +239,22 @@ export default function EventsListScreen() {
           .map((docSnap) => docSnap.data() as { listingId?: string; listingType?: string })
           .filter((item) => item.listingType === 'event' && typeof item.listingId === 'string' && item.listingId)
           .map((item) => item.listingId as string);
-        setSavedEventIds(ids);
+        if (!cancelled) {
+          setSavedEventIds(ids);
+        }
       } catch (error) {
         console.error('Error loading saved events:', error);
-        setSavedEventIds([]);
+        if (!cancelled) {
+          setSavedEventIds([]);
+        }
       }
     };
 
     fetchSavedEvents();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const categoryOptions = useMemo(() => {
@@ -308,15 +339,19 @@ export default function EventsListScreen() {
         })
       );
 
+      if (!isMountedRef.current) return;
       setDigestMessage('Subscribed! You will receive event digest updates based on your selections.');
       setDigestMessageType('success');
       setDigestEmail('');
     } catch (error) {
       console.error('Events digest subscription error:', error);
+      if (!isMountedRef.current) return;
       setDigestMessage('Something went wrong. Please try again.');
       setDigestMessageType('error');
     } finally {
-      setSubscribing(false);
+      if (isMountedRef.current) {
+        setSubscribing(false);
+      }
     }
   };
 
@@ -384,6 +419,7 @@ export default function EventsListScreen() {
 
       if (isSaved) {
         await deleteDoc(doc(db, 'saveListings', saveDocId));
+        if (!isMountedRef.current) return;
         setSavedEventIds((prev) => prev.filter((id) => id !== eventItem.id));
         return;
       }
@@ -405,13 +441,16 @@ export default function EventsListScreen() {
         createdAt: serverTimestamp(),
       });
 
+      if (!isMountedRef.current) return;
       setSavedEventIds((prev) => (prev.includes(eventItem.id) ? prev : [...prev, eventItem.id]));
       Alert.alert('Listing Saved', 'You can view saved listings from your profile.');
     } catch (error) {
       console.error('Error saving event listing:', error);
       Alert.alert('Error', 'Could not save listing. Please try again.');
     } finally {
-      setSavingEventId('');
+      if (isMountedRef.current) {
+        setSavingEventId('');
+      }
     }
   };
 

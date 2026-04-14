@@ -1,3 +1,4 @@
+import { getAuth } from 'firebase/auth';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import { app } from '../firebase';
@@ -17,15 +18,24 @@ type AppAnalyticsPayload = {
 
 export async function trackAppEvent(eventName: AppAnalyticsEventName, payload: AppAnalyticsPayload = {}): Promise<void> {
   try {
+    const auth = getAuth(app);
+    const authUser = auth.currentUser;
+    if (!authUser) {
+      return;
+    }
+
     const db = getFirestore(app);
     await addDoc(collection(db, 'appAnalyticsEvents'), {
       eventName,
       ...payload,
+      userId: payload.userId ?? authUser.uid,
       platform: Platform.OS,
-      createdAt: serverTimestamp(),
+      timestamp: serverTimestamp(),
     });
   } catch (error) {
     // Tracking should never break user flows.
-    console.error('trackAppEvent error', error);
+    if (__DEV__) {
+      console.warn('trackAppEvent skipped', error);
+    }
   }
 }

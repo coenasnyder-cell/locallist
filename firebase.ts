@@ -1,7 +1,9 @@
 // firebase.ts
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, getReactNativePersistence, initializeAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { Platform } from 'react-native';
 
 type FirebaseConfig = {
   apiKey: string;
@@ -63,7 +65,19 @@ const getFirebaseConfig = (): FirebaseConfig => {
 const firebaseConfig = getFirebaseConfig();
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth =
+  Platform.OS === 'web'
+    ? getAuth(app)
+    : (() => {
+      try {
+        return initializeAuth(app, {
+          persistence: getReactNativePersistence(AsyncStorage),
+        });
+      } catch {
+        // If Auth is already initialized (e.g., during fast refresh), reuse it.
+        return getAuth(app);
+      }
+    })();
 const db = getFirestore(app);
 
 export { app, auth, db };

@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Text, TextInput } from 'react-native';
+import { LogBox, Text, TextInput } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -19,6 +19,13 @@ Text.defaultProps.style = [globalFontStyle, Text.defaultProps.style];
 
 TextInput.defaultProps = TextInput.defaultProps ?? {};
 TextInput.defaultProps.style = [globalFontStyle, TextInput.defaultProps.style];
+
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    'SafeAreaView has been deprecated',
+    'react-native-safe-area-context',
+  ]);
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

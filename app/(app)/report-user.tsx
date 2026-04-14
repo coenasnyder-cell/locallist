@@ -4,7 +4,6 @@ import { addDoc, collection, getDocs, query, serverTimestamp } from 'firebase/fi
 import React, { useMemo, useState } from 'react';
 import {
     Alert,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../../firebase';
 
 const REPORT_REASONS = [

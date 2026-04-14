@@ -2,32 +2,32 @@ import PasswordTextInputRow from '@/components/PasswordTextInputRow';
 import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-  type User,
+    GoogleAuthProvider,
+    signInWithCredential,
+    signInWithEmailAndPassword,
+    type User,
 } from 'firebase/auth';
 import { doc, getDoc, getDocFromServer, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { app, auth } from '../firebase';
 import { getAuthErrorMessage } from '../utils/auth-helpers';
 import {
-  configureNativeGoogleSignIn,
-  getNativeGoogleIdToken,
-  getNativeGoogleSignInErrorMessage,
+    configureNativeGoogleSignIn,
+    getNativeGoogleIdToken,
+    getNativeGoogleSignInErrorMessage,
 } from '../utils/nativeGoogleAuth';
 
 export const unstable_settings = {
@@ -40,18 +40,20 @@ export const screenOptions = {
 
 function normalizeReturnPath(returnTo: string | undefined): string {
   if (!returnTo || !returnTo.startsWith('/')) {
-    return '/(tabs)/index';
+    return '/(tabs)';
   }
 
-  if (returnTo === '/(tabs)' || returnTo === '/(tabs)/') {
-    return '/(tabs)/index';
+  const cleaned = returnTo.replace(/^\/\(app\)(?=\/|$)/, '') || '/';
+
+  if (cleaned === '/(tabs)' || cleaned === '/(tabs)/') {
+    return '/(tabs)';
   }
 
-  if (returnTo === '/_sitemap' || returnTo === '/+not-found') {
-    return '/(tabs)/index';
+  if (cleaned === '/_sitemap' || cleaned === '/+not-found' || cleaned.includes('+not-found')) {
+    return '/(tabs)';
   }
 
-  return returnTo;
+  return cleaned;
 }
 
 export default function SignInOrSignUp() {
@@ -65,6 +67,13 @@ export default function SignInOrSignUp() {
   const [googleBusy, setGoogleBusy] = useState(false);
   const [error, setError] = useState('');
   const canUseNativeGoogle = Platform.OS !== 'web';
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (canUseNativeGoogle) {
@@ -78,7 +87,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)/index' as any);
+    router.replace('/(tabs)' as any);
   }
 
   function requiresZipSetup(profileData: Record<string, unknown> | null): boolean {
@@ -160,7 +169,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)/index' as any);
+    router.replace('/(tabs)' as any);
   };
 
   const handleGoogleLogin = async () => {
@@ -179,11 +188,13 @@ export default function SignInOrSignUp() {
     } catch (googleError) {
       console.error('Google login error:', googleError);
       const message = getNativeGoogleSignInErrorMessage(googleError);
-      if (message) {
+      if (message && isMountedRef.current) {
         setError(message);
       }
     } finally {
-      setGoogleBusy(false);
+      if (isMountedRef.current) {
+        setGoogleBusy(false);
+      }
     }
   };
 
@@ -212,9 +223,13 @@ export default function SignInOrSignUp() {
       const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, password);
       await handleAuthSuccess(userCredential.user);
     } catch (authError) {
-      setError(getAuthErrorMessage(authError, 'login'));
+      if (isMountedRef.current) {
+        setError(getAuthErrorMessage(authError, 'login'));
+      }
     } finally {
-      setSubmitting(false);
+      if (isMountedRef.current) {
+        setSubmitting(false);
+      }
     }
   };
 

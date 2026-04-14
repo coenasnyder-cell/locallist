@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>That page could not be found.</Text>
         <Text style={styles.subtitle}>You can return to the app home screen below.</Text>
-        <Link href="/(app)/publiclanding" style={styles.link}>
+        <Link href="/publiclanding" style={styles.link}>
           Go to Home
         </Link>
       </View>

@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 
@@ -47,6 +47,13 @@ export default function CommunityNews({ onNewsPress }: CommunityNewsProps) {
   const [loading, setLoading] = useState(true);
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
   const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     fetchCommunityNews();
@@ -70,6 +77,7 @@ export default function CommunityNews({ onNewsPress }: CommunityNewsProps) {
         spotlightCtaText: settingsData.spotlightCtaText ?? DEFAULT_DISPLAY_SETTINGS.spotlightCtaText,
         spotlightCtaUrl: settingsData.spotlightCtaUrl ?? DEFAULT_DISPLAY_SETTINGS.spotlightCtaUrl,
       };
+      if (!isMountedRef.current) return;
       setDisplaySettings(newSettings);
 
       const hasAdminSpotlightContent = [
@@ -111,6 +119,7 @@ export default function CommunityNews({ onNewsPress }: CommunityNewsProps) {
       const newsItems = allItems.filter((item) => item.id !== firestoreSpotlightItem?.id);
 
       if (hasAdminSpotlightContent) {
+        if (!isMountedRef.current) return;
         setSpotlight({
           id: 'admin-spotlight',
           title: (newSettings.spotlightHeadline || '').trim() || 'Community Spotlight',
@@ -122,16 +131,21 @@ export default function CommunityNews({ onNewsPress }: CommunityNewsProps) {
           isSpotlight: true,
         });
       } else {
+        if (!isMountedRef.current) return;
         setSpotlight(firestoreSpotlightItem || null);
       }
 
+      if (!isMountedRef.current) return;
       setIsStoryExpanded(false);
       setNews(newsItems);
     } catch (error) {
       // Silently handle errors when not logged in or no data available
+      if (!isMountedRef.current) return;
       setDisplaySettings(DEFAULT_DISPLAY_SETTINGS);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

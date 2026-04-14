@@ -81,7 +81,7 @@ export default function VerifyEmailPage() {
 
             <TouchableOpacity
               style={styles.tertiaryLink}
-              onPress={() => router.replace(isNewUser === 'true' ? '/(tabs)/profilebutton' : '/(tabs)/index')}
+              onPress={() => router.replace(isNewUser === 'true' ? '/(tabs)/profilebutton' : '/(tabs)')}
             >
               <Text style={styles.tertiaryLinkText}>
                 {isNewUser === 'true' ? 'Complete Your Profile' : 'Continue Browsing'}

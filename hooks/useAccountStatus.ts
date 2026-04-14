@@ -1,6 +1,6 @@
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { app } from '../firebase';
 import { UserProfile as BaseUserProfile } from '../types/User';
 
@@ -68,10 +68,18 @@ export function useAccountStatus(): AccountStatus {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      if (!isMountedRef.current) return;
       setUser(authUser);
       if (!authUser) {
         setLoading(false);
@@ -82,7 +90,9 @@ export function useAccountStatus(): AccountStatus {
 
   useEffect(() => {
     if (!user) {
-      setProfile(null);
+      if (isMountedRef.current) {
+        setProfile(null);
+      }
       return undefined;
     }
 
@@ -91,10 +101,12 @@ export function useAccountStatus(): AccountStatus {
     const unsubscribe = onSnapshot(
       userRef,
       (snapshot) => {
+        if (!isMountedRef.current) return;
         setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
         setLoading(false);
       },
       () => {
+        if (!isMountedRef.current) return;
         setProfile(null);
         setLoading(false);
       }

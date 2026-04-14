@@ -1,5 +1,5 @@
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { app } from '../firebase';
 import { Listing } from '../types/Listing';
@@ -20,12 +20,27 @@ export default function FeaturedListings({
 }: FeaturedListingsProps) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
+  const activeRequestRef = useRef(0);
 
   useEffect(() => {
-    fetchFeaturedListings();
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const requestId = activeRequestRef.current + 1;
+    activeRequestRef.current = requestId;
+    setLoading(true);
+    fetchFeaturedListings(requestId);
   }, [tier]);
 
-  const fetchFeaturedListings = async () => {
+  const isRequestActive = (requestId: number) => {
+    return isMountedRef.current && activeRequestRef.current === requestId;
+  };
+
+  const fetchFeaturedListings = async (requestId: number) => {
     try {
       const db = getFirestore(app);
       const listingsRef = collection(db, 'listings');
@@ -42,6 +57,7 @@ export default function FeaturedListings({
       } else {
         // Basic tier (Editor's Picks) - for now, return empty
         // TODO: Add 'isEditorsPick' field to listings to distinguish editor picks
+        if (!isRequestActive(requestId)) return;
         setListings([]);
         setLoading(false);
         return;
@@ -49,9 +65,6 @@ export default function FeaturedListings({
 
       const snapshot = await getDocs(q);
       const fetchedListingsPromises: Promise<Listing | null>[] = [];
-
-      console.log(`[${tier}] Query: isFeatured='true' AND status='approved'`);
-      console.log(`[${tier}] Found ${snapshot.docs.length} listings matching query`);
 
       snapshot.forEach((listingDoc) => {
         const data = listingDoc.data() as Listing;
@@ -85,11 +98,14 @@ export default function FeaturedListings({
         .sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt))
         .slice(0, 6);
 
+      if (!isRequestActive(requestId)) return;
       setListings(sorted);
     } catch (error) {
       console.error('Error fetching featured listings:', error);
     } finally {
-      setLoading(false);
+      if (isRequestActive(requestId)) {
+        setLoading(false);
+      }
     }
   };
 
