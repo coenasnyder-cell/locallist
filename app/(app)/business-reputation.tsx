@@ -143,7 +143,7 @@ export default function BusinessReputationScreen() {
           <Text style={styles.heroTitle}>Business Reputation</Text>
           <Text style={styles.heroSubtitle}>Track review quality and month-over-month momentum.</Text>
            <View style={styles.heroActions}>
-             <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+             <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
                <Text style={styles.backBtnText}>Back to Business Hub</Text>
              </TouchableOpacity>
            </View>

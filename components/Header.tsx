@@ -1,10 +1,11 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import React, { useEffect, useRef, useState } from 'react';
 import type { ImageSourcePropType, ViewStyle } from 'react-native';
-import { Alert, Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import { useMessages } from '../providers/MessagesProvider';

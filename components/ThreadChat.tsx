@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import {
@@ -18,7 +19,6 @@ import {
   Alert,
   Button,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,

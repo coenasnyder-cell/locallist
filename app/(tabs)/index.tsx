@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import GridListingCard from '../../components/GridListingCard';
 import { app } from '../../firebase';
 import { filterListingsWithExistingUsers } from '../../utils/listingOwners';

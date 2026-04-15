@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { collection, getDocs, getFirestore, limit, orderBy, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 
 interface Spotlight {

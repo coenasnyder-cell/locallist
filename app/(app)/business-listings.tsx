@@ -1,8 +1,9 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/Header';
 import { app } from '../../firebase';
@@ -300,7 +301,7 @@ export default function BusinessListingsScreen() {
           <Text style={styles.heroTitle}>Listings Manager</Text>
           <Text style={styles.heroSubtitle}>Choose what to display and manage your business listings from one place.</Text>
           <View style={styles.heroActions}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
               <Text style={styles.backBtnText}>Back to Business Hub</Text>
             </TouchableOpacity>
           </View>

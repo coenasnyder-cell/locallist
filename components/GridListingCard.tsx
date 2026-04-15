@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import React from 'react';
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Props = {
   title: string;

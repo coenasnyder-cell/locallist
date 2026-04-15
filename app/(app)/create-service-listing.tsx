@@ -367,7 +367,7 @@ export default function CreateServiceListingScreen() {
             <View style={styles.successActions}>
               <TouchableOpacity
                 style={styles.successPrimary}
-                onPress={() => router.replace('/(tabs)/listbutton' as any)}
+                onPress={() => router.back()}
                 activeOpacity={0.85}
               >
                 <Text style={styles.successPrimaryText}>Back to List Hub</Text>

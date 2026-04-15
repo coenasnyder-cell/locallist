@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 

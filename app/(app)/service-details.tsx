@@ -1,8 +1,9 @@
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as SafeAreaContext from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import UserReviewModal from '../../components/UserReviewModal';

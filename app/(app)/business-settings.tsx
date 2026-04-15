@@ -1,4 +1,5 @@
 import { useAccountStatus } from '@/hooks/useAccountStatus';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
@@ -7,7 +8,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Image,
     ScrollView,
     StyleSheet,
     Text,
@@ -128,7 +128,7 @@ export default function BusinessSettingsScreen() {
             Review your business profile details, update your information, and open your public business profile from one page.
           </Text>
           <View style={styles.heroActions}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
               <Text style={styles.backBtnText}>Back to Business Hub</Text>
             </TouchableOpacity>
           </View>

@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query } from 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 
 const COMMUNITY_SPOTLIGHT_FONT_SIZE = 20;

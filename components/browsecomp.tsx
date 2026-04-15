@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 
 import { useRouter } from 'expo-router';

@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 import { filterListingsWithExistingUsers } from '../../utils/listingOwners';

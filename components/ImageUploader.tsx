@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import React from 'react';
-import { Alert, Button, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, Button, Platform, StyleSheet, Text, View } from 'react-native';
 import { app } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 

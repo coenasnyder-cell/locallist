@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { getAuth } from 'firebase/auth';
 import { collection, doc, getFirestore, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { checkIsAdmin } from '../utils/adminUtils';
 

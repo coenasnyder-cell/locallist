@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PetCard from '../components/PetCard';
 import ScreenTitleRow from '../components/ScreenTitleRow';
 import { app } from '../firebase';

@@ -1,8 +1,9 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import GridListingCard from '../components/GridListingCard';
 import { app } from '../firebase';
 import { isListingVisible } from '../utils/listingVisibility';

@@ -61,7 +61,7 @@ export default function CreateDealListingScreen() {
             <Text style={styles.subtitle}>Deal posting is available for business and admin accounts only.</Text>
           </View>
           <View style={styles.panel}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.replace('/(tabs)/index' as any)} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => router.back()} activeOpacity={0.85}>
               <Text style={styles.cancelBtnText}>Back to Home</Text>
             </TouchableOpacity>
           </View>
@@ -179,7 +179,7 @@ export default function CreateDealListingScreen() {
             <View style={styles.successActions}>
               <TouchableOpacity
                 style={styles.successPrimary}
-                onPress={() => router.replace('/(tabs)/businesshubbutton' as any)}
+                onPress={() => router.back()}
                 activeOpacity={0.85}
               >
                 <Text style={styles.successPrimaryText}>Back to Business Hub</Text>

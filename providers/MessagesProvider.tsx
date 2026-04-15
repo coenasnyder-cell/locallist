@@ -1,5 +1,5 @@
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { db } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 
@@ -71,13 +71,16 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [user?.uid, loading]);
 
+  const value = useMemo(
+    () => ({
+      threadPreviews: threads,
+      unreadCount: unreadThreads.length,
+    }),
+    [threads, unreadThreads.length]
+  );
+
   return (
-    <MessagesContext.Provider
-      value={{
-        threadPreviews: threads, // all threads
-        unreadCount: unreadThreads.length, // only unread count
-      }}
-    >
+    <MessagesContext.Provider value={value}>
       {children}
     </MessagesContext.Provider>
   );

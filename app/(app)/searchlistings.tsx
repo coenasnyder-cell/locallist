@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../../firebase';
 
 const numColumns = 2;

@@ -1,9 +1,10 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, increment, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { app } from "../firebase";
 import { submitUserReview } from '../utils/userReviews';
 import UserReviewModal from './UserReviewModal';

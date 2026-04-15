@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 

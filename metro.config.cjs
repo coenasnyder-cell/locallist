@@ -15,6 +15,7 @@ config.resolver.blockList = [
   new RegExp(`^${projectRoot}[\\/]\\.expo-export-check[\\/].*`),
   new RegExp(`^${projectRoot}[\\/]git[\\/].*`),
   new RegExp(`^${projectRoot}[\\/]master[\\/].*`),
+  new RegExp(`^${projectRoot}[\\/]public[\\/].*`),
 ];
 
 module.exports = config;

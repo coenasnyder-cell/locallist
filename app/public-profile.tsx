@@ -1,9 +1,9 @@
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Image,
     ScrollView,
     StyleSheet,
     Text,

@@ -1,7 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { arrayRemove, arrayUnion, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../firebase'; // make sure this exports Firestore
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import ScreenTitleRow from './ScreenTitleRow';

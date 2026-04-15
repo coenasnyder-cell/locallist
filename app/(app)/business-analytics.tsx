@@ -176,7 +176,7 @@ export default function BusinessAnalyticsScreen() {
           <Text style={styles.heroTitle}>Business Analytics</Text>
           <Text style={styles.heroSubtitle}>Detailed performance snapshot for your business activity.</Text>
            <View style={styles.heroActions}>
-             <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+             <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
                <Text style={styles.backBtnText}>Back to Business Hub</Text>
              </TouchableOpacity>
            </View>

@@ -56,7 +56,7 @@ export default function PostPromoteScreen() {
           <Text style={styles.title}>Post & Promote</Text>
           <Text style={styles.subtitle}>Post & Promote is available for business accounts only.</Text>
           <View style={styles.heroActions}>
-            <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.replace('/(tabs)/index')}>
+            <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.back()}>
               <Text style={styles.heroBackBtnText}>Back to Home</Text>
             </TouchableOpacity>
           </View>
@@ -73,7 +73,7 @@ export default function PostPromoteScreen() {
           Build and launch local promotions in minutes, then monitor impressions, clicks, and leads.
         </Text>
         <View style={styles.heroActions}>
-          <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+          <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.back()}>
             <Text style={styles.heroBackBtnText}>Back to Business Hub</Text>
           </TouchableOpacity>
         </View>

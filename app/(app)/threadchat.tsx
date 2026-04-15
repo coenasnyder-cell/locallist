@@ -467,10 +467,10 @@ function BusinessLeadsScreen() {
 						<Text style={styles.panelTitle}>Business Account Required</Text>
 						<Text style={styles.panelSubtitle}>Only business accounts can access leads and inbox tools.</Text>
 						<View style={styles.heroButtonsRow}>
-							<TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/(tabs)/profilebutton')}>
+							<TouchableOpacity style={styles.primaryButton} onPress={() => router.back()}>
 								<Text style={styles.primaryButtonText}>Go to Profile</Text>
 							</TouchableOpacity>
-							<TouchableOpacity style={styles.secondaryButton} onPress={() => router.push('/(tabs)/browsebutton')}>
+							<TouchableOpacity style={styles.secondaryButton} onPress={() => router.back()}>
 								<Text style={styles.secondaryButtonText}>Back to Marketplace</Text>
 							</TouchableOpacity>
 						</View>
@@ -487,10 +487,10 @@ function BusinessLeadsScreen() {
 					<Text style={styles.heroTitle}>Leads & Inbox</Text>
 					<Text style={styles.heroSubtitle}>Monitor incoming conversations, unread messages, and buyer activity.</Text>
 					<View style={styles.heroButtonsRow}>
-						<TouchableOpacity style={styles.heroBackButton} onPress={() => router.push('/(tabs)/businesshubbutton')}>
+						<TouchableOpacity style={styles.heroBackButton} onPress={() => router.back()}>
 							<Text style={styles.heroBackButtonText}>Back to Business Hub</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.heroOpenButton} onPress={() => router.push('/(tabs)/messagesbutton')}>
+						<TouchableOpacity style={styles.heroOpenButton} onPress={() => router.back()}>
 							<Text style={styles.heroOpenButtonText}>Open Full Inbox</Text>
 						</TouchableOpacity>
 					</View>

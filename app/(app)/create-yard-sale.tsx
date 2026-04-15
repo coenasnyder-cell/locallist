@@ -264,7 +264,7 @@ export default function CreateYardSaleScreen() {
             <View style={styles.successActions}>
               <TouchableOpacity
                 style={styles.successPrimary}
-                onPress={() => router.replace('/(tabs)/communitybutton' as any)}
+                onPress={() => router.back()}
                 activeOpacity={0.85}
               >
                 <Text style={styles.successPrimaryText}>View Community</Text>

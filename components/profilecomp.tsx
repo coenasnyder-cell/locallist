@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import CommunityDisclosures from './CommunityDisclosures';

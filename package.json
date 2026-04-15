@@ -100,6 +100,7 @@
     "expo-module-scripts": "^5.0.8",
     "firebase-admin": "^13.6.1",
     "jest-expo": "~54.0.17",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.2"
   },
   "private": true,
