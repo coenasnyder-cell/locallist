@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { app } from '../firebase';
 import { Listing } from '../types/Listing';
+import { filterListingsWithExistingUsers } from '../utils/listingOwners';
+import { isListingVisible } from '../utils/listingVisibility';
 import GridListingCard from './GridListingCard';
 
 interface FeaturedListingsProps {
@@ -49,11 +51,7 @@ export default function FeaturedListings({
       // For premium tier, use isFeatured. For basic tier (Editor's Picks), would need a separate field
       let q;
       if (tier === 'premium') {
-        q = query(
-          listingsRef,
-          where('isFeatured', '==', true),
-          where('status', '==', 'approved')
-        );
+        q = query(listingsRef, where('isFeatured', '==', true), where('status', '==', 'approved'));
       } else {
         // Basic tier (Editor's Picks) - for now, return empty
         // TODO: Add 'isEditorsPick' field to listings to distinguish editor picks
@@ -63,11 +61,28 @@ export default function FeaturedListings({
         return;
       }
 
-      const snapshot = await getDocs(q);
+      const [snapshot, reportedSnapshot] = await Promise.all([
+        getDocs(q),
+        getDocs(
+          query(
+            collection(db, 'reportedListings'),
+            where('status', 'in', ['pending', 'reviewed', 'action_taken'])
+          )
+        ),
+      ]);
+      const excludedListingIds = new Set(
+        reportedSnapshot.docs
+          .map((reportDoc) => String(reportDoc.data()?.listingId || '').trim())
+          .filter(Boolean)
+      );
+      const nowMs = Date.now();
       const fetchedListingsPromises: Promise<Listing | null>[] = [];
 
       snapshot.forEach((listingDoc) => {
         const data = listingDoc.data() as Listing;
+        if (!isListingVisible(data, listingDoc.id, { nowMs, excludedListingIds })) {
+          return;
+        }
         
         const listingPromise = (async () => {
           // All matched listings are isFeatured and approved, so just return them
@@ -83,6 +98,7 @@ export default function FeaturedListings({
       const fetchedListings = (await Promise.all(fetchedListingsPromises)).filter(
         (item): item is Listing => item !== null
       );
+      const listingsWithExistingOwners = await filterListingsWithExistingUsers(db, fetchedListings);
 
       // Defensive sort: handle missing or invalid createdAt
       const getDate = (val: any) => {
@@ -94,7 +110,7 @@ export default function FeaturedListings({
         }
         return 0;
       };
-      const sorted = fetchedListings
+      const sorted = listingsWithExistingOwners
         .sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt))
         .slice(0, 6);
 

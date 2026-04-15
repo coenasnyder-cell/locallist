@@ -4,6 +4,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Header from '../components/Header';
 import ImageUploader from '../components/ImageUploader';
+import ScreenTitleRow from '../components/ScreenTitleRow';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 
@@ -120,13 +121,15 @@ export default function CreatePetPostScreen() {
   return (
     <View style={{ flex: 1 }}>
       <Header />
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow title={isFoundPost ? 'Create Found Pet Post' : 'Create Lost Pet Post'} onBackPress={navigateToPetHub} />
+      </View>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroCard}>
-          <Text style={styles.title}>{isFoundPost ? 'Report A Found Pet' : 'Report A Lost Pet'}</Text>
           <Text style={styles.subtitle}>
             {isFoundPost
               ? 'Share clear details so owners can identify and reunite with their pet quickly.'
@@ -300,6 +303,11 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
     gap: 12,
   },
+  screenTitleRowWrap: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
   actionsRow: {
     flexDirection: 'row',
     gap: 8,
@@ -331,12 +339,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderWidth: 1,
     borderColor: '#d8e4f2',
-  },
-  title: {
-    fontSize: 25,
-    fontWeight: '700',
-    color: '#19324d',
-    marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
@@ -438,7 +440,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 1,
-    backgroundColor: '#0f766e',
+    backgroundColor: '#475569',
     minHeight: 46,
     paddingHorizontal: 8,
     paddingVertical: 12,

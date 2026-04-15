@@ -1,14 +1,10 @@
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import CommunityNews from '../../components/CommunityNews';
-import FeaturedListings from '../../components/FeaturedListings';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import GridListingCard from '../../components/GridListingCard';
 import { app } from '../../firebase';
-import { useAccountStatus } from '../../hooks/useAccountStatus';
-import { trackAppEvent } from '../../utils/appAnalytics';
-import { createThread } from '../../utils/createThread';
+import { filterListingsWithExistingUsers } from '../../utils/listingOwners';
 import { isListingVisible } from '../../utils/listingVisibility';
 
 type RecentListing = {
@@ -35,29 +31,22 @@ type RecentPetListing = {
 };
 
 type CommunityDisplaySettings = {
-  showEditorsPicks: boolean;
-  showFeaturedListings: boolean;
   showQuoteOfDay: boolean;
   quoteOfDayText: string;
-  quoteOfDayAttribution: string;
 };
 
 const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
-  showEditorsPicks: true,
-  showFeaturedListings: true,
   showQuoteOfDay: true,
   quoteOfDayText: '',
-  quoteOfDayAttribution: '',
 };
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user } = useAccountStatus();
   const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [recentPetListings, setRecentPetListings] = useState<RecentPetListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [petsLoading, setPetsLoading] = useState(true);
-  const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings | null>(null);
+  const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,18 +60,13 @@ export default function HomeScreen() {
           ? (settingsSnapshot.data() as Partial<CommunityDisplaySettings>)
           : {};
 
-        const newSettings = {
-          showEditorsPicks: settingsData.showEditorsPicks ?? DEFAULT_DISPLAY_SETTINGS.showEditorsPicks,
-          showFeaturedListings: settingsData.showFeaturedListings ?? DEFAULT_DISPLAY_SETTINGS.showFeaturedListings,
+        if (!isMounted) return;
+        setDisplaySettings({
           showQuoteOfDay: settingsData.showQuoteOfDay ?? DEFAULT_DISPLAY_SETTINGS.showQuoteOfDay,
           quoteOfDayText: settingsData.quoteOfDayText ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayText,
-          quoteOfDayAttribution: settingsData.quoteOfDayAttribution ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayAttribution,
-        };
-        if (!isMounted) return;
-        setDisplaySettings(newSettings);
+        });
       } catch (error) {
-        console.error('Error fetching display settings:', error);
-        // Silently use defaults if fetch fails (e.g., when not logged in)
+        console.error('Error fetching home display settings:', error);
         if (!isMounted) return;
         setDisplaySettings(DEFAULT_DISPLAY_SETTINGS);
       }
@@ -104,7 +88,7 @@ export default function HomeScreen() {
         );
 
         const now = new Date().getTime();
-        const listings: RecentListing[] = await Promise.all(
+        const listingsRaw: RecentListing[] = await Promise.all(
           querySnapshot.docs
             .filter((listingDoc: any) => {
               const data = listingDoc.data();
@@ -136,6 +120,7 @@ export default function HomeScreen() {
               };
             })
         );
+        const listings = await filterListingsWithExistingUsers(db, listingsRaw);
         if (!isMounted) return;
         setRecentListings(listings);
       } catch (error) {
@@ -198,48 +183,15 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const handleStartFirstListing = () => {
-    trackAppEvent('first_listing_cta_tap', {
-      userId: user?.uid || null,
-      source: 'home_first_listing_card',
-      isSignedIn: Boolean(user),
-    });
-
-    if (user) {
-      router.push('/create-listing');
-      return;
-    }
-
-    router.push({
-      pathname: '/signup',
-      params: {
-        returnTo: '/create-listing',
-      },
-    } as any);
-  };
-
-
-  // Handler for test button
-  const handleCreateThread = async () => {
-    try {
-      await createThread(
-        'exampleThreadId123',
-        ['user1uid', 'user2uid'],
-        ['user1uid'],
-        'Hello!',
-        Date.now()
-      );
-      alert('Thread created!');
-    } catch (err) {
-      alert('Error creating thread: ' + err);
-    }
-  };
+  const quoteText = (displaySettings.quoteOfDayText || '').trim();
+  const shouldShowQuote = displaySettings.showQuoteOfDay && quoteText.length > 0;
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 8, paddingBottom: 24 }}>
-      {displaySettings?.showQuoteOfDay !== false && (
+      {shouldShowQuote && (
         <View
           style={{
+            marginTop: 8,
             marginHorizontal: 16,
             marginBottom: 12,
             paddingVertical: 14,
@@ -263,108 +215,20 @@ export default function HomeScreen() {
           >
             Quote of the Day
           </Text>
-          <Text style={{ fontSize: 15, lineHeight: 22, fontWeight: '600', color: '#1e293b', textAlign: 'center' }}>
-            {(displaySettings?.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."'}
+          <Text
+            style={{
+              fontSize: 15,
+              lineHeight: 22,
+              fontWeight: '600',
+              color: '#1e293b',
+              textAlign: 'center',
+            }}
+          >
+            {quoteText}
           </Text>
-          {(displaySettings?.quoteOfDayAttribution || '').trim() ? (
-            <Text style={{ marginTop: 8, fontSize: 13, color: '#64748b', fontWeight: '600', textAlign: 'center' }}>
-              {(displaySettings?.quoteOfDayAttribution || '').trim()}
-            </Text>
-          ) : null}
         </View>
       )}
 
-      <View style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-        <View
-          style={{
-            backgroundColor: '#f0f9ff',
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: '#bae6fd',
-            overflow: 'hidden',
-          }}
-        >
-          <View style={{ paddingTop: 14, paddingHorizontal: 14 }}>
-            <Text style={{ fontSize: 22, fontWeight: '800', color: '#0f172a', marginBottom: 8, textAlign: 'center' }}>
-              Community Hub
-            </Text>
-          </View>
-          <Image
-            source={require('../../assets/images/communityhub.png')}
-            style={{ width: '100%', height: 120 }}
-            resizeMode="cover"
-          />
-          <View style={{ padding: 14 }}>
-            <Text style={{ fontSize: 15, color: '#334155', lineHeight: 21, marginBottom: 12, textAlign: 'center' }}>
-              Explore local events, yard sales, jobs, deals, local businesses, services, and the Pet Corner all in one place.
-            </Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#475569', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
-              onPress={() => router.push('/(tabs)/communitybutton')}
-            >
-              <Text style={{ color: '#fff', fontWeight: '500', fontSize: 14 }}>Open Community Hub</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-          {/* Community News Section (includes spotlights) */}
-      <CommunityNews />
-
-      {/* Premium Featured Listings Section */}
-      {displaySettings?.showFeaturedListings && (
-        <FeaturedListings 
-          tier="premium"
-          title="✨ Featured"
-          subtitle="Top picks from our community"
-          onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
-        />
-      )}
-
-      {/* Editor's Picks Section */}
-      {displaySettings?.showEditorsPicks && (
-        <FeaturedListings 
-          tier="basic"
-          title="Editor's Picks"
-          subtitle="Hand-selected listings from your community"
-          onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
-        />
-      )}
-
-      {/* List Hub Promo Section */}
-      <View style={{ paddingVertical: 14, paddingHorizontal: 16 }}>
-        <View
-          style={{
-            backgroundColor: '#fff7ed',
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: '#fed7aa',
-            overflow: 'hidden',
-          }}
-        >
-          <View style={{ paddingTop: 14, paddingHorizontal: 14 }}>
-            <Text style={{ fontSize: 20, fontWeight: '800', color: '#7c2d12', marginBottom: 8, textAlign: 'center' }}>
-              List Hub
-            </Text>
-          </View>
-          <Image
-            source={require('../../assets/images/listhub.png')}
-            style={{ width: '100%', height: 120 }}
-            resizeMode="cover"
-          />
-          <View style={{ padding: 14 }}>
-            <Text style={{ fontSize: 13, color: '#7c2d12', lineHeight: 19, marginBottom: 12, textAlign: 'center' }}>
-              Promote what you offer, post your listing fast, and reach neighbors who are ready to buy.
-            </Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#475569', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'center' }}
-              onPress={() => router.push(user ? '/(tabs)/listbutton' : '/signInOrSignUp')}
-            >
-              <Text style={{ color: '#fff', fontWeight: '500', fontSize: 14 }}>Open List Hub</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
       <View style={{ marginTop: 18, marginBottom: 8, paddingHorizontal: 16 }}>
         <Text
           style={{
@@ -421,6 +285,23 @@ export default function HomeScreen() {
             );
           })
         )}
+      </View>
+      <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#475569',
+            borderRadius: 8,
+            paddingVertical: 10,
+            paddingHorizontal: 16,
+            alignSelf: 'center',
+            minWidth: 210,
+          }}
+          onPress={() => router.push('/(tabs)/browsebutton')}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
+            View All Recent Listings
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={{ marginTop: 8, marginBottom: 8, paddingHorizontal: 16 }}>

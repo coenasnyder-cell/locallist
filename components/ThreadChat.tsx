@@ -1,36 +1,37 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import {
-    addDoc,
-    arrayRemove,
-    arrayUnion,
-    collection,
-    doc,
-    query as firestoreQuery,
-    getDoc,
-    onSnapshot,
-    orderBy,
-    serverTimestamp,
-    updateDoc,
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  query as firestoreQuery,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Alert,
-    Button,
-    FlatList,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Button,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../firebase';
 import Header from './Header';
+import ScreenTitleRow from './ScreenTitleRow';
 
 type MessageRecord = {
   id: string;
@@ -38,6 +39,9 @@ type MessageRecord = {
   senderId?: string;
   createdAt?: unknown;
   deleted?: boolean;
+  editedAt?: unknown;
+  editedBy?: string;
+  isEdited?: boolean;
 };
 
 type ThreadRecord = {
@@ -100,6 +104,8 @@ const ThreadChat = () => {
 
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [text, setText] = useState('');
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
   const [threadData, setThreadData] = useState<ThreadRecord | null>(null);
   const [showReportMenu, setShowReportMenu] = useState(false);
   const [chatError, setChatError] = useState('');
@@ -396,6 +402,40 @@ const ThreadChat = () => {
     }
   };
 
+  const startEditingMessage = (message: MessageRecord) => {
+    if (!message.id || message.senderId !== user?.uid || message.deleted) return;
+    setEditingMessageId(message.id);
+    setEditingText(String(message.text || ''));
+  };
+
+  const cancelEditingMessage = () => {
+    setEditingMessageId(null);
+    setEditingText('');
+  };
+
+  const saveEditedMessage = async () => {
+    if (!threadId || !editingMessageId || !user?.uid) return;
+
+    const trimmedText = editingText.trim();
+    if (!trimmedText) {
+      Alert.alert('Edit Message', 'Message text cannot be empty.');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'threads', threadId, 'messages', editingMessageId), {
+        text: trimmedText,
+        isEdited: true,
+        editedBy: user.uid,
+        editedAt: serverTimestamp(),
+      });
+      cancelEditingMessage();
+    } catch (error) {
+      console.error('Error editing message:', error);
+      Alert.alert('Error', 'Failed to edit message. Please try again.');
+    }
+  };
+
   const deleteMessage = async (messageId: string) => {
     if (!threadId) return;
 
@@ -457,12 +497,8 @@ const ThreadChat = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 76 : 0}
       >
         <View style={styles.chatShell}>
-          <View style={styles.topRow}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton} activeOpacity={0.85}>
-              <Text style={styles.backText}>Back to Messages</Text>
-            </TouchableOpacity>
-            <Text style={styles.topRowTitle} numberOfLines={1}>Messages</Text>
-            <View style={styles.topRowSpacer} />
+          <View style={styles.screenTitleRowWrap}>
+            <ScreenTitleRow title="Messages" onBackPress={handleBack} />
           </View>
 
           <View style={styles.contextCard}>
@@ -534,6 +570,7 @@ const ThreadChat = () => {
             renderItem={({ item }) => {
               const isSender = item.senderId === user?.uid;
               const isDeleted = item.deleted === true;
+              const isEditingThisMessage = editingMessageId === item.id;
               const summary = isSender ? currentUserSummary : otherUserSummary;
               const timeLabel = formatMessageTime(item.createdAt);
 
@@ -543,16 +580,46 @@ const ThreadChat = () => {
 
                   <View style={styles.messageColumn}>
                     <View style={[styles.bubble, isSender ? styles.bubbleSender : styles.bubbleReceiver]}>
-                      <Text style={[styles.messageText, isDeleted ? styles.deletedMessageText : null]}>
-                        {isDeleted ? 'Message deleted' : item.text || ''}
-                      </Text>
+                      {isEditingThisMessage ? (
+                        <TextInput
+                          style={styles.editInput}
+                          value={editingText}
+                          onChangeText={setEditingText}
+                          multiline
+                          autoFocus
+                          maxLength={1200}
+                        />
+                      ) : (
+                        <Text style={[styles.messageText, isDeleted ? styles.deletedMessageText : null]}>
+                          {isDeleted ? 'Message deleted' : item.text || ''}
+                        </Text>
+                      )}
                       {timeLabel ? <Text style={styles.messageTime}>{timeLabel}</Text> : null}
+                      {item.isEdited && !isDeleted ? <Text style={styles.editedLabel}>Edited</Text> : null}
                     </View>
 
                     {isSender && !isDeleted ? (
-                      <TouchableOpacity style={styles.deleteMessageButton} onPress={() => deleteMessage(item.id)} activeOpacity={0.8}>
-                        <Text style={styles.deleteMessageText}>Delete</Text>
-                      </TouchableOpacity>
+                      <View style={styles.messageActionsRow}>
+                        {isEditingThisMessage ? (
+                          <>
+                            <TouchableOpacity style={styles.messageActionButton} onPress={saveEditedMessage} activeOpacity={0.8}>
+                              <Text style={styles.editMessageText}>Save</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.messageActionButton} onPress={cancelEditingMessage} activeOpacity={0.8}>
+                              <Text style={styles.cancelMessageText}>Cancel</Text>
+                            </TouchableOpacity>
+                          </>
+                        ) : (
+                          <>
+                            <TouchableOpacity style={styles.messageActionButton} onPress={() => startEditingMessage(item)} activeOpacity={0.8}>
+                              <Text style={styles.editMessageText}>Edit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.messageActionButton} onPress={() => deleteMessage(item.id)} activeOpacity={0.8}>
+                              <Text style={styles.deleteMessageText}>Delete</Text>
+                            </TouchableOpacity>
+                          </>
+                        )}
+                      </View>
                     ) : null}
                   </View>
 
@@ -607,39 +674,14 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 40,
   },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
-  },
-  backButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-  },
-  backText: {
-    color: '#334155',
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  topRowTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginHorizontal: 8,
-  },
-  topRowSpacer: {
-    width: 110,
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   contextCard: {
     flexDirection: 'row',
@@ -822,6 +864,25 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginTop: 4,
   },
+  editedLabel: {
+    marginTop: 2,
+    fontSize: 10,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
+  editInput: {
+    minWidth: 140,
+    maxWidth: 240,
+    minHeight: 40,
+    borderWidth: 1,
+    borderColor: '#94a3b8',
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    color: '#0f172a',
+    fontSize: 14,
+  },
   avatar: {
     width: 32,
     height: 32,
@@ -845,11 +906,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
   },
-  deleteMessageButton: {
-    alignSelf: 'flex-end',
+  messageActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     marginTop: 4,
+    gap: 8,
+  },
+  messageActionButton: {
+    alignSelf: 'flex-end',
     paddingHorizontal: 6,
     paddingVertical: 2,
+  },
+  editMessageText: {
+    fontSize: 12,
+    color: '#0f766e',
+    fontWeight: '700',
+  },
+  cancelMessageText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
   },
   deleteMessageText: {
     fontSize: 12,

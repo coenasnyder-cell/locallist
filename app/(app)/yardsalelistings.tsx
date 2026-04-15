@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 
 type YardSaleRecord = {
@@ -292,10 +292,20 @@ export default function YardSaleListingsScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <BackToCommunityHubRow />
+        <View style={styles.screenTitleRowWrap}>
+          <ScreenTitleRow
+            title="Yard Sales"
+            onBackPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+                return;
+              }
+              router.replace('/(tabs)/communitybutton');
+            }}
+          />
+        </View>
 
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Yard Sales</Text>
           <Text style={styles.heroSubtitle}>Browse local garage and yard sales near you</Text>
         </View>
 
@@ -304,10 +314,6 @@ export default function YardSaleListingsScreen() {
             <Image source={require('../../assets/images/yardsale.png')} style={styles.promoImage} resizeMode="cover" />
           </TouchableOpacity>
           <View style={styles.promoTextWrap}>
-            <Text style={styles.promoTitle}>Hosting a Yard Sale?</Text>
-            <Text style={styles.promoText}>
-              Let your neighbors know. Post your yard sale for free and reach shoppers in your area. It only takes a minute to get listed.
-            </Text>
             <TouchableOpacity style={styles.promoButton} onPress={() => router.push('/create-yard-sale' as any)} activeOpacity={0.86}>
               <Text style={styles.promoButtonText}>Post Your Yard Sale</Text>
             </TouchableOpacity>
@@ -336,9 +342,8 @@ export default function YardSaleListingsScreen() {
         </View>
 
         <View style={styles.digestBanner}>
-          <Text style={styles.digestIcon}>📬</Text>
-          <View style={styles.digestBody}>
-            <Text style={styles.digestTitle}>Get the Weekly Yard Sale Digest</Text>
+                    <View style={styles.digestBody}>
+            <Text style={styles.digestTitle}>Get the Weekly Digest</Text>
             <Text style={styles.digestText}>
               Every week we send a roundup of all upcoming yard sales in your area straight to your inbox.
             </Text>
@@ -373,6 +378,15 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 14,
     paddingBottom: 36,
+  },
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   hero: {
     paddingVertical: 24,

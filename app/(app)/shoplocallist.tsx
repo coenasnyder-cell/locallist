@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 import { useAccountStatus } from '../../hooks/useAccountStatus';
 
@@ -260,7 +260,7 @@ export default function ShopLocalList() {
       >
         {isPremium && (
           <View style={styles.premiumBadge}>
-            <Text style={styles.premiumBadgeText}>⭐ Premium Featured</Text>
+            <Text style={styles.premiumBadgeText}>Premium Featured</Text>
           </View>
         )}
 
@@ -302,9 +302,17 @@ export default function ShopLocalList() {
 
   return (
     <ScrollView style={styles.container}>
-      <BackToCommunityHubRow />
       <View style={styles.header}>
-        <Text style={styles.title}>Local Businesses</Text>
+        <ScreenTitleRow
+          title="Local Businesses"
+          onBackPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+              return;
+            }
+            router.replace('/(tabs)/communitybutton');
+          }}
+        />
         <View style={styles.benefitsRow}>
           <Image
             source={require('../../assets/images/businsshub.png')}
@@ -573,7 +581,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: '#FFD700',
+    backgroundColor: '#475569',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -582,7 +590,7 @@ const styles = StyleSheet.create({
   premiumBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#8B4513',
+    color: '#fff',
   },
   verifiedBadge: {
     alignSelf: 'flex-start',
@@ -646,16 +654,16 @@ const styles = StyleSheet.create({
   },
   claimButton: {
     marginTop: 8,
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#475569',
     borderWidth: 1,
-    borderColor: '#f59e0b',
+    borderColor: '#475569',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   claimButtonText: {
-    color: '#92400e',
+    color: '#fff',
     fontSize: 13,
     fontWeight: '700',
   },

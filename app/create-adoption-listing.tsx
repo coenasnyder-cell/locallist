@@ -4,6 +4,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Header from '../components/Header';
 import ImageUploader from '../components/ImageUploader';
+import ScreenTitleRow from '../components/ScreenTitleRow';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 
@@ -118,11 +119,10 @@ export default function CreateAdoptionListingScreen() {
   return (
     <View style={{ flex: 1 }}>
       <Header />
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow title="Create Adoption Listing" onBackPress={navigateToPetHub} />
+      </View>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={styles.pageTitle}>
-          <Text style={styles.title}>List Your Pet For Adoption</Text>
-        </View>
-
         <View style={styles.form}>
         {!loading && user && !canPostListings ? (
           <Text style={styles.notice}>{postingBlockedReason}</Text>
@@ -254,15 +254,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
-  pageTitle: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#333',
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   scrollContent: {
     paddingBottom: 80,
@@ -363,7 +362,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 1,
-    backgroundColor: '#0f766e',
+    backgroundColor: '#475569',
     minHeight: 46,
     paddingHorizontal: 8,
     paddingVertical: 12,

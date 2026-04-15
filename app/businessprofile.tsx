@@ -1,22 +1,23 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Linking,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Linking,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../components/Header';
+import ScreenTitleRow from '../components/ScreenTitleRow';
 import UserReviewModal from '../components/UserReviewModal';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
@@ -25,6 +26,8 @@ import { submitUserReview } from '../utils/userReviews';
 interface BusinessProfile {
   id: string;
   businessName?: string;
+  businessCover?: string;
+  businessMotto?: string;
   businessDescription?: string;
   businessPhone?: string;
   businessEmail?: string;
@@ -147,15 +150,75 @@ export default function BusinessProfileScreen() {
     }
   };
 
-  const handleEmail = () => {
-    if (profile?.businessEmail) {
-      Linking.openURL(`mailto:${profile.businessEmail}`);
-    }
-  };
-
   const handleWebsite = () => {
     if (profile?.businessWebsite) {
       Linking.openURL(profile.businessWebsite);
+    }
+  };
+
+  const handleContactBusiness = async () => {
+    const currentUser = getAuth().currentUser;
+
+    if (!currentUser) {
+      Alert.alert('Sign in required', 'Please log in to contact this business.');
+      return;
+    }
+
+    if (!profile) {
+      Alert.alert('Unavailable', 'Business profile is not available.');
+      return;
+    }
+
+    const recipientId = String(profile.ownerUserId || profile.userId || profile.id || '').trim();
+    if (!recipientId) {
+      Alert.alert('Unavailable', 'Unable to contact this business right now.');
+      return;
+    }
+
+    if (recipientId === currentUser.uid) {
+      Alert.alert('Heads up', 'This is your own business profile.');
+      return;
+    }
+
+    try {
+      const threadsRef = collection(db, 'threads');
+      const existingThreadQuery = query(
+        threadsRef,
+        where('listingId', '==', profile.id),
+        where('participantIds', 'array-contains', currentUser.uid)
+      );
+
+      const existingThreadSnapshot = await getDocs(existingThreadQuery);
+      if (!existingThreadSnapshot.empty) {
+        const existingMatch = existingThreadSnapshot.docs.find((threadDoc) => {
+          const participantIds: string[] = threadDoc.data().participantIds || [];
+          return participantIds.includes(recipientId);
+        });
+
+        if (existingMatch) {
+          router.push({ pathname: '/threadchat' as any, params: { threadId: existingMatch.id } });
+          return;
+        }
+      }
+
+      const threadDoc = await addDoc(threadsRef, {
+        listingId: profile.id,
+        listingType: 'business',
+        listingTitle: profile.businessName || 'Business Profile',
+        listingImage: profile.businessLogo || profile.businessImage || null,
+        buyerId: currentUser.uid,
+        sellerId: recipientId,
+        participantIds: [currentUser.uid, recipientId],
+        lastMessage: '',
+        lastTimestamp: serverTimestamp(),
+        unreadBy: [recipientId],
+        createdAt: serverTimestamp(),
+      });
+
+      router.push({ pathname: '/threadchat' as any, params: { threadId: threadDoc.id } });
+    } catch (error) {
+      console.error('Error starting business conversation:', error);
+      Alert.alert('Error', 'Unable to start conversation. Please try again.');
     }
   };
 
@@ -284,6 +347,9 @@ export default function BusinessProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header />
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow title={profile.businessName || 'Business Profile'} />
+      </View>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -291,30 +357,85 @@ export default function BusinessProfileScreen() {
       >
         {/* Business Header */}
         <View style={styles.headerSection}>
-          {profile.businessLogo && (
-            <View style={styles.logoContainer}>
+          <View style={styles.coverContainer}>
+            {profile.businessCover || profile.businessImage || profile.businessLogo ? (
               <Image
-                source={{ uri: profile.businessLogo }}
-                style={styles.logoImage}
+                source={{ uri: profile.businessCover || profile.businessImage || profile.businessLogo || '' }}
+                style={styles.coverImage}
                 resizeMode="cover"
               />
-            </View>
-          )}
-          <Text style={styles.businessName}>{profile.businessName || 'Business'}</Text>
+            ) : (
+              <View style={styles.coverPlaceholder}>
+                <Text style={styles.coverPlaceholderText}>No Cover Image</Text>
+              </View>
+            )}
+
+            {profile.businessLogo ? (
+              <View style={styles.logoOverlayContainer}>
+                <Image
+                  source={{ uri: profile.businessLogo }}
+                  style={styles.logoOverlayImage}
+                  resizeMode="cover"
+                />
+              </View>
+            ) : null}
+          </View>
+
+          {profile.businessMotto ? (
+            <Text style={styles.businessMotto}>{profile.businessMotto}</Text>
+          ) : null}
+
           {isBusinessVerified(profile) ? (
             <View style={styles.verifiedBadge}>
               <Text style={styles.verifiedBadgeText}>Local Business Verified</Text>
             </View>
           ) : null}
-          {profile.businessDescription ? (
-            <Text style={styles.businessDescription}>{profile.businessDescription}</Text>
-          ) : null}
         </View>
 
+
+        {/* Business Information */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>ℹ️ Business Information</Text>
+
+          {profile.businessCategory && (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Category</Text>
+              <Text style={styles.infoValue}>{profile.businessCategory}</Text>
+            </View>
+          )}
+
+          {profile.businessHours && (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Hours</Text>
+              <Text style={styles.infoValue}>{profile.businessHours}</Text>
+            </View>
+          )}
+
+          {profile.businessTier && (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Account Tier</Text>
+              <Text style={styles.infoValue}>
+                {profile.businessTier === 'premium' ? '⭐ Premium' : 'Free'}
+              </Text>
+            </View>
+          )}
+
+          {profile.businessDescription ? (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Description</Text>
+              <Text style={styles.infoValue}>{profile.businessDescription}</Text>
+            </View>
+          ) : null}
+        </View>
 
         {/* Contact Information */}
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>🔗 Contact Information</Text>
+
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Business Name</Text>
+            <Text style={styles.infoValue}>{profile.businessName || 'Business'}</Text>
+          </View>
 
           {profile.businessPhone && (
             <View style={styles.infoItem}>
@@ -341,34 +462,6 @@ export default function BusinessProfileScreen() {
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Address</Text>
               <Text style={styles.infoValue}>{profile.businessAddress}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Business Information */}
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>ℹ️ Business Information</Text>
-
-          {profile.businessCategory && (
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Category</Text>
-              <Text style={styles.infoValue}>{profile.businessCategory}</Text>
-            </View>
-          )}
-
-          {profile.businessHours && (
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Hours</Text>
-              <Text style={styles.infoValue}>{profile.businessHours}</Text>
-            </View>
-          )}
-
-          {profile.businessTier && (
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Account Tier</Text>
-              <Text style={styles.infoValue}>
-                {profile.businessTier === 'premium' ? '⭐ Premium' : 'Free'}
-              </Text>
             </View>
           )}
         </View>
@@ -404,15 +497,15 @@ export default function BusinessProfileScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          {profile.businessWebsite && (
-            <TouchableOpacity style={styles.buttonPrimary} onPress={handleWebsite}>
-              <Text style={styles.buttonPrimaryText}>🌐 Visit Website</Text>
+          {!isOwnBusiness && (
+            <TouchableOpacity style={styles.buttonPrimary} onPress={handleContactBusiness}>
+              <Text style={styles.buttonPrimaryText}>Message Business</Text>
             </TouchableOpacity>
           )}
 
-          {profile.businessEmail && (
-            <TouchableOpacity style={styles.buttonSecondary} onPress={handleEmail}>
-              <Text style={styles.buttonSecondaryText}>✉️ Send Email</Text>
+          {profile.businessWebsite && (
+            <TouchableOpacity style={styles.buttonPrimary} onPress={handleWebsite}>
+              <Text style={styles.buttonPrimaryText}>🌐 Visit Website</Text>
             </TouchableOpacity>
           )}
 
@@ -524,6 +617,15 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 48,
   },
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -559,29 +661,69 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     paddingHorizontal: 16,
-    paddingVertical: 40,
+    paddingTop: 16,
+    paddingBottom: 14,
     backgroundColor: 'white',
     marginBottom: 12,
     marginHorizontal: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  coverContainer: {
+    width: '100%',
+    height: 180,
+    borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#f0f0f0',
-    marginBottom: 24,
+    marginBottom: 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 5,
   },
-  logoImage: {
+  coverImage: {
     width: '100%',
     height: '100%',
+  },
+  coverPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e2e8f0',
+  },
+  coverPlaceholderText: {
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  logoOverlayContainer: {
+    position: 'absolute',
+    left: 16,
+    bottom: -28,
+    width: 88,
+    height: 88,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    borderWidth: 3,
+    borderColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  logoOverlayImage: {
+    width: '100%',
+    height: '100%',
+  },
+  businessMotto: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#334155',
+    textAlign: 'center',
+    marginBottom: 6,
   },
   businessName: {
     fontSize: 28,
@@ -597,7 +739,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   verifiedBadge: {
-    marginBottom: 12,
+    marginBottom: 8,
     backgroundColor: '#ecfdf5',
     borderWidth: 1,
     borderColor: '#86efac',

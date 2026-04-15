@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, increment, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { app } from "../firebase";
 import { submitUserReview } from '../utils/userReviews';
 import UserReviewModal from './UserReviewModal';
@@ -32,6 +32,30 @@ export type Listing = {
   expiresAt: any;
 };
 
+function getTimestampMs(value: any): number | null {
+  if (!value) return null;
+  if (typeof value?.toMillis === 'function') return value.toMillis();
+  if (typeof value?.toDate === 'function') return value.toDate().getTime();
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function formatRelativeTime(ms: number | null): string {
+  if (!ms) return '';
+  const diffMs = Date.now() - ms;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
+
 export default function SingleListing({ listing }: { listing: Listing }) {
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -41,9 +65,13 @@ export default function SingleListing({ listing }: { listing: Listing }) {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportDetails, setReportDetails] = useState('');
+  const [selectedReportReason, setSelectedReportReason] = useState<string>('');
+  const [submittingReport, setSubmittingReport] = useState(false);
   const [sellerPhotoUrl, setSellerPhotoUrl] = useState<string>('');
   const currentUser = getAuth().currentUser;
   const isOwnListing = !!currentUser && currentUser.uid === listing.userId;
+  const postedTimeLabel = formatRelativeTime(getTimestampMs(listing.createdAt));
 
   useEffect(() => {
     const db = getFirestore(app);
@@ -201,14 +229,15 @@ export default function SingleListing({ listing }: { listing: Listing }) {
   const submitListingReport = async (reason: string) => {
     if (!currentUser) {
       Alert.alert('Sign in required', 'Please sign in to report listings.');
-      return;
+      return false;
     }
 
     if (isOwnListing) {
       Alert.alert('Not allowed', 'You cannot report your own listing.');
-      return;
+      return false;
     }
 
+    setSubmittingReport(true);
     try {
       const db = getFirestore(app);
       await addDoc(collection(db, 'reportedListings'), {
@@ -219,42 +248,45 @@ export default function SingleListing({ listing }: { listing: Listing }) {
         sellerEmail: listing.sellerEmail || '',
         reportedBy: currentUser.uid,
         reason,
-        details: 'Reported from listing details screen',
+        details: reportDetails.trim() || 'Reported from listing details screen',
         createdAt: serverTimestamp(),
         status: 'pending',
       });
 
       Alert.alert('Report submitted', 'Thanks. Our moderators will review this listing.');
+      return true;
     } catch (error) {
       console.error('Error reporting listing:', error);
       Alert.alert('Error', 'Could not submit report. Please try again.');
+      return false;
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
   const reportListing = () => {
-    Alert.alert('Report Listing', 'Why are you reporting this listing?', [
-      {
-        text: 'Spam',
-        onPress: () => submitListingReport('spam'),
-      },
-      {
-        text: 'Scam/Fraud',
-        onPress: () => submitListingReport('scam'),
-      },
-      {
-        text: 'Prohibited Item',
-        onPress: () => submitListingReport('prohibited_item'),
-      },
-      {
-        text: 'Misleading Content',
-        onPress: () => submitListingReport('misleading_content'),
-      },
-      { text: 'Cancel', style: 'cancel', onPress: () => setReportModalVisible(false) },
-    ]);
+    setReportDetails('');
+    setSelectedReportReason('');
+    setReportModalVisible(true);
   };
 
   const handleReportReason = (reason: string) => {
-    submitListingReport(reason);
+    setSelectedReportReason(reason);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReportReason) {
+      Alert.alert('Reason required', 'Please select a reason before submitting.');
+      return;
+    }
+
+    const submitted = await submitListingReport(selectedReportReason);
+    if (!submitted) {
+      return;
+    }
+
+    setReportDetails('');
+    setSelectedReportReason('');
     setReportModalVisible(false);
   };
 
@@ -338,14 +370,31 @@ export default function SingleListing({ listing }: { listing: Listing }) {
 
             <View style={[styles.detailsColumn, isWideLayout ? styles.detailsColumnWide : null]}>
               {/* Details */}
-              <Text style={styles.title}>{listing.title}</Text>
-              <Text style={styles.price}>Price: ${listing.price}</Text>
+              <View style={styles.titlePriceRow}>
+                <Text style={styles.title}>{listing.title}</Text>
+                <Text style={styles.price}>${listing.price}</Text>
+              </View>
+              <View style={styles.metaPillRow}>
+                {!!listing.category && (
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>{listing.category}</Text>
+                  </View>
+                )}
+                {!!listing.condition && (
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>{listing.condition}</Text>
+                  </View>
+                )}
+                {!!postedTimeLabel && (
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>{postedTimeLabel}</Text>
+                  </View>
+                )}
+              </View>
               <View style={styles.viewCountRow}>
                 <Feather name="eye" size={13} color="#999" />
                 <Text style={styles.viewCountText}>{(listing.viewCount || 0) + (isOwnListing ? 0 : 1)} views</Text>
               </View>
-              <Text style={styles.meta}>Category: {listing.category}</Text>
-              <Text style={styles.meta}>Condition: {listing.condition}</Text>
 
               {listing.eventDate && (
                 <Text style={styles.meta}>Event Date: {listing.eventDate}</Text>
@@ -359,7 +408,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
 
               {/* Seller Info */}
               <View style={styles.sellerInfo}>
-                <Text style={styles.sellerLabel}>Seller:</Text>
+                <Text style={styles.sellerLabel}>Seller Information:</Text>
                 <View style={styles.sellerRow}>
                   {sellerPhotoUrl ? (
                     <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} resizeMode="cover" />
@@ -376,32 +425,39 @@ export default function SingleListing({ listing }: { listing: Listing }) {
                     <Text style={styles.sellerName}>{listing.sellerName}</Text>
                   )}
                 </View>
-                <Text style={styles.sellerLocation}>Location: {listing.city || 'TBD'}</Text>
+                <View style={styles.sellerLocationRow}>
+                  <Feather name="map-pin" size={13} color="#ec4899" />
+                  <Text style={styles.sellerLocation}>{listing.city || 'TBD'}</Text>
+                </View>
               </View>
               {!!currentUser && !isOwnListing && !!listing.userId && (
                 <TouchableOpacity style={styles.reviewButton} onPress={() => setReviewModalVisible(true)}>
                   <Text style={styles.reviewButtonText}>Leave Seller Review</Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity style={styles.messageButton} onPress={startThread}>
-                <Text style={styles.messageButtonText}>Message Seller</Text>
-              </TouchableOpacity>
-              {!!currentUser && !isOwnListing && (
+              <View style={styles.primaryActionsRow}>
                 <TouchableOpacity
-                  style={[styles.saveButton, isSaved && styles.saveButtonSaved]}
-                  onPress={toggleSave}
-                  disabled={savingInProgress}
+                  style={[styles.messageButton, !isOwnListing && styles.rowActionButton]}
+                  onPress={startThread}
                 >
-                  <Feather name="bookmark" size={16} color={isSaved ? '#fff' : '#475569'} />
-                  <Text style={[styles.saveButtonText, isSaved && styles.saveButtonTextSaved]}>
-                    {isSaved ? 'Saved' : 'Save Listing'}
-                  </Text>
+                  <Text style={styles.messageButtonText}>Message Seller</Text>
                 </TouchableOpacity>
-              )}
-              {!!currentUser && !isOwnListing && (
-                <TouchableOpacity style={styles.reportButton} onPress={reportListing}>
-                  <Feather name="flag" size={16} color="#dc2626" />
-                  <Text style={styles.reportButtonText}>Report Listing</Text>
+                {!isOwnListing && (
+                  <TouchableOpacity
+                    style={[styles.saveButton, styles.rowActionButton, isSaved && styles.saveButtonSaved]}
+                    onPress={toggleSave}
+                    disabled={savingInProgress}
+                  >
+                    <Feather name="bookmark" size={16} color={isSaved ? '#fff' : '#475569'} />
+                    <Text style={[styles.saveButtonText, isSaved && styles.saveButtonTextSaved]}>
+                      {isSaved ? 'Saved' : 'Save Listing'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {!isOwnListing && (
+                <TouchableOpacity style={styles.reportLinkWrap} onPress={reportListing}>
+                  <Text style={styles.reportLinkText}>Report Listing</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -441,40 +497,63 @@ export default function SingleListing({ listing }: { listing: Listing }) {
               <Text style={styles.reportModalQuestion}>Why are you reporting this listing?</Text>
 
               <TouchableOpacity
-                style={styles.reportReasonButton}
+                style={[styles.reportReasonButton, selectedReportReason === 'spam' && styles.reportReasonButtonSelected]}
                 onPress={() => handleReportReason('spam')}
               >
-                <Text style={styles.reportReasonText}>Spam</Text>
+                <Text style={[styles.reportReasonText, selectedReportReason === 'spam' && styles.reportReasonTextSelected]}>Spam</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.reportReasonButton}
+                style={[styles.reportReasonButton, selectedReportReason === 'scam' && styles.reportReasonButtonSelected]}
                 onPress={() => handleReportReason('scam')}
               >
-                <Text style={styles.reportReasonText}>Scam/Fraud</Text>
+                <Text style={[styles.reportReasonText, selectedReportReason === 'scam' && styles.reportReasonTextSelected]}>Scam/Fraud</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.reportReasonButton}
+                style={[styles.reportReasonButton, selectedReportReason === 'prohibited_item' && styles.reportReasonButtonSelected]}
                 onPress={() => handleReportReason('prohibited_item')}
               >
-                <Text style={styles.reportReasonText}>Prohibited Item</Text>
+                <Text style={[styles.reportReasonText, selectedReportReason === 'prohibited_item' && styles.reportReasonTextSelected]}>Prohibited Item</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.reportReasonButton}
+                style={[styles.reportReasonButton, selectedReportReason === 'misleading_content' && styles.reportReasonButtonSelected]}
                 onPress={() => handleReportReason('misleading_content')}
               >
-                <Text style={styles.reportReasonText}>Misleading Content</Text>
+                <Text style={[styles.reportReasonText, selectedReportReason === 'misleading_content' && styles.reportReasonTextSelected]}>Misleading Content</Text>
               </TouchableOpacity>
+
+              <Text style={styles.reportDetailsLabel}>Additional details (optional)</Text>
+              <TextInput
+                style={styles.reportDetailsInput}
+                value={reportDetails}
+                onChangeText={setReportDetails}
+                placeholder="Add any context that would help moderators review this listing"
+                placeholderTextColor="#9ca3af"
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
             </ScrollView>
 
             <View style={styles.reportModalFooter}>
               <TouchableOpacity
                 style={styles.reportCancelButton}
-                onPress={() => setReportModalVisible(false)}
+                onPress={() => {
+                  setReportModalVisible(false);
+                  setSelectedReportReason('');
+                  setReportDetails('');
+                }}
               >
                 <Text style={styles.reportCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.reportSubmitButton, (!selectedReportReason || submittingReport) && styles.reportSubmitButtonDisabled]}
+                onPress={handleSubmitReport}
+                disabled={!selectedReportReason || submittingReport}
+              >
+                <Text style={styles.reportSubmitButtonText}>{submittingReport ? 'Submitting...' : 'Submit Report'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -588,16 +667,43 @@ const styles = StyleSheet.create({
   detailsColumnWide: {
     width: '58%',
   },
+  titlePriceRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
   title: {
     fontSize: 20,
     fontWeight: '500',
     marginBottom: 8,
+    flex: 1,
   },
   price: {
     fontSize: 15,
     color: '#475569',
     marginBottom: 8,
     fontWeight: '500',
+  },
+  metaPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  metaPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: '#e5e7eb',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  metaPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
   },
   meta: {
     fontSize: 12,
@@ -665,6 +771,12 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: '500',
   },
+  sellerLocationRow: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   reviewButton: {
     marginTop: 8,
     marginBottom: 4,
@@ -697,6 +809,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  primaryActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 10,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  rowActionButton: {
+    flex: 1,
+    marginTop: 0,
+    marginBottom: 0,
+    paddingHorizontal: 10,
+  },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -721,23 +846,18 @@ const styles = StyleSheet.create({
   saveButtonTextSaved: {
     color: '#fff',
   },
-  reportButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: '#fca5a5',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+  reportLinkWrap: {
+    alignSelf: 'center',
+    marginTop: 2,
     marginBottom: 24,
-    backgroundColor: '#fff1f2',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
   },
-  reportButtonText: {
+  reportLinkText: {
     color: '#dc2626',
-    fontWeight: '700',
     fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   listingDetailsTitle: {
     fontSize: 18,
@@ -794,6 +914,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontWeight: '500',
   },
+  reportDetailsLabel: {
+    fontSize: 13,
+    color: '#374151',
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  reportDetailsInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 90,
+    fontSize: 13,
+    color: '#111827',
+    marginBottom: 14,
+  },
   reportReasonButton: {
     paddingVertical: 12,
     paddingHorizontal: 12,
@@ -803,10 +941,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafbfc',
     marginBottom: 10,
   },
+  reportReasonButtonSelected: {
+    borderColor: '#fca5a5',
+    backgroundColor: '#fff1f2',
+  },
   reportReasonText: {
     fontSize: 14,
     color: '#2d3748',
     fontWeight: '500',
+  },
+  reportReasonTextSelected: {
+    color: '#b91c1c',
+    fontWeight: '700',
   },
   reportModalFooter: {
     paddingHorizontal: 20,
@@ -814,8 +960,12 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   reportCancelButton: {
+    flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
     backgroundColor: '#f3f4f6',
@@ -825,5 +975,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
     fontWeight: '600',
+  },
+  reportSubmitButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#dc2626',
+    alignItems: 'center',
+  },
+  reportSubmitButtonDisabled: {
+    opacity: 0.5,
+  },
+  reportSubmitButtonText: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '700',
   },
 });

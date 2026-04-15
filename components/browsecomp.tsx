@@ -7,6 +7,7 @@ import { app } from '../firebase';
 import { useRouter } from 'expo-router';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import { isUserBlocked } from '../utils/blockService';
+import { filterListingsWithExistingUsers } from '../utils/listingOwners';
 import { isListingVisible } from '../utils/listingVisibility';
 import FeaturedListings from './FeaturedListings';
 import GridListingCard from './GridListingCard';
@@ -92,7 +93,8 @@ export default function BrowseComp() {
 					}
 					fetchedListings.push({ id: docSnap.id, ...data });
 				});
-				setListings(fetchedListings);
+				const listingsWithExistingOwners = await filterListingsWithExistingUsers(db, fetchedListings);
+				setListings(listingsWithExistingOwners);
 			} catch (error) {
 				console.error('Error fetching listings:', error);
 			}
@@ -184,22 +186,40 @@ export default function BrowseComp() {
 				<View style={styles.listHubHighlightTextWrap}>
 					<TouchableOpacity
 						style={styles.listHubHighlightButton}
-						onPress={() => router.push((user ? '/(tabs)/listbutton' : '/signInOrSignUp') as any)}
-						activeOpacity={0.85}
+						onPress={() => router.push('/create-listing' as any)}
 					>
-						<Text style={styles.listHubHighlightButtonText}>Open List Hub</Text>
+						<Text style={styles.listHubHighlightButtonText}>List Your Items</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
 
 		{/* Premium Featured Listings Section */}
 		{displaySettings?.showFeaturedListings && (
-			<FeaturedListings 
-				tier="premium"
-				title="✨ Featured"
-				subtitle="Top picks from our community"
-				onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
-			/>
+			<>
+				<FeaturedListings 
+					tier="premium"
+					title="✨ Featured"
+					subtitle="Top picks from our community"
+					onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
+				/>
+				<View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+					<TouchableOpacity
+						style={{
+							backgroundColor: '#475569',
+							borderRadius: 8,
+							paddingVertical: 10,
+							paddingHorizontal: 16,
+							alignSelf: 'center',
+							minWidth: 220,
+						}}
+						onPress={() => router.push('/featured-listings' as any)}
+					>
+						<Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
+							View All Featured Listings
+						</Text>
+					</TouchableOpacity>
+				</View>
+			</>
 		)}
 
 			<View style={styles.categoryRow}>

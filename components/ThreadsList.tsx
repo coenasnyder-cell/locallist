@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../firebase'; // make sure this exports Firestore
 import { useAccountStatus } from '../hooks/useAccountStatus';
+import ScreenTitleRow from './ScreenTitleRow';
 
 type Thread = {
   id: string;
@@ -160,6 +161,14 @@ export default function ThreadsList() {
     }
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/(tabs)/messagesbutton');
+  };
+
   const filteredThreads = threads.filter((thread) => {
     const isArchived = (thread.hiddenFor || []).includes(user?.uid || '');
     return showArchived ? isArchived : !isArchived;
@@ -184,6 +193,10 @@ export default function ThreadsList() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow title="Messages" onBackPress={handleBack} />
+      </View>
+
       <View style={styles.filterRow}>
         <TouchableOpacity
           onPress={() => setShowArchived(false)}
@@ -263,6 +276,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#f8fafc',
+  },
+  screenTitleRowWrap: {
+    marginBottom: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   stateWrap: {
     flex: 1,

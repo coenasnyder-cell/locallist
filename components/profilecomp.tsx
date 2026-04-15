@@ -681,7 +681,7 @@ export default function Profile() {
           </TouchableOpacity>
 
           {isBusinessAccount ? (
-            <TouchableOpacity style={[styles.actionCard, styles.actionCardBusinessHub]} onPress={() => router.push('/(app)/businesslocal')}>
+            <TouchableOpacity style={[styles.actionCard, styles.actionCardBusinessHub]} onPress={() => router.push('/businesslocal')}>
               <Feather name="briefcase" size={22} color="#fff" />
               <Text style={styles.actionCardText}>Business Hub</Text>
             </TouchableOpacity>
@@ -693,7 +693,7 @@ export default function Profile() {
           </TouchableOpacity>
 
           {!isBusinessAccount ? (
-            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/upgrade-business')}>
+            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/premium-upgrade')}>
               <Feather name="briefcase" size={22} color="#fff" />
               <Text style={styles.actionCardText}>Upgrade Business</Text>
             </TouchableOpacity>

@@ -8,7 +8,7 @@
  */
 
 import { initializeApp } from "firebase-admin/app";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
 import { setGlobalOptions } from "firebase-functions";
 import * as logger from "firebase-functions/logger";
 import { onSchedule } from "firebase-functions/scheduler";
@@ -32,6 +32,90 @@ import Stripe from "stripe";
 setGlobalOptions({ maxInstances: 10 });
 
 initializeApp();
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+/**
+ * Weekly cleanup for listings whose owner account no longer exists.
+ * This keeps both regular and featured listing surfaces from showing orphaned data.
+ */
+export const cleanupOrphanListingsWeekly = onSchedule(
+  "every sunday 03:00",
+  async () => {
+    const db = getFirestore();
+
+    try {
+      const listingsSnapshot = await db.collection("listings").get();
+      if (listingsSnapshot.empty) {
+        logger.info("Weekly orphan listing cleanup: no listings found");
+        return;
+      }
+
+      const listingOwnerIds = Array.from(
+        new Set(
+          listingsSnapshot.docs
+            .map((listingDoc) => String(listingDoc.data()?.userId || "").trim())
+            .filter(Boolean)
+        )
+      );
+
+      if (listingOwnerIds.length === 0) {
+        logger.info("Weekly orphan listing cleanup: no owner IDs found");
+        return;
+      }
+
+      const existingOwnerIds = new Set<string>();
+      const ownerIdChunks = chunkArray(listingOwnerIds, 10);
+
+      for (const ownerIdChunk of ownerIdChunks) {
+        const usersSnapshot = await db
+          .collection("users")
+          .where(FieldPath.documentId(), "in", ownerIdChunk)
+          .get();
+
+        usersSnapshot.forEach((userDoc) => {
+          existingOwnerIds.add(userDoc.id);
+        });
+      }
+
+      const orphanListingRefs = listingsSnapshot.docs
+        .filter((listingDoc) => {
+          const ownerId = String(listingDoc.data()?.userId || "").trim();
+          return !ownerId || !existingOwnerIds.has(ownerId);
+        })
+        .map((listingDoc) => listingDoc.ref);
+
+      if (orphanListingRefs.length === 0) {
+        logger.info("Weekly orphan listing cleanup: no orphan listings found", {
+          scannedListings: listingsSnapshot.size,
+          ownerCount: listingOwnerIds.length,
+        });
+        return;
+      }
+
+      const writer = db.bulkWriter();
+      orphanListingRefs.forEach((listingRef) => {
+        writer.delete(listingRef);
+      });
+      await writer.close();
+
+      logger.info("Weekly orphan listing cleanup complete", {
+        scannedListings: listingsSnapshot.size,
+        ownerCount: listingOwnerIds.length,
+        deletedListings: orphanListingRefs.length,
+      });
+    } catch (error) {
+      logger.error("Weekly orphan listing cleanup failed", {error});
+      throw error;
+    }
+  }
+);
 
 /**
  * Ensures jobBoard documents always keep canonical identity fields.

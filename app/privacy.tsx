@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PrivacyPolicy() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -81,8 +83,8 @@ export default function PrivacyPolicy() {
             </Text>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>© 2026 Local List. A local marketplace for Harrison.</Text>
+          <View style={[styles.footer, { paddingBottom: 16 + insets.bottom }]}>
+            <Text style={styles.footerText}>© 2026 Local List.</Text>
           </View>
         </View>
       </ScrollView>
@@ -169,10 +171,14 @@ const styles = StyleSheet.create({
 
   footer: {
     marginTop: 40,
-    paddingVertical: 20,
+    marginHorizontal: -20,
+    alignSelf: "stretch",
+    paddingTop: 18,
+    paddingBottom: 16,
     backgroundColor: "#333",
     borderRadius: 0,
     alignItems: "center",
+ 
   },
 
   footerText: {

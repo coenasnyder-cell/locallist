@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 
 const CATEGORIES = [
@@ -230,11 +230,20 @@ export default function ServicesList() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <BackToCommunityHubRow />
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow
+          title="Local Services"
+          onBackPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+              return;
+            }
+            router.replace('/(tabs)/communitybutton');
+          }}
+        />
+      </View>
 
       <View style={styles.header}>
-        <Text style={styles.title}>Local Services</Text>
-
         <View style={styles.heroRow}>
           <Image
             source={require('../../assets/images/serviceshub.png')}
@@ -341,6 +350,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 48,
+  },
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   header: {
     padding: 16,

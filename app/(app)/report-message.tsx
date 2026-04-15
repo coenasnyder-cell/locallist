@@ -13,6 +13,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { db } from '../../firebase';
 
 type ReportableMessage = {
@@ -44,6 +45,14 @@ export default function ReportMessageScreen() {
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/(tabs)/messagesbutton');
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -153,12 +162,11 @@ export default function ReportMessageScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.85}>
-          <Text style={styles.backButtonText}>Back To Chat</Text>
-        </TouchableOpacity>
+        <View style={styles.screenTitleRowWrap}>
+          <ScreenTitleRow title="Report Message" onBackPress={handleBack} />
+        </View>
 
         <View style={styles.panel}>
-          <Text style={styles.title}>Report Message</Text>
           <Text style={styles.subtitle}>Select a message from {listingTitle} and tell us what happened.</Text>
 
           {loading ? (
@@ -201,14 +209,20 @@ export default function ReportMessageScreen() {
             textAlignVertical="top"
           />
 
-          <TouchableOpacity
-            style={[styles.submitButton, (!selectedMessage || submitting) ? styles.submitButtonDisabled : null]}
-            onPress={handleSubmit}
-            disabled={!selectedMessage || submitting}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.submitButtonText}>{submitting ? 'Submitting...' : 'Report Message'}</Text>
-          </TouchableOpacity>
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleBack} activeOpacity={0.85}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.submitButton, (!selectedMessage || submitting) ? styles.submitButtonDisabled : null]}
+              onPress={handleSubmit}
+              disabled={!selectedMessage || submitting}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.submitButtonText}>{submitting ? 'Submitting...' : 'Report Message'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -224,19 +238,11 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 14,
   },
-  backButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  backButtonText: {
-    color: '#334155',
-    fontSize: 13,
-    fontWeight: '700',
+  screenTitleRowWrap: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   panel: {
     backgroundColor: '#ffffff',
@@ -245,11 +251,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     gap: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0f172a',
   },
   subtitle: {
     fontSize: 14,
@@ -329,10 +330,29 @@ const styles = StyleSheet.create({
     color: '#0f172a',
   },
   submitButton: {
+    flex: 1,
     backgroundColor: '#0f766e',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#334155',
+    fontSize: 14,
+    fontWeight: '800',
   },
   submitButtonDisabled: {
     opacity: 0.5,

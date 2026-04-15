@@ -3,6 +3,7 @@ import { collection, getDocs, getFirestore, orderBy, query, where } from 'fireba
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PetCard from '../components/PetCard';
+import ScreenTitleRow from '../components/ScreenTitleRow';
 import { app } from '../firebase';
 import { Pet } from '../types/Pet';
 
@@ -22,6 +23,16 @@ type ServiceListing = {
   approvalStatus?: string;
   isApproved?: boolean;
 };
+
+type PetHubSectionFilter = 'all' | 'services' | 'lost' | 'found' | 'adoption';
+
+const SECTION_FILTER_OPTIONS: Array<{ value: PetHubSectionFilter; label: string }> = [
+  { value: 'all', label: 'All Sections' },
+  { value: 'services', label: 'Pet Services' },
+  { value: 'lost', label: 'Lost Pets' },
+  { value: 'found', label: 'Found Pets' },
+  { value: 'adoption', label: 'Pets for Adoption' },
+];
 
 function isApprovedService(data: any): boolean {
   const status = String(data?.status || '').toLowerCase();
@@ -56,6 +67,8 @@ export default function PetHubScreen() {
   const [petServices, setPetServices] = useState<ServiceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<PetHubSectionFilter>('all');
+  const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetchAllPets();
@@ -135,6 +148,12 @@ export default function PetHubScreen() {
     fetchAllPets().then(() => setRefreshing(false));
   }, []);
 
+  const selectedSectionLabel =
+    SECTION_FILTER_OPTIONS.find((option) => option.value === selectedSection)?.label || 'All Sections';
+
+  const shouldShowSection = (section: Exclude<PetHubSectionFilter, 'all'>) =>
+    selectedSection === 'all' || selectedSection === section;
+
   const handlePetPress = (pet: Pet) => {
     router.push({
       pathname: '/pet-details' as any,
@@ -192,7 +211,7 @@ export default function PetHubScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionHeaderLeft}>
-            <Text style={styles.sectionTitle}>🐾 Pet Services</Text>
+            <Text style={styles.sectionTitle}>Pet Services</Text>
             <Text style={styles.petCount}>{petServices.length} listing{petServices.length === 1 ? '' : 's'}</Text>
           </View>
 
@@ -260,12 +279,10 @@ export default function PetHubScreen() {
 
   const PetSection = ({
     title,
-    emoji,
     pets,
     postType,
   }: {
     title: string;
-    emoji: string;
     pets: Pet[];
     postType: 'lost' | 'found' | 'adoption';
   }) => {
@@ -277,7 +294,7 @@ export default function PetHubScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionHeaderLeft}>
             <Text style={styles.sectionTitle}>
-              {emoji} {title}
+             {title}
             </Text>
             <Text style={styles.petCount}>{countLabel}</Text>
           </View>
@@ -344,35 +361,69 @@ export default function PetHubScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
-        <Text style={styles.pageTitle}>🐾 The Pet Corner</Text>
-        <Text style={styles.pageSubtitle}>
-          Lost pets, found pets, adoption listings, and local pet services.
-        </Text>
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow title="The Pet Corner" />
       </View>
 
-      <PetServicesSection />
+      <View style={styles.filterWrap}>
+        <TouchableOpacity
+          style={styles.filterDropdownButton}
+          onPress={() => setSectionDropdownOpen((open) => !open)}
+          activeOpacity={0.86}
+        >
+          <Text style={styles.filterDropdownButtonText}>{selectedSectionLabel}</Text>
+          <Text style={styles.filterDropdownChevron}>{sectionDropdownOpen ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
 
-      <PetSection
-        title="Lost Pets"
-        emoji="🔍"
-        pets={lostPets}
-        postType="lost"
-      />
+        {sectionDropdownOpen ? (
+          <View style={styles.filterDropdownMenu}>
+            {SECTION_FILTER_OPTIONS.map((option) => {
+              const active = selectedSection === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[styles.filterDropdownItem, active ? styles.filterDropdownItemActive : null]}
+                  onPress={() => {
+                    setSelectedSection(option.value);
+                    setSectionDropdownOpen(false);
+                  }}
+                  activeOpacity={0.86}
+                >
+                  <Text style={[styles.filterDropdownItemText, active ? styles.filterDropdownItemTextActive : null]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ) : null}
+      </View>
 
-      <PetSection
-        title="Found Pets"
-        emoji="✨"
-        pets={foundPets}
-        postType="found"
-      />
+      {shouldShowSection('services') ? <PetServicesSection /> : null}
 
-      <PetSection
-        title="Pets for Adoption"
-        emoji="💕"
-        pets={adoptionPets}
-        postType="adoption"
-      />
+      {shouldShowSection('lost') ? (
+        <PetSection
+          title="Lost Pets"
+          pets={lostPets}
+          postType="lost"
+        />
+      ) : null}
+
+      {shouldShowSection('found') ? (
+        <PetSection
+          title="Found Pets"
+          pets={foundPets}
+          postType="found"
+        />
+      ) : null}
+
+      {shouldShowSection('adoption') ? (
+        <PetSection
+          title="Pets for Adoption"
+          pets={adoptionPets}
+          postType="adoption"
+        />
+      ) : null}
 
       <View style={styles.footer} />
     </ScrollView>
@@ -395,24 +446,66 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderRadius: 8,
   },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#333',
-    marginBottom: 6,
+  filterWrap: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    zIndex: 20,
   },
-  pageSubtitle: {
+  filterDropdownButton: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  filterDropdownButtonText: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '400',
+    color: '#334155',
+    fontWeight: '600',
+  },
+  filterDropdownChevron: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  filterDropdownMenu: {
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+  },
+  filterDropdownItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  filterDropdownItemActive: {
+    backgroundColor: '#f8fafc',
+  },
+  filterDropdownItemText: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '500',
+  },
+  filterDropdownItemTextActive: {
+    color: '#0f172a',
+    fontWeight: '700',
   },
   section: {
     paddingHorizontal: 16,
@@ -439,7 +532,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionActionButton: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#475569',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
@@ -538,7 +631,7 @@ const styles = StyleSheet.create({
   viewAllText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0f766e',
+    color: '#475569',
   },
   footer: {
     height: 20,

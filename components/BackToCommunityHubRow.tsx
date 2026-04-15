@@ -2,16 +2,31 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function BackToCommunityHubRow() {
+type BackToCommunityHubRowProps = {
+  fallbackRoute?: string;
+};
+
+export default function BackToCommunityHubRow({ fallbackRoute }: BackToCommunityHubRowProps) {
   const router = useRouter();
+
+  const handlePress = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    if (fallbackRoute) {
+      router.replace(fallbackRoute as any);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={() => router.push('/(tabs)/communitybutton' as any)}
+        onPress={handlePress}
         activeOpacity={0.8}
       >
-        <Text style={styles.backText}>{'< Back To The Community Hub'}</Text>
+        <Text style={styles.backText}>{'< Back'}</Text>
       </TouchableOpacity>
     </View>
   );

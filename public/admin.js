@@ -1222,7 +1222,6 @@
     const newsCheckbox = document.getElementById('showNews');
     const quoteOfDayCheckbox = document.getElementById('showQuoteOfDay');
     const quoteOfDayTextInput = document.getElementById('quoteOfDayText');
-    const quoteOfDayAttributionInput = document.getElementById('quoteOfDayAttribution');
     const spotlightHeadlineInput = document.getElementById('spotlightHeadline');
     const spotlightDescriptionInput = document.getElementById('spotlightDescription');
     const spotlightImageUrlInput = document.getElementById('spotlightImageUrl');
@@ -1238,7 +1237,6 @@
     newsCheckbox.checked = true;
     if (quoteOfDayCheckbox) quoteOfDayCheckbox.checked = true;
     if (quoteOfDayTextInput) quoteOfDayTextInput.value = '';
-    if (quoteOfDayAttributionInput) quoteOfDayAttributionInput.value = '';
     if (spotlightHeadlineInput) spotlightHeadlineInput.value = '';
     if (spotlightDescriptionInput) spotlightDescriptionInput.value = '';
     if (spotlightImageUrlInput) spotlightImageUrlInput.value = '';
@@ -1256,7 +1254,6 @@
       if (typeof data.showNews === 'boolean') newsCheckbox.checked = data.showNews;
       if (quoteOfDayCheckbox && typeof data.showQuoteOfDay === 'boolean') quoteOfDayCheckbox.checked = data.showQuoteOfDay;
       if (quoteOfDayTextInput) quoteOfDayTextInput.value = data.quoteOfDayText || '';
-      if (quoteOfDayAttributionInput) quoteOfDayAttributionInput.value = data.quoteOfDayAttribution || '';
       if (spotlightHeadlineInput) spotlightHeadlineInput.value = data.spotlightHeadline || '';
       if (spotlightDescriptionInput) spotlightDescriptionInput.value = data.spotlightDescription || '';
       if (spotlightImageUrlInput) spotlightImageUrlInput.value = data.spotlightImageUrl || '';
@@ -1274,7 +1271,6 @@
     const newsCheckbox = document.getElementById('showNews');
     const quoteOfDayCheckbox = document.getElementById('showQuoteOfDay');
     const quoteOfDayTextInput = document.getElementById('quoteOfDayText');
-    const quoteOfDayAttributionInput = document.getElementById('quoteOfDayAttribution');
     const spotlightHeadlineInput = document.getElementById('spotlightHeadline');
     const spotlightDescriptionInput = document.getElementById('spotlightDescription');
     const spotlightImageUrlInput = document.getElementById('spotlightImageUrl');
@@ -1301,7 +1297,6 @@
       showNews: newsCheckbox.checked,
       showQuoteOfDay: quoteOfDayCheckbox ? quoteOfDayCheckbox.checked : true,
       quoteOfDayText: quoteOfDayTextInput ? quoteOfDayTextInput.value.trim() : '',
-      quoteOfDayAttribution: quoteOfDayAttributionInput ? quoteOfDayAttributionInput.value.trim() : '',
       spotlightHeadline: spotlightHeadlineInput ? spotlightHeadlineInput.value.trim() : '',
       spotlightDescription: spotlightDescriptionInput ? spotlightDescriptionInput.value.trim() : '',
       spotlightImageUrl: spotlightImageUrlInput ? spotlightImageUrlInput.value.trim() : '',
@@ -3234,7 +3229,7 @@
     'verified-businesses': 'Verified Businesses',
     'pending-business-profiles': 'Pending Business Profiles',
     'shop-local-section': 'Local Section Settings',
-    'community-settings': 'Community Settings',
+    'community-settings': 'Site Settings',
     'pending-approvals': 'Pending Approvals',
     'blocked': 'Blocked Users',
     'reports': 'Reports & Exports',

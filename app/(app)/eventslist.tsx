@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 
 type EventRecord = {
@@ -165,8 +165,6 @@ export default function EventsListScreen() {
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [digestEmail, setDigestEmail] = useState('');
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [monthlyDigest, setMonthlyDigest] = useState(true);
   const [digestMessage, setDigestMessage] = useState('');
   const [digestMessageType, setDigestMessageType] = useState<'success' | 'error' | ''>('');
   const [subscribing, setSubscribing] = useState(false);
@@ -312,15 +310,7 @@ export default function EventsListScreen() {
       return;
     }
 
-    const frequencies: ('weekly' | 'monthly')[] = [];
-    if (weeklyDigest) frequencies.push('weekly');
-    if (monthlyDigest) frequencies.push('monthly');
-
-    if (!frequencies.length) {
-      setDigestMessage('Select at least one digest option.');
-      setDigestMessageType('error');
-      return;
-    }
+    const frequencies: ('weekly' | 'monthly')[] = ['monthly', 'weekly'];
 
     try {
       setSubscribing(true);
@@ -340,7 +330,7 @@ export default function EventsListScreen() {
       );
 
       if (!isMountedRef.current) return;
-      setDigestMessage('Subscribed! You will receive event digest updates based on your selections.');
+      setDigestMessage('Subscribed! You will receive monthly and weekly event digest updates.');
       setDigestMessageType('success');
       setDigestEmail('');
     } catch (error) {
@@ -511,11 +501,19 @@ export default function EventsListScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <BackToCommunityHubRow />
+      
 
-        <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Events</Text>
-          <Text style={styles.heroSubtitle}>Local events and happenings in your area</Text>
+        <View style={styles.screenTitleRowWrap}>
+          <ScreenTitleRow
+            title="Events"
+            onBackPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+                return;
+              }
+              router.replace('/(tabs)/communitybutton');
+            }}
+          />
         </View>
 
         <View style={styles.benefitsRow}>
@@ -587,23 +585,7 @@ export default function EventsListScreen() {
           <Text style={styles.digestIcon}>📬</Text>
           <View style={styles.digestBody}>
             <Text style={styles.digestTitle}>Get Events Digest Updates</Text>
-            <Text style={styles.digestText}>Subscribe to weekly and monthly event roundups so you never miss what is happening locally.</Text>
-            <View style={styles.digestOptions}>
-              <TouchableOpacity
-                style={[styles.digestOptionChip, weeklyDigest ? styles.digestOptionChipActive : null]}
-                activeOpacity={0.86}
-                onPress={() => setWeeklyDigest((current) => !current)}
-              >
-                <Text style={[styles.digestOptionText, weeklyDigest ? styles.digestOptionTextActive : null]}>Weekly Digest</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.digestOptionChip, monthlyDigest ? styles.digestOptionChipActive : null]}
-                activeOpacity={0.86}
-                onPress={() => setMonthlyDigest((current) => !current)}
-              >
-                <Text style={[styles.digestOptionText, monthlyDigest ? styles.digestOptionTextActive : null]}>Monthly Digest</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.digestText}>Subscribe once to receive both monthly and weekly event roundups so you never miss what is happening locally.</Text>
             <View style={styles.digestForm}>
               <TextInput
                 style={styles.digestInput}
@@ -641,21 +623,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingBottom: 64,
   },
-  hero: {
-    paddingVertical: 24,
-    alignItems: 'center',
-  },
-  heroTitle: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: '#1f2937',
-    marginBottom: 8,
-  },
-  heroSubtitle: {
-    fontSize: 15,
-    color: '#475569',
-    fontWeight: '500',
-    textAlign: 'center',
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   benefitsRow: {
     borderWidth: 1,
@@ -925,33 +900,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     textAlign: 'center',
     marginBottom: 12,
-  },
-  digestOptions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  digestOptionChip: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-  },
-  digestOptionChipActive: {
-    backgroundColor: '#0f172a',
-    borderColor: '#0f172a',
-  },
-  digestOptionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  digestOptionTextActive: {
-    color: '#fff',
   },
   digestForm: {
     width: '100%',

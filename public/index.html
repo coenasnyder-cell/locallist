@@ -279,12 +279,6 @@
       margin-bottom: 8px;
     }
 
-    .quote-of-day-attribution {
-      font-size: 13px;
-      color: #475569;
-      font-weight: 600;
-    }
-
     .hub-explainer {
       margin-top: 26px;
       background: #ffffff;
@@ -560,7 +554,6 @@
       <div class="quote-of-day" aria-label="Quote of the day">
         <div class="quote-of-day-label">Quote of the Day</div>
         <p class="quote-of-day-text" id="quoteOfDayTextDisplay"></p>
-        <p class="quote-of-day-attribution" id="quoteOfDayAttributionDisplay"></p>
       </div>
     </section>
 
@@ -1066,7 +1059,6 @@
             showSpotlight: true,
             showQuoteOfDay: true,
             quoteOfDayText: '',
-            quoteOfDayAttribution: '',
             spotlightHeadline: '',
             spotlightDescription: '',
             spotlightImageUrl: '',
@@ -1081,7 +1073,6 @@
           showSpotlight: settings.showSpotlight !== false,
           showQuoteOfDay: settings.showQuoteOfDay !== false,
           quoteOfDayText: settings.quoteOfDayText || '',
-          quoteOfDayAttribution: settings.quoteOfDayAttribution || '',
           spotlightHeadline: settings.spotlightHeadline || '',
           spotlightDescription: settings.spotlightDescription || '',
           spotlightImageUrl: settings.spotlightImageUrl || '',
@@ -1097,7 +1088,6 @@
           showSpotlight: true,
           showQuoteOfDay: true,
           quoteOfDayText: '',
-          quoteOfDayAttribution: '',
           spotlightHeadline: '',
           spotlightDescription: '',
           spotlightImageUrl: '',
@@ -1110,20 +1100,23 @@
     function renderQuoteOfDay(displaySettings) {
       const section = document.getElementById('quoteOfDaySection');
       const quoteTextEl = document.getElementById('quoteOfDayTextDisplay');
-      const quoteAttributionEl = document.getElementById('quoteOfDayAttributionDisplay');
 
-      if (!section || !quoteTextEl || !quoteAttributionEl) return;
+      if (!section || !quoteTextEl) return;
 
       if (!displaySettings.showQuoteOfDay) {
         section.style.display = 'none';
         return;
       }
 
-      const quoteText = (displaySettings.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."';
-      const quoteAttribution = (displaySettings.quoteOfDayAttribution || '').trim() || '- Local List';
+      const quoteText = (displaySettings.quoteOfDayText || '').trim();
+      const shouldShowQuote = quoteText.length > 0;
+
+      if (!shouldShowQuote) {
+        section.style.display = 'none';
+        return;
+      }
 
       quoteTextEl.textContent = quoteText;
-      quoteAttributionEl.textContent = quoteAttribution;
       section.style.display = 'block';
     }
 

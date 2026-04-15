@@ -36,14 +36,12 @@ type CommunityDisplaySettings = {
   showEditorsPicks: boolean;
   showQuoteOfDay: boolean;
   quoteOfDayText: string;
-  quoteOfDayAttribution: string;
 };
 
 const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
   showEditorsPicks: true,
   showQuoteOfDay: true,
   quoteOfDayText: '',
-  quoteOfDayAttribution: '',
 };
 
 export default function PublicLanding() {
@@ -55,6 +53,8 @@ export default function PublicLanding() {
   const [loading, setLoading] = useState(true);
   const [petsLoading, setPetsLoading] = useState(true);
   const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+  const quoteText = (displaySettings.quoteOfDayText || '').trim();
+  const shouldShowQuote = displaySettings.showQuoteOfDay && quoteText.length > 0;
 
   const handlePreviewTap = () => {
     router.push('/signInOrSignUp');
@@ -90,7 +90,6 @@ export default function PublicLanding() {
           showEditorsPicks: settingsData.showEditorsPicks ?? DEFAULT_DISPLAY_SETTINGS.showEditorsPicks,
           showQuoteOfDay: settingsData.showQuoteOfDay ?? DEFAULT_DISPLAY_SETTINGS.showQuoteOfDay,
           quoteOfDayText: settingsData.quoteOfDayText ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayText,
-          quoteOfDayAttribution: settingsData.quoteOfDayAttribution ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayAttribution,
         });
       } catch (error) {
         console.error('Error fetching public display settings:', error);
@@ -219,15 +218,12 @@ export default function PublicLanding() {
         />
       </View>
 
-      {displaySettings.showQuoteOfDay && (
+      {shouldShowQuote && (
         <View style={styles.quoteCard}>
           <Text style={styles.quoteLabel}>Quote of the Day</Text>
           <Text style={styles.quoteText}>
-            {(displaySettings.quoteOfDayText || '').trim() || '"Small acts, when multiplied by many people, can transform a community."'}
+            {quoteText}
           </Text>
-          {(displaySettings.quoteOfDayAttribution || '').trim() ? (
-            <Text style={styles.quoteAttribution}>{displaySettings.quoteOfDayAttribution.trim()}</Text>
-          ) : null}
         </View>
       )}
         <View style={styles.ctaSection}>
@@ -436,13 +432,6 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     textAlign: 'center',
   },
-  quoteAttribution: {
-    marginTop: 8,
-    fontSize: 13,
-    color: '#64748b',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   sectionHeader: {
     marginTop: 8,
     marginBottom: 8,
@@ -526,7 +515,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButton: {
-    backgroundColor: '#f97316',
+    backgroundColor: '#475569',
   },
   secondaryButton: {
     backgroundColor: '#e0f2fe',

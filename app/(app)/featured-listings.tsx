@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
+import { filterListingsWithExistingUsers } from '../../utils/listingOwners';
+import { isListingVisible } from '../../utils/listingVisibility';
 
 const numColumns = 2;
 const screenWidth = Dimensions.get('window').width;
@@ -20,45 +22,35 @@ export default function FeaturedListingsPage() {
       try {
         const db = getFirestore(app);
         const listingsRef = collection(db, 'listings');
-        const now = new Date();
+        // Match Home featured logic: featured + approved listings
+        const q = query(listingsRef, where('isFeatured', '==', true), where('status', '==', 'approved'));
 
-        // Query for featured listings (premium or basic) that are approved
-        const q = query(
-          listingsRef,
-          where('status', '==', 'approved'),
-          where('featureTier', 'in', ['premium', 'basic'])
+        const [snapshot, reportedSnapshot] = await Promise.all([
+          getDocs(q),
+          getDocs(
+            query(
+              collection(db, 'reportedListings'),
+              where('status', 'in', ['pending', 'reviewed', 'action_taken'])
+            )
+          ),
+        ]);
+        const excludedListingIds = new Set(
+          reportedSnapshot.docs
+            .map((reportDoc) => String(reportDoc.data()?.listingId || '').trim())
+            .filter(Boolean)
         );
-
-        const snapshot = await getDocs(q);
+        const nowMs = Date.now();
         const fetchedListings: any[] = [];
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          // For premium listings, check if feature hasn't expired
-          if (data.featureTier === 'premium') {
-            if (data.featureExpiresAt) {
-              const expiresAt = (typeof data.featureExpiresAt === 'object' && typeof data.featureExpiresAt.toDate === 'function') 
-                ? data.featureExpiresAt.toDate() 
-                : new Date(data.featureExpiresAt);
-              
-              // Only include if not expired
-              if (expiresAt > now && Array.isArray(data.images) && data.images.length > 0) {
-                fetchedListings.push({
-                  ...data,
-                  id: doc.id,
-                });
-              }
-            }
-          } else {
-            // Basic listings don't have expiration
-            if (Array.isArray(data.images) && data.images.length > 0) {
-              fetchedListings.push({
-                ...data,
-                id: doc.id,
-              });
-            }
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (!isListingVisible(data, docSnap.id, { nowMs, excludedListingIds })) {
+            return;
           }
+          fetchedListings.push({
+            ...data,
+            id: docSnap.id,
+          });
         });
 
         // Sort by createdAt (newest first)
@@ -72,7 +64,8 @@ export default function FeaturedListingsPage() {
           return 0;
         };
 
-        const sorted = fetchedListings.sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt));
+        const listingsWithExistingOwners = await filterListingsWithExistingUsers(db, fetchedListings);
+        const sorted = listingsWithExistingOwners.sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt));
         setListings(sorted);
       } catch (error) {
         console.error('Error fetching featured listings:', error);

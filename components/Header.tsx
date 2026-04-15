@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ImageSourcePropType, ViewStyle } from 'react-native';
 import { Alert, Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
   },
 });
 
+
 export default function Header({
   onMenuPress,
   onSearchPress,
@@ -245,46 +246,52 @@ export default function Header({
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [threadPreviews, setThreadPreviews] = useState<ThreadPreview[]>([]);
   const [slideAnim] = useState(new Animated.Value(-280));
-  const isMountedRef = useRef(true);
   const router = useRouter();
   const { user, loading, isAdmin } = useAccountStatus();
 
   useEffect(() => {
     return () => {
-      isMountedRef.current = false;
       slideAnim.stopAnimation();
     };
   }, [slideAnim]);
 
   useEffect(() => {
-    if (!user?.uid) {
+    let unsubscribe: (() => void) | undefined;
+    if (typeof user?.uid === 'string' && user.uid.length > 0) {
+      const threadsQuery = query(collection(db, 'threads'), where('participantIds', 'array-contains', user.uid));
+      unsubscribe = onSnapshot(
+        threadsQuery,
+        (snapshot) => {
+          const rows = snapshot.docs.map((threadDoc) => ({ id: threadDoc.id, ...(threadDoc.data() as Omit<ThreadPreview, 'id'>) }));
+          const unread = rows
+            .filter((thread) => (thread.unreadBy || []).includes(user.uid))
+            .sort((a, b) => {
+              const aTime = typeof a.lastTimestamp?.toMillis === 'function' ? a.lastTimestamp.toMillis() : 0;
+              const bTime = typeof b.lastTimestamp?.toMillis === 'function' ? b.lastTimestamp.toMillis() : 0;
+              return bTime - aTime;
+            })
+            .slice(0, 6);
+          setThreadPreviews((prev) => {
+            // Only update if changed (shallow compare by id and unreadBy)
+            if (
+              prev.length === unread.length &&
+              prev.every((t, i) => t.id === unread[i].id && String(t.unreadBy) === String(unread[i].unreadBy))
+            ) {
+              return prev;
+            }
+            return unread;
+          });
+        },
+        () => {
+          setThreadPreviews([]);
+        }
+      );
+    } else {
       setThreadPreviews([]);
-      return undefined;
     }
-
-    const threadsQuery = query(collection(db, 'threads'), where('participantIds', 'array-contains', user.uid));
-    const unsubscribe = onSnapshot(
-      threadsQuery,
-      (snapshot) => {
-        if (!isMountedRef.current) return;
-        const rows = snapshot.docs.map((threadDoc) => ({ id: threadDoc.id, ...(threadDoc.data() as Omit<ThreadPreview, 'id'>) }));
-        const unread = rows
-          .filter((thread) => (thread.unreadBy || []).includes(user.uid))
-          .sort((a, b) => {
-            const aTime = typeof a.lastTimestamp?.toMillis === 'function' ? a.lastTimestamp.toMillis() : 0;
-            const bTime = typeof b.lastTimestamp?.toMillis === 'function' ? b.lastTimestamp.toMillis() : 0;
-            return bTime - aTime;
-          })
-          .slice(0, 6);
-        setThreadPreviews(unread);
-      },
-      () => {
-        if (!isMountedRef.current) return;
-        setThreadPreviews([]);
-      }
-    );
-
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [user?.uid]);
 
   const unreadCount = useMemo(() => threadPreviews.length, [threadPreviews]);

@@ -1195,6 +1195,26 @@
         </div>
 
         <div class="table-section">
+          <p class="hub-section-label">⚙️ Site Settings</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Quote of the Day</span></td>
+                <td><span class="count-pill">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('community-settings')">Open</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-section">
           <p class="hub-section-label">🚨 Moderation</p>
           <table class="admin-table">
             <thead>
@@ -1603,7 +1623,7 @@
 
         <section id="tab-community-settings" class="tab-section">
           <div class="section-header">
-            <div class="section-title">Community Settings</div>
+            <div class="section-title">Site Settings</div>
             <button class="btn secondary" id="refreshCommunitySettings">Refresh</button>
           </div>
           <form id="communitySettingsForm" class="settings-form">
@@ -1636,15 +1656,12 @@
             <div class="settings-field" style="margin-top: 18px;">
               <label class="settings-label">Quote of the Day</label>
               <div class="settings-help" style="margin-bottom: 10px;">Update this daily to share a message with the community.</div>
-              <div style="display: grid; gap: 10px;">
+              <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; align-items: end;">
                 <div>
                   <label for="quoteOfDayText" class="settings-label">Quote Text</label>
                   <textarea id="quoteOfDayText" rows="3" placeholder="Enter today's quote..."></textarea>
                 </div>
-                <div>
-                  <label for="quoteOfDayAttribution" class="settings-label">Attribution</label>
-                  <input id="quoteOfDayAttribution" type="text" placeholder="- Local List Community">
-                </div>
+
               </div>
             </div>
 

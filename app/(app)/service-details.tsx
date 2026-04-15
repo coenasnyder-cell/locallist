@@ -3,11 +3,13 @@ import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SafeAreaContext from 'react-native-safe-area-context';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import UserReviewModal from '../../components/UserReviewModal';
 import { app } from '../../firebase';
 import { submitUserReview } from '../../utils/userReviews';
+
+const { SafeAreaView } = SafeAreaContext;
 
 type ServiceDetails = {
   id: string;
@@ -118,7 +120,7 @@ export default function ServiceDetailsScreen() {
           return;
         }
 
-        setService({ id: snap.id, ...data });
+        setService({ ...data, id: snap.id });
       } catch {
         setService(null);
       } finally {
@@ -258,7 +260,7 @@ export default function ServiceDetailsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <BackToCommunityHubRow />
+        <BackToCommunityHubRow fallbackRoute="/(app)/serviceslist" />
 
         <View style={styles.card}>
           {service.serviceImage ? (

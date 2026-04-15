@@ -12,6 +12,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { db } from '../../firebase';
 
 const REPORT_REASONS = [
@@ -32,6 +33,14 @@ export default function ReportUserScreen() {
   const [selectedReason, setSelectedReason] = useState('');
   const [explanation, setExplanation] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/(tabs)/messagesbutton');
+  };
 
   const canSubmit = useMemo(() => Boolean(selectedReason && reportedUserId), [reportedUserId, selectedReason]);
 
@@ -94,12 +103,11 @@ export default function ReportUserScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.85}>
-          <Text style={styles.backButtonText}>Back To Chat</Text>
-        </TouchableOpacity>
+        <View style={styles.screenTitleRowWrap}>
+          <ScreenTitleRow title="Report User" onBackPress={handleBack} />
+        </View>
 
         <View style={styles.panel}>
-          <Text style={styles.title}>Report User</Text>
           <Text style={styles.subtitle}>Tell us why you are reporting {reportedUserName}.</Text>
 
           <View style={styles.reasonList}>
@@ -132,14 +140,20 @@ export default function ReportUserScreen() {
             textAlignVertical="top"
           />
 
-          <TouchableOpacity
-            style={[styles.submitButton, (!canSubmit || submitting) ? styles.submitButtonDisabled : null]}
-            onPress={handleSubmit}
-            disabled={!canSubmit || submitting}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.submitButtonText}>{submitting ? 'Submitting...' : 'Report User'}</Text>
-          </TouchableOpacity>
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleBack} activeOpacity={0.85}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.submitButton, (!canSubmit || submitting) ? styles.submitButtonDisabled : null]}
+              onPress={handleSubmit}
+              disabled={!canSubmit || submitting}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.submitButtonText}>{submitting ? 'Submitting...' : 'Report User'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -152,35 +166,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   content: {
-    padding: 16,
-    gap: 14,
+    padding: 12,
+    gap: 10,
   },
-  backButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  backButtonText: {
-    color: '#334155',
-    fontSize: 13,
-    fontWeight: '700',
+  screenTitleRowWrap: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   panel: {
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e2e8f0',
     borderRadius: 16,
-    padding: 16,
-    gap: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0f172a',
+    padding: 14,
+    gap: 10,
   },
   subtitle: {
     fontSize: 14,
@@ -248,10 +249,29 @@ const styles = StyleSheet.create({
     color: '#0f172a',
   },
   submitButton: {
+    flex: 1,
     backgroundColor: '#0f766e',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#334155',
+    fontSize: 14,
+    fontWeight: '800',
   },
   submitButtonDisabled: {
     opacity: 0.5,

@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 import { useAccountStatus } from '../../hooks/useAccountStatus';
 
@@ -73,10 +73,20 @@ export default function JobListingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <BackToCommunityHubRow />
+      <View style={styles.screenTitleRowWrap}>
+        <ScreenTitleRow
+          title="Job Board"
+          onBackPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+              return;
+            }
+            router.replace('/(tabs)/communitybutton');
+          }}
+        />
+      </View>
 
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Job Board</Text>
         <Text style={styles.heroSubtitle}>Browse local opportunities and find your next role.</Text>
       </View>
 
@@ -84,10 +94,6 @@ export default function JobListingsScreen() {
         <View style={styles.benefitsCard}>
           <Image source={require('../../assets/images/jobhub.png')} style={styles.benefitsImage} resizeMode="cover" />
           <View style={styles.benefitsContent}>
-            <Text style={styles.benefitsTitle}>Hire Local Talent Faster</Text>
-            <Text style={styles.benefitsText}>
-              Post your open position on Local List and get your job in front of people right here in the community. Reach motivated local candidates, explain your role clearly, and make it easier for applicants to contact you quickly.
-            </Text>
             <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('/create-job-listing' as any)}>
               <Text style={styles.postButtonText}>+ Post A Job</Text>
             </TouchableOpacity>
@@ -132,18 +138,6 @@ export default function JobListingsScreen() {
         </View>
       )}
 
-      <View style={styles.digestBanner}>
-        <Text style={styles.digestIcon}>📬</Text>
-        <View style={styles.digestBody}>
-          <Text style={styles.digestTitle}>Get Job Digest Updates</Text>
-          <Text style={styles.digestText}>
-            Subscribe for a roundup of newly posted local jobs so you can keep up with fresh opportunities.
-          </Text>
-          <View style={styles.digestPill}>
-            <Text style={styles.digestPillText}>Job Digest</Text>
-          </View>
-        </View>
-      </View>
     </ScrollView>
   );
 }
@@ -155,8 +149,16 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 22,
     paddingBottom: 60,
+  },
+  screenTitleRowWrap: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
   },
   hero: {
     alignItems: 'center',
