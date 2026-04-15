@@ -76,7 +76,7 @@ export default function PetCard({ pet, onPress, compact = false, containerStyle 
     >
       <View style={styles.imageContainer}>
         {isValidSource(pet.petImages?.[0] || pet.petPhoto) ? (
-          <Image source={normalizedSource(pet.petImages?.[0] || pet.petPhoto)} style={styles.image} />
+          <Image source={normalizedSource(pet.petImages?.[0] || pet.petPhoto)} style={styles.image} contentFit="cover" />
         ) : (
           <View style={[styles.image, styles.placeholder]}>
             <Text style={styles.placeholderEmoji}>🐾</Text>
@@ -155,7 +155,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: '#eee',
-    resizeMode: 'cover',
   },
   placeholder: {
     justifyContent: 'center',

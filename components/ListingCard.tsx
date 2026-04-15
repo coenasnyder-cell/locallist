@@ -37,10 +37,10 @@ export default function ListingCard({ title, subtitle, imageSource = require('..
     <TouchableOpacity onPress={onPress} style={styles.container} activeOpacity={0.8}>
       <View style={styles.imageContainer}>
         {isValidSource(imageSource) ? (
-          <Image source={normalizedSource(imageSource)} style={styles.image} />
+          <Image source={normalizedSource(imageSource)} style={styles.image} contentFit="cover" />
         ) : (
           <View style={[styles.image, styles.placeholder]}>
-            <Image source={require('../assets/images/icon.png')} style={styles.placeholderImage} />
+            <Image source={require('../assets/images/icon.png')} style={styles.placeholderImage} contentFit="contain" tintColor="#ccc" />
           </View>
         )}
         {isBusinessUser && (
@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 8,
     marginRight: 12,
-    resizeMode: 'cover',
     overflow: 'hidden',
   },
   placeholder: {
@@ -89,8 +88,6 @@ const styles = StyleSheet.create({
   placeholderImage: {
     width: '60%',
     height: '60%',
-    resizeMode: 'contain',
-    tintColor: '#ccc',
   },
   content: {
     flex: 1,

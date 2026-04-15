@@ -80,10 +80,10 @@ export default function GridListingCard({
           </View>
         )}
         {isValidSource(imageSource) ? (
-          <Image source={normalizedSource(imageSource)} style={styles.image} />
+          <Image source={normalizedSource(imageSource)} style={styles.image} contentFit="cover" />
         ) : (
           <View style={[styles.image, styles.placeholder]}>
-            <Image source={require('../assets/images/icon.png')} style={styles.placeholderImage} />
+            <Image source={require('../assets/images/icon.png')} style={styles.placeholderImage} contentFit="contain" tintColor="#ccc" />
           </View>
         )}
       </View>
@@ -129,7 +129,6 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
     borderRadius: 14,
-    resizeMode: 'cover',
     backgroundColor: '#eee',
     overflow: 'hidden',
   },
@@ -141,8 +140,6 @@ const styles = StyleSheet.create({
   placeholderImage: {
     width: '60%',
     height: '60%',
-    resizeMode: 'contain',
-    tintColor: '#ccc',
   },
   featuredBadge: {
     position: 'absolute',

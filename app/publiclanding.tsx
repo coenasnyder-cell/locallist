@@ -341,7 +341,6 @@ const styles = StyleSheet.create({
   centeredLogo: {
     width: 120,
     height: 56,
-    resizeMode: 'contain',
   },
   heroSection: {
     paddingHorizontal: 16,

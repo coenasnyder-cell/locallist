@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 150,
-    resizeMode: 'contain',
   },
   logoCompact: {
     width: 72,
@@ -323,7 +322,7 @@ const { threadPreviews, unreadCount } = useMessages();
             accessibilityLabel="App logo"
             style={[styles.logoButton, compact && styles.logoButtonCompact]}
           >
-            <Image source={logoSource} style={[styles.logo, compact && styles.logoCompact]} accessibilityLabel="Local List logo" />
+            <Image source={logoSource} style={[styles.logo, compact && styles.logoCompact]} contentFit="contain" accessibilityLabel="Local List logo" />
           </TouchableOpacity>
         </View>
 
