@@ -174,7 +174,9 @@ export default function EventsListScreen() {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    console.log('[EventsList] mounted');
     return () => {
+      console.log('[EventsList] unmounted');
       isMountedRef.current = false;
     };
   }, []);

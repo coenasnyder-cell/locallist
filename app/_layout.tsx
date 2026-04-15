@@ -7,57 +7,56 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import React, { useEffect } from 'react';
+import { MessagesProvider } from '../providers/MessagesProvider';
 
 const globalFontStyle = { fontFamily: 'Inter' as const };
 
-Text.defaultProps = Text.defaultProps ?? {};
-Text.defaultProps.style = [globalFontStyle, Text.defaultProps.style];
+(Text as any).defaultProps = (Text as any).defaultProps ?? {};
+(Text as any).defaultProps.style = [globalFontStyle, (Text as any).defaultProps.style];
 
-TextInput.defaultProps = TextInput.defaultProps ?? {};
-TextInput.defaultProps.style = [globalFontStyle, TextInput.defaultProps.style];
+(TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
+(TextInput as any).defaultProps.style = [globalFontStyle, (TextInput as any).defaultProps.style];
 
-if (__DEV__) {
+if (process.env.NODE_ENV === 'development') {
   LogBox.ignoreLogs([
     'SafeAreaView has been deprecated',
     'react-native-safe-area-context',
+    "Can't perform a React state update on a component that hasn't mounted yet",
   ]);
 }
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  useEffect(() => {
+    console.log('[RootLayout] mounted');
+    return () => console.log('[RootLayout] unmounted');
+  }, []);
+
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''}>
-      <SafeAreaProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(app)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="signInOrSignUp" options={{ headerShown: false }} />
-            <Stack.Screen name="signup" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="zipCodeverify"
-              options={{
-                headerShown: false,
-                gestureEnabled: false,
-                animation: 'none',
-              }}
-            />
-            <Stack.Screen name="verify-email" options={{ headerShown: false }} />
-            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-            <Stack.Screen name="account-restricted" options={{ headerShown: false }} />
-            <Stack.Screen name="privacy" options={{ headerShown: false }} />
-            <Stack.Screen name="termsOfUse" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </SafeAreaProvider>
+    <StripeProvider publishableKey="">
+      <MessagesProvider>
+        <SafeAreaProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(app)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="signInOrSignUp" />
+              <Stack.Screen name="signup" />
+              <Stack.Screen name="zipCodeverify" options={{ gestureEnabled: false, animation: 'none' }} />
+              <Stack.Screen name="verify-email" />
+              <Stack.Screen name="forgot-password" />
+              <Stack.Screen name="account-restricted" />
+              <Stack.Screen name="privacy" />
+              <Stack.Screen name="termsOfUse" />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </MessagesProvider>
     </StripeProvider>
   );
 }

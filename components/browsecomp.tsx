@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
+import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
@@ -9,7 +9,6 @@ import { useAccountStatus } from '../hooks/useAccountStatus';
 import { isUserBlocked } from '../utils/blockService';
 import { filterListingsWithExistingUsers } from '../utils/listingOwners';
 import { isListingVisible } from '../utils/listingVisibility';
-import FeaturedListings from './FeaturedListings';
 import GridListingCard from './GridListingCard';
 
 const CATEGORIES = [
@@ -26,15 +25,7 @@ const CATEGORIES = [
 	'Other',
 ];
 
-type CommunityDisplaySettings = {
-	showEditorsPicks: boolean;
-	showFeaturedListings: boolean;
-};
 
-const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
-	showEditorsPicks: true,
-	showFeaturedListings: true,
-};
 
 export default function BrowseComp() {
 	const [listings, setListings] = useState<any[]>([]);
@@ -42,32 +33,10 @@ export default function BrowseComp() {
 	const [search, setSearch] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [showDropdown, setShowDropdown] = useState(false);
-	const [displaySettings, setDisplaySettings] = useState<CommunityDisplaySettings | null>(null);
 	const router = useRouter();
 	const { user, profile } = useAccountStatus();
 
 	useEffect(() => {
-		const fetchDisplaySettings = async () => {
-			try {
-				const db = getFirestore(app);
-				const settingsRef = doc(db, 'community_settings', 'display');
-				const settingsSnapshot = await getDoc(settingsRef);
-				const settingsData = settingsSnapshot.exists()
-					? (settingsSnapshot.data() as Partial<CommunityDisplaySettings>)
-					: {};
-
-				const newSettings = {
-					showEditorsPicks: settingsData.showEditorsPicks ?? DEFAULT_DISPLAY_SETTINGS.showEditorsPicks,
-					showFeaturedListings: settingsData.showFeaturedListings ?? DEFAULT_DISPLAY_SETTINGS.showFeaturedListings,
-				};
-				console.log('Display settings fetched (Browse):', newSettings);
-				setDisplaySettings(newSettings);
-			} catch (error) {
-				console.error('Error fetching display settings (Browse):', error);
-				// Silently use defaults if fetch fails (e.g., when not logged in)
-				setDisplaySettings(DEFAULT_DISPLAY_SETTINGS);
-			}
-		};
 
 		const fetchListings = async () => {
 			setLoading(true);
@@ -100,7 +69,7 @@ export default function BrowseComp() {
 			}
 			setLoading(false);
 		};
-		fetchDisplaySettings();
+
 		fetchListings();
 	}, []);
 
@@ -114,7 +83,6 @@ export default function BrowseComp() {
 		return matchesCategory && matchesSearch && notBlocked;
 	});
 
-	const editorsPicks = listings.filter(item => item.editorsPick === true && Array.isArray(item.images) && item.images.length > 0);
 	const listingsSectionTitle = selectedCategory === 'All' ? 'All Listings' : `${selectedCategory} Listings`;
 
 	return (
@@ -126,40 +94,6 @@ export default function BrowseComp() {
 			<View style={styles.marketplaceTitleRow}>
 				<Text style={styles.marketplaceTitleText}>Local List Marketplace</Text>
 			</View>
-
-			{displaySettings?.showEditorsPicks && (
-				<>
-					{/* Editor's Picks Section */}
-					<FeaturedListings 
-						tier="basic"
-						title="Editor's Picks"
-						subtitle="Hand-selected for you"
-						onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
-					/>
-					{editorsPicks.length > 0 && (
-						<View style={styles.editorsPicksContainer}>
-							<Text style={styles.editorsPicksHeader}>Editor's Picks</Text>
-							<ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.editorsPicksScroll}>
-								{editorsPicks.map(listing => (
-									<TouchableOpacity
-										key={listing.id}
-										onPress={() => router.push({ pathname: '/listing', params: { id: listing.id } })}
-										activeOpacity={0.8}
-										style={styles.editorsPicksCard}
-									>
-										<Image
-											source={{ uri: listing.images[0] }}
-											style={styles.editorsPicksImage}
-											resizeMode="cover"
-										/>
-										<Text style={styles.editorsPicksTitle} numberOfLines={1}>{listing.title}</Text>
-									</TouchableOpacity>
-								))}
-							</ScrollView>
-						</View>
-					)}
-				</>
-			)}
 
 			<View style={styles.topControlsRow}>
 				<View style={styles.leftControlGroup}>
@@ -192,35 +126,6 @@ export default function BrowseComp() {
 					</TouchableOpacity>
 				</View>
 			</View>
-
-		{/* Premium Featured Listings Section */}
-		{displaySettings?.showFeaturedListings && (
-			<>
-				<FeaturedListings 
-					tier="premium"
-					title="✨ Featured"
-					subtitle="Top picks from our community"
-					onListingPress={(listingId) => router.push({ pathname: '/listing', params: { id: listingId } })}
-				/>
-				<View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-					<TouchableOpacity
-						style={{
-							backgroundColor: '#475569',
-							borderRadius: 8,
-							paddingVertical: 10,
-							paddingHorizontal: 16,
-							alignSelf: 'center',
-							minWidth: 220,
-						}}
-						onPress={() => router.push('/featured-listings' as any)}
-					>
-						<Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
-							View All Featured Listings
-						</Text>
-					</TouchableOpacity>
-				</View>
-			</>
-		)}
 
 			<View style={styles.categoryRow}>
 				<Text style={styles.categorySubtitle}>Choose a category</Text>
@@ -432,45 +337,7 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		color: '#fff',
 	},
-	editorsPicksContainer: {
-		marginBottom: 16,
-	},
-	editorsPicksHeader: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: '#475569',
-		marginBottom: 8,
-		textAlign: 'center',
-	},
-	editorsPicksScroll: {
-		paddingLeft: 12,
-	},
-	editorsPicksCard: {
-		width: 140,
-		backgroundColor: '#f8f8f8',
-		borderRadius: 12,
-		marginRight: 12,
-		padding: 8,
-		alignItems: 'center',
-		elevation: 2,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.08,
-		shadowRadius: 4,
-	},
-	editorsPicksImage: {
-		width: 120,
-		height: 120,
-		borderRadius: 8,
-		marginBottom: 8,
-		backgroundColor: '#ddd',
-	},
-	editorsPicksTitle: {
-		fontSize: 15,
-		fontWeight: 'bold',
-		color: '#222',
-		textAlign: 'center',
-	},
+
 	shopLocalSection: {
 		backgroundColor: '#FFFAF0',
 		borderRadius: 12,

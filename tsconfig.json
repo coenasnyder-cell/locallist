@@ -19,6 +19,8 @@
     ".expo/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist-web-check",
+    "dist-web-check-2"
   ]
 }

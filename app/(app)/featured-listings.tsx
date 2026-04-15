@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BackToCommunityHubRow from '../../components/BackToCommunityHubRow';
 import { app } from '../../firebase';
 import { filterListingsWithExistingUsers } from '../../utils/listingOwners';
@@ -16,6 +16,15 @@ export default function FeaturedListingsPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    console.log('[FeaturedListingsPage] mounted');
+    return () => {
+      console.log('[FeaturedListingsPage] unmounted');
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -66,12 +75,14 @@ export default function FeaturedListingsPage() {
 
         const listingsWithExistingOwners = await filterListingsWithExistingUsers(db, fetchedListings);
         const sorted = listingsWithExistingOwners.sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt));
+        if (!isMountedRef.current) return;
         setListings(sorted);
       } catch (error) {
         console.error('Error fetching featured listings:', error);
+        if (!isMountedRef.current) return;
         setListings([]);
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) setLoading(false);
       }
     };
     fetchListings();
@@ -81,46 +92,59 @@ export default function FeaturedListingsPage() {
     router.push({ pathname: '/listing', params: { id } });
   };
 
+  const renderItem = ({ item: listing }: { item: any }) => (
+    <TouchableOpacity style={styles.card} onPress={() => handlePress(listing.id)} activeOpacity={0.8}>
+      {listing.featureTier === 'premium' && (
+        <View style={styles.premiumBadge}>
+          <Text style={styles.premiumBadgeText}>⭐ PREMIUM</Text>
+        </View>
+      )}
+      {listing.featureTier === 'basic' && (
+        <View style={styles.basicBadge}>
+          <Text style={styles.basicBadgeText}>📌 PICK</Text>
+        </View>
+      )}
+      <Image
+        source={{ uri: listing.images?.[0] }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+      <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
+      <Text style={styles.priceZip}>
+        {listing.price ? `$${listing.price}` : ''}
+        {listing.zipCode ? `  |  ${listing.zipCode}` : ''}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderListHeader = () => (
+    <>
+      <BackToCommunityHubRow />
+      <Text style={styles.pageTitle}>✨ Featured Listings</Text>
+      <Text style={styles.pageSubtitle}>Premium and Editor's Pick listings in one place</Text>
+    </>
+  );
+
+  const renderListEmpty = () => {
+    if (loading) return <Text style={styles.loading}>Loading...</Text>;
+    return <Text style={styles.loading}>No featured listings found.</Text>;
+  };
+
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-        <BackToCommunityHubRow />
-        <Text style={styles.pageTitle}>✨ Featured Listings</Text>
-        <Text style={styles.pageSubtitle}>Premium and Editor's Pick listings in one place</Text>
-        {loading ? (
-          <Text style={styles.loading}>Loading...</Text>
-        ) : listings.length === 0 ? (
-          <Text style={styles.loading}>No featured listings found.</Text>
-        ) : (
-          <View style={styles.gridContainer}>
-            {listings.map(listing => (
-              <TouchableOpacity style={styles.card} key={listing.id} onPress={() => handlePress(listing.id)} activeOpacity={0.8}>
-                {listing.featureTier === 'premium' && (
-                  <View style={styles.premiumBadge}>
-                    <Text style={styles.premiumBadgeText}>⭐ PREMIUM</Text>
-                  </View>
-                )}
-                {listing.featureTier === 'basic' && (
-                  <View style={styles.basicBadge}>
-                    <Text style={styles.basicBadgeText}>📌 PICK</Text>
-                  </View>
-                )}
-                <Image
-                  source={{ uri: listing.images[0] }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-                <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
-                <Text style={styles.priceZip}>
-                  {listing.price ? `$${listing.price}` : ''}
-                  {listing.zipCode ? `  |  ${listing.zipCode}` : ''}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </View>
+    <FlatList
+      data={listings}
+      numColumns={2}
+      keyExtractor={(item) => item.id}
+      renderItem={renderItem}
+      ListHeaderComponent={renderListHeader}
+      ListEmptyComponent={renderListEmpty}
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      columnWrapperStyle={listings.length > 0 ? styles.columnWrapper : undefined}
+      removeClippedSubviews
+      maxToRenderPerBatch={6}
+      windowSize={5}
+    />
   );
 }
 
@@ -156,6 +180,9 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  columnWrapper: {
     justifyContent: 'space-between',
   },
   card: {

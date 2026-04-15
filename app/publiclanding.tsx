@@ -33,13 +33,11 @@ type RecentPetListing = {
 };
 
 type CommunityDisplaySettings = {
-  showEditorsPicks: boolean;
   showQuoteOfDay: boolean;
   quoteOfDayText: string;
 };
 
 const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
-  showEditorsPicks: true,
   showQuoteOfDay: true,
   quoteOfDayText: '',
 };
@@ -87,7 +85,6 @@ export default function PublicLanding() {
 
         if (!isMounted) return;
         setDisplaySettings({
-          showEditorsPicks: settingsData.showEditorsPicks ?? DEFAULT_DISPLAY_SETTINGS.showEditorsPicks,
           showQuoteOfDay: settingsData.showQuoteOfDay ?? DEFAULT_DISPLAY_SETTINGS.showQuoteOfDay,
           quoteOfDayText: settingsData.quoteOfDayText ?? DEFAULT_DISPLAY_SETTINGS.quoteOfDayText,
         });

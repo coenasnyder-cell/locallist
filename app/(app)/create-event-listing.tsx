@@ -118,7 +118,7 @@ export default function CreateEventListingScreen() {
           </View>
           <View style={styles.panel}>
             <TouchableOpacity style={styles.cancelBtn} onPress={() => router.replace('/login' as any)} activeOpacity={0.85}>
-              <Text style={styles.cancelBtnText}>Go to Login</Text>
+              <Text style={styles.cancelText}>Go to Login</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

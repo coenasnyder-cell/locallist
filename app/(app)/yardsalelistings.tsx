@@ -162,7 +162,9 @@ export default function YardSaleListingsScreen() {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    console.log('[YardSaleListings] mounted');
     return () => {
+      console.log('[YardSaleListings] unmounted');
       isMountedRef.current = false;
     };
   }, []);

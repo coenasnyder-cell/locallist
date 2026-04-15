@@ -1,5 +1,5 @@
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 import { app } from '../firebase';
 import { UserProfile as BaseUserProfile } from '../types/User';
@@ -71,49 +71,50 @@ export function useAccountStatus(): AccountStatus {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      if (!isMountedRef.current) return;
-      setUser(authUser);
-      if (!authUser) {
-        setLoading(false);
-      }
-    });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!user) {
-      if (isMountedRef.current) {
-        setProfile(null);
-      }
-      return undefined;
+  const auth = getAuth(app);
+  const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+    if (!isMountedRef.current) return;
+    setUser(authUser);
+    if (!authUser) {
+      setLoading(false);
     }
+  });
 
-    const db = getFirestore(app);
-    const userRef = doc(db, 'users', user.uid);
-    const unsubscribe = onSnapshot(
-      userRef,
-      (snapshot) => {
-        if (!isMountedRef.current) return;
-        setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
-        setLoading(false);
-      },
-      () => {
-        if (!isMountedRef.current) return;
-        setProfile(null);
-        setLoading(false);
+  return unsubscribe;
+}, []);
+
+
+
+  useEffect(() => {
+  if (!user?.uid) {
+    setProfile(null);
+    return;
+  }
+
+  let isMounted = true;
+
+  const db = getFirestore(app);
+  const userRef = doc(db, 'users', user.uid);
+
+  const fetchProfile = async () => {
+    try {
+      const docSnap = await getDoc(userRef);
+      if (isMounted && docSnap.exists()) {
+        setProfile(docSnap.data() as UserProfile);
       }
-    );
+    } catch (e) {
+      console.log('Profile fetch error', e);
+    } finally {
+      if (isMounted) setLoading(false);
+    }
+  };
 
-    return unsubscribe;
-  }, [user]);
+  fetchProfile();
+
+  return () => {
+    isMounted = false;
+  };
+}, [user?.uid]);
 
   const providerIds = user?.providerData?.map((provider) => provider.providerId) ?? [];
   const isPasswordUser = providerIds.includes('password');

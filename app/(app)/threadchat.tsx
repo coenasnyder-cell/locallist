@@ -153,6 +153,11 @@ function BusinessLeadsScreen() {
 	const isBusiness = isBusinessAccount;
 
 	useEffect(() => {
+		console.log('[BusinessLeadsScreen] mounted');
+		return () => console.log('[BusinessLeadsScreen] unmounted');
+	}, []);
+
+	useEffect(() => {
 		let cancelled = false;
 
 		const loadUserSettings = async () => {
@@ -644,7 +649,23 @@ export default function ThreadChatRoute() {
 	const { user, loading } = useAccountStatus();
 	const threadId = typeof params.threadId === 'string' ? params.threadId : Array.isArray(params.threadId) ? params.threadId[0] : '';
 
-	if (!loading && !user) {
+	useEffect(() => {
+		console.log('[ThreadChatRoute] mounted');
+		return () => console.log('[ThreadChatRoute] unmounted');
+	}, []);
+
+	if (loading) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<View style={styles.centerState}>
+					<ActivityIndicator size="large" color="#0f766e" />
+					<Text style={styles.loadingText}>Loading...</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	if (!user) {
 		return <Redirect href="/login" />;
 	}
 

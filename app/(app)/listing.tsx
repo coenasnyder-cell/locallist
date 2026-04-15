@@ -14,6 +14,11 @@ export default function ListingScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('[ListingScreen] mounted');
+    return () => console.log('[ListingScreen] unmounted');
+  }, []);
+
+  useEffect(() => {
     const fetchListings = async () => {
       try {
         const db = getFirestore(app);

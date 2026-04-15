@@ -130,6 +130,11 @@ const ThreadChat = () => {
   const listingType = String(threadData?.listingType || '').toLowerCase();
   const isMessagingBlocked = isBlockedByCurrentUser || isBlockedByOtherUser;
 
+  useEffect(() => {
+    console.log('[ThreadChat] mounted');
+    return () => console.log('[ThreadChat] unmounted');
+  }, []);
+
   const blockedMessage = useMemo(() => {
     if (isBlockedByCurrentUser) {
       return 'You have blocked this user. You cannot view or send messages until you unblock them.';

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 
@@ -79,7 +79,9 @@ export default function ServicesList() {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    console.log('[ServicesList] mounted');
     return () => {
+      console.log('[ServicesList] unmounted');
       isMountedRef.current = false;
     };
   }, []);
@@ -225,11 +227,11 @@ export default function ServicesList() {
     );
   };
 
-  const featuredListings = filteredListings.filter((l) => l.isFeatured).slice(0, 6);
+  const featuredListings = useMemo(() => filteredListings.filter((l) => l.isFeatured).slice(0, 6), [filteredListings]);
   const resultsTitle = selectedCategory === 'All' ? 'All Services' : `${selectedCategory} Services`;
 
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+  const renderListHeader = () => (
+    <>
       <View style={styles.screenTitleRowWrap}>
         <ScreenTitleRow
           title="Local Services"
@@ -297,9 +299,33 @@ export default function ServicesList() {
         </View>
       </View>
 
-      {loading ? (
-        <Text style={styles.emptyText}>Loading services...</Text>
-      ) : loadError ? (
+      {!loading && !loadError && featuredListings.length > 0 && (
+        <>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Services</Text>
+            <Text style={styles.sectionSubtitle}>Highlighted local services you may want to explore first.</Text>
+          </View>
+          <View style={styles.gridContainer}>
+            {featuredListings.map(renderCard)}
+          </View>
+        </>
+      )}
+
+      {!loading && !loadError && filteredListings.length > 0 && (
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{resultsTitle}</Text>
+          <Text style={styles.sectionSubtitle}>Browse services available in your community.</Text>
+        </View>
+      )}
+    </>
+  );
+
+  const renderListEmpty = () => {
+    if (loading) {
+      return <Text style={styles.emptyText}>Loading services...</Text>;
+    }
+    if (loadError) {
+      return (
         <View style={styles.errorState}>
           <Text style={styles.errorTitle}>Service Listings Unavailable</Text>
           <Text style={styles.errorText}>{loadError}</Text>
@@ -307,39 +333,35 @@ export default function ServicesList() {
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
-      ) : filteredListings.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No Services Found</Text>
-          <Text style={styles.emptyText}>
-            {searchQuery || selectedCategory !== 'All'
-              ? 'Try adjusting your search or category filter.'
-              : 'No services have been posted yet. Be the first!'}
-          </Text>
-        </View>
-      ) : (
-        <>
-          {featuredListings.length > 0 && (
-            <>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Featured Services</Text>
-                <Text style={styles.sectionSubtitle}>Highlighted local services you may want to explore first.</Text>
-              </View>
-              <View style={styles.gridContainer}>
-                {featuredListings.map(renderCard)}
-              </View>
-            </>
-          )}
+      );
+    }
+    return (
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyTitle}>No Services Found</Text>
+        <Text style={styles.emptyText}>
+          {searchQuery || selectedCategory !== 'All'
+            ? 'Try adjusting your search or category filter.'
+            : 'No services have been posted yet. Be the first!'}
+        </Text>
+      </View>
+    );
+  };
 
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{resultsTitle}</Text>
-            <Text style={styles.sectionSubtitle}>Browse services available in your community.</Text>
-          </View>
-          <View style={styles.gridContainer}>
-            {filteredListings.map(renderCard)}
-          </View>
-        </>
-      )}
-    </ScrollView>
+  return (
+    <FlatList
+      data={filteredListings}
+      numColumns={2}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => renderCard(item)}
+      ListHeaderComponent={renderListHeader}
+      ListEmptyComponent={renderListEmpty}
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      columnWrapperStyle={filteredListings.length > 0 ? styles.columnWrapper : undefined}
+      removeClippedSubviews
+      maxToRenderPerBatch={6}
+      windowSize={5}
+    />
   );
 }
 
@@ -496,6 +518,10 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  columnWrapper: {
+    paddingHorizontal: 12,
     justifyContent: 'space-between',
   },
   card: {

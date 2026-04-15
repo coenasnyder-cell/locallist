@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
-import { arrayRemove, arrayUnion, collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../firebase'; // make sure this exports Firestore
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import ScreenTitleRow from './ScreenTitleRow';
@@ -39,22 +39,23 @@ function getInitials(name: string): string {
 
 export default function ThreadsList() {
   const { user, loading: authLoading } = useAccountStatus();
-  const [threads, setThreads] = useState<Thread[]>([]);
+
   const [participantByThreadId, setParticipantByThreadId] = useState<Record<string, ParticipantSummary>>({});
   const [showArchived, setShowArchived] = useState(false);
-  const [loading, setLoading] = useState(true);
+const [threads, setThreads] = useState<Thread[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    if (authLoading) {
-      setLoading(true);
-      return undefined;
-    }
+ useEffect(() => {
+    console.log('[ThreadsList] mounted');
+    return () => console.log('[ThreadsList] unmounted');
+  }, []);
+
+ useEffect(() => {
+    if (authLoading) return;
 
     if (!user?.uid) {
       setThreads([]);
-      setLoading(false);
-      return undefined;
+      return;
     }
 
     const q = query(
@@ -62,50 +63,15 @@ export default function ThreadsList() {
       where('participantIds', 'array-contains', user.uid)
     );
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const results = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Thread[];
-
-      results.sort((a, b) => {
-        const aTime = typeof (a.lastTimestamp as { toMillis?: () => number })?.toMillis === 'function'
-          ? (a.lastTimestamp as { toMillis: () => number }).toMillis()
-          : 0;
-        const bTime = typeof (b.lastTimestamp as { toMillis?: () => number })?.toMillis === 'function'
-          ? (b.lastTimestamp as { toMillis: () => number }).toMillis()
-          : 0;
-        return bTime - aTime;
-      });
-
-      const summaries = await Promise.all(
-        results.map(async (thread) => {
-          const otherParticipantId = getOtherParticipantId(thread, user.uid);
-          if (!otherParticipantId) {
-            return [thread.id, { profileImage: null, name: 'User' } as ParticipantSummary] as const;
-          }
-
-          try {
-            const userSnap = await getDoc(doc(db, 'users', otherParticipantId));
-            const userData = userSnap.exists() ? userSnap.data() || {} : {};
-            const profileImage = String(userData.profileimage || userData.profileImage || userData.photoURL || '').trim() || null;
-            const name = String(userData.name || userData.displayName || userData.email || 'User');
-            return [thread.id, { profileImage, name } as ParticipantSummary] as const;
-          } catch {
-            return [thread.id, { profileImage: null, name: 'User' } as ParticipantSummary] as const;
-          }
-        })
-      );
-
-      setParticipantByThreadId(Object.fromEntries(summaries));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const results = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Thread[];
 
       setThreads(results);
-      setLoading(false);
-    }, () => {
-      setThreads([]);
-      setParticipantByThreadId({});
-      setLoading(false);
+    }, (error) => {
+      console.error('[ThreadsList] onSnapshot error:', error);
     });
 
     return () => unsubscribe();
@@ -169,19 +135,10 @@ export default function ThreadsList() {
     router.replace('/(tabs)/messagesbutton');
   };
 
-  const filteredThreads = threads.filter((thread) => {
-    const isArchived = (thread.hiddenFor || []).includes(user?.uid || '');
-    return showArchived ? isArchived : !isArchived;
-  });
-
-  if (loading) {
-    return (
-      <View style={styles.stateWrap}>
-        <ActivityIndicator size="large" color="#0f766e" />
-        <Text style={styles.stateText}>Loading conversations...</Text>
-      </View>
-    );
-  }
+const filteredThreads = threads.filter((thread) => {
+  const isArchived = (thread.hiddenFor || []).includes(user?.uid || '');
+  return showArchived ? isArchived : !isArchived;
+});
 
   if (!user) {
     return (

@@ -5,7 +5,7 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*'],
+    ignores: ['dist/*', 'dist-web-check/**', 'dist-web-check-2/**'],
     rules: {
       'react/no-unescaped-entities': 'off',
       '@typescript-eslint/no-unused-vars': 'off',

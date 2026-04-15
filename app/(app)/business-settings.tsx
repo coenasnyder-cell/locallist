@@ -143,7 +143,7 @@ export default function BusinessSettingsScreen() {
           <View style={styles.panel}>
             <Text style={styles.helperText}>Business settings are available for business accounts only.</Text>
             <View style={styles.heroActions}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/(tabs)/index')}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/')}>
                 <Text style={styles.backBtnText}>Back to Home</Text>
               </TouchableOpacity>
             </View>

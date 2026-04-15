@@ -2,9 +2,14 @@ import Header from '@/components/Header';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export default function Layout() {
+
+  useEffect(() => {
+    console.log('[TabsLayout] mounted');
+    return () => console.log('[TabsLayout] unmounted');
+  }, []);
   return (
     <>
       <Header />

@@ -38,6 +38,11 @@ export default function ShopLocalList() {
   const router = useRouter();
   const { isBusinessAccount } = useAccountStatus();
 
+  useEffect(() => {
+    console.log('[ShopLocalList] mounted');
+    return () => console.log('[ShopLocalList] unmounted');
+  }, []);
+
   const normalizeValue = (value?: string | null) => String(value || '').trim().toLowerCase();
   const isBusinessVerified = (profile: ShopLocalProfile) => {
     const verifiedValue = profile.isVerified;

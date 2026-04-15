@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import GridListingCard from '../../components/GridListingCard';
 import { app } from '../../firebase';
 import { filterListingsWithExistingUsers } from '../../utils/listingOwners';
@@ -228,6 +228,33 @@ export default function HomeScreen() {
           </Text>
         </View>
       )}
+
+      <View
+        style={{
+          marginHorizontal: 16,
+          marginBottom: 16,
+          borderRadius: 12,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: '#e2e8f0',
+        }}
+      >
+        <Image
+          source={require('../../assets/images/communityhub.png')}
+          style={{ width: '100%', height: 150, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+          resizeMode="cover"
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#475569',
+            paddingVertical: 12,
+            alignItems: 'center',
+          }}
+          onPress={() => router.push('/(tabs)/communitybutton')}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Open Community Hub</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={{ marginTop: 18, marginBottom: 8, paddingHorizontal: 16 }}>
         <Text

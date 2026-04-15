@@ -122,20 +122,19 @@ export default function BusinessAnalyticsScreen() {
 
         const promoCtr = promoImpressions > 0 ? Math.round((promoClicks / promoImpressions) * 100) : 0;
 
-        if (!cancelled) {
-          setState({
-            loading: false,
-            activeListings,
-            services,
-            deals,
-            activePromotions,
-            promoImpressions,
-            promoClicks,
-            promoLeads,
-            promoCtr,
-            trackedCampaigns: tracked.size,
-          });
-        }
+        if (cancelled) return;
+        setState({
+          loading: false,
+          activeListings,
+          services,
+          deals,
+          activePromotions,
+          promoImpressions,
+          promoClicks,
+          promoLeads,
+          promoCtr,
+          trackedCampaigns: tracked.size,
+        });
       } catch (error) {
         if (!cancelled) {
           setState((prev) => ({ ...prev, loading: false }));
@@ -148,7 +147,7 @@ export default function BusinessAnalyticsScreen() {
     return () => {
       cancelled = true;
     };
-  }, [hasBusinessAccess, user?.uid]);
+  }, [user?.uid, hasBusinessAccess]);
 
   if (loading || waitingForProfile || state.loading) {
     return (
