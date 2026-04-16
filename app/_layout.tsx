@@ -6,8 +6,12 @@ import { LogBox, Text, TextInput } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import Header from '@/components/Header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePathname } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import React, { useEffect } from 'react';
+import { app } from '../firebase';
 import { MessagesProvider } from '../providers/MessagesProvider';
 
 const globalFontStyle = { fontFamily: 'Inter' as const };
@@ -26,8 +30,25 @@ if (process.env.NODE_ENV === 'development') {
   ]);
 }
 
+const HIDE_HEADER_ROUTES = [
+  '/login',
+  '/signInOrSignUp',
+  '/signup',
+  '/zipCodeverify',
+  '/verify-email',
+  '/forgot-password',
+  '/account-restricted',
+  '/threadchat',
+  '/publiclanding',
+];
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const pathname = usePathname();
+
+  const hideHeader =
+    HIDE_HEADER_ROUTES.some((r) => pathname.includes(r)) ||
+    (pathname === '/' && !getAuth(app).currentUser);
 
   useEffect(() => {
     console.log('[RootLayout] mounted');
@@ -39,6 +60,7 @@ export default function RootLayout() {
       <MessagesProvider>
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            {!hideHeader && <Header />}
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(app)" />
               <Stack.Screen name="(tabs)" />
@@ -51,7 +73,6 @@ export default function RootLayout() {
               <Stack.Screen name="account-restricted" />
               <Stack.Screen name="privacy" />
               <Stack.Screen name="termsOfUse" />
-              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

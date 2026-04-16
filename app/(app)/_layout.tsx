@@ -1,11 +1,7 @@
-import Header from '@/components/Header';
-import { Stack, usePathname } from 'expo-router';
+import { Stack } from 'expo-router';
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
 
 export default function AppLayout() {
-  const pathname = usePathname();
-  const shouldShowHeader = !pathname.includes('/threadchat');
 
   useEffect(() => {
     console.log('[AppLayout] mounted');
@@ -13,9 +9,6 @@ export default function AppLayout() {
   }, []);
 
   return (
-      <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        {shouldShowHeader && <Header showTitle={false} />}
-
         <Stack
           screenOptions={{
             headerShown: false,
@@ -45,18 +38,30 @@ export default function AppLayout() {
           <Stack.Screen name="eventslist" />
           <Stack.Screen name="searchlistings" />
           <Stack.Screen name="joblistings" />
-          <Stack.Screen name="help" />
           <Stack.Screen name="support-hub" />
           <Stack.Screen name="community-guidelines" />
-          <Stack.Screen name="termsOfUse" />
-          <Stack.Screen name="privacy" />
           <Stack.Screen name="contactus" />
           <Stack.Screen name="deals" />
           <Stack.Screen name="featured-listings" />
           <Stack.Screen name="yardsalelistings" />
           <Stack.Screen name="blocked-users" />
           <Stack.Screen name="threadchat" />
+          <Stack.Screen name="pet-details" />
+          <Stack.Screen name="create-pet-post" />
+          <Stack.Screen name="create-adoption-listing" />
+          <Stack.Screen name="browse-pets" />
+          <Stack.Screen name="businessprofile" />
+          <Stack.Screen name="upgrade-business" />
+          <Stack.Screen name="create-listing" />
+          <Stack.Screen name="create-job-listing" />
+          <Stack.Screen name="public-profile" />
+          <Stack.Screen name="business-listings" />
+          <Stack.Screen name="serviceslist" />
+          <Stack.Screen name="premium-upgrade" />
+          <Stack.Screen name="listing-posted" />
+          <Stack.Screen name="pet-corner" />
+          <Stack.Screen name="business-hub" />
+          <Stack.Screen name="admin-panel" />
         </Stack>
-      </View>
   );
 }

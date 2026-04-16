@@ -358,11 +358,11 @@ const { threadPreviews, unreadCount } = useMessages();
                 )}
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => router.push('/(tabs)/profilebutton')}
-                accessibilityLabel="Profile"
-                style={[styles.rightButton, styles.profileButton]}
+                onPress={() => router.push('/(app)/support-hub')}
+                accessibilityLabel="Support"
+                style={styles.rightButton}
               >
-                <Ionicons name="person-circle" size={24} color="#334155" />
+                <Ionicons name="help-circle-outline" size={24} color="#334155" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={async () => {
@@ -488,7 +488,7 @@ const { threadPreviews, unreadCount } = useMessages();
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavigate(Platform.OS === 'web' ? 'support-legal-hub.html' : '/(tabs)/supporthubbutton')}
+              onPress={() => handleNavigate(Platform.OS === 'web' ? 'support-legal-hub.html' : '/(app)/support-hub')}
             >
               <Text style={styles.menuItemText}>Support and Legal Hub</Text>
             </TouchableOpacity>

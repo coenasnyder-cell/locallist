@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Header from '../components/Header';
 
 type PostType = 'lost' | 'found' | 'adoption';
 
@@ -28,7 +27,7 @@ export default function ListingPostedScreen() {
       return;
     }
 
-    router.replace('/(tabs)/petbutton' as any);
+    router.replace('/(app)/pet-corner' as any);
   };
 
   const viewListing = () => {
@@ -46,7 +45,7 @@ export default function ListingPostedScreen() {
     }
 
     router.replace({
-      pathname: '/pet-details' as any,
+      pathname: '/(app)/pet-details' as any,
       params: {
         petId,
         postType: normalizedPostType,
@@ -56,7 +55,6 @@ export default function ListingPostedScreen() {
 
   return (
     <View style={styles.screen}>
-      <Header />
       <View style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.checkmark}>✓</Text>

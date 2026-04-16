@@ -11,10 +11,9 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import GridListingCard from '../components/GridListingCard';
-import Header from '../components/Header';
-import { app } from '../firebase';
-import { isListingVisible } from '../utils/listingVisibility';
+import GridListingCard from '../../components/GridListingCard';
+import { app } from '../../firebase';
+import { isListingVisible } from '../../utils/listingVisibility';
 
 type PublicUserProfile = {
   id: string;
@@ -204,7 +203,7 @@ export default function PublicProfileScreen() {
         }
 
         if (accountType === 'business') {
-          router.replace({ pathname: '/businessprofile', params: { id: profileId } });
+          router.replace({ pathname: '/(app)/businessprofile', params: { id: profileId } });
           return;
         }
 
@@ -297,7 +296,6 @@ export default function PublicProfileScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
         <View style={styles.stateWrap}>
           <ActivityIndicator size="large" color="#0f766e" />
           <Text style={styles.stateText}>Loading public profile...</Text>
@@ -309,7 +307,6 @@ export default function PublicProfileScreen() {
   if (notFound || !profile) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
         <View style={styles.stateWrap}>
           <Text style={styles.emptyTitle}>Profile not available</Text>
           <Text style={styles.emptyText}>
@@ -325,12 +322,11 @@ export default function PublicProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.heroCard}>
           <View style={styles.heroTopRow}>
             {avatarUri ? (
-              <Image source={{ uri: avatarUri }} style={styles.avatarImage} resizeMode="cover" />
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" />
             ) : (
               <View style={styles.avatarFallback}>
                 <Text style={styles.avatarFallbackText}>{displayName.charAt(0).toUpperCase() || 'U'}</Text>
@@ -430,7 +426,7 @@ export default function PublicProfileScreen() {
               onPress={() => router.push({ pathname: '/(app)/service-details', params: { id: item.id } })}
             >
               {item.serviceImage ? (
-                <Image source={{ uri: item.serviceImage }} style={styles.serviceImage} resizeMode="cover" />
+                <Image source={{ uri: item.serviceImage }} style={styles.serviceImage} contentFit="cover" />
               ) : (
                 <View style={styles.serviceImagePlaceholder}>
                   <Text style={styles.serviceEmoji}>{item.categoryIcon || '🧰'}</Text>

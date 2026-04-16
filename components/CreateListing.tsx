@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
 				router.back();
 				return;
 			}
-			router.replace('/(tabs)/listbutton' as any);
+			router.replace('/(tabs)/browsebutton' as any);
 		};
 
 		const goToLogin = () => {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
 			router.push({
 				pathname: '/signInOrSignUp',
 				params: {
-					returnTo: '/create-listing',
+					returnTo: '/(app)/create-listing',
 				},
 			} as any);
 		};
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
 		if (presentError) {
 			if (presentError.code === 'Canceled') {
 				router.replace({
-					pathname: '/create-listing' as any,
+					pathname: '/(app)/create-listing' as any,
 					params: {
 						featureCanceled: '1',
 					},
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
 		});
 
 		router.replace({
-			pathname: '/listing-posted' as any,
+			pathname: '/(app)/listing-posted' as any,
 			params: {
 				listingId,
 				checkout: 'featured',
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
 			} else {
 				await clearDraft();
 				router.replace({
-					pathname: '/listing-posted' as any,
+					pathname: '/(app)/listing-posted' as any,
 					params: {
 						listingId: listingDocRef.id,
 					},

@@ -2,11 +2,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Header from '../components/Header';
-import ImageUploader from '../components/ImageUploader';
-import ScreenTitleRow from '../components/ScreenTitleRow';
-import { app } from '../firebase';
-import { useAccountStatus } from '../hooks/useAccountStatus';
+import ImageUploader from '../../components/ImageUploader';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
+import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 type PetGender = 'male' | 'female' | 'unknown';
 
@@ -36,7 +35,7 @@ export default function CreatePetPostScreen() {
       return;
     }
 
-    router.push('/(tabs)/petbutton' as any);
+    router.push('/(app)/pet-corner' as any);
   }, [router]);
 
   React.useEffect(() => {
@@ -104,7 +103,7 @@ export default function CreatePetPostScreen() {
       });
 
       router.replace({
-        pathname: '/listing-posted' as any,
+        pathname: '/(app)/listing-posted' as any,
         params: {
           petId: createdPetDoc.id,
           postType,
@@ -120,7 +119,6 @@ export default function CreatePetPostScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header />
       <View style={styles.screenTitleRowWrap}>
         <ScreenTitleRow title={isFoundPost ? 'Create Found Pet Post' : 'Create Lost Pet Post'} onBackPress={navigateToPetHub} />
       </View>

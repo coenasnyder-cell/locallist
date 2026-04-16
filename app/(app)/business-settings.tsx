@@ -180,7 +180,7 @@ export default function BusinessSettingsScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.btn, styles.secondaryBtn]}
-                    onPress={() => router.push({ pathname: '/businessprofile', params: { id: user?.uid || '' } })}
+                    onPress={() => router.push({ pathname: '/(app)/businessprofile', params: { id: user?.uid || '' } })}
                   >
                     <Text style={styles.btnText}>View Public Profile</Text>
                   </TouchableOpacity>
@@ -199,7 +199,7 @@ export default function BusinessSettingsScreen() {
                 {settings?.businessLogo ? (
                   <View style={[styles.field, styles.full]}>
                     <Text style={styles.fieldLabel}>Logo</Text>
-                    <Image source={{ uri: settings.businessLogo }} style={styles.businessLogo} resizeMode="contain" />
+                    <Image source={{ uri: settings.businessLogo }} style={styles.businessLogo} contentFit="contain" />
                   </View>
                 ) : null}
               </View>

@@ -243,7 +243,7 @@ export default function HomeScreen() {
         <Image
           source={require('../../assets/images/communityhub.png')}
           style={{ width: '100%', height: 150, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
-          resizeMode="cover"
+          contentFit="cover"
         />
         <TouchableOpacity
           style={{
@@ -375,7 +375,7 @@ export default function HomeScreen() {
                   title={item.title}
                   price={item.subtitle}
                   imageSource={item.imageSource}
-                  onPress={() => router.push({ pathname: '/pet-details', params: { petId: item.id } })}
+                  onPress={() => router.push({ pathname: '/(app)/pet-details', params: { petId: item.id } })}
                 />
               </View>
             );
@@ -392,7 +392,7 @@ export default function HomeScreen() {
             alignSelf: 'center',
             minWidth: 190,
           }}
-          onPress={() => router.push('/browse-pets')}
+          onPress={() => router.push('/(app)/browse-pets')}
         >
           <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
             View All Pet Listings

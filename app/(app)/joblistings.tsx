@@ -92,9 +92,9 @@ export default function JobListingsScreen() {
 
       {isBusinessUser && (
         <View style={styles.benefitsCard}>
-          <Image source={require('../../assets/images/jobhub.png')} style={styles.benefitsImage} resizeMode="cover" />
+          <Image source={require('../../assets/images/jobhub.png')} style={styles.benefitsImage} contentFit="cover" />
           <View style={styles.benefitsContent}>
-            <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('/create-job-listing' as any)}>
+            <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('/(app)/create-job-listing' as any)}>
               <Text style={styles.postButtonText}>+ Post A Job</Text>
             </TouchableOpacity>
           </View>

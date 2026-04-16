@@ -5,7 +5,6 @@ import { collection, getDocs, getFirestore, query, where } from 'firebase/firest
 import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../../components/Header';
 import { app } from '../../firebase';
 
 type ListingTab = 'marketplace' | 'services' | 'deals' | 'featured' | 'pending' | 'sold' | 'saved';
@@ -295,7 +294,6 @@ export default function BusinessListingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Listings Manager</Text>
@@ -371,7 +369,7 @@ export default function BusinessListingsScreen() {
                 }}
               >
                 {item.imageUrl ? (
-                  <Image source={{ uri: item.imageUrl }} style={styles.cardImage} resizeMode="cover" />
+                  <Image source={{ uri: item.imageUrl }} style={styles.cardImage} contentFit="cover" />
                 ) : (
                   <View style={styles.cardPlaceholder}>
                     <Text style={styles.cardPlaceholderText}>No Image</Text>

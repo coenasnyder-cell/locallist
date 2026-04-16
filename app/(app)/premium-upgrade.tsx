@@ -4,13 +4,13 @@ import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -358,7 +358,7 @@ export default function PremiumUpgradeScreen() {
           Alert.alert('Premium active', 'You now have Premium business tools.', [
             {
               text: 'Go to Business Hub',
-              onPress: () => router.replace('/business-hub'),
+              onPress: () => router.replace('/(app)/business-hub'),
             },
             { text: 'OK', style: 'cancel' },
           ]);
@@ -391,7 +391,7 @@ export default function PremiumUpgradeScreen() {
   }
 
   const onFreeBusinessPress = () => {
-    router.push('/upgrade-business' as any);
+    router.push('/(app)/upgrade-business' as any);
   };
 
   return (
@@ -415,7 +415,7 @@ export default function PremiumUpgradeScreen() {
         <View style={styles.contentCentered}>
           <Text style={styles.title}>You&apos;re on Premium</Text>
           <Text style={styles.body}>Manage your business from Business Hub.</Text>
-          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace('/business-hub')}>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace('/(app)/business-hub')}>
             <Text style={styles.primaryBtnText}>Business Hub</Text>
           </TouchableOpacity>
         </View>

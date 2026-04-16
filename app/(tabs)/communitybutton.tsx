@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 type CommunityItem = {
@@ -22,7 +22,7 @@ const ITEMS: CommunityItem[] = [
     title: 'The Pet Corner',
     subtitle: 'Lost & found pets, adoptions',
     accentColor: '#7C3AED',
-    route: '/(tabs)/petbutton',
+    route: '/(app)/pet-corner',
   },
   {
     emoji: '🏷️',

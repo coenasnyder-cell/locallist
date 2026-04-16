@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Header from "../components/Header";
 
 export default function Help() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -117,7 +116,6 @@ export default function Help() {
 
   return (
     <View style={styles.container}>
-      <Header showTitle={false} />
 
       {/* Content */}
       <ScrollView contentContainerStyle={styles.content}>

@@ -3,11 +3,10 @@ import { addDoc, collection, getDocs, getFirestore, serverTimestamp } from 'fire
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FormInput from '../components/FormInput';
-import Header from '../components/Header';
-import { ThemedView } from '../components/themed-view';
-import { app } from '../firebase';
-import { useAccountStatus } from '../hooks/useAccountStatus';
+import FormInput from '../../components/FormInput';
+import { ThemedView } from '../../components/themed-view';
+import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 const DEFAULT_JOB_CATEGORIES = [
   'General Labor',
@@ -34,7 +33,7 @@ export default function CreateJobListingPage() {
 
   const handleBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/(tabs)/listbutton' as any);
+    else router.replace('/(tabs)/browsebutton' as any);
   };
 
   const [jobTitle, setJobTitle] = useState('');
@@ -199,7 +198,6 @@ export default function CreateJobListingPage() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header />
       <ThemedView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
           <Text style={styles.title}>Create Job Listing</Text>

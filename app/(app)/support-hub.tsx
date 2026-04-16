@@ -17,7 +17,7 @@ const SUPPORT_CARDS: SupportCard[] = [
   {
     title: 'Help',
     description: 'Find answers to common questions and account support topics.',
-    route: '/(app)/help',
+    route: '/help',
   },
   {
     title: 'Terms of Use',

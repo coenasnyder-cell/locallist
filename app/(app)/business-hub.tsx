@@ -1,20 +1,19 @@
-import Header from '@/components/Header';
 import { useAccountStatus } from '@/hooks/useAccountStatus';
 import { Redirect, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { app } from '../firebase';
-import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
+import { app } from '../../firebase';
+import { signOutNativeGoogle } from '../../utils/nativeGoogleAuth';
 
 type HubTool = {
   title: string;
@@ -42,7 +41,7 @@ type HubAnalytics = {
   promoTrackedCampaigns: number;
 };
 
-export default function BusinessHubScreen({ showHeader = true }: { showHeader?: boolean }) {
+export default function BusinessHubScreen() {
   const router = useRouter();
   const { user, profile, loading, isBusinessAccount } = useAccountStatus();
   const waitingForProfile = !!user && !profile;
@@ -244,12 +243,6 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
     return <Redirect href="/signInOrSignUp" />;
   }
 
-  // If this screen is opened as a standalone route, bounce to the tabs route
-  // so the bottom tab bar is always visible for business users.
-  if (!loading && user && profile && isBusinessAccount && showHeader) {
-    return <Redirect href="/(tabs)/businesshubbutton" />;
-  }
-
   if (!loading && user && profile && !isBusinessAccount) {
     return <Redirect href="/(tabs)/profilebutton" />;
   }
@@ -265,7 +258,7 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
       title: 'Listings Manager',
       description: 'Manage your marketplace listings, services, and deal content in one place.',
       cta: 'Open Listings',
-      onPress: () => router.push('/business-listings'),
+      onPress: () => router.push('/(app)/business-listings'),
     },
     {
       title: 'Post & Promote',
@@ -296,7 +289,6 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
   if (loading || waitingForProfile) {
     return (
       <SafeAreaView style={styles.container}>
-        {showHeader ? <Header /> : null}
         <View style={styles.loadingWrap}>
           <Text style={styles.loadingText}>Loading Business Hub...</Text>
         </View>
@@ -306,7 +298,6 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
 
   return (
     <SafeAreaView style={styles.container}>
-      {showHeader ? <Header /> : null}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.userSummary}>
           <View style={styles.avatar}>
@@ -342,7 +333,7 @@ export default function BusinessHubScreen({ showHeader = true }: { showHeader?: 
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.claimSetupSecondaryButton}
-              onPress={() => router.push({ pathname: '/businessprofile', params: { id: user?.uid || '' } })}
+              onPress={() => router.push({ pathname: '/(app)/businessprofile', params: { id: user?.uid || '' } })}
             >
               <Text style={styles.claimSetupSecondaryButtonText}>View Public Listing</Text>
             </TouchableOpacity>

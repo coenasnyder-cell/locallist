@@ -379,7 +379,7 @@ export default function Profile() {
   };
 
   const openCreateHub = () => {
-    router.push('/(tabs)/listbutton');
+    router.push('/(tabs)/browsebutton');
   };
 
   const handleOpenItem = (section: SectionKey, tab: SectionTab, item: AnyItem) => {
@@ -399,7 +399,7 @@ export default function Profile() {
 
       if (section === 'pets') {
         const petId = item.listingId || item.id;
-        router.push({ pathname: '/pet-details', params: { id: petId } });
+        router.push({ pathname: '/(app)/pet-details', params: { id: petId } });
         return;
       }
 
@@ -424,7 +424,7 @@ export default function Profile() {
     }
 
     if (section === 'pets') {
-      router.push({ pathname: '/pet-details', params: { id: item.id } });
+      router.push({ pathname: '/(app)/pet-details', params: { id: item.id } });
     }
   };
 
@@ -694,7 +694,7 @@ export default function Profile() {
           </TouchableOpacity>
 
           {!isBusinessAccount ? (
-            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/premium-upgrade')}>
+            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/(app)/premium-upgrade')}>
               <Feather name="briefcase" size={22} color="#fff" />
               <Text style={styles.actionCardText}>Upgrade Business</Text>
             </TouchableOpacity>

@@ -222,13 +222,13 @@ export default function ShopLocalList() {
 
   const handleViewDetails = (profile: ShopLocalProfile) => {
     router.push({
-      pathname: '/businessprofile',
+      pathname: '/(app)/businessprofile',
       params: { id: profile.id || profile.userId },
     });
   };
 
   const handleAddBusinessPress = () => {
-    router.push(isBusinessAccount ? '/(app)/businesslocal' as any : '/premium-upgrade' as any);
+    router.push(isBusinessAccount ? '/(app)/businesslocal' as any : '/(app)/premium-upgrade' as any);
   };
 
   const handleViewDetailsAlert = (profile: ShopLocalProfile) => {
@@ -271,7 +271,7 @@ export default function ShopLocalList() {
         )}
 
         {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.cardImage} resizeMode="cover" />
+          <Image source={{ uri: profileImage }} style={styles.cardImage} contentFit="cover" />
         ) : (
           <View style={styles.cardImagePlaceholder} />
         )}
@@ -323,7 +323,7 @@ export default function ShopLocalList() {
           <Image
             source={require('../../assets/images/businsshub.png')}
             style={styles.benefitsImage}
-            resizeMode="cover"
+            contentFit="cover"
           />
           <TouchableOpacity
             style={styles.createProfileButton}

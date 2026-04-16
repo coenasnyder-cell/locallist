@@ -265,7 +265,7 @@ export default function ServiceDetailsScreen() {
 
         <View style={styles.card}>
           {service.serviceImage ? (
-            <Image source={{ uri: service.serviceImage }} style={styles.heroImage} resizeMode="cover" />
+            <Image source={{ uri: service.serviceImage }} style={styles.heroImage} contentFit="cover" />
           ) : (
             <View style={styles.placeholderImage}>
               <Text style={styles.placeholderIcon}>🛠️</Text>
@@ -298,7 +298,7 @@ export default function ServiceDetailsScreen() {
                 <Text style={styles.sectionTitle}>Gallery</Text>
                 <View style={styles.galleryGrid}>
                   {galleryImages.map((uri, index) => (
-                    <Image key={`${uri}-${index}`} source={{ uri }} style={styles.galleryImage} resizeMode="cover" />
+                    <Image key={`${uri}-${index}`} source={{ uri }} style={styles.galleryImage} contentFit="cover" />
                   ))}
                 </View>
               </View>

@@ -13,9 +13,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import Header from '../components/Header';
-import { app } from '../firebase';
-import { useAccountStatus } from '../hooks/useAccountStatus';
+import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 export default function UpgradeBusinessScreen() {
   const router = useRouter();
@@ -47,7 +46,7 @@ export default function UpgradeBusinessScreen() {
       return;
     }
 
-    router.replace('/(tabs)/listbutton' as any);
+    router.replace('/(tabs)/browsebutton' as any);
   };
 
   const handleUpgradeToBusiness = async () => {
@@ -79,7 +78,7 @@ export default function UpgradeBusinessScreen() {
       );
 
       Alert.alert('Success', 'Your account has been upgraded to a business account.');
-      router.replace('/(tabs)/businesshubbutton' as any);
+      router.replace('/(app)/business-hub' as any);
     } catch (upgradeError) {
       console.error('Error upgrading account:', upgradeError);
       setError('Could not upgrade account. Please try again.');
@@ -92,7 +91,7 @@ export default function UpgradeBusinessScreen() {
     router.push({
       pathname: '/signInOrSignUp' as any,
       params: {
-        returnTo: '/upgrade-business',
+        returnTo: '/(app)/upgrade-business',
       },
     });
   };
@@ -142,7 +141,7 @@ export default function UpgradeBusinessScreen() {
           </Text>
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => router.replace('/(tabs)/businesshubbutton' as any)}
+            onPress={() => router.replace('/(app)/business-hub' as any)}
           >
             <Text style={styles.primaryButtonText}>Open Business Hub</Text>
           </TouchableOpacity>
@@ -158,7 +157,6 @@ export default function UpgradeBusinessScreen() {
           headerShown: false,
         }}
       />
-      <Header showTitle={false} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}

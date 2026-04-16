@@ -116,12 +116,12 @@ export default function BrowseComp() {
 				<Image
 					source={require('../assets/images/listhub.png')}
 					style={styles.listHubHighlightImage}
-					resizeMode="cover"
+					contentFit="cover"
 				/>
 				<View style={styles.listHubHighlightTextWrap}>
 					<TouchableOpacity
 						style={styles.listHubHighlightButton}
-						onPress={() => router.push('/create-listing' as any)}
+						onPress={() => router.push('/(app)/create-listing' as any)}
 					>
 						<Text style={styles.listHubHighlightButtonText}>List Your Items</Text>
 					</TouchableOpacity>

@@ -59,7 +59,7 @@ export default function AllListings() {
               <Image
                 source={{ uri: listing.images[0] }}
                 style={styles.image}
-                resizeMode="cover"
+                contentFit="cover"
               />
               <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
               <Text style={styles.priceZip}>

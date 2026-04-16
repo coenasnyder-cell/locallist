@@ -2,31 +2,31 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  doc,
-  query as firestoreQuery,
-  getDoc,
-  onSnapshot,
-  orderBy,
-  serverTimestamp,
-  updateDoc,
+    addDoc,
+    arrayRemove,
+    arrayUnion,
+    collection,
+    doc,
+    query as firestoreQuery,
+    getDoc,
+    onSnapshot,
+    orderBy,
+    serverTimestamp,
+    updateDoc,
 } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
-  Button,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Button,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../firebase';
@@ -285,7 +285,7 @@ const ThreadChat = () => {
     if (!listingId) return;
 
     if (listingType === 'pet') {
-      router.push({ pathname: '/pet-details', params: { id: listingId } });
+      router.push({ pathname: '/(app)/pet-details', params: { id: listingId } });
       return;
     }
 
@@ -466,7 +466,7 @@ const ThreadChat = () => {
 
   const openUserProfile = (userId: string | null) => {
     if (!userId) return;
-    router.push({ pathname: '/public-profile', params: { userId } });
+    router.push({ pathname: '/(app)/public-profile', params: { userId } });
   };
 
   const renderAvatar = (summary: UserSummary, variant: 'sender' | 'receiver') => {
@@ -508,7 +508,7 @@ const ThreadChat = () => {
 
           <View style={styles.contextCard}>
             {listingImage ? (
-              <Image source={{ uri: listingImage }} style={styles.listingImage} resizeMode="cover" />
+              <Image source={{ uri: listingImage }} style={styles.listingImage} contentFit="cover" />
             ) : (
               <View style={styles.listingImagePlaceholder}>
                 <Text style={styles.listingImagePlaceholderText}>{getInitials(listingTitle)}</Text>

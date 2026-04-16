@@ -21,7 +21,7 @@ const ACTIONS: PromoteAction[] = [
   {
     title: '💼 Job Post',
     description: 'Post hiring opportunities to reach local candidates.',
-    route: '/create-job-listing',
+    route: '/(app)/create-job-listing',
     cta: 'Create Job Post',
   },
   {
@@ -33,7 +33,7 @@ const ACTIONS: PromoteAction[] = [
   {
     title: '🧰 Add A Service',
     description: 'List your professional services for local customers to find.',
-    route: '/create-listing',
+    route: '/(app)/create-listing',
     params: { category: 'Services' },
     cta: 'Create Service',
   },
@@ -104,7 +104,7 @@ export default function PostPromoteScreen() {
       <View style={styles.infoPanel}>
         <Text style={styles.infoPanelTitle}>Want To Manage Your Current Listings and Promotions?</Text>
         <Text style={styles.infoPanelSubtitle}>To view all your promotions and listings, go to Listings Manager.</Text>
-        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/business-listings')}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/(app)/business-listings')}>
           <Text style={styles.primaryBtnText}>Open Listings Manager</Text>
         </TouchableOpacity>
       </View>

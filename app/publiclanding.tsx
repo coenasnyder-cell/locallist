@@ -1,9 +1,8 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { getAuth, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import GridListingCard from '../components/GridListingCard';
 import { app } from '../firebase';
 import { isListingVisible } from '../utils/listingVisibility';
@@ -45,8 +44,6 @@ const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
 
 export default function PublicLanding() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
-  const isCompactHeader = width < 360;
   const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [recentPetListings, setRecentPetListings] = useState<RecentPetListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,19 +54,6 @@ export default function PublicLanding() {
 
   const handlePreviewTap = () => {
     router.push('/signInOrSignUp');
-  };
-
-  const handleLogout = async () => {
-    try {
-      const auth = getAuth(app);
-      if (auth.currentUser) {
-        await signOut(auth);
-      }
-      router.replace('/login');
-    } catch (error) {
-      console.error('Error signing out from public landing:', error);
-      Alert.alert('Logout Error', 'Could not log out right now. Please try again.');
-    }
   };
 
   useEffect(() => {
@@ -212,7 +196,7 @@ export default function PublicLanding() {
         <Image
           source={require('../assets/images/logo.png')}
           style={styles.centeredLogo}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </View>
 
@@ -333,14 +317,15 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   logoSection: {
-    paddingVertical: 16,
+    paddingTop: 48,
+    paddingBottom: 16,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   centeredLogo: {
-    width: 120,
-    height: 56,
+    width: 140,
+    height: 66,
   },
   heroSection: {
     paddingHorizontal: 16,

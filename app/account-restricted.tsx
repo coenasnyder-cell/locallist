@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Header from '../components/Header';
 import { app } from '../firebase';
 import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
 
@@ -22,7 +21,6 @@ export default function AccountRestrictedPage() {
 
   return (
     <>
-      <Header />
       <View style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.title}>Account Restricted</Text>

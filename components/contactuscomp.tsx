@@ -121,7 +121,13 @@ export default function ContactUsComp() {
 			Alert.alert("Success", "Your message has been sent. We'll get back to you soon!", [
 				{
 					text: "OK",
-					onPress: () => router.push("/(tabs)"),
+					onPress: () => {
+						if (router.canGoBack()) {
+							router.back();
+						} else {
+							router.replace("/(tabs)");
+						}
+					},
 				},
 			]);
 		} catch (error) {

@@ -3,10 +3,10 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import PetCard from '../components/PetCard';
-import ScreenTitleRow from '../components/ScreenTitleRow';
-import { app } from '../firebase';
-import { Pet } from '../types/Pet';
+import PetCard from '../../components/PetCard';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
+import { app } from '../../firebase';
+import { Pet } from '../../types/Pet';
 
 type ServiceListing = {
   id: string;
@@ -157,7 +157,7 @@ export default function PetHubScreen() {
 
   const handlePetPress = (pet: Pet) => {
     router.push({
-      pathname: '/pet-details' as any,
+      pathname: '/(app)/pet-details' as any,
       params: {
         petId: pet.id,
         postType: pet.postType,
@@ -166,15 +166,15 @@ export default function PetHubScreen() {
   };
 
   const handleCreateLostPet = () => {
-    router.push('/create-pet-post?type=lost' as any);
+    router.push('/(app)/create-pet-post?type=lost' as any);
   };
 
   const handleCreateFoundPet = () => {
-    router.push('/create-pet-post?type=found' as any);
+    router.push('/(app)/create-pet-post?type=found' as any);
   };
 
   const handleCreateAdoption = () => {
-    router.push('/create-adoption-listing');
+    router.push('/(app)/create-adoption-listing');
   };
 
   const handleCreatePetService = () => {
@@ -238,7 +238,7 @@ export default function PetHubScreen() {
                   activeOpacity={0.88}
                 >
                   {service.serviceImage ? (
-                    <Image source={{ uri: service.serviceImage }} style={styles.serviceImage} resizeMode="cover" />
+                    <Image source={{ uri: service.serviceImage }} style={styles.serviceImage} contentFit="cover" />
                   ) : (
                     <View style={styles.serviceImagePlaceholder}>
                       <Text style={styles.servicePlaceholderText}>{service.categoryIcon || '🐾'}</Text>
@@ -333,7 +333,7 @@ export default function PetHubScreen() {
           style={styles.viewAllButton}
           onPress={() =>
             router.push({
-              pathname: '/browse-pets' as any,
+              pathname: '/(app)/browse-pets' as any,
               params: { category: postType },
             })
           }

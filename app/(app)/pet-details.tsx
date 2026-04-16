@@ -14,9 +14,8 @@ import {
     useWindowDimensions,
     View,
 } from 'react-native';
-import Header from '../components/Header';
-import { db } from '../firebase';
-import { Pet } from '../types/Pet';
+import { db } from '../../firebase';
+import { Pet } from '../../types/Pet';
 
 export default function PetDetailsScreen() {
   const router = useRouter();
@@ -35,7 +34,7 @@ export default function PetDetailsScreen() {
       router.back();
       return;
     }
-    router.replace('/(tabs)/petbutton' as any);
+    router.replace('/(app)/pet-corner' as any);
   }, [router]);
 
   useEffect(() => {
@@ -269,7 +268,6 @@ export default function PetDetailsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}

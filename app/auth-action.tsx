@@ -62,7 +62,7 @@ export default function AuthActionPage() {
         return;
       }
 
-      if (redirectToNativeApp('/listing-posted', {
+      if (redirectToNativeApp('/(app)/listing-posted', {
         ...(listingId ? { listingId } : {}),
         checkout: 'featured',
       })) {
@@ -70,7 +70,7 @@ export default function AuthActionPage() {
       }
 
       router.replace({
-        pathname: '/listing-posted',
+        pathname: '/(app)/listing-posted',
         params: {
           ...(listingId ? { listingId } : {}),
           checkout: 'featured',
@@ -80,12 +80,12 @@ export default function AuthActionPage() {
     }
 
     if (checkout === 'premium') {
-      if (redirectToNativeApp('/premium-upgrade', { checkout: 'premium' })) {
+      if (redirectToNativeApp('/(app)/premium-upgrade', { checkout: 'premium' })) {
         return;
       }
 
       router.replace({
-        pathname: '/premium-upgrade',
+        pathname: '/(app)/premium-upgrade',
         params: {
           checkout: 'premium',
         },
@@ -114,14 +114,14 @@ export default function AuthActionPage() {
         return;
       }
 
-      if (redirectToNativeApp('/create-listing', {
+      if (redirectToNativeApp('/(app)/create-listing', {
         featureCanceled: '1',
       })) {
         return;
       }
 
       router.replace({
-        pathname: '/create-listing',
+        pathname: '/(app)/create-listing',
         params: {
           featureCanceled: '1',
         },
@@ -130,12 +130,12 @@ export default function AuthActionPage() {
     }
 
     if (premiumCanceled === '1') {
-      if (redirectToNativeApp('/premium-upgrade', { premiumCanceled: '1' })) {
+      if (redirectToNativeApp('/(app)/premium-upgrade', { premiumCanceled: '1' })) {
         return;
       }
 
       router.replace({
-        pathname: '/premium-upgrade',
+        pathname: '/(app)/premium-upgrade',
         params: {
           premiumCanceled: '1',
         },

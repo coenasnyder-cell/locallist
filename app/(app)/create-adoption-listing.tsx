@@ -2,11 +2,10 @@ import { useRouter } from 'expo-router';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import React from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Header from '../components/Header';
-import ImageUploader from '../components/ImageUploader';
-import ScreenTitleRow from '../components/ScreenTitleRow';
-import { app } from '../firebase';
-import { useAccountStatus } from '../hooks/useAccountStatus';
+import ImageUploader from '../../components/ImageUploader';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
+import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 type PetGender = 'male' | 'female' | 'unknown';
 
@@ -22,7 +21,7 @@ export default function CreateAdoptionListingScreen() {
       return;
     }
 
-    router.replace('/(tabs)/petbutton' as any);
+    router.replace('/(app)/pet-corner' as any);
   }, [router]);
 
   const [petName, setPetName] = React.useState('');
@@ -102,7 +101,7 @@ export default function CreateAdoptionListingScreen() {
       });
 
       router.replace({
-        pathname: '/listing-posted' as any,
+        pathname: '/(app)/listing-posted' as any,
         params: {
           petId: createdPetDoc.id,
           postType: 'adoption',
@@ -118,7 +117,6 @@ export default function CreateAdoptionListingScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header />
       <View style={styles.screenTitleRowWrap}>
         <ScreenTitleRow title="Create Adoption Listing" onBackPress={navigateToPetHub} />
       </View>

@@ -199,7 +199,7 @@ export default function ServicesList() {
         )}
 
         {item.serviceImage ? (
-          <Image source={{ uri: item.serviceImage }} style={styles.cardImage} resizeMode="cover" />
+          <Image source={{ uri: item.serviceImage }} style={styles.cardImage} contentFit="cover" />
         ) : (
           <View style={styles.cardImagePlaceholder}>
             <Text style={styles.cardImageIcon}>{item.categoryIcon || '🧰'}</Text>
@@ -251,7 +251,7 @@ export default function ServicesList() {
           <Image
             source={require('../../assets/images/serviceshub.png')}
             style={styles.heroImage}
-            resizeMode="cover"
+            contentFit="cover"
           />
           <TouchableOpacity
             style={styles.postButton}

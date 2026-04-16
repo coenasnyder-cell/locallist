@@ -451,7 +451,7 @@ export default function EventsListScreen() {
     <View key={eventItem.id} style={[styles.eventCard, isWideLayout ? styles.eventCardWide : null]}>
       <View style={[styles.eventMediaWrap, isWideLayout ? styles.eventMediaWrapWide : null]}>
         {eventItem.eventImage ? (
-          <Image source={{ uri: eventItem.eventImage }} style={styles.eventMediaImage} resizeMode="cover" />
+          <Image source={{ uri: eventItem.eventImage }} style={styles.eventMediaImage} contentFit="cover" />
         ) : (
           <View style={[styles.eventMediaImage, styles.eventMediaPlaceholder]}>
             <Text style={styles.eventMediaPlaceholderText}>🎉</Text>
@@ -523,7 +523,7 @@ export default function EventsListScreen() {
           <Image
             source={require('../../assets/images/eventshub.png')}
             style={styles.benefitsImage}
-            resizeMode="cover"
+            contentFit="cover"
           />
           <View style={styles.benefitsContent}>
             <Text style={styles.benefitsTitle}>Promote Your Next Event Locally</Text>

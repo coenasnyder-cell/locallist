@@ -128,7 +128,7 @@ export default function CreateEventListingScreen() {
 
   const handleBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/(tabs)/listbutton' as any);
+    else router.replace('/(tabs)/browsebutton' as any);
   };
 
   const handleDateChange = (field: 'startDate' | 'endDate') => (event: DateTimePickerEvent, selectedDate?: Date) => {

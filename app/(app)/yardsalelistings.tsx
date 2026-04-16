@@ -273,7 +273,7 @@ export default function YardSaleListingsScreen() {
       <View key={sale.id} style={[styles.saleCard, isWideLayout ? styles.saleCardWide : null]}>
         <View style={[styles.saleMediaWrap, isWideLayout ? styles.saleMediaWrapWide : null]}>
           {sale.yardsaleImage ? (
-            <Image source={{ uri: sale.yardsaleImage }} style={styles.saleMediaImage} resizeMode="cover" />
+            <Image source={{ uri: sale.yardsaleImage }} style={styles.saleMediaImage} contentFit="cover" />
           ) : (
             <View style={[styles.saleMediaImage, styles.saleMediaPlaceholder]}>
               <Text style={styles.saleMediaPlaceholderText}>🏷️</Text>
@@ -314,7 +314,7 @@ export default function YardSaleListingsScreen() {
 
         <View style={styles.promoRow}>
           <TouchableOpacity style={styles.promoImageLink} onPress={() => router.push('/create-yard-sale' as any)} activeOpacity={0.86}>
-            <Image source={require('../../assets/images/yardsale.png')} style={styles.promoImage} resizeMode="cover" />
+            <Image source={require('../../assets/images/yardsale.png')} style={styles.promoImage} contentFit="cover" />
           </TouchableOpacity>
           <View style={styles.promoTextWrap}>
             <TouchableOpacity style={styles.promoButton} onPress={() => router.push('/create-yard-sale' as any)} activeOpacity={0.86}>

@@ -16,12 +16,11 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/Header';
-import ScreenTitleRow from '../components/ScreenTitleRow';
-import UserReviewModal from '../components/UserReviewModal';
-import { app } from '../firebase';
-import { useAccountStatus } from '../hooks/useAccountStatus';
-import { submitUserReview } from '../utils/userReviews';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
+import UserReviewModal from '../../components/UserReviewModal';
+import { app } from '../../firebase';
+import { useAccountStatus } from '../../hooks/useAccountStatus';
+import { submitUserReview } from '../../utils/userReviews';
 
 interface BusinessProfile {
   id: string;
@@ -318,7 +317,6 @@ export default function BusinessProfileScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#475569" />
           <Text style={styles.loadingText}>Loading profile...</Text>
@@ -330,7 +328,6 @@ export default function BusinessProfileScreen() {
   if (!profile) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>Profile Not Found</Text>
           <TouchableOpacity
@@ -346,7 +343,6 @@ export default function BusinessProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <View style={styles.screenTitleRowWrap}>
         <ScreenTitleRow title={profile.businessName || 'Business Profile'} />
       </View>
@@ -362,7 +358,7 @@ export default function BusinessProfileScreen() {
               <Image
                 source={{ uri: profile.businessCover || profile.businessImage || profile.businessLogo || '' }}
                 style={styles.coverImage}
-                resizeMode="cover"
+                contentFit="cover"
               />
             ) : (
               <View style={styles.coverPlaceholder}>
@@ -375,7 +371,7 @@ export default function BusinessProfileScreen() {
                 <Image
                   source={{ uri: profile.businessLogo }}
                   style={styles.logoOverlayImage}
-                  resizeMode="cover"
+                  contentFit="cover"
                 />
               </View>
             ) : null}
@@ -487,7 +483,7 @@ export default function BusinessProfileScreen() {
                   <Image
                     source={{ uri: item }}
                     style={styles.galleryImageItem}
-                    resizeMode="cover"
+                    contentFit="cover"
                   />
                 </TouchableOpacity>
               )}
@@ -538,7 +534,7 @@ export default function BusinessProfileScreen() {
             onPress={() => setModalVisible(false)}
           >
             {selectedImage && (
-              <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+              <Image source={{ uri: selectedImage }} style={styles.modalImage} contentFit="contain" />
             )}
           </TouchableOpacity>
           <TouchableOpacity

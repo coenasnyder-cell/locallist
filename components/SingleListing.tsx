@@ -412,14 +412,14 @@ export default function SingleListing({ listing }: { listing: Listing }) {
                 <Text style={styles.sellerLabel}>Seller Information:</Text>
                 <View style={styles.sellerRow}>
                   {sellerPhotoUrl ? (
-                    <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} resizeMode="cover" />
+                    <Image source={{ uri: sellerPhotoUrl }} style={styles.sellerAvatar} contentFit="cover" />
                   ) : (
                     <View style={styles.sellerAvatarFallback}>
                       <Text style={styles.sellerAvatarFallbackText}>{String(listing.sellerName || 'U').trim().charAt(0).toUpperCase() || 'U'}</Text>
                     </View>
                   )}
                   {listing.userId ? (
-                    <TouchableOpacity onPress={() => router.push({ pathname: '/public-profile', params: { userId: listing.userId } })}>
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/(app)/public-profile', params: { userId: listing.userId } })}>
                       <Text style={[styles.sellerName, styles.profileLink]}>{listing.sellerName}</Text>
                     </TouchableOpacity>
                   ) : (

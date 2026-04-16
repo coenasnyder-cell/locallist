@@ -2,11 +2,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Header from '../components/Header';
-import PetCard from '../components/PetCard';
-import ScreenTitleRow from '../components/ScreenTitleRow';
-import { app } from '../firebase';
-import { Pet } from '../types/Pet';
+import PetCard from '../../components/PetCard';
+import ScreenTitleRow from '../../components/ScreenTitleRow';
+import { app } from '../../firebase';
+import { Pet } from '../../types/Pet';
 
 type PetCategory = 'all' | 'lost' | 'found' | 'adoption';
 
@@ -36,7 +35,7 @@ export default function BrowsePetsScreen() {
       return;
     }
 
-    router.replace('/(tabs)/petbutton' as any);
+    router.replace('/(app)/pet-corner' as any);
   }, [router]);
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function BrowsePetsScreen() {
 
   const handlePetPress = (pet: Pet) => {
     router.push({
-      pathname: '/pet-details' as any,
+      pathname: '/(app)/pet-details' as any,
       params: {
         petId: pet.id,
         postType: pet.postType,
@@ -108,8 +107,6 @@ export default function BrowsePetsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header />
-
       <View style={styles.screenTitleRowWrap}>
         <ScreenTitleRow title="Browse Pets" onBackPress={navigateToPetHub} />
       </View>
