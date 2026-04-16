@@ -27,7 +27,6 @@ export default function AppLayout() {
           <Stack.Screen name="shoplocallist" />
           <Stack.Screen name="businesslocal" />
           <Stack.Screen name="business-settings" />
-          <Stack.Screen name="business-analytics" />
           <Stack.Screen name="business-reputation" />
           <Stack.Screen name="create-deal-listing" />
           <Stack.Screen name="create-yard-sale" />

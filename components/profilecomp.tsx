@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
@@ -13,7 +13,7 @@ import EditBusinessProfileComp from './EditBusinessProfileComp';
 import ManageBlockedUsers from './ManageBlockedUsers';
 import SimpleSettingsPage from './SimpleSettingsPage';
 
-type SectionKey = 'marketplace' | 'eventsYardSales' | 'pets' | 'services';
+type SectionKey = 'marketplace' | 'yardSales' | 'events' | 'pets' | 'services';
 type SectionTab = 'active' | 'saved' | 'sold' | 'archived';
 type OnboardingStepKey = 'verifyEmail' | 'completeProfile' | 'postFirstListing' | 'readMessages' | 'firstSale';
 
@@ -21,7 +21,8 @@ type AnyItem = Record<string, any>;
 
 const SECTION_LABELS: Record<SectionKey, string> = {
   marketplace: 'Marketplace',
-  eventsYardSales: 'Events / Yard Sales',
+  yardSales: 'Yard Sales',
+  events: 'Events',
   pets: 'Pets',
   services: 'Services',
 };
@@ -72,8 +73,12 @@ function normalizeSavedSection(item: AnyItem): SectionKey {
   const listingType = String(item?.listingType || '').toLowerCase();
   const category = String(item?.category || '').toLowerCase();
 
-  if (listingType === 'event' || category.includes('yard sale') || category.includes('yardsale') || category.includes('yard-sale')) {
-    return 'eventsYardSales';
+  if (listingType === 'event' || category.includes('event')) {
+    return 'events';
+  }
+
+  if (category.includes('yard sale') || category.includes('yardsale') || category.includes('yard-sale')) {
+    return 'yardSales';
   }
 
   if (listingType === 'pet' || category.includes('pet')) {
@@ -109,16 +114,27 @@ export default function Profile() {
 
   const [sectionTabs, setSectionTabs] = useState<Record<SectionKey, SectionTab>>({
     marketplace: 'active',
-    eventsYardSales: 'active',
+    yardSales: 'active',
+    events: 'active',
     pets: 'active',
     services: 'active',
   });
   const [collapsedSections, setCollapsedSections] = useState<Record<SectionKey, boolean>>({
     marketplace: false,
-    eventsYardSales: false,
+    yardSales: false,
+    events: false,
     pets: false,
     services: false,
   });
+  const [expandedSections, setExpandedSections] = useState<Record<SectionKey, boolean>>({
+    marketplace: false,
+    yardSales: false,
+    events: false,
+    pets: false,
+    services: false,
+  });
+
+  const DISPLAY_LIMIT = 5;
 
   useEffect(() => {
     return () => {
@@ -281,22 +297,38 @@ export default function Profile() {
       });
     }
 
-    if (section === 'eventsYardSales') {
-      const combined = [...events, ...yardSales];
-
-      if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSection(item) === 'eventsYardSales');
+    if (section === 'yardSales') {
+      if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSection(item) === 'yardSales');
       if (tab === 'sold') return [];
       if (tab === 'archived') {
-        return combined.filter((item) => {
-          const status = String(item.eventStatus || item.yardsalestatus || '').toLowerCase();
-          const endDate = item.eventEndDate || item.yardsaleEndDate || item.yardsaleExpires || item.eventDate || item.yardsaleDate;
+        return yardSales.filter((item) => {
+          const status = String(item.yardsalestatus || '').toLowerCase();
+          const endDate = item.yardsaleEndDate || item.yardsaleExpires || item.yardsaleDate;
           return status === 'cancelled' || status === 'archived' || status === 'expired' || isPastDate(endDate);
         });
       }
 
-      return combined.filter((item) => {
-        const status = String(item.eventStatus || item.yardsalestatus || '').toLowerCase();
-        const endDate = item.eventEndDate || item.yardsaleEndDate || item.yardsaleExpires || item.eventDate || item.yardsaleDate;
+      return yardSales.filter((item) => {
+        const status = String(item.yardsalestatus || '').toLowerCase();
+        const endDate = item.yardsaleEndDate || item.yardsaleExpires || item.yardsaleDate;
+        return status !== 'cancelled' && status !== 'archived' && status !== 'expired' && !isPastDate(endDate);
+      });
+    }
+
+    if (section === 'events') {
+      if (tab === 'saved') return savedListings.filter((item) => normalizeSavedSection(item) === 'events');
+      if (tab === 'sold') return [];
+      if (tab === 'archived') {
+        return events.filter((item) => {
+          const status = String(item.eventStatus || '').toLowerCase();
+          const endDate = item.eventEndDate || item.eventDate;
+          return status === 'cancelled' || status === 'archived' || status === 'expired' || isPastDate(endDate);
+        });
+      }
+
+      return events.filter((item) => {
+        const status = String(item.eventStatus || '').toLowerCase();
+        const endDate = item.eventEndDate || item.eventDate;
         return status !== 'cancelled' && status !== 'archived' && status !== 'expired' && !isPastDate(endDate);
       });
     }
@@ -343,25 +375,34 @@ export default function Profile() {
   };
 
   const getItemTitle = (section: SectionKey, item: AnyItem): string => {
-    if (section === 'eventsYardSales') {
-      if (item.__kind === 'event') return item.eventTitle || 'Event';
-      return item.yardsaleTitle || 'Yard Sale';
-    }
+    if (section === 'yardSales') return item.yardsaleTitle || 'Yard Sale';
+    if (section === 'events') return item.eventTitle || 'Event';
     if (section === 'pets') return item.petName || item.title || 'Pet Listing';
     if (section === 'services') return item.serviceName || item.title || 'Service';
     return item.title || 'Listing';
   };
 
   const getItemSubtitle = (section: SectionKey, item: AnyItem): string => {
-    if (section === 'eventsYardSales') {
-      const start = toDate(item.eventDate || item.yardsaleDate);
-      const end = toDate(item.eventEndDate || item.yardsaleEndDate || item.yardsaleExpires || item.eventDate || item.yardsaleDate);
+    if (section === 'yardSales') {
+      const start = toDate(item.yardsaleDate);
+      const end = toDate(item.yardsaleEndDate || item.yardsaleExpires || item.yardsaleDate);
       if (start && end) {
         const startText = start.toLocaleDateString();
         const endText = end.toLocaleDateString();
         return startText === endText ? startText : `${startText} - ${endText}`;
       }
-      return item.eventCity || item.yardsalelocation || 'Date pending';
+      return item.yardsalelocation || 'Date pending';
+    }
+
+    if (section === 'events') {
+      const start = toDate(item.eventDate);
+      const end = toDate(item.eventEndDate || item.eventDate);
+      if (start && end) {
+        const startText = start.toLocaleDateString();
+        const endText = end.toLocaleDateString();
+        return startText === endText ? startText : `${startText} - ${endText}`;
+      }
+      return item.eventCity || 'Date pending';
     }
 
     if (section === 'pets') return item.petType || item.petStatus || 'Pet';
@@ -372,7 +413,8 @@ export default function Profile() {
   };
 
   const getItemImage = (section: SectionKey, item: AnyItem): string | null => {
-    if (section === 'eventsYardSales') return item.eventImage || item.yardsaleImage || item.image || null;
+    if (section === 'yardSales') return item.yardsaleImage || item.image || null;
+    if (section === 'events') return item.eventImage || item.image || null;
     if (section === 'pets') return item.petImages?.[0] || item.image || null;
     if (section === 'services') return item.serviceImage || item.businessLogo || item.image || null;
     return item.images?.[0] || item.image || null;
@@ -384,17 +426,13 @@ export default function Profile() {
 
   const handleOpenItem = (section: SectionKey, tab: SectionTab, item: AnyItem) => {
     if (tab === 'saved' && item.id) {
-      if (section === 'eventsYardSales') {
-        const listingType = String(item.listingType || '').toLowerCase();
-        const category = String(item.category || '').toLowerCase();
-        if (listingType === 'event') {
-          router.push('/(app)/eventslist');
-          return;
-        }
-        if (category.includes('yard sale') || category.includes('yardsale') || category.includes('yard-sale')) {
-          router.push('/(app)/yardsalelistings');
-          return;
-        }
+      if (section === 'events') {
+        router.push('/(app)/eventslist');
+        return;
+      }
+      if (section === 'yardSales') {
+        router.push('/(app)/yardsalelistings');
+        return;
       }
 
       if (section === 'pets') {
@@ -417,9 +455,13 @@ export default function Profile() {
       return;
     }
 
-    if (section === 'eventsYardSales') {
-      if (item.__kind === 'event') router.push('/(app)/eventslist');
-      else router.push('/(app)/yardsalelistings');
+    if (section === 'yardSales') {
+      router.push('/(app)/yardsalelistings');
+      return;
+    }
+
+    if (section === 'events') {
+      router.push('/(app)/eventslist');
       return;
     }
 
@@ -459,6 +501,53 @@ export default function Profile() {
       ...prev,
       [section]: !prev[section],
     }));
+  };
+
+  const getCollectionName = (section: SectionKey): string => {
+    switch (section) {
+      case 'marketplace': return 'listings';
+      case 'yardSales': return 'yardSales';
+      case 'events': return 'events';
+      case 'pets': return 'pets';
+      case 'services': return 'services';
+    }
+  };
+
+  const handleMarkSold = async (section: SectionKey, item: AnyItem) => {
+    const db = getFirestore(app);
+    const col = getCollectionName(section);
+    try {
+      if (section === 'pets') {
+        const newStatus = item.postType === 'lost' ? 'reunited' : 'adopted';
+        await updateDoc(doc(db, col, item.id), { petStatus: newStatus });
+      } else {
+        await updateDoc(doc(db, col, item.id), { status: 'sold' });
+      }
+      Alert.alert('Updated', section === 'pets' ? 'Pet listing updated.' : 'Listing marked as sold.');
+      fetchData();
+    } catch {
+      Alert.alert('Error', 'Failed to update. Please try again.');
+    }
+  };
+
+  const handleArchive = async (section: SectionKey, item: AnyItem) => {
+    const db = getFirestore(app);
+    const col = getCollectionName(section);
+    try {
+      if (section === 'pets') {
+        await updateDoc(doc(db, col, item.id), { petStatus: 'archived' });
+      } else if (section === 'yardSales') {
+        await updateDoc(doc(db, col, item.id), { yardsalestatus: 'archived' });
+      } else if (section === 'events') {
+        await updateDoc(doc(db, col, item.id), { eventStatus: 'archived' });
+      } else {
+        await updateDoc(doc(db, col, item.id), { status: 'archived' });
+      }
+      Alert.alert('Archived', 'Listing has been archived.');
+      fetchData();
+    } catch {
+      Alert.alert('Error', 'Failed to archive. Please try again.');
+    }
   };
 
   if (!user) return null;
@@ -508,7 +597,7 @@ export default function Profile() {
           <TouchableOpacity onPress={() => setShowGuidelines(false)}>
             <Feather name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.guidelinesTitle}>Guidelines</Text>
+          <Text style={styles.guidelinesTitle}>Community Guidelines</Text>
           <View style={{ width: 24 }} />
         </View>
         <CommunityDisclosures />
@@ -663,65 +752,51 @@ export default function Profile() {
       ) : null}
 
       {isBusinessAccount ? (
-        <View style={styles.businessProfileSection}>
-          <View style={styles.businessHeader}>
-            <Feather name="briefcase" size={24} color="#4CAF50" />
-            <Text style={styles.businessTitle}>Business Profile</Text>
-            <TouchableOpacity onPress={() => setShowEditBusiness(true)} style={{ marginLeft: 'auto' }}>
-              <Feather name="edit" size={20} color="#4CAF50" />
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.hubPromoCard}
+          activeOpacity={0.85}
+          onPress={() => router.push('/(app)/business-hub' as any)}
+        >
+          <Image
+            source={require('../assets/images/businesshubs.png')}
+            style={styles.hubPromoImage}
+            contentFit="cover"
+          />
+          <View style={styles.hubPromoContent}>
+            <Text style={styles.hubPromoTitle}>Business Hub</Text>
+            <View style={styles.hubPromoFeatures}>
+              <View style={styles.hubPromoFeatureRow}>
+                <Feather name="edit-3" size={13} color="#475569" />
+                <Text style={styles.hubPromoFeatureText}>Edit Business Profile</Text>
+              </View>
+              <View style={styles.hubPromoFeatureRow}>
+                <Feather name="bar-chart-2" size={13} color="#475569" />
+                <Text style={styles.hubPromoFeatureText}>Analytics & Performance</Text>
+              </View>
+              <View style={styles.hubPromoFeatureRow}>
+                <Feather name="star" size={13} color="#475569" />
+                <Text style={styles.hubPromoFeatureText}>Reputation & Reviews</Text>
+              </View>
+            </View>
+            <View style={styles.hubPromoCta}>
+              <Text style={styles.hubPromoCtaText}>Open Business Hub</Text>
+            </View>
           </View>
-
-          <View style={styles.businessInfo}>
-            <Text style={styles.businessNameLabel}>Business Name</Text>
-            <Text style={styles.businessName}>{userProfile?.businessName || 'Business'}</Text>
-          </View>
-
-          {userProfile?.businessDescription ? (
-            <View style={styles.businessInfo}>
-              <Text style={styles.businessLabel}>Description</Text>
-              <Text style={styles.businessText}>{userProfile.businessDescription}</Text>
-            </View>
-          ) : null}
-
-          {userProfile?.businessPhone ? (
-            <View style={styles.businessInfo}>
-              <Text style={styles.businessLabel}>Phone</Text>
-              <Text style={styles.businessText}>{userProfile.businessPhone}</Text>
-            </View>
-          ) : null}
-
-          {userProfile?.businessWebsite ? (
-            <View style={styles.businessInfo}>
-              <Text style={styles.businessLabel}>Website</Text>
-              <Text style={styles.businessText}>{userProfile.businessWebsite}</Text>
-            </View>
-          ) : null}
-        </View>
+        </TouchableOpacity>
       ) : null}
 
       <View style={styles.listingsSection}>
         <View style={styles.actionGrid}>
           <TouchableOpacity style={[styles.actionCard, styles.actionCardGuidelines]} onPress={() => setShowGuidelines(true)}>
-            <Feather name="book" size={22} color="#fff" />
-            <Text style={styles.actionCardText}>Guidelines</Text>
+            <Text style={styles.actionCardText}>Community Guidelines</Text>
           </TouchableOpacity>
 
-          {isBusinessAccount ? (
-            <TouchableOpacity style={[styles.actionCard, styles.actionCardBusinessHub]} onPress={() => router.push('/businesslocal')}>
-              <Feather name="briefcase" size={22} color="#fff" />
-              <Text style={styles.actionCardText}>Business Hub</Text>
-            </TouchableOpacity>
-          ) : null}
-
           <TouchableOpacity style={[styles.actionCard, styles.actionCardBlocked]} onPress={() => setShowBlockedUsers(true)}>
-            <Feather name="user-x" size={22} color="#fff" />
             <Text style={styles.actionCardText}>Blocked Users</Text>
           </TouchableOpacity>
 
           {!isBusinessAccount ? (
             <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/(app)/premium-upgrade')}>
-              <Feather name="briefcase" size={22} color="#fff" />
               <Text style={styles.actionCardText}>Upgrade Business</Text>
             </TouchableOpacity>
           ) : null}
@@ -740,6 +815,31 @@ export default function Profile() {
                 activeOpacity={0.85}
               >
                 <Text style={styles.sectionTitle}>{SECTION_LABELS[section]}</Text>
+                {section === 'marketplace' ? (
+                  <TouchableOpacity onPress={() => router.push('/(app)/create-listing' as any)} style={styles.sectionCreateLink}>
+                    <Text style={styles.sectionCreateLinkText}>Create A Listing</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {section === 'yardSales' ? (
+                  <TouchableOpacity onPress={() => router.push('/(app)/create-yard-sale' as any)} style={styles.sectionCreateLink}>
+                    <Text style={styles.sectionCreateLinkText}>Create A Yard Sale</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {section === 'events' ? (
+                  <TouchableOpacity onPress={() => router.push('/(app)/create-event-listing' as any)} style={styles.sectionCreateLink}>
+                    <Text style={styles.sectionCreateLinkText}>Create An Event</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {section === 'services' ? (
+                  <TouchableOpacity onPress={() => router.push('/(app)/create-service-listing' as any)} style={styles.sectionCreateLink}>
+                    <Text style={styles.sectionCreateLinkText}>Create A Service</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {section === 'pets' ? (
+                  <TouchableOpacity onPress={() => router.push('/(app)/pet-corner' as any)} style={styles.sectionCreateLink}>
+                    <Text style={styles.sectionCreateLinkText}>Add A Pet Listing</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <View style={styles.sectionHeaderRight}>
                   <View style={styles.sectionCountBadge}>
                     <Text style={styles.sectionCountText}>{rows.length}</Text>
@@ -770,17 +870,15 @@ export default function Profile() {
 
                   {!rows.length ? (
                     <View style={styles.emptyStateWrap}>
-                      <Text style={styles.emptyStateTitle}>No posts yet</Text>
-                      <TouchableOpacity style={styles.emptyStateButton} onPress={openCreateHub}>
-                        <Text style={styles.emptyStateButtonText}>Create your first listing</Text>
-                      </TouchableOpacity>
+                      <Text style={styles.emptyStateTitle}>You don't have any listings in this section yet.</Text>
                     </View>
                   ) : (
-                    rows.map((item) => {
+                    <>
+                    {(expandedSections[section] ? rows : rows.slice(0, DISPLAY_LIMIT)).map((item) => {
                       const imageUri = getItemImage(section, item);
                       return (
+                        <View key={`${section}-${currentTab}-${item.id}`}>
                         <TouchableOpacity
-                          key={`${section}-${currentTab}-${item.id}`}
                           style={styles.listingRow}
                           activeOpacity={0.75}
                           onPress={() => handleOpenItem(section, currentTab, item)}
@@ -819,8 +917,43 @@ export default function Profile() {
                             </TouchableOpacity>
                           ) : null}
                         </TouchableOpacity>
+
+                        {currentTab === 'active' ? (
+                          <View style={styles.listingActions}>
+                            <TouchableOpacity
+                              style={styles.listingActionBtn}
+                              onPress={() => handleOpenItem(section, currentTab, item)}
+                            >
+                              <Text style={styles.listingActionText}>Edit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[styles.listingActionBtn, styles.listingActionSold]}
+                              onPress={() => handleMarkSold(section, item)}
+                            >
+                              <Text style={styles.listingActionSoldText}>
+                                {section === 'pets' ? (item.postType === 'lost' ? 'Reunited' : 'Adopted') : 'Mark Sold'}
+                              </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[styles.listingActionBtn, styles.listingActionArchive]}
+                              onPress={() => handleArchive(section, item)}
+                            >
+                              <Text style={styles.listingActionArchiveText}>Archive</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : null}
+                        </View>
                       );
-                    })
+                    })}
+                    {rows.length > DISPLAY_LIMIT && !expandedSections[section] ? (
+                      <TouchableOpacity
+                        style={styles.showAllButton}
+                        onPress={() => setExpandedSections((prev) => ({ ...prev, [section]: true }))}
+                      >
+                        <Text style={styles.showAllButtonText}>Show All ({rows.length})</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    </>
                   )}
                 </>
               ) : null}
@@ -928,19 +1061,20 @@ const styles = StyleSheet.create({
   actionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 10,
     marginBottom: 12,
   },
   actionCard: {
-    width: '31.5%',
+    flex: 1,
+    minWidth: '30%',
     borderRadius: 8,
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-    minHeight: 92,
-    gap: 8,
+    marginBottom: 0,
+    minHeight: 44,
+    gap: 4,
   },
   actionCardText: {
     color: '#fff',
@@ -949,15 +1083,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionCardGuidelines: {
-    backgroundColor: '#FF9800',
-  },
-  actionCardBlocked: {
-    backgroundColor: '#E53935',
-  },
-  actionCardBusinessHub: {
     backgroundColor: '#475569',
   },
-  actionCardUpgrade: {
+  actionCardBlocked: {
+    backgroundColor: '#475569',
+  },
+   actionCardUpgrade: {
     backgroundColor: '#4CAF50',
   },
   sectionCard: {
@@ -1000,6 +1131,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0f172a',
     marginBottom: 0,
+  },
+  sectionCreateLink: {
+    marginLeft: 10,
+  },
+  sectionCreateLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4f46e5',
+    textDecorationLine: 'underline',
   },
   sectionTabsRow: {
     flexDirection: 'row',
@@ -1097,6 +1237,54 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  listingActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: -6,
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  listingActionBtn: {
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    backgroundColor: '#f8fafc',
+  },
+  listingActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  listingActionSold: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#a7f3d0',
+  },
+  listingActionSoldText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#065f46',
+  },
+  listingActionArchive: {
+    backgroundColor: '#fff7ed',
+    borderColor: '#fed7aa',
+  },
+  listingActionArchiveText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9a3412',
+  },
+  showAllButton: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  showAllButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#4f46e5',
+  },
   guidelinesHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1111,47 +1299,57 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#333',
   },
-  businessProfileSection: {
-    backgroundColor: '#f0f8f5',
+  hubPromoCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
+    overflow: 'hidden',
   },
-  businessHeader: {
+  hubPromoImage: {
+    width: 130,
+    height: 100,
+    alignSelf: 'center',
+    borderRadius: 8,
+    margin: 10,
+  },
+  hubPromoContent: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'space-evenly',
+  },
+  hubPromoTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 10,
+  },
+  hubPromoFeatures: {
+    gap: 6,
+  },
+  hubPromoFeatureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    gap: 8,
   },
-  businessTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    marginLeft: 8,
-  },
-  businessInfo: {
-    marginBottom: 12,
-  },
-  businessNameLabel: {
+  hubPromoFeatureText: {
     fontSize: 13,
-    color: '#666',
+    color: '#475569',
     fontWeight: '600',
-    marginBottom: 4,
   },
-  businessName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  hubPromoCta: {
+    marginTop: 12,
+    backgroundColor: '#475569',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignSelf: 'flex-start',
   },
-  businessLabel: {
+  hubPromoCtaText: {
+    color: '#fff',
     fontSize: 13,
-    color: '#666',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  businessText: {
-    fontSize: 15,
-    color: '#555',
+    fontWeight: '700',
   },
 });

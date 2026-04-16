@@ -1,26 +1,27 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Linking,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Linking,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import UserReviewModal from '../../components/UserReviewModal';
 import { app } from '../../firebase';
 import { useAccountStatus } from '../../hooks/useAccountStatus';
-import { submitUserReview } from '../../utils/userReviews';
+import { submitBusinessReview } from '../../utils/businessReviews';
 
 interface BusinessProfile {
   id: string;
@@ -40,6 +41,8 @@ interface BusinessProfile {
   businessImages?: string[];
   businessCity?: string;
   businessState?: string;
+  facebookUrl?: string;
+  youtubeUrl?: string;
   userId?: string;
   ownerUserId?: string;
   isClaimed?: boolean | number | string;
@@ -58,6 +61,8 @@ export default function BusinessProfileScreen() {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+  const [reviewCount, setReviewCount] = useState(0);
 
   const profileId = id || businessId;
 
@@ -76,6 +81,33 @@ export default function BusinessProfileScreen() {
 
   useEffect(() => {
     loadBusinessProfile();
+  }, [profileId]);
+
+  useEffect(() => {
+    if (!profileId) return;
+    const fetchReviews = async () => {
+      try {
+        const reviewsQuery = query(
+          collection(db, 'businessReviews'),
+          where('businessId', '==', String(profileId)),
+          where('status', '==', 'approved')
+        );
+        const snap = await getDocs(reviewsQuery);
+        if (snap.empty) {
+          setAverageRating(null);
+          setReviewCount(0);
+          return;
+        }
+        let total = 0;
+        snap.forEach(d => { total += d.data().rating || 0; });
+        setReviewCount(snap.size);
+        setAverageRating(Math.round((total / snap.size) * 10) / 10);
+      } catch {
+        setAverageRating(null);
+        setReviewCount(0);
+      }
+    };
+    fetchReviews();
   }, [profileId]);
 
 
@@ -294,9 +326,9 @@ export default function BusinessProfileScreen() {
 
     setSubmittingReview(true);
     try {
-      await submitUserReview({
+      await submitBusinessReview({
         currentUser,
-        ratedUserId: ratedBusinessUserId,
+        businessId: ratedBusinessUserId,
         rating,
         reviewText,
         reviewTargetType: 'business',
@@ -386,6 +418,19 @@ export default function BusinessProfileScreen() {
               <Text style={styles.verifiedBadgeText}>Local Business Verified</Text>
             </View>
           ) : null}
+
+          {averageRating !== null && (
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingStars}>{'★'.repeat(Math.round(averageRating))}{'☆'.repeat(5 - Math.round(averageRating))}</Text>
+              <Text style={styles.ratingText}>{averageRating} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</Text>
+            </View>
+          )}
+
+          {!!user && !isOwnBusiness && !!ratedBusinessUserId && (
+            <TouchableOpacity style={styles.headerReviewButton} onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.headerReviewButtonText}>⭐ Leave Business Review</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
 
@@ -460,6 +505,27 @@ export default function BusinessProfileScreen() {
               <Text style={styles.infoValue}>{profile.businessAddress}</Text>
             </View>
           )}
+
+          {(profile.facebookUrl || profile.youtubeUrl) && (
+            <View style={styles.socialRow}>
+              {profile.facebookUrl && (
+                <TouchableOpacity
+                  style={styles.socialIconButton}
+                  onPress={() => Linking.openURL(profile.facebookUrl!)}
+                >
+                  <FontAwesome5 name="facebook" size={24} color="#1877F2" />
+                </TouchableOpacity>
+              )}
+              {profile.youtubeUrl && (
+                <TouchableOpacity
+                  style={styles.socialIconButton}
+                  onPress={() => Linking.openURL(profile.youtubeUrl!)}
+                >
+                  <FontAwesome5 name="youtube" size={24} color="#FF0000" />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Gallery */}
@@ -495,25 +561,19 @@ export default function BusinessProfileScreen() {
         <View style={styles.actionButtons}>
           {!isOwnBusiness && (
             <TouchableOpacity style={styles.buttonPrimary} onPress={handleContactBusiness}>
-              <Text style={styles.buttonPrimaryText}>Message Business</Text>
+              <Text style={styles.buttonPrimaryText}>Send a Message</Text>
             </TouchableOpacity>
           )}
 
           {profile.businessWebsite && (
             <TouchableOpacity style={styles.buttonPrimary} onPress={handleWebsite}>
-              <Text style={styles.buttonPrimaryText}>🌐 Visit Website</Text>
-            </TouchableOpacity>
-          )}
-
-          {!!user && !isOwnBusiness && !!ratedBusinessUserId && (
-            <TouchableOpacity style={styles.buttonReview} onPress={() => setReviewModalVisible(true)}>
-              <Text style={styles.buttonReviewText}>⭐ Leave Business Review</Text>
+              <Text style={styles.buttonPrimaryText}>Visit Website</Text>
             </TouchableOpacity>
           )}
 
           {!isOwnBusiness && (
             <TouchableOpacity style={styles.buttonDanger} onPress={handleReportBusiness}>
-              <Text style={styles.buttonDangerText}>🚩 Report Listing</Text>
+              <Text style={styles.buttonDangerText}>Report Business</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -748,6 +808,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  ratingStars: {
+    fontSize: 16,
+    color: '#f59e0b',
+  },
+  ratingText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  headerReviewButton: {
+    marginTop: 8,
+    backgroundColor: '#eef2ff',
+    borderColor: '#c7d2fe',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  headerReviewButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#3730a3',
+    textAlign: 'center',
+  },
   infoSection: {
     backgroundColor: 'white',
     marginHorizontal: 12,
@@ -778,6 +869,20 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 15,
     color: '#333',
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 4,
+    paddingTop: 12,
+  },
+  socialIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f4f4f5',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   gallerySection: {
     backgroundColor: 'white',

@@ -426,7 +426,8 @@ service cloud.firestore {
       && request.resource.data.rating >= 1
       && request.resource.data.rating <= 5
       && request.resource.data.reviewText is string
-      && request.resource.data.status in ['approved', 'pending'];
+      && request.resource.data.reviewTargetType in ['business', 'service']
+      && request.resource.data.status == 'pending';
 
     allow update: if signedIn()
       && resource.data.userId == request.auth.uid
@@ -437,7 +438,7 @@ service cloud.firestore {
       && request.resource.data.rating >= 1
       && request.resource.data.rating <= 5
       && request.resource.data.reviewText is string
-      && request.resource.data.status in ['approved', 'pending'];
+      && request.resource.data.status == 'pending';
 
     allow delete: if signedIn() && resource.data.userId == request.auth.uid;
   }

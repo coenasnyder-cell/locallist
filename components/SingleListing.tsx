@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, increment, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, increment, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { app } from "../firebase";
@@ -70,6 +70,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
   const [selectedReportReason, setSelectedReportReason] = useState<string>('');
   const [submittingReport, setSubmittingReport] = useState(false);
   const [sellerPhotoUrl, setSellerPhotoUrl] = useState<string>('');
+  const [sellerListings, setSellerListings] = useState<Listing[]>([]);
   const currentUser = getAuth().currentUser;
   const isOwnListing = !!currentUser && currentUser.uid === listing.userId;
   const postedTimeLabel = formatRelativeTime(getTimestampMs(listing.createdAt));
@@ -119,6 +120,34 @@ export default function SingleListing({ listing }: { listing: Listing }) {
 
     loadSellerPhoto();
   }, [listing.userId]);
+
+  useEffect(() => {
+    if (!listing.userId) return;
+    const db = getFirestore(app);
+    const now = new Date();
+    const q = query(
+      collection(db, 'listings'),
+      where('userId', '==', listing.userId),
+      where('status', '==', 'approved'),
+      orderBy('createdAt', 'desc'),
+      limit(7),
+    );
+    getDocs(q)
+      .then(snap => {
+        const others: Listing[] = [];
+        snap.forEach(d => {
+          if (d.id === listing.id) return;
+          const data = d.data();
+          const expiresMs = getTimestampMs(data.expiresAt);
+          if (expiresMs && expiresMs < now.getTime()) return;
+          if (others.length < 6) {
+            others.push({ id: d.id, ...data } as Listing);
+          }
+        });
+        setSellerListings(others);
+      })
+      .catch(() => {});
+  }, [listing.userId, listing.id]);
 
   const toggleSave = async () => {
     if (!currentUser) {
@@ -336,7 +365,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
         <View style={styles.headerSpacer} />
         <View style={styles.titleRow}>
           <TouchableOpacity onPress={() => router.back()} style={styles.arrowButton}>
@@ -463,6 +492,31 @@ export default function SingleListing({ listing }: { listing: Listing }) {
               )}
             </View>
           </View>
+
+          {sellerListings.length > 0 && (
+            <View style={styles.sellerOtherListings}>
+              <Text style={styles.sellerOtherListingsTitle}>Seller's Other Listings</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sellerOtherListingsRow}>
+                {sellerListings.map(item => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.sellerOtherCard}
+                    onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+                  >
+                    {item.images?.[0] ? (
+                      <Image source={{ uri: item.images[0] }} style={styles.sellerOtherImage} contentFit="cover" />
+                    ) : (
+                      <View style={[styles.sellerOtherImage, styles.sellerOtherImagePlaceholder]}>
+                        <Feather name="image" size={20} color="#94a3b8" />
+                      </View>
+                    )}
+                    <Text style={styles.sellerOtherTitle} numberOfLines={2}>{item.title}</Text>
+                    <Text style={styles.sellerOtherPrice}>${item.price}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -991,5 +1045,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#ffffff',
     fontWeight: '700',
+  },
+  sellerOtherListings: {
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  sellerOtherListingsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 12,
+  },
+  sellerOtherListingsRow: {
+    gap: 12,
+    paddingRight: 4,
+  },
+  sellerOtherCard: {
+    width: 140,
+    borderRadius: 10,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    overflow: 'hidden',
+  },
+  sellerOtherImage: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#e2e8f0',
+  },
+  sellerOtherImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sellerOtherTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#334155',
+    paddingHorizontal: 8,
+    paddingTop: 6,
+  },
+  sellerOtherPrice: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+    paddingHorizontal: 8,
+    paddingTop: 2,
+    paddingBottom: 8,
   },
 });

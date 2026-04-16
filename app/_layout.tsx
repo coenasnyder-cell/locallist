@@ -38,6 +38,14 @@ if (process.env.NODE_ENV === 'development') {
     }
     origConsoleError(...args);
   };
+
+  const origConsoleWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes('SafeAreaView has been deprecated')) {
+      return;
+    }
+    origConsoleWarn(...args);
+  };
 }
 
 const HIDE_HEADER_ROUTES = [

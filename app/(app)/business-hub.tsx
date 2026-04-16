@@ -5,6 +5,7 @@ import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'fi
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -267,12 +268,6 @@ export default function BusinessHubScreen() {
       onPress: () => router.push('/post-promote'),
     },
     {
-      title: 'Performance Analytics',
-      description: 'View detailed analytics and metrics for your business activity and performance.',
-      cta: 'Open Analytics',
-      onPress: () => router.push('/business-analytics'),
-    },
-    {
       title: 'Leads and Inbox',
       description: 'Track inbound inquiries and unread conversations from shoppers.',
       cta: 'Open Leads & Inbox',
@@ -380,6 +375,41 @@ export default function BusinessHubScreen() {
               </View>
             </View>
           )}
+
+          {!analytics.loading && (
+            <>
+              <Text style={[styles.sectionLabel, { marginTop: 14 }]}>Promotion Performance (Last 7 Days)</Text>
+              <View style={styles.analyticsGrid}>
+                <View style={styles.metricCard}>
+                  <Text style={styles.metricLabel}>Impressions</Text>
+                  <Text style={styles.metricValue}>{analytics.promoImpressions.toLocaleString()}</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={styles.metricLabel}>Clicks</Text>
+                  <Text style={styles.metricValue}>{analytics.promoClicks.toLocaleString()}</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={styles.metricLabel}>Leads</Text>
+                  <Text style={styles.metricValue}>{analytics.promoLeads.toLocaleString()}</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={styles.metricLabel}>CTR</Text>
+                  <Text style={styles.metricValue}>{analytics.promoCtr}%</Text>
+                </View>
+              </View>
+              <Text style={styles.analyticsFootnote}>
+                {analytics.promoTrackedCampaigns.toLocaleString()} campaigns produced tracked events in the last 7 days.
+              </Text>
+            </>
+          )}
+        </View>
+
+        <View style={styles.webPromptCard}>
+          <Text style={styles.webPromptTitle}>Want more detailed analytics?</Text>
+          <Text style={styles.webPromptText}>Visit the Local List website for advanced reporting, historical trends, and detailed promotion breakdowns.</Text>
+          <TouchableOpacity style={styles.webPromptButton} onPress={() => Linking.openURL('https://app.locallist.biz')}>
+            <Text style={styles.webPromptButtonText}>Go to Website →</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.sectionLabel}>Business Tools</Text>
@@ -825,6 +855,39 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 12,
     color: '#1e40af',
+    fontWeight: '700',
+  },
+  webPromptCard: {
+    marginTop: 16,
+    backgroundColor: '#eef2ff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+    padding: 16,
+    alignItems: 'center',
+  },
+  webPromptTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3730a3',
+    marginBottom: 6,
+  },
+  webPromptText: {
+    fontSize: 13,
+    color: '#4338ca',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 12,
+  },
+  webPromptButton: {
+    backgroundColor: '#4f46e5',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  webPromptButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: '700',
   },
 });

@@ -1,14 +1,14 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import { addDoc, collection, doc, getDoc, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import UserReviewModal from '../../components/UserReviewModal';
 import { app } from '../../firebase';
-import { submitUserReview } from '../../utils/userReviews';
+import { submitBusinessReview } from '../../utils/businessReviews';
 
 type ServiceDetails = {
   id: string;
@@ -102,6 +102,8 @@ export default function ServiceDetailsScreen() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+  const [reviewCount, setReviewCount] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const currentUser = getAuth().currentUser;
   const galleryImages = useMemo(() => buildGalleryImages(service), [service]);
@@ -137,6 +139,35 @@ export default function ServiceDetailsScreen() {
     };
 
     loadService();
+  }, [idParam]);
+
+  useEffect(() => {
+    if (!idParam) return;
+    const fetchReviews = async () => {
+      try {
+        const db = getFirestore(app);
+        const reviewsQuery = query(
+          collection(db, 'businessReviews'),
+          where('reviewTargetId', '==', idParam),
+          where('reviewTargetType', '==', 'service'),
+          where('status', '==', 'approved')
+        );
+        const snap = await getDocs(reviewsQuery);
+        if (snap.empty) {
+          setAverageRating(null);
+          setReviewCount(0);
+          return;
+        }
+        let total = 0;
+        snap.forEach(d => { total += d.data().rating || 0; });
+        setReviewCount(snap.size);
+        setAverageRating(Math.round((total / snap.size) * 10) / 10);
+      } catch {
+        setAverageRating(null);
+        setReviewCount(0);
+      }
+    };
+    fetchReviews();
   }, [idParam]);
 
   const handleBack = () => {
@@ -218,9 +249,9 @@ export default function ServiceDetailsScreen() {
 
     setSubmittingReview(true);
     try {
-      await submitUserReview({
+      await submitBusinessReview({
         currentUser,
-        ratedUserId: service.userId,
+        businessId: service.userId,
         rating,
         reviewText,
         reviewTargetType: 'service',
@@ -286,6 +317,12 @@ export default function ServiceDetailsScreen() {
               </View>
             )}
 
+            {service.isFeatured && (
+              <View style={styles.featuredBadgeOverlay}>
+                <Text style={styles.featuredBadgeText}>⭐ Featured</Text>
+              </View>
+            )}
+
             {service.logoImage ? (
               <View style={styles.logoOverlayContainer}>
                 <Image source={{ uri: service.logoImage }} style={styles.logoOverlayImage} contentFit="cover" />
@@ -295,10 +332,17 @@ export default function ServiceDetailsScreen() {
 
           {!!motto && <Text style={styles.businessMotto}>{motto}</Text>}
 
-          {service.isFeatured && (
-            <View style={styles.featuredBadge}>
-              <Text style={styles.featuredBadgeText}>⭐ Featured</Text>
+          {averageRating !== null && (
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingStars}>{'★'.repeat(Math.round(averageRating))}{'☆'.repeat(5 - Math.round(averageRating))}</Text>
+              <Text style={styles.ratingText}>{averageRating} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</Text>
             </View>
+          )}
+
+          {!!currentUser && !isOwnService && !!service.userId && (
+            <TouchableOpacity style={styles.headerReviewButton} onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.headerReviewButtonText}>⭐ Leave Service Review</Text>
+            </TouchableOpacity>
           )}
         </View>
 
@@ -428,19 +472,13 @@ export default function ServiceDetailsScreen() {
               style={styles.buttonPrimary}
               onPress={() => router.push({ pathname: '/businessprofile' as any, params: { id: service.userId } })}
             >
-              <Text style={styles.buttonPrimaryText}>View Provider Profile</Text>
-            </TouchableOpacity>
-          )}
-
-          {!!currentUser && !isOwnService && !!service.userId && (
-            <TouchableOpacity style={styles.buttonReview} onPress={() => setReviewModalVisible(true)}>
-              <Text style={styles.buttonReviewText}>⭐ Leave Service Review</Text>
+              <Text style={styles.buttonPrimaryText}>View Business Profile</Text>
             </TouchableOpacity>
           )}
 
           {!isOwnService && (
             <TouchableOpacity style={styles.buttonDanger} onPress={handleReportService}>
-              <Text style={styles.buttonDangerText}>🚩 Report Listing</Text>
+              <Text style={styles.buttonDangerText}> Report Service</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -640,17 +678,52 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 6,
   },
-  featuredBadge: {
-    marginBottom: 8,
+  featuredBadgeOverlay: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
     backgroundColor: '#475569',
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    zIndex: 10,
+    alignContent: 'flex-start',
   },
   featuredBadgeText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '700',
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  ratingStars: {
+    fontSize: 16,
+    color: '#f59e0b',
+  },
+  ratingText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  headerReviewButton: {
+    marginTop: 8,
+    backgroundColor: '#eef2ff',
+    borderColor: '#c7d2fe',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  headerReviewButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#3730a3',
+    textAlign: 'center',
   },
   infoSection: {
     backgroundColor: 'white',

@@ -16,6 +16,9 @@ import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/fire
 import { onCall, onRequest } from "firebase-functions/v2/https";
 import Stripe from "stripe";
 
+// Email triggers (Resend)
+export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onUserCreated } from "./emailTriggers.js";
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
