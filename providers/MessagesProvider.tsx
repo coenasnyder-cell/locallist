@@ -1,4 +1,4 @@
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { db } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
@@ -42,9 +42,13 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Limit to 20 most recent threads to prevent memory/heap issues
+    // Order by lastTimestamp in the query to avoid large in-memory sorts
     const threadsQuery = query(
       collection(db, 'threads'),
-      where('participantIds', 'array-contains', user.uid)
+      where('participantIds', 'array-contains', user.uid),
+      orderBy('lastTimestamp', 'desc'),
+      limit(20)
     );
 
     const unsubscribe = onSnapshot(threadsQuery, (snapshot) => {
@@ -53,19 +57,16 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         ...(doc.data() as any),
       }));
 
-      const sorted = rows.sort((a, b) => {
-        const aTime = a.lastTimestamp?.toMillis?.() || 0;
-        const bTime = b.lastTimestamp?.toMillis?.() || 0;
-        return bTime - aTime;
-      });
-
-      const unread = sorted.filter((t) =>
+      // Unread filtering remains in-memory as it depends on the user.uid
+      const unread = rows.filter((t) =>
         (t.unreadBy || []).includes(user.uid)
       );
 
-      // ✅ SET BOTH STATES
-      setThreads(sorted);
+      setThreads(rows);
       setUnreadThreads(unread);
+    }, (error) => {
+      console.error('[MessagesProvider] Snapshot error:', error);
+      // If index is missing, it will log a link to create it in the Firebase console
     });
 
     return () => unsubscribe();

@@ -397,28 +397,32 @@ const { threadPreviews, unreadCount } = useMessages();
             <View style={styles.notificationsHeader}>
               <Text style={styles.notificationsHeaderText}>New Messages</Text>
             </View>
-            {threadPreviews.length === 0 ? (
-              <View style={styles.notificationItemEmpty}>
-                <Text style={styles.notificationItemEmptyText}>No new messages right now.</Text>
-              </View>
-            ) : (
-              threadPreviews.map((thread) => (
-                <TouchableOpacity
-                  key={thread.id}
-                  style={styles.notificationItem}
-                  onPress={() => {
-                    setNotificationsVisible(false);
-                    if (Platform.OS === 'web') {
-                      handleNavigate('messages.html');
-                    } else {
-                      router.push({ pathname: '/threadchat', params: { threadId: thread.id } });
-                    }
-                  }}
-                >
-                  <Text style={styles.notificationItemTitle} numberOfLines={1}>{thread.listingTitle || 'New message'}</Text>
-                  <Text style={styles.notificationItemMessage} numberOfLines={1}>{thread.lastMessage || 'Tap to open conversation'}</Text>
-                </TouchableOpacity>
-              ))
+            {notificationsVisible && (
+              <>
+                {threadPreviews.length === 0 ? (
+                  <View style={styles.notificationItemEmpty}>
+                    <Text style={styles.notificationItemEmptyText}>No new messages right now.</Text>
+                  </View>
+                ) : (
+                  threadPreviews.map((thread) => (
+                    <TouchableOpacity
+                      key={thread.id}
+                      style={styles.notificationItem}
+                      onPress={() => {
+                        setNotificationsVisible(false);
+                        if (Platform.OS === 'web') {
+                          handleNavigate('messages.html');
+                        } else {
+                          router.push({ pathname: '/threadchat', params: { threadId: thread.id } });
+                        }
+                      }}
+                    >
+                      <Text style={styles.notificationItemTitle} numberOfLines={1}>{thread.listingTitle || 'New message'}</Text>
+                      <Text style={styles.notificationItemMessage} numberOfLines={1}>{thread.lastMessage || 'Tap to open conversation'}</Text>
+                    </TouchableOpacity>
+                  ))
+                )}
+              </>
             )}
             <TouchableOpacity
               style={styles.notificationFooterButton}
