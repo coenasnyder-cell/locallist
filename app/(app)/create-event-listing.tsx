@@ -311,7 +311,7 @@ export default function CreateEventListingScreen() {
                 onPress={handleBack}
                 activeOpacity={0.85}
               >
-                <Text style={styles.successSecondaryText}>Back to List Hub</Text>
+                <Text style={styles.successSecondaryText}>Back to Events</Text>
               </TouchableOpacity>
             </View>
           </View>

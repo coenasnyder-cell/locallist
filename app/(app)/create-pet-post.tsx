@@ -100,6 +100,7 @@ export default function CreatePetPostScreen() {
         userId: user?.uid,
         petStatus: postType,
         createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       });
 
       router.replace({
@@ -133,6 +134,7 @@ export default function CreatePetPostScreen() {
               ? 'Share clear details so owners can identify and reunite with their pet quickly.'
               : 'Share clear details so neighbors can quickly help bring your pet home.'}
           </Text>
+          <Text style={[styles.subtitle, { fontSize: 12, marginTop: 6, color: '#64748b' }]}>Pet posts expire after 14 days. You can relist from your profile.</Text>
         </View>
 
         <View style={styles.formCard}>

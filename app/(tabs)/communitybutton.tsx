@@ -1,15 +1,14 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 type CommunityItem = {
-  emoji: string;
   title: string;
   subtitle: string;
   accentColor: string;
@@ -18,52 +17,45 @@ type CommunityItem = {
 
 const ITEMS: CommunityItem[] = [
   {
-    emoji: '🐾',
     title: 'The Pet Corner',
     subtitle: 'Lost & found pets, adoptions',
-    accentColor: '#7C3AED',
+    accentColor: '#475569',
     route: '/(app)/pet-corner',
   },
   {
-    emoji: '🏷️',
     title: 'Yard Sales',
     subtitle: 'Garage & yard sales near you',
-    accentColor: '#DC2626',
+    accentColor: '#475569',
     route: '/yardsalelistings',
   },
-    {
-    emoji: '🎉',
+  {
     title: 'Events',
     subtitle: 'Local events & happenings',
-    accentColor: '#059669',
+    accentColor: '#475569',
     route: '/eventslist',
   },
   {
-    emoji: '🛍️',
     title: 'Explore Local Businesses',
     subtitle: 'Browse trusted local businesses',
     accentColor: '#475569',
     route: '/(app)/shoplocallist',
   },
   {
-    emoji: '🧰',
     title: 'Services',
     subtitle: 'Find local professionals for hire',
-    accentColor: '#0F766E',
+    accentColor: '#475569',
     route: '/(app)/serviceslist',
   },
   {
-    emoji: '💼',
     title: 'Job Board',
     subtitle: 'Local job opportunities',
-    accentColor: '#0066cc',
+    accentColor: '#475569',
     route: '/(app)/joblistings',
   },
   {
-    emoji: '🛍️',
     title: 'Deals',
     subtitle: 'Featured and promoted listings',
-    accentColor: '#D97706',
+    accentColor: '#475569',
     route: '/deals',
   },
 ];
@@ -88,9 +80,6 @@ export default function CommunityScreen() {
             onPress={() => router.push(item.route as any)}
             activeOpacity={0.85}
           >
-            <View style={[styles.iconCircle, { backgroundColor: item.accentColor + '18' }]}>
-              <Text style={styles.emoji}>{item.emoji}</Text>
-            </View>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
             <View style={[styles.pill, { backgroundColor: item.accentColor }]}>
@@ -148,17 +137,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 6,
     elevation: 3,
-  },
-  iconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  emoji: {
-    fontSize: 26,
   },
   cardTitle: {
     fontSize: 15,

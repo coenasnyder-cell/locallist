@@ -6,42 +6,51 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { app } from '../../firebase';
-import { getCityFromZip } from '../../utils/zipToCity';
 
 const CATEGORIES = [
-  { id: 'home-repair',    label: 'Home Repair',        icon: '🔨' },
-  { id: 'lawn-garden',    label: 'Lawn & Garden',      icon: '🌿' },
-  { id: 'cleaning',       label: 'Cleaning',           icon: '🧹' },
-  { id: 'plumbing',       label: 'Plumbing',           icon: '🚰' },
-  { id: 'electrical',     label: 'Electrical',         icon: '⚡' },
-  { id: 'hvac',           label: 'HVAC',               icon: '❄️' },
-  { id: 'painting',       label: 'Painting',           icon: '🎨' },
-  { id: 'carpentry',      label: 'Carpentry',          icon: '🪚' },
-  { id: 'moving',         label: 'Moving & Hauling',   icon: '🚚' },
-  { id: 'childcare',      label: 'Childcare',          icon: '👶' },
-  { id: 'tutoring',       label: 'Tutoring',           icon: '📚' },
-  { id: 'pet-care',       label: 'Pet Care',           icon: '🐾' },
-  { id: 'beauty',         label: 'Beauty & Wellness',  icon: '💇' },
-  { id: 'auto',           label: 'Auto Services',      icon: '🚗' },
-  { id: 'photography',    label: 'Photography',        icon: '📷' },
-  { id: 'tech',           label: 'Tech Support',       icon: '💻' },
-  { id: 'event-planning', label: 'Event Planning',     icon: '🎉' },
-  { id: 'construction',   label: 'Construction',       icon: '🏗️' },
-  { id: 'food-catering',  label: 'Food & Catering',    icon: '🍽️' },
-  { id: 'fitness',        label: 'Fitness & Training', icon: '🏋️' },
-  { id: 'other',          label: 'Other',              icon: '📋' },
+  { id: 'home-repair',    label: 'Home Repair' },
+  { id: 'lawn-garden',    label: 'Lawn & Garden' },
+  { id: 'cleaning',       label: 'Cleaning' },
+  { id: 'plumbing',       label: 'Plumbing' },
+  { id: 'electrical',     label: 'Electrical' },
+  { id: 'hvac',           label: 'HVAC' },
+  { id: 'painting',       label: 'Painting' },
+  { id: 'carpentry',      label: 'Carpentry' },
+  { id: 'moving',         label: 'Moving & Hauling' },
+  { id: 'childcare',      label: 'Childcare' },
+  { id: 'tutoring',       label: 'Tutoring' },
+  { id: 'pet-care',       label: 'Pet Care' },
+  { id: 'beauty',         label: 'Beauty & Wellness' },
+  { id: 'auto',           label: 'Auto Services' },
+  { id: 'photography',    label: 'Photography' },
+  { id: 'tech',           label: 'Tech Support' },
+  { id: 'event-planning', label: 'Event Planning' },
+  { id: 'construction',   label: 'Construction' },
+  { id: 'food-catering',  label: 'Food & Catering' },
+  { id: 'fitness',        label: 'Fitness & Training' },
+  { id: 'other',          label: 'Other' },
 ];
 
-const CATEGORY_OPTIONS = CATEGORIES.map((c) => `${c.icon} ${c.label}`);
+const CATEGORY_OPTIONS = CATEGORIES.map((c) => c.label);
 
-const PRICE_TYPES = ['hourly', 'fixed', 'quote', 'negotiable'] as const;
-type PriceType = (typeof PRICE_TYPES)[number];
+type ContactMethod = 'phone' | 'email' | 'website' | 'local_list';
 
-const CONTACT_METHODS = ['phone', 'email', 'website'] as const;
-type ContactMethod = (typeof CONTACT_METHODS)[number];
+const CONTACT_METHOD_OPTIONS = ['Phone', 'Email', 'Website', 'Local List'];
+const CONTACT_LABEL_TO_VALUE: Record<string, ContactMethod> = {
+  'Phone': 'phone',
+  'Email': 'email',
+  'Website': 'website',
+  'Local List': 'local_list',
+};
+const CONTACT_VALUE_TO_LABEL: Record<ContactMethod, string> = {
+  phone: 'Phone',
+  email: 'Email',
+  website: 'Website',
+  local_list: 'Local List',
+};
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -71,21 +80,23 @@ export default function CreateServiceListingScreen() {
 
   const [serviceName, setServiceName] = useState('');
   const [categoryLabel, setCategoryLabel] = useState('');
+  const [serviceMotto, setServiceMotto] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
-  const [providerName, setProviderName] = useState(
-    profile?.displayName || ''
-  );
-  const [priceType, setPriceType] = useState<PriceType>('hourly');
-  const [priceAmount, setPriceAmount] = useState('');
-  const [preferredContact, setPreferredContact] = useState<ContactMethod>('email');
-  const [contactPhone, setContactPhone] = useState('');
-  const [contactEmail, setContactEmail] = useState(user?.email || '');
-  const [contactWebsite, setContactWebsite] = useState('');
-  const [allowMessaging, setAllowMessaging] = useState(true);
-  const [serviceArea, setServiceArea] = useState('');
+  const [businessHours, setBusinessHours] = useState('');
+  const [streetAddress, setStreetAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
+  const [preferredContact, setPreferredContact] = useState<ContactMethod>('email');
+  const [allowMessaging, setAllowMessaging] = useState(true);
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactWebsite, setContactWebsite] = useState('');
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [coverImage, setCoverImage] = useState<string[]>([]);
+  const [logoImage, setLogoImage] = useState<string[]>([]);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [featureRequested, setFeatureRequested] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [posted, setPosted] = useState(false);
 
@@ -124,7 +135,7 @@ export default function CreateServiceListingScreen() {
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
-            <Text style={styles.heroTitle}>🧰 List a Service</Text>
+            <Text style={styles.heroTitle}>List a Service</Text>
             <Text style={styles.heroSubtitle}>Please sign in to create a service listing.</Text>
           </View>
           <View style={styles.panel}>
@@ -147,15 +158,17 @@ export default function CreateServiceListingScreen() {
   };
 
   const resolvedCategory = CATEGORIES.find(
-    (c) => `${c.icon} ${c.label}` === categoryLabel
+    (c) => c.label === categoryLabel
   );
 
   const preferredContactValue =
     preferredContact === 'phone'
       ? contactPhone.trim()
-      : preferredContact === 'email'
-        ? contactEmail.trim()
-        : contactWebsite.trim();
+      : preferredContact === 'website'
+        ? contactWebsite.trim()
+        : preferredContact === 'local_list'
+          ? 'Local List'
+          : '';
 
   const launchFeaturedCheckout = async (serviceId: string, serviceTitle: string) => {
     const functions = getFunctions(app);
@@ -235,7 +248,7 @@ export default function CreateServiceListingScreen() {
 
   const handleSubmit = async () => {
     if (!serviceName.trim()) {
-      Alert.alert('Missing Field', 'Please enter a service title.');
+      Alert.alert('Missing Field', 'Please enter a service business name.');
       return;
     }
     if (!resolvedCategory) {
@@ -246,23 +259,26 @@ export default function CreateServiceListingScreen() {
       Alert.alert('Missing Field', 'Please enter a service description.');
       return;
     }
-    if (!providerName.trim()) {
-      Alert.alert('Missing Field', 'Please enter your name or business name.');
+    if (!city.trim()) {
+      Alert.alert('Missing Field', 'City is required.');
+      return;
+    }
+    if (!state.trim()) {
+      Alert.alert('Missing Field', 'State is required.');
       return;
     }
     if (!zipCode.trim()) {
-      Alert.alert('Missing Field', 'Please enter your ZIP code.');
+      Alert.alert('Missing Field', 'Zip code is required.');
       return;
     }
-    if (!preferredContactValue) {
-      Alert.alert(
-        'Missing Field',
-        `Please enter your ${preferredContact} for the preferred contact method.`
-      );
+    if (!preferredContact) {
+      Alert.alert('Missing Field', 'Please select a preferred contact method.');
       return;
     }
-    if (images.length === 0) {
-      Alert.alert('Missing Images', 'Please upload at least one photo for your service listing.');
+
+    const hasAtLeastOneImage = coverImage.length > 0 || logoImage.length > 0 || galleryImages.length > 0;
+    if (!hasAtLeastOneImage) {
+      Alert.alert('Missing Images', 'Please upload at least one image (cover, logo, or gallery).');
       return;
     }
 
@@ -278,29 +294,31 @@ export default function CreateServiceListingScreen() {
     try {
       setSubmitting(true);
       const db = getFirestore(app);
-      const serviceImage = images[0] ?? '';
-      const city = await getCityFromZip(zipCode) ?? 'TBD';
+      const serviceImage = coverImage[0] || logoImage[0] || galleryImages[0] || '';
 
       const serviceDocRef = await addDoc(collection(db, 'services'), {
         userId: user.uid,
-        providerName: providerName.trim(),
         serviceName: serviceName.trim(),
         category: resolvedCategory.label,
         categoryId: resolvedCategory.id,
-        categoryIcon: resolvedCategory.icon,
+        serviceMotto: serviceMotto.trim() || null,
         serviceDescription: serviceDescription.trim(),
+        businessHours: businessHours.trim() || null,
         serviceImage,
-        priceType,
-        priceAmount: priceAmount.trim() || null,
+        streetAddress: streetAddress.trim() || null,
+        city: city.trim(),
+        state: state.trim(),
+        zipCode: zipCode.trim(),
         preferredContactMethod: preferredContact,
         preferredContactValue,
-        contactPhone: contactPhone.trim() || null,
-        contactEmail: contactEmail.trim() || null,
-        contactWebsite: contactWebsite.trim() || null,
         allowMessaging,
-        serviceArea: serviceArea.trim() || null,
-        zipCode: zipCode.trim(),
-        city,
+        contactPhone: contactPhone.trim() || null,
+        contactWebsite: contactWebsite.trim() || null,
+        facebookUrl: facebookUrl.trim() || null,
+        youtubeUrl: youtubeUrl.trim() || null,
+        coverImage: coverImage.length > 0 ? coverImage[0] : null,
+        logoImage: logoImage.length > 0 ? logoImage[0] : null,
+        galleryImages,
         isActive: true,
         isApproved: false,
         approvalStatus: 'pending',
@@ -336,19 +354,23 @@ export default function CreateServiceListingScreen() {
   const resetForm = () => {
     setServiceName('');
     setCategoryLabel('');
+    setServiceMotto('');
     setServiceDescription('');
-    setProviderName(profile?.displayName || '');
-    setPriceType('hourly');
-    setPriceAmount('');
-    setPreferredContact('email');
-    setContactPhone('');
-    setContactEmail(user?.email || '');
-    setContactWebsite('');
-    setAllowMessaging(true);
-    setServiceArea('');
+    setBusinessHours('');
+    setStreetAddress('');
+    setCity('');
+    setState('');
     setZipCode('');
+    setPreferredContact('email');
+    setAllowMessaging(true);
+    setContactPhone('');
+    setContactWebsite('');
+    setFacebookUrl('');
+    setYoutubeUrl('');
+    setCoverImage([]);
+    setLogoImage([]);
+    setGalleryImages([]);
     setFeatureRequested(false);
-    setImages([]);
     setPosted(false);
   };
 
@@ -370,7 +392,7 @@ export default function CreateServiceListingScreen() {
                 onPress={() => router.back()}
                 activeOpacity={0.85}
               >
-                <Text style={styles.successPrimaryText}>Back to List Hub</Text>
+                <Text style={styles.successPrimaryText}>Back To Services</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.successSecondary}
@@ -390,7 +412,7 @@ export default function CreateServiceListingScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} nestedScrollEnabled>
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>🧰 List a Service</Text>
+          <Text style={styles.heroTitle}>List a Service</Text>
           <Text style={styles.heroSubtitle}>Offer your skills to the local community</Text>
         </View>
 
@@ -398,15 +420,17 @@ export default function CreateServiceListingScreen() {
           {!canPostListings ? (
             <Text style={styles.notice}>{postingBlockedReason}</Text>
           ) : null}
-          <Text style={styles.sectionDivider}>SERVICE DETAILS</Text>
 
+          {/* 1. Service Business Name */}
           <FormInput
-            label="Service Title"
+            label="Service Business Name"
             value={serviceName}
             onChangeText={setServiceName}
             required
-            placeholder="e.g. Professional Lawn Mowing"
+            placeholder="e.g. Jane's Cleaning Co."
           />
+
+          {/* 2. Category */}
           <FormInput
             label="Category"
             value={categoryLabel}
@@ -417,6 +441,16 @@ export default function CreateServiceListingScreen() {
             placeholder="Select a service category"
             dropdownZIndex={2000}
           />
+
+          {/* 3. Motto (Optional) */}
+          <FormInput
+            label="Motto (Optional)"
+            value={serviceMotto}
+            onChangeText={setServiceMotto}
+            placeholder="e.g. Quality work you can trust"
+          />
+
+          {/* 4. Description */}
           <FormInput
             label="Description"
             value={serviceDescription}
@@ -425,133 +459,126 @@ export default function CreateServiceListingScreen() {
             multiline
             placeholder="Describe your service, experience, what's included..."
           />
-          <FormInput
-            label="Your Name / Business Name"
-            value={providerName}
-            onChangeText={setProviderName}
-            required
-            placeholder="Jane's Cleaning Co."
+
+          {/* 5. Business Hours */}
+          <Text style={styles.fieldLabel}>Business Hours</Text>
+          <TextInput
+            style={[styles.textInput, styles.textArea]}
+            value={businessHours}
+            onChangeText={setBusinessHours}
+            placeholder={'Mon-Fri: 9am-5pm\nSat: 10am-2pm\nSun: Closed'}
+            placeholderTextColor="#94a3b8"
+            multiline
+            numberOfLines={3}
           />
 
-          <Text style={styles.sectionDivider}>PRICING</Text>
-
-          <Text style={styles.fieldLabel}>Price Type</Text>
-          <View style={styles.priceTypeRow}>
-            {PRICE_TYPES.map((pt) => (
-              <TouchableOpacity
-                key={pt}
-                style={[styles.priceTypeBtn, priceType === pt && styles.priceTypeBtnActive]}
-                onPress={() => setPriceType(pt)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.priceTypeBtnText, priceType === pt && styles.priceTypeBtnTextActive]}>
-                  {pt.charAt(0).toUpperCase() + pt.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {priceType !== 'quote' && (
-            <FormInput
-              label="Price / Rate"
-              value={priceAmount}
-              onChangeText={setPriceAmount}
-              placeholder="e.g. $40/hr, $150 flat"
-            />
-          )}
-
-          <Text style={styles.sectionDivider}>CONTACT</Text>
-
-          <FormInput
-            label="Preferred Contact Method"
-            value={preferredContact}
-            onChangeText={(v) => setPreferredContact(v as ContactMethod)}
-            required
-            type="picker"
-            options={['phone', 'email', 'website']}
-            placeholder="Select a contact method"
-            dropdownZIndex={1000}
-          />
-          {preferredContact === 'phone' && (
-            <FormInput
-              label="Phone Number"
-              value={contactPhone}
-              onChangeText={setContactPhone}
-              required
-              keyboardType="phone-pad"
-              placeholder="(555) 555-5555"
-            />
-          )}
-          {preferredContact === 'email' && (
-            <FormInput
-              label="Email Address"
-              value={contactEmail}
-              onChangeText={setContactEmail}
-              required
-              keyboardType="email-address"
-              placeholder="you@example.com"
-            />
-          )}
-          {preferredContact === 'website' && (
-            <FormInput
-              label="Website URL"
-              value={contactWebsite}
-              onChangeText={setContactWebsite}
-              required
-              placeholder="https://..."
-            />
-          )}
-          {preferredContact !== 'phone' && (
-            <FormInput
-              label="Phone (optional)"
-              value={contactPhone}
-              onChangeText={setContactPhone}
-              keyboardType="phone-pad"
-              placeholder="(555) 555-5555"
-            />
-          )}
-          {preferredContact !== 'email' && (
-            <FormInput
-              label="Email (optional)"
-              value={contactEmail}
-              onChangeText={setContactEmail}
-              keyboardType="email-address"
-              placeholder="you@example.com"
-            />
-          )}
-
-          <TouchableOpacity
-            style={styles.checkboxRow}
-            onPress={() => setAllowMessaging((v) => !v)}
-            activeOpacity={0.85}
-          >
-            <View style={[styles.checkbox, allowMessaging && styles.checkboxChecked]}>
-              {allowMessaging && <Text style={styles.checkboxTick}>✓</Text>}
-            </View>
-            <Text style={styles.checkboxLabel}>Allow in-app messaging</Text>
-          </TouchableOpacity>
-
+          {/* 6. Location */}
           <Text style={styles.sectionDivider}>LOCATION</Text>
 
           <FormInput
-            label="Service Area"
-            value={serviceArea}
-            onChangeText={setServiceArea}
-            placeholder="e.g. Harrison, AR and surrounding areas (optional)"
+            label="Street Address (Optional)"
+            value={streetAddress}
+            onChangeText={setStreetAddress}
+            placeholder="123 Main Street, Suite 100"
           />
           <FormInput
-            label="ZIP Code"
+            label="City"
+            value={city}
+            onChangeText={setCity}
+            required
+            placeholder="Your city"
+          />
+          <FormInput
+            label="State"
+            value={state}
+            onChangeText={setState}
+            required
+            placeholder="State"
+          />
+          <FormInput
+            label="Zip Code"
             value={zipCode}
             onChangeText={setZipCode}
             required
             keyboardType="numeric"
-            placeholder="72601"
+            placeholder="Zip code"
           />
 
-          <Text style={styles.sectionDivider}>PHOTO *</Text>
+          {/* 7. Preferred Contact Method */}
+          <Text style={styles.sectionDivider}>CONTACT</Text>
 
-          <ImageUploader images={images} onChange={setImages} />
+          <FormInput
+            label="Preferred Contact Method"
+            value={CONTACT_VALUE_TO_LABEL[preferredContact] || ''}
+            onChangeText={(label) => {
+              const method = CONTACT_LABEL_TO_VALUE[label];
+              if (method) setPreferredContact(method);
+            }}
+            required
+            type="picker"
+            options={CONTACT_METHOD_OPTIONS}
+            placeholder="Select contact method"
+            dropdownZIndex={1500}
+          />
 
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>OK to message on Local List</Text>
+            <Switch
+              value={allowMessaging}
+              onValueChange={setAllowMessaging}
+              trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+              thumbColor={allowMessaging ? '#16a34a' : '#f8fafc'}
+            />
+          </View>
+
+          {/* 8. Phone (Optional) */}
+          <FormInput
+            label="Phone (Optional)"
+            value={contactPhone}
+            onChangeText={setContactPhone}
+            keyboardType="phone-pad"
+            placeholder="(555) 555-5555"
+          />
+
+          {/* 9. Link / Website (Optional) */}
+          <FormInput
+            label="Website Link (Optional)"
+            value={contactWebsite}
+            onChangeText={setContactWebsite}
+            placeholder="https://www.example.com"
+          />
+
+          {/* 10. Facebook URL (Optional) */}
+          <FormInput
+            label="Facebook URL (Optional)"
+            value={facebookUrl}
+            onChangeText={setFacebookUrl}
+            placeholder="https://facebook.com/your-page"
+          />
+
+          {/* 11. YouTube URL (Optional) */}
+          <FormInput
+            label="YouTube URL (Optional)"
+            value={youtubeUrl}
+            onChangeText={setYoutubeUrl}
+            placeholder="https://youtube.com/@your-channel"
+          />
+
+          {/* 12-14. Images */}
+          <Text style={styles.sectionDivider}>IMAGES</Text>
+
+          <Text style={styles.fieldLabel}>Cover Image</Text>
+          <ImageUploader images={coverImage} onChange={(imgs: string[]) => setCoverImage(imgs.slice(0, 1))} />
+
+          <Text style={styles.fieldLabel}>Logo Image</Text>
+          <ImageUploader images={logoImage} onChange={(imgs: string[]) => setLogoImage(imgs.slice(0, 1))} />
+
+          <Text style={styles.fieldLabel}>Gallery</Text>
+          <ImageUploader images={galleryImages} onChange={setGalleryImages} />
+
+          <Text style={styles.imageNote}>* At least one image is required (cover, logo, or gallery)</Text>
+
+          {/* Boost */}
           <Text style={styles.sectionDivider}>BOOST YOUR LISTING</Text>
 
           <TouchableOpacity
@@ -636,19 +663,42 @@ const styles = StyleSheet.create({
     color: '#334155',
     marginBottom: 8,
   },
-  priceTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  priceTypeBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 8,
-    borderWidth: 1.5,
+  textInput: {
+    borderWidth: 1,
     borderColor: '#cbd5e1',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: '#0f172a',
     backgroundColor: '#f8fafc',
-    alignItems: 'center',
   },
-  priceTypeBtnActive: { borderColor: '#0f766e', backgroundColor: '#f0fdfa' },
-  priceTypeBtnText: { fontSize: 13, fontWeight: '600', color: '#64748b' },
-  priceTypeBtnTextActive: { color: '#0f766e' },
+  textArea: {
+    height: 90,
+    textAlignVertical: 'top',
+  },
+  switchRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    backgroundColor: '#f8fafc',
+  },
+  switchLabel: {
+    color: '#334155',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  imageNote: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, marginBottom: 4 },
   checkbox: {
     width: 22,

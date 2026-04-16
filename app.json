@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.mycompany.locallist",
-      "versionCode": 17,
+      "versionCode": 24,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -114,13 +114,6 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Local List uses your location once to suggest your ZIP code for Harrison-area listings. GPS is not saved to your profile."
-        }
-      ],
-      [
-        "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.com.mycompany.locallist",
-          "enableGooglePay": true
         }
       ]
     ],

@@ -6,27 +6,17 @@ import { getAuth, signOut } from 'firebase/auth';
 import React, { useEffect, useRef, useState } from 'react';
 import type { ImageSourcePropType, ViewStyle } from 'react-native';
 import { Alert, Animated, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAccountStatus } from '../hooks/useAccountStatus';
-import { useMessages } from '../providers/MessagesProvider';
 import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
 
 type HeaderProps = {
   onMenuPress?: () => void;
   onSearchPress?: () => void;
-  onNotificationsPress?: () => void;
   logoSource?: ImageSourcePropType;
   showTitle?: boolean;
   compact?: boolean;
   style?: ViewStyle;
-};
-
-type ThreadPreview = {
-  id: string;
-  listingTitle?: string;
-  lastMessage?: string;
-  lastTimestamp?: any;
-  unreadBy?: string[];
 };
 
 const styles = StyleSheet.create({
@@ -100,96 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#cbd5e1',
   },
-  bellWrap: {
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#ef4444',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    zIndex: 2,
-  },
-  notificationBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  notificationsOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
-  },
-  notificationsModalRoot: {
-    flex: 1,
-  },
-  notificationsDropdown: {
-    position: 'absolute',
-    top: 66,
-    right: 10,
-    width: 300,
-    maxHeight: 360,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 10,
-    overflow: 'hidden',
-  },
-  notificationsHeader: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eef2f7',
-  },
-  notificationsHeaderText: {
-    color: '#334155',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  notificationItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  notificationItemTitle: {
-    color: '#0f172a',
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  notificationItemMessage: {
-    color: '#475569',
-    marginTop: 2,
-    fontSize: 12,
-  },
-  notificationItemEmpty: {
-    paddingHorizontal: 12,
-    paddingVertical: 18,
-  },
-  notificationItemEmptyText: {
-    color: '#64748b',
-    fontSize: 13,
-  },
-  notificationFooterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#f8fafc',
-  },
-  notificationFooterText: {
-    color: '#2563eb',
-    fontWeight: '700',
-    fontSize: 13,
-  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -234,15 +134,12 @@ const styles = StyleSheet.create({
 export default function Header({
   onMenuPress,
   onSearchPress,
-  onNotificationsPress,
   logoSource = require('../assets/images/logo.png'),
   showTitle = false,
   compact = false,
   style,
 }: HeaderProps) {
   const [menuVisible, setMenuVisible] = useState(false);
-  const [notificationsVisible, setNotificationsVisible] = useState(false);
-const { threadPreviews, unreadCount } = useMessages();
  const slideAnim = useRef(new Animated.Value(-280)).current;
   const isMountedRef = useRef(true);
   const router = useRouter();
@@ -295,8 +192,10 @@ const { threadPreviews, unreadCount } = useMessages();
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.headerWrapper}>
         <LinearGradient
           colors={['#f0f8fc', '#f9f9f9']}
@@ -340,24 +239,6 @@ const { threadPreviews, unreadCount } = useMessages();
           {user && (
             <>
               <TouchableOpacity
-                onPress={() => {
-                  if (onNotificationsPress) {
-                    onNotificationsPress();
-                    return;
-                  }
-                  setNotificationsVisible((prev) => !prev);
-                }}
-                accessibilityLabel="Notifications"
-                style={[styles.rightButton, styles.bellWrap]}
-              >
-                <Ionicons name="notifications-outline" size={21} color="#334155" />
-                {unreadCount > 0 && (
-                  <View style={styles.notificationBadge}>
-                    <Text style={styles.notificationBadgeText}>{unreadCount > 9 ? '9+' : String(unreadCount)}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
                 onPress={() => router.push('/(app)/support-hub')}
                 accessibilityLabel="Support"
                 style={styles.rightButton}
@@ -384,62 +265,6 @@ const { threadPreviews, unreadCount } = useMessages();
           )}
         </View>
       </LinearGradient>
-
-      <Modal
-        transparent
-        visible={notificationsVisible}
-        animationType="fade"
-        onRequestClose={() => setNotificationsVisible(false)}
-      >
-        <View style={styles.notificationsModalRoot}>
-          <TouchableOpacity style={styles.notificationsOverlay} activeOpacity={1} onPress={() => setNotificationsVisible(false)} />
-          <View style={styles.notificationsDropdown}>
-            <View style={styles.notificationsHeader}>
-              <Text style={styles.notificationsHeaderText}>New Messages</Text>
-            </View>
-            {notificationsVisible && (
-              <>
-                {threadPreviews.length === 0 ? (
-                  <View style={styles.notificationItemEmpty}>
-                    <Text style={styles.notificationItemEmptyText}>No new messages right now.</Text>
-                  </View>
-                ) : (
-                  threadPreviews.map((thread) => (
-                    <TouchableOpacity
-                      key={thread.id}
-                      style={styles.notificationItem}
-                      onPress={() => {
-                        setNotificationsVisible(false);
-                        if (Platform.OS === 'web') {
-                          handleNavigate('messages.html');
-                        } else {
-                          router.push({ pathname: '/threadchat', params: { threadId: thread.id } });
-                        }
-                      }}
-                    >
-                      <Text style={styles.notificationItemTitle} numberOfLines={1}>{thread.listingTitle || 'New message'}</Text>
-                      <Text style={styles.notificationItemMessage} numberOfLines={1}>{thread.lastMessage || 'Tap to open conversation'}</Text>
-                    </TouchableOpacity>
-                  ))
-                )}
-              </>
-            )}
-            <TouchableOpacity
-              style={styles.notificationFooterButton}
-              onPress={() => {
-                setNotificationsVisible(false);
-                if (Platform.OS === 'web') {
-                  handleNavigate('messages.html');
-                } else {
-                  router.push('/(tabs)/messagesbutton');
-                }
-              }}
-            >
-              <Text style={styles.notificationFooterText}>View all messages</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         transparent
@@ -500,6 +325,6 @@ const { threadPreviews, unreadCount } = useMessages();
         </TouchableOpacity>
       </Modal>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

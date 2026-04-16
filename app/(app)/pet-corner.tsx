@@ -44,16 +44,6 @@ function isApprovedService(data: any): boolean {
   return status === 'approved';
 }
 
-function getServicePriceLabel(service: ServiceListing): string | null {
-  if (!service.priceType) return null;
-  if (service.priceType === 'quote') return 'Free Quote';
-  if (service.priceType === 'negotiable') return 'Negotiable';
-  if (service.priceAmount && service.priceType === 'hourly') return `$${service.priceAmount}/hr`;
-  if (service.priceAmount && service.priceType === 'fixed') return `$${service.priceAmount} flat`;
-  if (service.priceAmount) return `$${service.priceAmount}`;
-  return null;
-}
-
 function getTimestampValue(value: any): number {
   if (value?.toMillis) return value.toMillis();
   if (typeof value?.seconds === 'number') return value.seconds * 1000;
@@ -228,8 +218,6 @@ export default function PetHubScreen() {
         {previewServices.length > 0 ? (
           <View style={styles.serviceGrid}>
             {previewServices.map((service) => {
-              const priceLabel = getServicePriceLabel(service);
-
               return (
                 <TouchableOpacity
                   key={service.id}
@@ -247,15 +235,12 @@ export default function PetHubScreen() {
 
                   <View style={styles.serviceContent}>
                     <Text style={styles.serviceName} numberOfLines={1}>{service.serviceName}</Text>
-                    {!!service.providerName && (
-                      <Text style={styles.serviceProvider} numberOfLines={1}>by {service.providerName}</Text>
-                    )}
-                    {!!priceLabel && <Text style={styles.servicePrice}>{priceLabel}</Text>}
-                    {!!service.serviceDescription && (
-                      <Text style={styles.serviceDescription} numberOfLines={2}>
-                        {service.serviceDescription}
-                      </Text>
-                    )}
+                    <View style={styles.serviceMetaRow}>
+                      <Text style={styles.serviceMetaText}>{service.category || 'Pet Service'}</Text>
+                    </View>
+                    <View style={styles.serviceViewDetailsButton}>
+                      <Text style={styles.serviceViewDetailsText}>View Details</Text>
+                    </View>
                   </View>
                 </TouchableOpacity>
               );
@@ -591,23 +576,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#1f2937',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  serviceProvider: {
+  serviceMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  serviceMetaText: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#475569',
+  },
+  serviceViewDetailsButton: {
     marginTop: 4,
+    borderRadius: 8,
+    backgroundColor: '#475569',
+    paddingVertical: 8,
+    alignItems: 'center',
   },
-  servicePrice: {
+  serviceViewDetailsText: {
     fontSize: 12,
+    color: '#ffffff',
     fontWeight: '700',
-    color: '#0f766e',
-    marginTop: 4,
-  },
-  serviceDescription: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 4,
-    lineHeight: 17,
   },
   emptyState: {
     paddingVertical: 24,

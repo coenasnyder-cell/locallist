@@ -621,6 +621,203 @@ export const createPremiumUpgradeCheckoutSession = onCall(
 );
 
 /**
+ * Create a Stripe Subscription + Payment Sheet for Premium $10/month upgrade (mobile).
+ * Returns clientSecret, ephemeralKey, customerId so the app can use native Payment Sheet.
+ */
+export const createPremiumSubscriptionSheet = onCall(
+  { secrets: ["STRIPE_SECRET_KEY"] },
+  async (request) => {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    if (!stripeSecretKey) {
+      logger.error("Missing Stripe secret key");
+      throw new Error("Stripe is not configured");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    const db = getFirestore();
+    const userDoc = await db.collection("users").doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : undefined;
+
+    // Reuse or create Stripe Customer
+    let customerId = userData?.stripeCustomerId as string | undefined;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        metadata: { firebaseUserId: userId },
+      });
+      customerId = customer.id;
+
+      await db.collection("users").doc(userId).set(
+        { stripeCustomerId: customerId },
+        { merge: true }
+      );
+    }
+
+    // Determine price: use env var or create inline
+    let priceId = (process.env.STRIPE_PREMIUM_PRICE_ID || "").trim();
+
+    if (priceId) {
+      try {
+        const existing = await stripe.prices.retrieve(priceId);
+        if (
+          existing.unit_amount !== 1000 ||
+          existing.recurring?.interval !== "month"
+        ) {
+          logger.warn(
+            `Configured STRIPE_PREMIUM_PRICE_ID '${priceId}' does not match $10/month. Creating ad-hoc price.`
+          );
+          priceId = "";
+        }
+      } catch {
+        logger.warn(`Could not retrieve STRIPE_PREMIUM_PRICE_ID '${priceId}'. Creating ad-hoc price.`);
+        priceId = "";
+      }
+    }
+
+    if (!priceId) {
+      // Find or create a product + recurring price
+      const prices = await stripe.prices.list({
+        lookup_keys: ["premium_monthly_1000"],
+        limit: 1,
+      });
+
+      if (prices.data.length > 0) {
+        priceId = prices.data[0].id;
+      } else {
+        const product = await stripe.products.create({
+          name: "Local List Premium Business",
+          description: "Monthly Premium upgrade for Local List business tools",
+        });
+
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: 1000,
+          currency: "usd",
+          recurring: { interval: "month" },
+          lookup_key: "premium_monthly_1000",
+        });
+        priceId = price.id;
+      }
+    }
+
+    // Create subscription with incomplete payment so we get a clientSecret
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      payment_behavior: "default_incomplete",
+      payment_settings: { save_default_payment_method: "on_subscription" },
+      expand: ["latest_invoice.payment_intent"],
+      metadata: {
+        firebaseUserId: userId,
+        itemType: "premium_upgrade",
+      },
+    });
+
+    const invoice = subscription.latest_invoice as Stripe.Invoice;
+    const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
+
+    if (!paymentIntent?.client_secret) {
+      throw new Error("Could not obtain payment intent client secret from subscription.");
+    }
+
+    // Ephemeral key so the Payment Sheet can manage saved cards
+    const ephemeralKey = await stripe.ephemeralKeys.create(
+      { customer: customerId },
+      { apiVersion: "2026-02-25.clover" }
+    );
+
+    logger.info(
+      `Premium subscription sheet created: sub=${subscription.id}, pi=${paymentIntent.id}, user=${userId}`
+    );
+
+    return {
+      paymentIntentClientSecret: paymentIntent.client_secret,
+      customerId,
+      customerEphemeralKeySecret: ephemeralKey.secret,
+      subscriptionId: subscription.id,
+      paymentIntentId: paymentIntent.id,
+    };
+  }
+);
+
+/**
+ * Finalize Premium Subscription after successful Payment Sheet payment.
+ * Verifies the subscription is active and updates the user doc.
+ */
+export const finalizePremiumSubscription = onCall(
+  { secrets: ["STRIPE_SECRET_KEY"] },
+  async (request) => {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new Error("Authentication required");
+    }
+
+    if (!stripeSecretKey) {
+      throw new Error("Stripe is not configured");
+    }
+
+    const subscriptionId = request.data?.subscriptionId;
+    const paymentIntentId = request.data?.paymentIntentId;
+
+    if (!subscriptionId) {
+      throw new Error("Missing subscriptionId");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    if (subscription.status !== "active" && subscription.status !== "trialing") {
+      throw new Error(`Subscription status is '${subscription.status}', expected active.`);
+    }
+
+    const db = getFirestore();
+
+    // Record the purchase
+    await db.collection("premiumPurchases").doc(subscriptionId).set({
+      userId,
+      amount: 10,
+      currency: "USD",
+      status: "active",
+      paymentMethod: "stripe",
+      subscriptionId,
+      paymentIntentId: paymentIntentId || null,
+      purchasedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+
+    // Activate premium on user doc
+    await db.collection("users").doc(userId).set({
+      accountType: "business",
+      businessTier: "premium",
+      isPremium: true,
+      premiumStatus: "active",
+      premiumActivatedAt: new Date().toISOString(),
+      premiumUpdatedAt: new Date().toISOString(),
+      upgradedAt: new Date().toISOString(),
+      stripeSubscriptionId: subscriptionId,
+    }, { merge: true });
+
+    logger.info(`Premium subscription finalized for user ${userId}, sub=${subscriptionId}`);
+
+    return { success: true };
+  }
+);
+
+/**
  * Scheduled function to expire featured listings after 7 days
  * Runs daily at 2 AM UTC
  */
@@ -689,6 +886,77 @@ export const expireFeaturedListings = onSchedule("every day 02:00", async (conte
     
   } catch (error) {
     logger.error("Error in expireFeaturedListings:", error);
+    throw error;
+  }
+});
+
+/**
+ * Scheduled function to expire marketplace listings and pet posts after 14 days.
+ * Runs daily at 02:30 AM UTC.
+ * Sets status to 'expired' so owners can relist from their profile.
+ */
+export const expireStaleListings = onSchedule("every day 02:30", async () => {
+  const db = getFirestore();
+
+  try {
+    const now = new Date();
+    logger.info("Starting stale listing expiration check", { timestamp: now });
+
+    // Expire marketplace listings
+    const staleListings = await db
+      .collection("listings")
+      .where("status", "==", "approved")
+      .where("expiresAt", "<", now)
+      .get();
+
+    logger.info(`Found ${staleListings.size} expired marketplace listings`);
+
+    if (!staleListings.empty) {
+      const chunks = chunkArray(staleListings.docs, 500);
+      for (const chunk of chunks) {
+        const batch = db.batch();
+        for (const doc of chunk) {
+          batch.update(doc.ref, {
+            status: "expired",
+            isActive: false,
+            expiredAt: now.toISOString(),
+          });
+        }
+        await batch.commit();
+      }
+      logger.info(`Expired ${staleListings.size} marketplace listings`);
+    }
+
+    // Expire pet posts
+    const stalePets = await db
+      .collection("pets")
+      .where("expiresAt", "<", now)
+      .get();
+
+    // Only expire pets that are still in an active status
+    const activePets = stalePets.docs.filter((doc) => {
+      const status = doc.data().petStatus;
+      return status === "lost" || status === "found";
+    });
+
+    logger.info(`Found ${activePets.length} expired pet posts`);
+
+    if (activePets.length > 0) {
+      const chunks = chunkArray(activePets, 500);
+      for (const chunk of chunks) {
+        const batch = db.batch();
+        for (const doc of chunk) {
+          batch.update(doc.ref, {
+            petStatus: "expired",
+            expiredAt: now.toISOString(),
+          });
+        }
+        await batch.commit();
+      }
+      logger.info(`Expired ${activePets.length} pet posts`);
+    }
+  } catch (error) {
+    logger.error("Error in expireStaleListings:", error);
     throw error;
   }
 });
@@ -985,6 +1253,49 @@ export const handleStripeCheckout = onRequest(
           }
 
           logger.info(`Listing ${targetId} marked as feature payment received`);
+        }
+
+        res.status(200).send({ received: true });
+      } else if (event.type === "customer.subscription.deleted") {
+        // Subscription canceled or expired — deactivate premium
+        const subscription = event.data.object;
+        const firebaseUserId = subscription.metadata?.firebaseUserId;
+
+        if (firebaseUserId) {
+          await db.collection("users").doc(firebaseUserId).set({
+            isPremium: false,
+            premiumStatus: "canceled",
+            premiumCanceledAt: new Date().toISOString(),
+            premiumUpdatedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          logger.info(`Premium deactivated for user ${firebaseUserId} (subscription ${subscription.id} deleted)`);
+        } else {
+          logger.warn(`customer.subscription.deleted: no firebaseUserId in metadata for sub ${subscription.id}`);
+        }
+
+        res.status(200).send({ received: true });
+      } else if (event.type === "invoice.payment_failed") {
+        // Subscription payment failed — mark as past_due
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+
+        if (subscriptionId) {
+          // Look up user by subscriptionId
+          const usersSnap = await db.collection("users")
+            .where("stripeSubscriptionId", "==", subscriptionId)
+            .limit(1)
+            .get();
+
+          if (!usersSnap.empty) {
+            const userDoc = usersSnap.docs[0];
+            await userDoc.ref.set({
+              premiumStatus: "past_due",
+              premiumUpdatedAt: new Date().toISOString(),
+            }, { merge: true });
+
+            logger.info(`Premium marked past_due for user ${userDoc.id} (invoice payment failed)`);
+          }
         }
 
         res.status(200).send({ received: true });

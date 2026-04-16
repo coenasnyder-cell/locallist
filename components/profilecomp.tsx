@@ -428,6 +428,32 @@ export default function Profile() {
     }
   };
 
+  const handleRelist = async (section: SectionKey, item: AnyItem) => {
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const db = getFirestore(app);
+    try {
+      if (section === 'marketplace') {
+        await updateDoc(doc(db, 'listings', item.id), {
+          status: 'approved',
+          isActive: true,
+          expiresAt,
+          expiredAt: null,
+        });
+      } else if (section === 'pets') {
+        const originalStatus = item.postType || 'lost';
+        await updateDoc(doc(db, 'pets', item.id), {
+          petStatus: originalStatus,
+          expiresAt,
+          expiredAt: null,
+        });
+      }
+      Alert.alert('Relisted', 'Your listing is active again for 14 days.');
+      fetchData();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to relist. Please try again.');
+    }
+  };
+
   const toggleSectionCollapsed = (section: SectionKey) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -781,6 +807,17 @@ export default function Profile() {
                               <Feather name="trash-2" size={20} color="#888" />
                             </TouchableOpacity>
                           ) : null}
+                          {currentTab === 'archived' && (section === 'marketplace' || section === 'pets') && String(item.status || item.petStatus || '').toLowerCase() === 'expired' ? (
+                            <TouchableOpacity
+                              style={styles.relistButton}
+                              onPress={(event: any) => {
+                                event?.stopPropagation?.();
+                                handleRelist(section, item);
+                              }}
+                            >
+                              <Text style={styles.relistButtonText}>Relist</Text>
+                            </TouchableOpacity>
+                          ) : null}
                         </TouchableOpacity>
                       );
                     })
@@ -1048,6 +1085,17 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 4,
+  },
+  relistButton: {
+    backgroundColor: '#0ea5e9',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  relistButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   guidelinesHeader: {
     flexDirection: 'row',

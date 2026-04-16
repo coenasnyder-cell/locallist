@@ -14,7 +14,7 @@ export default function CommunityDisclosures() {
     {
       icon: 'calendar',
       title: 'Listing Expiration',
-      description: 'All listings automatically expire after 7 days. You can renew or repost items to keep them visible in the marketplace.',
+      description: 'Marketplace and pet listings automatically expire after 14 days. You can relist expired items from your profile to keep them visible.',
       color: '#FFF3E0',
       borderColor: '#FF9800',
     },

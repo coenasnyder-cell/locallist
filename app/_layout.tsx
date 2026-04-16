@@ -2,17 +2,18 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox, Text, TextInput } from 'react-native';
+import { AppRegistry, LogBox, Text, TextInput } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Register Stripe headless task to suppress Android warning
+AppRegistry.registerHeadlessTask('StripeKeepJsAwakeTask', () => async () => {});
 
 import Header from '@/components/Header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePathname } from 'expo-router';
-import { getAuth } from 'firebase/auth';
 import React, { useEffect } from 'react';
-import { app } from '../firebase';
-import { MessagesProvider } from '../providers/MessagesProvider';
+import { useAuth } from '../hooks/useAuth';
 
 const globalFontStyle = { fontFamily: 'Inter' as const };
 
@@ -28,6 +29,15 @@ if (process.env.NODE_ENV === 'development') {
     'react-native-safe-area-context',
     "Can't perform a React state update on a component that hasn't mounted yet",
   ]);
+
+  // Suppress known react-navigation animated header warning in terminal
+  const origConsoleError = console.error;
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes("Can't perform a React state update on a component that hasn't mounted yet")) {
+      return;
+    }
+    origConsoleError(...args);
+  };
 }
 
 const HIDE_HEADER_ROUTES = [
@@ -45,10 +55,11 @@ const HIDE_HEADER_ROUTES = [
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const hideHeader =
     HIDE_HEADER_ROUTES.some((r) => pathname.includes(r)) ||
-    (pathname === '/' && !getAuth(app).currentUser);
+    (pathname === '/' && !user);
 
   useEffect(() => {
     console.log('[RootLayout] mounted');
@@ -56,8 +67,10 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <StripeProvider publishableKey="">
-      <MessagesProvider>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''}
+      merchantIdentifier="merchant.com.mycompany.locallist"
+    >
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {!hideHeader && <Header />}
@@ -77,7 +90,6 @@ export default function RootLayout() {
             <StatusBar style="auto" />
           </ThemeProvider>
         </SafeAreaProvider>
-      </MessagesProvider>
     </StripeProvider>
   );
 }

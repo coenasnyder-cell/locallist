@@ -208,16 +208,10 @@ export default function ServicesList() {
 
         <View style={styles.cardContent}>
           <Text style={styles.serviceName} numberOfLines={1}>{item.serviceName}</Text>
-          <Text style={styles.cardMetaText}>Price: {price || 'Not listed'}</Text>
-          <Text style={styles.cardMetaText}>Service Type: {item.category || 'Other'}</Text>
 
           <View style={styles.ratingLocationRow}>
-            <View style={styles.ratingColumn}>
-              <Text style={styles.ratingText}>⭐ {item.rating || 5.0}</Text>
-            </View>
-            <View style={styles.locationColumn}>
-              <Text style={styles.locationText}>📍 {item.location || 'Harrison'}</Text>
-            </View>
+            <Text style={styles.cardMetaText}>{item.category || 'Other'}</Text>
+            <Text style={styles.locationText}>📍 {item.location || 'Harrison'}</Text>
           </View>
 
           <View style={styles.viewDetailsButton}>
@@ -408,7 +402,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#cbd5e1',
   },
   postButton: {
-    backgroundColor: '#0F766E',
+    backgroundColor: '#475569',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -576,9 +570,9 @@ const styles = StyleSheet.create({
   },
   ratingLocationRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    marginBottom: 8,
+    justifyContent: 'center',
+    marginTop: 2,
+    marginBottom: 4,
     gap: 8,
   },
   ratingColumn: {
@@ -603,21 +597,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#1f2937',
-    marginBottom: 8,
-  },
-  reportButton: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#fecdd3',
-    backgroundColor: '#fff1f2',
-    borderRadius: 8,
-    paddingVertical: 7,
-    alignItems: 'center',
-  },
-  reportButtonText: {
-    fontSize: 12,
-    color: '#b91c1c',
-    fontWeight: '700',
+    marginBottom: 2,
+    textAlign: 'center',
   },
   cardMetaText: {
     fontSize: 12,
@@ -628,7 +609,7 @@ const styles = StyleSheet.create({
   viewDetailsButton: {
     marginTop: 8,
     borderRadius: 8,
-    backgroundColor: '#0f766e',
+    backgroundColor: '#475569',
     paddingVertical: 8,
     alignItems: 'center',
   },

@@ -1,8 +1,8 @@
-import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import ImageUploader from './ImageUploader';
@@ -11,16 +11,12 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   const router = useRouter();
   const { user, profile, isBusinessAccount, isAdmin } = useAccountStatus();
   const [businessName, setBusinessName] = useState('');
-  const [listingType, setListingType] = useState('');
   const [businessDescription, setBusinessDescription] = useState('');
-  const [businessEmail, setBusinessEmail] = useState('');
   const [businessPhone, setBusinessPhone] = useState('');
   const [businessWebsite, setBusinessWebsite] = useState('');
-  const [preferredContactMethod, setPreferredContactMethod] = useState<'email' | 'phone'>('email');
+  const [preferredContactMethod, setPreferredContactMethod] = useState<'phone' | 'email' | 'website' | 'local_list'>('email');
   const [allowLocalListMessaging, setAllowLocalListMessaging] = useState(false);
   const [facebookUrl, setFacebookUrl] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
   const [businessCity, setBusinessCity] = useState('');
@@ -29,13 +25,15 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   const [businessCategory, setBusinessCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [businessHours, setBusinessHours] = useState('');
+  const [businessCoverImage, setBusinessCoverImage] = useState<string[]>([]);
   const [businessPhotoSingle, setBusinessPhotoSingle] = useState<string[]>([]);
   const [businessImages, setBusinessImages] = useState<string[]>([]);
-  const [businessTier, setBusinessTier] = useState('free');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [accountType, setAccountType] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
+  const [contactPickerOpen, setContactPickerOpen] = useState(false);
 
   const DEFAULT_BUSINESS_CATEGORIES = [
     'Restaurant',
@@ -141,17 +139,17 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
             setShowUpgradePrompt(!canManageBusinessProfile);
 
             setBusinessName(data.businessName || '');
-            setListingType(data.listingType || '');
             setBusinessDescription(data.businessDescription || '');
-            setBusinessEmail(data.businessEmail || user.email || '');
             setBusinessPhone(data.businessPhone || '');
             setBusinessWebsite(data.businessWebsite || '');
             const storedPreferred = String(data.preferredContactMethod || '').toLowerCase();
-            setPreferredContactMethod(storedPreferred === 'phone' ? 'phone' : 'email');
+            if (storedPreferred === 'phone' || storedPreferred === 'website' || storedPreferred === 'local_list') {
+              setPreferredContactMethod(storedPreferred);
+            } else {
+              setPreferredContactMethod('email');
+            }
             setAllowLocalListMessaging(data.allowLocalListMessaging === true || data.preferredContactMethod === 'local_list');
             setFacebookUrl(data.facebookUrl || '');
-            setInstagramUrl(data.instagramUrl || '');
-            setTiktokUrl(data.tiktokUrl || '');
             setYoutubeUrl(data.youtubeUrl || '');
             setBusinessAddress(data.businessAddress || data.address || '');
             setBusinessCity(data.businessCity || data.city || '');
@@ -159,10 +157,11 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
             setBusinessZipcode(data.businessZipcode || data.zipcode || '');
             setBusinessCategory(data.businessCategory || '');
             setBusinessHours(data.businessHours || '');
+            const coverImage = data.businessCoverImage || '';
+            setBusinessCoverImage(coverImage ? [coverImage] : []);
             const profileImage = data.businessPhotoSingle || data.businessPhotosingle || data.businessLogo || '';
             setBusinessPhotoSingle(profileImage ? [profileImage] : []);
             setBusinessImages(Array.isArray(data.businessImages) ? data.businessImages : []);
-            setBusinessTier(data.businessTier || 'free');
           } else {
             console.error('User document does not exist');
             Alert.alert('Error', 'User profile not found.');
@@ -193,16 +192,24 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
       Alert.alert('Required Field', 'Business name is required.');
       return;
     }
-    if (!listingType) {
-      Alert.alert('Required Field', 'Listing type is required.');
+    if (!businessCategory.trim()) {
+      Alert.alert('Required Field', 'Business category is required.');
       return;
     }
     if (!businessDescription.trim()) {
       Alert.alert('Required Field', 'Business description is required.');
       return;
     }
-    if (!businessCategory.trim()) {
-      Alert.alert('Required Field', 'Business category is required.');
+    if (!businessCity.trim()) {
+      Alert.alert('Required Field', 'City is required.');
+      return;
+    }
+    if (!businessState.trim()) {
+      Alert.alert('Required Field', 'State is required.');
+      return;
+    }
+    if (!businessZipcode.trim()) {
+      Alert.alert('Required Field', 'Zip code is required.');
       return;
     }
     if (!preferredContactMethod) {
@@ -210,19 +217,9 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (businessEmail.trim() && !emailRegex.test(businessEmail.trim())) {
-      Alert.alert('Invalid Email', 'Please enter a valid business contact email.');
-      return;
-    }
-
-    if (preferredContactMethod === 'phone' && !businessPhone.trim()) {
-      Alert.alert('Missing Phone', 'Add a phone number if you want users to contact you by phone.');
-      return;
-    }
-
-    if (preferredContactMethod === 'email' && !businessEmail.trim()) {
-      Alert.alert('Missing Email', 'Add an email if you want users to contact you by email.');
+    const hasAtLeastOneImage = businessCoverImage.length > 0 || businessPhotoSingle.length > 0 || businessImages.length > 0;
+    if (!hasAtLeastOneImage) {
+      Alert.alert('Required', 'Please upload at least one image (cover, logo, or gallery).');
       return;
     }
 
@@ -234,23 +231,20 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
 
       const businessData = {
         businessName: businessName.trim(),
-        listingType: listingType || null,
+        businessCategory: businessCategory.trim() || null,
         businessDescription: businessDescription.trim() || null,
-        businessEmail: businessEmail.trim() || null,
-        businessPhone: businessPhone.trim() || null,
-        businessWebsite: businessWebsite.trim() || null,
-        preferredContactMethod,
-        allowLocalListMessaging,
-        facebookUrl: facebookUrl.trim() || null,
-        instagramUrl: instagramUrl.trim() || null,
-        tiktokUrl: tiktokUrl.trim() || null,
-        youtubeUrl: youtubeUrl.trim() || null,
+        businessHours: businessHours.trim() || null,
         businessAddress: businessAddress.trim() || null,
         businessCity: businessCity.trim() || null,
         businessState: businessState.trim() || null,
         businessZipcode: businessZipcode.trim() || null,
-        businessCategory: businessCategory.trim() || null,
-        businessHours: businessHours.trim() || null,
+        preferredContactMethod,
+        allowLocalListMessaging,
+        businessPhone: businessPhone.trim() || null,
+        businessWebsite: businessWebsite.trim() || null,
+        facebookUrl: facebookUrl.trim() || null,
+        youtubeUrl: youtubeUrl.trim() || null,
+        businessCoverImage: businessCoverImage.length > 0 ? businessCoverImage[0] : null,
         businessPhotoSingle: businessPhotoSingle.length > 0 ? businessPhotoSingle[0] : null,
         businessLogo: businessPhotoSingle.length > 0 ? businessPhotoSingle[0] : null,
         businessImages,
@@ -262,7 +256,6 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         userId: user.uid,
         userEmail: user.email || null,
         accountType: 'business',
-        businessTier: businessTier === 'premium' ? 'premium' : 'free',
         updatedAt: serverTimestamp(),
       }, { merge: true });
 
@@ -338,6 +331,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         <Text style={styles.benefitItem}>• Manage your visibility from the Business Hub.</Text>
       </View>
 
+      {/* 1. Business Name */}
       <Text style={styles.label}>Business Name *</Text>
       <TextInput
         style={styles.input}
@@ -346,21 +340,28 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         placeholder="Enter your business name"
       />
 
-      <Text style={styles.label}>Listing Type *</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={listingType}
-          onValueChange={(value) => setListingType(value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select where to display..." value="" />
-          <Picker.Item label="Shop Local Only - Retail & physical products" value="shopLocal" />
-          <Picker.Item label="Services Only - Professional services" value="services" />
-          <Picker.Item label="Both - Shop Local & Services" value="both" />
-        </Picker>
+      {/* 2. Business Category */}
+      <Text style={styles.label}>Business Category *</Text>
+      <View style={categoryPickerOpen ? { zIndex: 3000, marginBottom: 230 } : undefined}>
+        <DropDownPicker
+          open={categoryPickerOpen}
+          value={businessCategory || null}
+          items={categories.map((c) => ({ label: c, value: c }))}
+          setOpen={setCategoryPickerOpen}
+          setValue={(callback) => {
+            const next = typeof callback === 'function' ? callback(businessCategory || null) : callback;
+            setBusinessCategory(typeof next === 'string' ? next : '');
+          }}
+          placeholder="Select a category..."
+          style={{ borderColor: '#ccc', backgroundColor: '#f8f8f8' }}
+          dropDownContainerStyle={{ borderColor: '#ccc' }}
+          listMode="SCROLLVIEW"
+          maxHeight={220}
+        />
       </View>
 
-      <Text style={styles.label}>Business Description</Text>
+      {/* 3. Business Description */}
+      <Text style={styles.label}>Business Description *</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
         value={businessDescription}
@@ -369,129 +370,8 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         multiline
         numberOfLines={4}
       />
-<Text style={styles.label}>Preferred Contact Method *</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={preferredContactMethod}
-          onValueChange={(value) => setPreferredContactMethod(value as 'email' | 'phone')}
-          style={styles.picker}
-        >
-          <Picker.Item label="Email" value="email" />
-          <Picker.Item label="Phone" value="phone" />
-        </Picker>
-      </View>
-      <View style={styles.switchRow}>
-        <Text style={styles.switchLabel}>Allow Local List Messaging</Text>
-        <Switch
-          value={allowLocalListMessaging}
-          onValueChange={setAllowLocalListMessaging}
-          trackColor={{ false: '#cbd5e1', true: '#86efac' }}
-          thumbColor={allowLocalListMessaging ? '#16a34a' : '#f8fafc'}
-        />
-      </View>
 
-      {preferredContactMethod === 'email' ? (
-        <>
-          <Text style={styles.label}>Business Contact Email</Text>
-          <TextInput
-            style={styles.input}
-            value={businessEmail}
-            onChangeText={setBusinessEmail}
-            placeholder="your-business@example.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </>
-      ) : null}
-
-      {preferredContactMethod === 'phone' ? (
-        <>
-          <Text style={styles.label}>Business Phone</Text>
-          <TextInput
-            style={styles.input}
-            value={businessPhone}
-            onChangeText={setBusinessPhone}
-            placeholder="(555) 123-4567"
-            keyboardType="phone-pad"
-          />
-        </>
-      ) : null}
-
-      <Text style={styles.label}>Business Website</Text>
-      <TextInput
-        style={styles.input}
-        value={businessWebsite}
-        onChangeText={setBusinessWebsite}
-        placeholder="https://www.example.com"
-        keyboardType="url"
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>Facebook URL</Text>
-      <TextInput
-        style={styles.input}
-        value={facebookUrl}
-        onChangeText={setFacebookUrl}
-        placeholder="https://facebook.com/your-page"
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>Instagram URL</Text>
-      <TextInput
-        style={styles.input}
-        value={instagramUrl}
-        onChangeText={setInstagramUrl}
-        placeholder="https://instagram.com/your-handle"
-        autoCapitalize="none"
-      />
-      <Text style={styles.label}>Business Address (Optional)</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        value={businessAddress}
-        onChangeText={setBusinessAddress}
-        placeholder={'123 Main Street, Suite 100\nYour City, State 12345'}
-        multiline
-        numberOfLines={3}
-      />
-
-      <Text style={styles.label}>City</Text>
-      <TextInput
-        style={styles.input}
-        value={businessCity}
-        onChangeText={setBusinessCity}
-        placeholder="Your city"
-      />
-
-      <Text style={styles.label}>State</Text>
-      <TextInput
-        style={styles.input}
-        value={businessState}
-        onChangeText={setBusinessState}
-        placeholder="State"
-      />
-
-      <Text style={styles.label}>Zip Code</Text>
-      <TextInput
-        style={styles.input}
-        value={businessZipcode}
-        onChangeText={setBusinessZipcode}
-        placeholder="Zip code"
-      />
-
-      <Text style={styles.label}>Business Category</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={businessCategory}
-          onValueChange={(value) => setBusinessCategory(value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select a category..." value="" />
-          {categories.map((category) => (
-            <Picker.Item key={category} label={category} value={category} />
-          ))}
-        </Picker>
-      </View>
-
+      {/* 4. Business Hours */}
       <Text style={styles.label}>Business Hours</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
@@ -502,23 +382,140 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
         numberOfLines={3}
       />
 
-      <Text style={styles.label}>Business Profile Image</Text>
+      {/* 5. Location */}
+      <Text style={styles.label}>Street Address (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={businessAddress}
+        onChangeText={setBusinessAddress}
+        placeholder="123 Main Street, Suite 100"
+      />
+
+      <Text style={styles.label}>City *</Text>
+      <TextInput
+        style={styles.input}
+        value={businessCity}
+        onChangeText={setBusinessCity}
+        placeholder="Your city"
+      />
+
+      <Text style={styles.label}>State *</Text>
+      <TextInput
+        style={styles.input}
+        value={businessState}
+        onChangeText={setBusinessState}
+        placeholder="State"
+      />
+
+      <Text style={styles.label}>Zip Code *</Text>
+      <TextInput
+        style={styles.input}
+        value={businessZipcode}
+        onChangeText={setBusinessZipcode}
+        placeholder="Zip code"
+        keyboardType="number-pad"
+      />
+
+      {/* 6. Preferred Contact Method */}
+      <Text style={styles.label}>Preferred Contact Method *</Text>
+      <View style={contactPickerOpen ? { zIndex: 2000, marginBottom: 200 } : undefined}>
+        <DropDownPicker
+          open={contactPickerOpen}
+          value={preferredContactMethod || null}
+          items={[
+            { label: 'Phone', value: 'phone' },
+            { label: 'Email', value: 'email' },
+            { label: 'Website', value: 'website' },
+            { label: 'Local List', value: 'local_list' },
+          ]}
+          setOpen={setContactPickerOpen}
+          setValue={(callback) => {
+            const next = typeof callback === 'function' ? callback(preferredContactMethod || null) : callback;
+            if (next === 'phone' || next === 'email' || next === 'website' || next === 'local_list') {
+              setPreferredContactMethod(next);
+            }
+          }}
+          placeholder="Select contact method"
+          style={{ borderColor: '#ccc', backgroundColor: '#f8f8f8' }}
+          dropDownContainerStyle={{ borderColor: '#ccc' }}
+          listMode="SCROLLVIEW"
+          maxHeight={200}
+        />
+      </View>
+
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>OK to message on Local List</Text>
+        <Switch
+          value={allowLocalListMessaging}
+          onValueChange={setAllowLocalListMessaging}
+          trackColor={{ false: '#cbd5e1', true: '#86efac' }}
+          thumbColor={allowLocalListMessaging ? '#16a34a' : '#f8fafc'}
+        />
+      </View>
+
+      {/* 7. Phone (Optional) */}
+      <Text style={styles.label}>Phone (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={businessPhone}
+        onChangeText={setBusinessPhone}
+        placeholder="(555) 123-4567"
+        keyboardType="phone-pad"
+      />
+
+      {/* 8. Link / Website (Optional) */}
+      <Text style={styles.label}>Website Link (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={businessWebsite}
+        onChangeText={setBusinessWebsite}
+        placeholder="https://www.example.com"
+        keyboardType="url"
+        autoCapitalize="none"
+      />
+
+      {/* 9. Facebook URL (Optional) */}
+      <Text style={styles.label}>Facebook URL (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={facebookUrl}
+        onChangeText={setFacebookUrl}
+        placeholder="https://facebook.com/your-page"
+        autoCapitalize="none"
+      />
+
+      {/* 10. YouTube URL (Optional) */}
+      <Text style={styles.label}>YouTube URL (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={youtubeUrl}
+        onChangeText={setYoutubeUrl}
+        placeholder="https://youtube.com/@your-channel"
+        autoCapitalize="none"
+      />
+
+      {/* 11. Cover Image */}
+      <Text style={styles.label}>Cover Image</Text>
+      <ImageUploader
+        images={businessCoverImage}
+        onChange={(images: string[]) => setBusinessCoverImage(images.slice(0, 1))}
+      />
+
+      {/* 12. Logo Image */}
+      <Text style={styles.label}>Logo Image</Text>
       <ImageUploader
         images={businessPhotoSingle}
         onChange={(images: string[]) => setBusinessPhotoSingle(images.slice(0, 1))}
       />
 
-      <Text style={styles.label}>Business Profile Gallery Images</Text>
+      {/* 13. Gallery */}
+      <Text style={styles.label}>Gallery Images</Text>
       <ImageUploader
         images={businessImages}
         onChange={(images: string[]) => setBusinessImages(images)}
       />
 
-      <Text style={styles.label}>Business Tier</Text>
-      <View style={styles.tierDisplay}>
-        <Text style={styles.tierText}>{businessTier.charAt(0).toUpperCase() + businessTier.slice(1)}</Text>
-        <Text style={styles.tierNote}>(Managed by admin)</Text>
-      </View>
+      <Text style={styles.imageNote}>* At least one image is required (cover, logo, or gallery)</Text>
 
       <TouchableOpacity 
         style={[styles.saveButton, (saving || loading) && styles.saveButtonDisabled]} 
@@ -618,23 +615,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  tierDisplay: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 12,
-    marginTop: 8,
-  },
-  tierText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4CAF50',
-  },
-  tierNote: {
+  imageNote: {
     fontSize: 12,
-    color: '#888',
-    marginTop: 4,
+    color: '#64748b',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   pickerContainer: {
     borderWidth: 1,

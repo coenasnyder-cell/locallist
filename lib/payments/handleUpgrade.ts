@@ -1,6 +1,6 @@
 import { app, auth } from '@/firebase';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { Linking } from 'react-native';
 
 export const STRIPE_UPGRADE_CANCELED = 'stripe_upgrade_canceled';
 
@@ -17,23 +17,57 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
 
   try {
     const functions = getFunctions(app);
-    const createCheckout = httpsCallable(functions, 'createPremiumUpgradeCheckoutSession');
 
-    const res: any = await createCheckout({
-      mobileApp: true,
-    });
+    // 1. Create subscription + get Payment Sheet params from Cloud Function
+    const createSheet = httpsCallable(functions, 'createPremiumSubscriptionSheet');
+    const res: any = await createSheet({});
 
     const data = res?.data || {};
-    const checkoutUrl = String(data.url || '').trim();
+    const {
+      paymentIntentClientSecret,
+      customerId,
+      customerEphemeralKeySecret,
+      subscriptionId,
+      paymentIntentId,
+    } = data as {
+      paymentIntentClientSecret?: string;
+      customerId?: string;
+      customerEphemeralKeySecret?: string;
+      subscriptionId?: string;
+      paymentIntentId?: string;
+    };
 
-    if (!checkoutUrl) {
-      return { success: false, error: 'Invalid premium checkout link from server.' };
+    if (!paymentIntentClientSecret) {
+      return { success: false, error: 'Could not initialize premium checkout.' };
     }
 
-    await Linking.openURL(checkoutUrl);
+    // 2. Initialize the native Stripe Payment Sheet
+    const { error: initError } = await initPaymentSheet({
+      merchantDisplayName: 'Local List',
+      paymentIntentClientSecret,
+      customerId,
+      customerEphemeralKeySecret,
+    });
+
+    if (initError) {
+      return { success: false, error: initError.message || 'Could not initialize payment sheet.' };
+    }
+
+    // 3. Present the Payment Sheet to the user
+    const { error: presentError } = await presentPaymentSheet();
+
+    if (presentError) {
+      if (presentError.code === 'Canceled') {
+        return { success: false, error: STRIPE_UPGRADE_CANCELED };
+      }
+      return { success: false, error: presentError.message || 'Payment failed.' };
+    }
+
+    // 4. Finalize: verify subscription is active and update Firestore
+    const finalize = httpsCallable(functions, 'finalizePremiumSubscription');
+    await finalize({ subscriptionId, paymentIntentId });
 
     return { success: true };
-
   } catch (error: any) {
     return {
       success: false,

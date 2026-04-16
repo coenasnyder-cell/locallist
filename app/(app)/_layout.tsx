@@ -44,6 +44,7 @@ export default function AppLayout() {
           <Stack.Screen name="deals" />
           <Stack.Screen name="featured-listings" />
           <Stack.Screen name="yardsalelistings" />
+          <Stack.Screen name="yard-sale-detail" />
           <Stack.Screen name="blocked-users" />
           <Stack.Screen name="threadchat" />
           <Stack.Screen name="pet-details" />

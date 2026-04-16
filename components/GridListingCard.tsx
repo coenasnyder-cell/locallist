@@ -68,7 +68,6 @@ export default function GridListingCard({
   };
 
   const timeLabel = formatRelativeTime(createdAt);
-  const viewLabel = viewCount != null ? `👀 ${viewCount.toLocaleString()} views` : null;
   const locationLabel = city || location;
 
   return (
@@ -88,18 +87,15 @@ export default function GridListingCard({
         )}
       </View>
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>{title}</Text>
-        <Text style={styles.price}>{formatPrice(price)}</Text>
+        <Text style={styles.titleRow} numberOfLines={1}>
+          {title} <Text style={styles.priceInline}>{formatPrice(price)}</Text>
+        </Text>
         <View style={styles.metaRow}>
-          {!!category && <Text style={styles.metaText}>{category}</Text>}
-          {!!category && !!timeLabel && <Text style={styles.metaDot}>·</Text>}
+          {!!category && <View style={styles.pill}><Text style={styles.pillText}>{category}</Text></View>}
           {!!timeLabel && <Text style={styles.metaText}>{timeLabel}</Text>}
+          {viewCount != null && <Text style={styles.metaText}>{viewCount.toLocaleString()} views</Text>}
         </View>
-        {viewLabel ? <Text style={styles.viewCount}>{viewLabel}</Text> : null}
-        <View style={styles.footer}>
-          {!!sellerName && <Text style={styles.footerText}>👤 {sellerName}</Text>}
-          {!!locationLabel && <Text style={styles.footerText}>📍 {locationLabel}</Text>}
-        </View>
+        {!!locationLabel && <Text style={styles.locationText}>{locationLabel}</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -161,48 +157,46 @@ const styles = StyleSheet.create({
   content: {
     width: '100%',
     paddingHorizontal: 6,
-    paddingTop: 10,
+    paddingTop: 8,
     paddingBottom: 6,
     backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 14,
+  titleRow: {
+    fontSize: 13,
     fontWeight: '600',
-    textAlign: 'left',
     color: '#1a1a1a',
+    numberOfLines: 1,
   },
-  price: {
-    fontSize: 18,
+  priceInline: {
+    fontSize: 13,
+    fontWeight: '800',
     color: '#000',
-    fontWeight: 'bold',
-    marginTop: 2,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
     marginTop: 4,
-    gap: 4,
+    gap: 6,
+  },
+  pill: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  pillText: {
+    fontSize: 11,
+    color: '#475569',
+    fontWeight: '600',
   },
   metaText: {
-    fontSize: 12,
-    color: '#555',
+    fontSize: 11,
+    color: '#64748b',
   },
-  metaDot: {
-    fontSize: 12,
-    color: '#aaa',
-  },
-  viewCount: {
-    fontSize: 12,
-    color: '#555',
-    marginTop: 4,
-  },
-  footer: {
-    marginTop: 6,
-    gap: 2,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#444',
+  locationText: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 3,
   },
 });

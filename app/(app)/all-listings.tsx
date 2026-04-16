@@ -1,19 +1,17 @@
 
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import GridListingCard from '../../components/GridListingCard';
 import { app } from '../../firebase';
 
-const numColumns = 2;
-const screenWidth = Dimensions.get('window').width;
-const cardMargin = 10;
-const cardWidth = (screenWidth - cardMargin * (numColumns * 2 + 2)) / numColumns;
-
+const NUM_COLUMNS = 3;
+const PAGE_SIZE = 12; // 4 rows × 3 columns
 
 export default function AllListings() {
-  const [listings, setListings] = useState<any[]>([]);
+  const [allListings, setAllListings] = useState<any[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -29,9 +27,9 @@ export default function AllListings() {
             return { id: doc.id, ...data };
           })
           .filter(listing => Array.isArray(listing.images) && listing.images.length > 0);
-        setListings(fetched);
+        setAllListings(fetched);
       } catch (error) {
-        setListings([]);
+        setAllListings([]);
       } finally {
         setLoading(false);
       }
@@ -39,91 +37,94 @@ export default function AllListings() {
     fetchListings();
   }, []);
 
-  const handlePress = (id: string) => {
-    router.push({ pathname: '/listing', params: { id } });
-  };
+  const listings = allListings.slice(0, visibleCount);
+  const hasMore = visibleCount < allListings.length;
+
+  const loadMore = useCallback(() => {
+    if (hasMore) {
+      setVisibleCount(prev => Math.min(prev + PAGE_SIZE, allListings.length));
+    }
+  }, [hasMore, allListings.length]);
+
+  const renderItem = useCallback(({ item }: { item: any }) => {
+    const createdAtMs = item.createdAt
+      ? (item.createdAt.toMillis ? item.createdAt.toMillis() : new Date(item.createdAt).getTime())
+      : undefined;
+
+    return (
+      <View style={styles.cardWrapper}>
+        <GridListingCard
+          title={item.title || ''}
+          price={String(item.price ?? '')}
+          category={item.category}
+          viewCount={typeof item.viewCount === 'number' ? item.viewCount : undefined}
+          createdAt={createdAtMs}
+          city={item.city}
+          location={item.location || item.zipCode}
+          isFeatured={Boolean(item.isFeatured)}
+          imageSource={Array.isArray(item.images) && item.images[0] ? { uri: item.images[0] } : undefined}
+          onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+        />
+      </View>
+    );
+  }, [router]);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#0ea5e9" />
+      </View>
+    );
+  }
+
+  if (allListings.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>No listings found.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      {loading ? (
-        <Text style={styles.loading}>Loading...</Text>
-      ) : listings.length === 0 ? (
-        <Text style={styles.loading}>No listings found.</Text>
-      ) : (
-        <View style={styles.gridContainer}>
-          {listings.map(listing => (
-            <TouchableOpacity style={styles.card} key={listing.id} onPress={() => handlePress(listing.id)} activeOpacity={0.8}>
-              <Image
-                source={{ uri: listing.images[0] }}
-                style={styles.image}
-                contentFit="cover"
-              />
-              <Text style={styles.title} numberOfLines={1}>{listing.title}</Text>
-              <Text style={styles.priceZip}>
-                {listing.price ? `$${listing.price}` : ''}
-                {listing.zipCode ? `  |  ${listing.zipCode}` : ''}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-      </ScrollView>
-    </View>
+    <FlatList
+      data={listings}
+      renderItem={renderItem}
+      keyExtractor={item => item.id}
+      numColumns={NUM_COLUMNS}
+      contentContainerStyle={styles.listContent}
+      columnWrapperStyle={styles.row}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={
+        hasMore ? (
+          <ActivityIndicator style={{ marginVertical: 16 }} size="small" color="#94a3b8" />
+        ) : null
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  centered: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#fff',
   },
-  scrollContent: {
-    padding: 10,
-    flexGrow: 1,
-  },
-  loading: {
-    textAlign: 'center',
+  emptyText: {
     color: '#888',
     fontSize: 16,
-    marginTop: 32,
   },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  listContent: {
+    padding: 8,
+    backgroundColor: '#fff',
+  },
+  row: {
     justifyContent: 'space-between',
   },
-  card: {
-    width: cardWidth,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    marginBottom: cardMargin * 2,
-    marginHorizontal: cardMargin,
-    padding: 10,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-  },
-  image: {
-    width: cardWidth - 20,
-    height: cardWidth - 20,
-    borderRadius: 8,
-    marginBottom: 8,
-    backgroundColor: '#ddd',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  priceZip: {
-    fontSize: 14,
-    color: '#475569',
-    textAlign: 'center',
+  cardWrapper: {
+    flex: 1,
+    maxWidth: `${100 / NUM_COLUMNS}%`,
+    padding: 4,
   },
 });

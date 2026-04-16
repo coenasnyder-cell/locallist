@@ -235,6 +235,7 @@ export default function CreateYardSaleScreen() {
         yardsalelocation: hasFullLocationDetails ? `${addressText}, ${cityText}, ${stateText} ${zipText}` : '',
         yardsaleExpires: saleEndParsed,
         yardsaleImage,
+        yardsaleImages: images,
         yardsalestatus: 'active',
         userName: profile?.displayName || user.displayName || user.email?.split('@')[0] || '',
         userId: user.uid,
@@ -294,7 +295,7 @@ export default function CreateYardSaleScreen() {
                 onPress={handleBack}
                 activeOpacity={0.85}
               >
-                <Text style={styles.successSecondaryText}>Back to List Hub</Text>
+                <Text style={styles.successSecondaryText}>Back to Yard Sales</Text>
               </TouchableOpacity>
             </View>
           </View>

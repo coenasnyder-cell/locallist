@@ -16,6 +16,7 @@ type FormInputProps = {
 	secureTextEntry?: boolean;
 	dropdownZIndex?: number;
 	dropdownMaxHeight?: number;
+	maxLength?: number;
 };
 
 export default function FormInput({
@@ -32,6 +33,7 @@ export default function FormInput({
 	secureTextEntry = false,
 	dropdownZIndex = 3000,
 	dropdownMaxHeight = 220,
+	maxLength,
 }: FormInputProps) {
 	const [open, setOpen] = useState(false);
 	const items = useMemo(() => options.map((opt) => ({ label: opt, value: opt })), [options]);
@@ -86,6 +88,7 @@ export default function FormInput({
 					keyboardType={keyboardType}
 					placeholder={placeholder}
 					secureTextEntry={secureTextEntry}
+					maxLength={maxLength}
 				/>
 			)}
 		</View>

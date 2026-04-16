@@ -2,13 +2,14 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 
 type YardSaleRecord = {
   id: string;
   yardsaleImage?: string;
+  yardsaleImages?: string[];
   yardsaleTitle?: string;
   yardsaleDescription?: string;
   yardsaleDate?: unknown;
@@ -149,7 +150,7 @@ function getBuckets(sales: YardSaleRecord[]) {
 
 export default function YardSaleListingsScreen() {
   const { width } = useWindowDimensions();
-  const isWideLayout = width >= 920;
+  const cardImageWidth = (width - 28 - 12) / 2 - 2; // match 48% card width minus padding
   const [sales, setSales] = useState<YardSaleRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -265,30 +266,51 @@ export default function YardSaleListingsScreen() {
   };
 
   const renderSaleCard = (sale: YardSaleRecord) => {
-    const timeText = sale.yardsaleStart
-      ? `${sale.yardsaleStart}${sale.yardsaleEndtime ? ` - ${sale.yardsaleEndtime}` : ''}`
-      : 'Time TBD';
+    const allImages = (sale.yardsaleImages && sale.yardsaleImages.length > 0)
+      ? sale.yardsaleImages
+      : sale.yardsaleImage
+        ? [sale.yardsaleImage]
+        : [];
+    const locationLabel = getDisplayLocation(sale);
+    const dateLabel = formatDateRange(sale.yardsaleDate, sale.yardsaleEndDate || sale.yardsaleExpires);
+
+    const handlePress = () => {
+      router.push({ pathname: '/(app)/yard-sale-detail', params: { id: sale.id } } as any);
+    };
 
     return (
-      <View key={sale.id} style={[styles.saleCard, isWideLayout ? styles.saleCardWide : null]}>
-        <View style={[styles.saleMediaWrap, isWideLayout ? styles.saleMediaWrapWide : null]}>
-          {sale.yardsaleImage ? (
-            <Image source={{ uri: sale.yardsaleImage }} style={styles.saleMediaImage} contentFit="cover" />
+      <TouchableOpacity key={sale.id} style={styles.card} onPress={handlePress} activeOpacity={0.85}>
+        {allImages.length > 0 ? (
+          allImages.length === 1 ? (
+            <Image source={{ uri: allImages[0] }} style={styles.cardImage} contentFit="cover" />
           ) : (
-            <View style={[styles.saleMediaImage, styles.saleMediaPlaceholder]}>
-              <Text style={styles.saleMediaPlaceholderText}>🏷️</Text>
-            </View>
-          )}
-        </View>
+            <FlatList
+              data={allImages}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, i) => String(i)}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item }} style={[styles.cardImage, { width: cardImageWidth }]} contentFit="cover" />
+              )}
+              style={styles.cardImageGallery}
+            />
+          )
+        ) : (
+          <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+            <Text style={styles.cardPlaceholderText}>No Photo</Text>
+          </View>
+        )}
 
-        <View style={[styles.saleBody, isWideLayout ? styles.saleBodyWide : null]}>
-          <Text style={styles.saleTitle}>{sale.yardsaleTitle || 'Yard Sale'}</Text>
-          <Text style={styles.saleMeta}>Date: {formatDateRange(sale.yardsaleDate, sale.yardsaleEndDate || sale.yardsaleExpires)}</Text>
-          <Text style={styles.saleMeta}>Time: {timeText}</Text>
-          <Text style={styles.saleMeta}>Location: {getDisplayLocation(sale)}</Text>
-          <Text style={styles.saleDescription}>{sale.yardsaleDescription || ''}</Text>
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle} numberOfLines={1}>{sale.yardsaleTitle || 'Yard Sale'}</Text>
+          <View style={styles.cardMetaRow}>
+            <Text style={styles.cardMetaText} numberOfLines={1}>{dateLabel}</Text>
+            <Text style={styles.cardMetaDot}>·</Text>
+            <Text style={styles.cardMetaText} numberOfLines={1}>{locationLabel}</Text>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -336,12 +358,20 @@ export default function YardSaleListingsScreen() {
          </View>
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionTitle}>Upcoming Yard Sales</Text>
-          {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.upcoming.length ? buckets.upcoming.map(renderSaleCard) : <Text style={styles.emptyState}>No upcoming yard sales found.</Text>}
+          {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.upcoming.length ? (
+            <View style={styles.gridContainer}>
+              {buckets.upcoming.map(renderSaleCard)}
+            </View>
+          ) : <Text style={styles.emptyState}>No upcoming yard sales found.</Text>}
         </View>
 
         <View style={styles.sectionBlock}>
           <Text style={styles.sectionTitle}>Recently Posted</Text>
-          {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.recent.length ? buckets.recent.map(renderSaleCard) : <Text style={styles.emptyState}>No recently posted yard sales.</Text>}
+          {loading ? <Text style={styles.emptyState}>Loading yard sales...</Text> : buckets.recent.length ? (
+            <View style={styles.gridContainer}>
+              {buckets.recent.map(renderSaleCard)}
+            </View>
+          ) : <Text style={styles.emptyState}>No recently posted yard sales.</Text>}
         </View>
 
         <View style={styles.digestBanner}>
@@ -487,65 +517,66 @@ const styles = StyleSheet.create({
   sectionBlock: {
     marginBottom: 22,
   },
-  saleCard: {
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  card: {
     backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    width: '48%',
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     borderWidth: 1,
     borderColor: '#e5e7eb',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
   },
-  saleCardWide: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    padding: 10,
-  },
-  saleMediaWrap: {
+  cardImage: {
     width: '100%',
-    marginBottom: 10,
+    height: 120,
   },
-  saleMediaWrapWide: {
-    width: 220,
-    marginBottom: 0,
-    marginRight: 12,
+  cardImageGallery: {
+    height: 120,
   },
-  saleMediaImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: 10,
-    backgroundColor: '#e2e8f0',
-  },
-  saleMediaPlaceholder: {
+  cardImagePlaceholder: {
+    backgroundColor: '#f1f5f9',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fef2f2',
   },
-  saleMediaPlaceholderText: {
-    fontSize: 40,
+  cardPlaceholderText: {
+    fontSize: 13,
+    color: '#94a3b8',
+    fontWeight: '600',
   },
-  saleBody: {
-    flex: 1,
+  cardContent: {
+    padding: 10,
   },
-  saleBodyWide: {
-    justifyContent: 'center',
-  },
-  saleTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0f172a',
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1f2937',
     marginBottom: 6,
-    lineHeight: 22,
+    textAlign: 'center',
   },
-  saleMeta: {
-    color: '#334155',
-    fontSize: 13,
-    marginBottom: 4,
+  cardMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
-  saleDescription: {
-    color: '#64748b',
-    fontSize: 13,
-    marginTop: 8,
-    lineHeight: 20,
+  cardMetaText: {
+    fontSize: 12,
+    color: '#475569',
+  },
+  cardMetaDot: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginHorizontal: 4,
   },
   emptyState: {
     backgroundColor: '#fff',

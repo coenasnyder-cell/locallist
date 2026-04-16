@@ -7,6 +7,12 @@ import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
 import { useAccountStatus } from '../../hooks/useAccountStatus';
 
+// Module-level cache to avoid refetching on every mount
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+let cachedProfiles: ShopLocalProfile[] | null = null;
+let cachedCategories: string[] | null = null;
+let cacheTimestamp = 0;
+
 interface ShopLocalProfile {
   id: string;
   businessName: string;
@@ -52,8 +58,15 @@ export default function ShopLocalList() {
   };
 
   useEffect(() => {
-    fetchShopLocalProfiles();
-    fetchBusinessCategories();
+    if (cachedProfiles && cachedCategories && Date.now() - cacheTimestamp < CACHE_TTL) {
+      setProfiles(cachedProfiles);
+      setFilteredProfiles(cachedProfiles);
+      setCategories(cachedCategories);
+      setLoading(false);
+    } else {
+      fetchShopLocalProfiles();
+      fetchBusinessCategories();
+    }
   }, []);
 
   useEffect(() => {
@@ -142,7 +155,9 @@ export default function ShopLocalList() {
 
       const list = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
       console.log('Final categories list:', list);
-      setCategories(list.length > 0 ? list : DEFAULT_CATEGORIES);
+      const finalCategories = list.length > 0 ? list : DEFAULT_CATEGORIES;
+      setCategories(finalCategories);
+      cachedCategories = finalCategories;
     } catch (error) {
       console.error('Error fetching business categories:', error);
       setCategories(DEFAULT_CATEGORIES);
@@ -202,6 +217,8 @@ export default function ShopLocalList() {
 
       setProfiles(allProfiles);
       setFilteredProfiles(allProfiles);
+      cachedProfiles = allProfiles;
+      cacheTimestamp = Date.now();
     } catch (error) {
       console.error('Error fetching profiles:', error);
       setProfiles([]);
@@ -255,7 +272,6 @@ export default function ShopLocalList() {
       String(profile.businessLogo || '').trim();
     const categoryLabel = profile.businessCategory ? formatCategoryLabel(profile.businessCategory) : 'Uncategorized';
     const locationLabel = profile.businessCity || 'Location not listed';
-    const mottoLabel = String(profile.businessMotto || '').trim();
 
     return (
       <TouchableOpacity 
@@ -266,7 +282,7 @@ export default function ShopLocalList() {
       >
         {isPremium && (
           <View style={styles.premiumBadge}>
-            <Text style={styles.premiumBadgeText}>Premium Featured</Text>
+            <Text style={styles.premiumBadgeText}>⭐ Featured</Text>
           </View>
         )}
 
@@ -279,22 +295,14 @@ export default function ShopLocalList() {
         <View style={styles.cardContent}>
           <Text style={styles.businessName} numberOfLines={1}>{profile.businessName}</Text>
 
-          {isVerified ? (
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedBadgeText}>Local Business Verified</Text>
-            </View>
-          ) : null}
-
-          <Text style={styles.metaLine} numberOfLines={1}>{categoryLabel}</Text>
-          <Text style={styles.metaLine} numberOfLines={1}>📍 {locationLabel}</Text>
-          {mottoLabel ? (
-            <Text style={styles.mottoLine} numberOfLines={2}>{mottoLabel}</Text>
-          ) : null}
+          <View style={styles.metaRow}>
+            <Text style={styles.cardMetaText}>{categoryLabel}</Text>
+            <Text style={styles.locationText}>📍 {locationLabel}</Text>
+          </View>
 
           <View style={styles.viewDetailsButton}>
             <Text style={styles.viewDetailsButtonText}>View Details</Text>
           </View>
-
         </View>
       </TouchableOpacity>
     );
@@ -307,7 +315,7 @@ export default function ShopLocalList() {
     : `${formatCategoryLabel(selectedCategory)} Local Businesses`;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <ScreenTitleRow
           title="Local Businesses"
@@ -413,6 +421,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    paddingBottom: 80,
   },
   header: {
     padding: 16,
@@ -585,33 +596,20 @@ const styles = StyleSheet.create({
   },
   premiumBadge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 8,
+    left: 8,
     backgroundColor: '#475569',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
     zIndex: 10,
+    opacity: 0.95,
   },
   premiumBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#fff',
-  },
-  verifiedBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ecfdf5',
-    borderWidth: 1,
-    borderColor: '#86efac',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginBottom: 8,
-  },
-  verifiedBadgeText: {
-    color: '#166534',
-    fontSize: 11,
-    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   cardImage: {
     width: '100%',
@@ -623,39 +621,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2e8f0',
   },
   cardContent: {
-    padding: 12,
+    padding: 10,
   },
   businessName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#475569',
-    marginBottom: 6,
+    color: '#1f2937',
+    marginBottom: 2,
+    textAlign: 'center',
   },
-  metaLine: {
-    fontSize: 13,
-    color: '#64748b',
-    marginBottom: 4,
-  },
-  mottoLine: {
-    fontSize: 13,
-    color: '#475569',
-    lineHeight: 18,
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 2,
-    marginBottom: 10,
+    marginBottom: 4,
+    gap: 8,
+  },
+  cardMetaText: {
+    fontSize: 12,
+    color: '#475569',
+    marginBottom: 4,
+    lineHeight: 17,
+  },
+  locationText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0f766e',
   },
   viewDetailsButton: {
-    marginTop: 4,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+    marginTop: 8,
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#475569',
+    paddingVertical: 8,
+    alignItems: 'center',
   },
   viewDetailsButtonText: {
-    color: '#334155',
     fontSize: 12,
+    color: '#ffffff',
     fontWeight: '700',
   },
   claimButton: {

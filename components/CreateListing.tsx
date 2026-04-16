@@ -7,7 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { addDoc, collection, getDocs, getFirestore, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import React, { useRef, useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import { trackAppEvent } from '../utils/appAnalytics';
@@ -612,6 +612,7 @@ const styles = StyleSheet.create({
 		try {
 			const db = getFirestore(app);
 			const city = await getCityFromZip(zipCode) ?? 'TBD';
+			const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 			const listingDocRef = await addDoc(collection(db, 'listings'), {
 				images,
 				title,
@@ -623,6 +624,7 @@ const styles = StyleSheet.create({
 				city,
 				pickupLocation,
 				createdAt: serverTimestamp(),
+				expiresAt,
 				status: 'approved',
 				viewCount: 0,
 				isActive: true,
@@ -689,7 +691,6 @@ const styles = StyleSheet.create({
 			style={{ flex: 1 }}
 			keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 80}
 		>
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 				<View style={{ flex: 1 }}>
 						<ScrollView 
 							contentContainerStyle={styles.scrollContainer} 
@@ -697,18 +698,18 @@ const styles = StyleSheet.create({
 							nestedScrollEnabled
 							keyboardDismissMode="on-drag"
 							showsVerticalScrollIndicator={false}
-							onScrollBeginDrag={Keyboard.dismiss}
 						>
 							<Text style={styles.formTitle}>Create Marketplace Listing</Text>
 							<Text style={draftRestored ? styles.draftRestoredHint : styles.draftHint}>
 								{draftRestored ? 'Draft restored from this device.' : 'Draft autosaves on this device while you type.'}
 							</Text>
+							<Text style={styles.draftHint}>Listings expire after 14 days. You can relist from your profile.</Text>
 							{hasDraftContent && (
 								<TouchableOpacity style={styles.clearDraftButton} onPress={confirmClearDraft}>
 									<Text style={styles.clearDraftButtonText}>Clear Draft</Text>
 								</TouchableOpacity>
 							)}
-								<FormInput label="Title" value={title} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setTitle(text); } }} required editable={canEditListing} />
+								<FormInput label="Title" value={title} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setTitle(text); } }} required editable={canEditListing} maxLength={40} />
 								<FormInput label="Description" value={description} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setDescription(text); } }} required multiline editable={canEditListing} />
 								<FormInput label="Price" value={price} onChangeText={text => { if (!user) setShowLogin(true); else if (!canPostListings) Alert.alert('Account Action Required', accountStatusMessage()); else { markListingFormStarted(); setPrice(text); } }} required keyboardType="numeric" editable={canEditListing} />
 								<FormInput
@@ -796,13 +797,12 @@ const styles = StyleSheet.create({
 									<Text style={styles.buttonText}>Continue to Login / Sign Up</Text>
 								</TouchableOpacity>
 								<TouchableOpacity onPress={handleBack} style={{ marginTop: 12, alignSelf: 'center' }}>
-									<Text style={{ color: '#475569', fontWeight: '700' }}>Back To List Hub</Text>
+									<Text style={{ color: '#475569', fontWeight: '700' }}>Back To Listings</Text>
 								</TouchableOpacity>
 							</View>
 						</View>
 					)}
 				</View>
-			</TouchableWithoutFeedback>
 		</KeyboardAvoidingView>
 	);
 }

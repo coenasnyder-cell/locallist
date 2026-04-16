@@ -115,9 +115,13 @@ export default function PetCard({ pet, onPress, compact = false, containerStyle 
 
         {displayLocation ? (
           <Text style={[styles.location, compact && styles.locationCompact]} numberOfLines={1}>
-            📍 {displayLocation}
+            {displayLocation}
           </Text>
-        ) : null}
+        ) : (
+          <Text style={[styles.location, compact && styles.locationCompact]} numberOfLines={1}>
+            Location not listed
+          </Text>
+        )}
 
         {!compact && pet.petAdoptionFee && pet.postType === 'adoption' ? (
           <Text style={styles.adoptionFee}>
