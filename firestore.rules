@@ -140,12 +140,7 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['zipApproved']) || request.resource.data.zipApproved == false)
         && (!request.resource.data.keys().hasAny(['accountType']) || request.resource.data.accountType in ['personal', 'user'])
         && (!request.resource.data.keys().hasAny(['publicProfileEnabled']) || request.resource.data.publicProfileEnabled is bool);
-      allow read: if signedIn()
-        && (
-          request.auth.uid == document
-          || isAdmin()
-          || userProfileVisibleToSignedInPeers()
-        );
+      allow read: if signedIn();
       allow update: if signedIn()
         && request.auth.uid == document
         && (

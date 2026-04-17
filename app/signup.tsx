@@ -8,7 +8,7 @@ import {
     signInWithCredential,
     updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
@@ -137,7 +137,12 @@ export default function SignUpScreen() {
 
       const db = getFirestore(app);
       const userRef = doc(db, 'users', user.uid);
-      const snap = await getDoc(userRef);
+      let snap;
+      try {
+        snap = await getDocFromServer(userRef);
+      } catch {
+        snap = await getDoc(userRef);
+      }
       const profileData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
       const fallbackName = String(user.displayName || user.email?.split('@')[0] || 'User').trim();
       const needsSetup = !snap.exists() || profileNeedsServiceArea(profileData as any);
