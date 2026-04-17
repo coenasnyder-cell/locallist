@@ -29,12 +29,14 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
       customerEphemeralKeySecret,
       subscriptionId,
       paymentIntentId,
+      invoiceId,
     } = data as {
       paymentIntentClientSecret?: string;
       customerId?: string;
       customerEphemeralKeySecret?: string;
       subscriptionId?: string;
       paymentIntentId?: string;
+      invoiceId?: string;
     };
 
     if (!paymentIntentClientSecret) {
@@ -65,7 +67,7 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
 
     // 4. Finalize: verify subscription is active and update Firestore
     const finalize = httpsCallable(functions, 'finalizePremiumSubscription');
-    await finalize({ subscriptionId, paymentIntentId });
+    await finalize({ subscriptionId, paymentIntentId, invoiceId });
 
     return { success: true };
   } catch (error: any) {

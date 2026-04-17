@@ -4,13 +4,13 @@ import { useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useCallback, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -64,7 +64,48 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
+  },
+  successCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 320,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  successIcon: {
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 6,
+  },
+  successBody: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  successBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#0f766e',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+  },
+  successBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
   hero: {
     marginHorizontal: 16,
@@ -74,6 +115,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 16,
     backgroundColor: '#0f766e',
+    alignItems: 'center',
   },
   heroEyebrow: {
     fontSize: 12,
@@ -82,6 +124,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.9)',
     marginBottom: 10,
+    textAlign: 'center',
   },
   heroTitle: {
     fontSize: 22,
@@ -89,11 +132,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     lineHeight: 28,
     marginBottom: 12,
+    textAlign: 'center',
   },
   heroSubtitle: {
     fontSize: 15,
     lineHeight: 22,
     color: 'rgba(255,255,255,0.92)',
+    textAlign: 'center',
   },
   section: {
     paddingHorizontal: 16,
@@ -101,17 +146,20 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     marginBottom: 12,
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '800',
     color: '#0f172a',
+    textAlign: 'center',
   },
   sectionLead: {
     fontSize: 14,
     color: '#64748b',
     marginBottom: 12,
     lineHeight: 20,
+    textAlign: 'center',
   },
   valueCard: {
     backgroundColor: '#fff',
@@ -199,6 +247,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     color: '#475569',
+    textAlign: 'center',
   },
   pricingStrong: {
     fontWeight: '800',
@@ -413,11 +462,17 @@ export default function PremiumUpgradeScreen() {
 
       {alreadyPremium ? (
         <View style={styles.contentCentered}>
-          <Text style={styles.title}>You&apos;re on Premium</Text>
-          <Text style={styles.body}>Manage your business from Business Hub.</Text>
-          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace('/(app)/business-hub')}>
-            <Text style={styles.primaryBtnText}>Business Hub</Text>
-          </TouchableOpacity>
+          <View style={styles.successCard}>
+            <View style={styles.successIcon}>
+              <Feather name="check-circle" size={48} color="#0f766e" />
+            </View>
+            <Text style={styles.successTitle}>You&apos;re on Premium</Text>
+            <Text style={styles.successBody}>Manage your business from Business Hub.</Text>
+            <TouchableOpacity style={styles.successBtn} onPress={() => router.replace('/(app)/business-hub')}>
+              <Feather name="briefcase" size={16} color="#fff" />
+              <Text style={styles.successBtnText}>Open Business Hub</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <>
@@ -427,33 +482,12 @@ export default function PremiumUpgradeScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.hero}>
-              <Text style={styles.heroEyebrow}>Local List for Business</Text>
-              <Text style={styles.heroTitle}>Get your business seen by more local customers</Text>
+              <Text style={styles.heroEyebrow}></Text>
+              <Text style={styles.heroTitle}>Grow your business locally</Text>
               <Text style={styles.heroSubtitle}>
                 Reach locals with featured placement, deeper analytics, and reputation tools, or start free and upgrade
                 anytime.
               </Text>
-            </View>
-
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Why businesses choose Premium</Text>
-              </View>
-              <ValueCard
-                label="TOP"
-                title="Get seen first"
-                body="Featured placement puts listings, services, and deals in front of shoppers when it matters."
-              />
-              <ValueCard
-                label="DATA"
-                title="Understand customers"
-                body="Go beyond views with richer analytics like clicks, trends, and promotion tracking."
-              />
-              <ValueCard
-                label="TRUST"
-                title="Build trust"
-                body="Review tools and a stronger presence help customers choose you with confidence."
-              />
             </View>
 
             <View style={styles.section}>
@@ -487,12 +521,14 @@ export default function PremiumUpgradeScreen() {
                 <Text style={styles.sectionTitle}>Simple pricing</Text>
               </View>
               <Text style={styles.pricingText}>
-                Premium is <Text style={styles.pricingStrong}>$10/month</Text>. Pay in the app with Apple Pay or card.
-                Cancel anytime. Free accounts stay free, add your business and grow at your pace.
+                Upgrading to a premium membership is just{' '}
+                <Text style={styles.pricingStrong}>$10/month</Text>. We accept Apple Pay, Google Pay, and card
+                payments. To sign up, just click the &quot;Premium Account&quot; option below. You can also opt out by
+                signing up for a free account by choosing the &quot;Free Account&quot; option below.
               </Text>
             </View>
 
-            <View style={{ height: 120 }} />
+            <View style={{ height: 24 }} />
           </ScrollView>
 
           <View style={[styles.bottomBar, { paddingBottom: 12 + insets.bottom }]}>
@@ -502,7 +538,7 @@ export default function PremiumUpgradeScreen() {
               accessibilityRole="button"
               accessibilityLabel="Create a free business account"
             >
-              <Text style={styles.outlineBtnText}>Free business</Text>
+              <Text style={styles.outlineBtnText}>Free Account</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.primaryBtn, busy && styles.primaryBtnDisabled]}
@@ -514,7 +550,7 @@ export default function PremiumUpgradeScreen() {
               {busy ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.primaryBtnText}>Premium - checkout</Text>
+                <Text style={styles.primaryBtnText}>Premium Account</Text>
               )}
             </TouchableOpacity>
           </View>

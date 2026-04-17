@@ -1,6 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { collection, getCountFromServer, getFirestore, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { app } from '../firebase';
 
 type Props = {
   onNavigateToPendingUsers: () => void;
@@ -15,9 +17,60 @@ export default function AdminMobileActionCenter({
   onNavigateToPendingListings,
   onNavigateToReports,
 }: Props) {
+  const [stats, setStats] = useState<{ users: number; listings: number; businesses: number; services: number } | null>(null);
+
+  useEffect(() => {
+    const db = getFirestore(app);
+    const fetchStats = async () => {
+      try {
+        const [usersSnap, listingsSnap, businessSnap, servicesSnap] = await Promise.all([
+          getCountFromServer(collection(db, 'users')),
+          getCountFromServer(collection(db, 'listings')),
+          getCountFromServer(query(collection(db, 'users'), where('accountType', '==', 'business'))),
+          getCountFromServer(collection(db, 'services')),
+        ]);
+        setStats({
+          users: usersSnap.data().count,
+          listings: listingsSnap.data().count,
+          businesses: businessSnap.data().count,
+          services: servicesSnap.data().count,
+        });
+      } catch {
+        setStats({ users: 0, listings: 0, businesses: 0, services: 0 });
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Admin Action Center</Text>
+
+      {/* Quick Stats */}
+      <View style={styles.statsRow}>
+        {stats ? (
+          <>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.users}</Text>
+              <Text style={styles.statLabel}>Users</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.listings}</Text>
+              <Text style={styles.statLabel}>Listings</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.businesses}</Text>
+              <Text style={styles.statLabel}>Businesses</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{stats.services}</Text>
+              <Text style={styles.statLabel}>Services</Text>
+            </View>
+          </>
+        ) : (
+          <ActivityIndicator size="small" color="#64748b" style={{ flex: 1, paddingVertical: 16 }} />
+        )}
+      </View>
 
       <TouchableOpacity style={styles.card} onPress={onNavigateToPendingUsers} activeOpacity={0.8}>
         <Feather name="users" size={22} color="#0ea5e9" />
@@ -90,6 +143,29 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '600',
     color: '#64748b',
     marginTop: 2,
   },

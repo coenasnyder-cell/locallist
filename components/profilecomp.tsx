@@ -3,10 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { sendEmailVerification } from 'firebase/auth';
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { app } from '../firebase';
+import { app, auth } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import CommunityDisclosures from './CommunityDisclosures';
 import EditBusinessProfileComp from './EditBusinessProfileComp';
@@ -670,6 +671,22 @@ export default function Profile() {
               <Feather name={hasVerifiedEmail ? 'check-circle' : 'circle'} size={16} color={hasVerifiedEmail ? '#16a34a' : '#64748b'} />
             </TouchableOpacity>
             <Text style={styles.welcomeStepText}>Verify your email</Text>
+            {!hasVerifiedEmail ? (
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    if (auth.currentUser) {
+                      await sendEmailVerification(auth.currentUser);
+                      Alert.alert('Sent', 'Verification email sent! Check your inbox.');
+                    }
+                  } catch {
+                    Alert.alert('Error', 'Could not send verification email. Please wait a moment and try again.');
+                  }
+                }}
+              >
+                <Text style={styles.resendLink}>(Resend Verification Email)</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
 
           <View style={styles.welcomeStepRow}>
@@ -1024,10 +1041,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   welcomeStepText: {
-    flex: 1,
     fontSize: 14,
     color: '#1e293b',
     fontWeight: '500',
+  },
+  resendLink: {
+    fontSize: 12,
+    color: '#4f46e5',
+    fontWeight: '600',
   },
   welcomeStepLinkButton: {
     flex: 1,

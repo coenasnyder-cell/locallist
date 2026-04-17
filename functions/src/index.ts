@@ -712,13 +712,16 @@ export const createPremiumSubscriptionSheet = onCall(
       }
     }
 
-    // Create subscription with incomplete payment so we get a clientSecret
+    // Create subscription (incomplete — Clover API does not auto-create a PI)
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
-      payment_settings: { save_default_payment_method: "on_subscription" },
-      expand: ["latest_invoice.payment_intent"],
+      payment_settings: {
+        save_default_payment_method: "on_subscription",
+        payment_method_types: ["card"],
+      },
+      expand: ["latest_invoice"],
       metadata: {
         firebaseUserId: userId,
         itemType: "premium_upgrade",
@@ -726,10 +729,25 @@ export const createPremiumSubscriptionSheet = onCall(
     });
 
     const invoice = subscription.latest_invoice as Stripe.Invoice;
-    const paymentIntent = (invoice as any).payment_intent as Stripe.PaymentIntent;
 
-    if (!paymentIntent?.client_secret) {
-      throw new Error("Could not obtain payment intent client secret from subscription.");
+    // Clover API removed payment_intent from Invoice.
+    // Create a PaymentIntent manually for the invoice amount.
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: invoice.amount_due,
+      currency: invoice.currency,
+      customer: customerId,
+      setup_future_usage: "off_session",
+      metadata: {
+        subscriptionId: subscription.id,
+        invoiceId: invoice.id,
+        firebaseUserId: userId,
+        itemType: "premium_upgrade",
+      },
+    });
+
+    if (!paymentIntent.client_secret) {
+      logger.error(`PaymentIntent created but no client_secret. PI: ${paymentIntent.id}, status: ${paymentIntent.status}`);
+      throw new Error("Could not obtain client secret for checkout.");
     }
 
     // Ephemeral key so the Payment Sheet can manage saved cards
@@ -739,7 +757,7 @@ export const createPremiumSubscriptionSheet = onCall(
     );
 
     logger.info(
-      `Premium subscription sheet created: sub=${subscription.id}, pi=${paymentIntent.id}, user=${userId}`
+      `Premium subscription sheet created: sub=${subscription.id}, pi=${paymentIntent.id}, invoice=${invoice.id}, user=${userId}`
     );
 
     return {
@@ -748,6 +766,7 @@ export const createPremiumSubscriptionSheet = onCall(
       customerEphemeralKeySecret: ephemeralKey.secret,
       subscriptionId: subscription.id,
       paymentIntentId: paymentIntent.id,
+      invoiceId: invoice.id,
     };
   }
 );
@@ -772,6 +791,7 @@ export const finalizePremiumSubscription = onCall(
 
     const subscriptionId = request.data?.subscriptionId;
     const paymentIntentId = request.data?.paymentIntentId;
+    const invoiceId = request.data?.invoiceId;
 
     if (!subscriptionId) {
       throw new Error("Missing subscriptionId");
@@ -780,6 +800,19 @@ export const finalizePremiumSubscription = onCall(
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2026-02-25.clover",
     });
+
+    // If we have a paymentIntentId and invoiceId, attach the payment to the invoice
+    // so the subscription transitions from incomplete → active
+    if (paymentIntentId && invoiceId) {
+      try {
+        await stripe.invoices.attachPayment(invoiceId, {
+          payment_intent: paymentIntentId,
+        });
+        logger.info(`Attached PI ${paymentIntentId} to invoice ${invoiceId}`);
+      } catch (attachErr: any) {
+        logger.warn(`attachPayment failed (may already be attached): ${attachErr.message}`);
+      }
+    }
 
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 

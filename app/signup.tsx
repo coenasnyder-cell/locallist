@@ -62,7 +62,7 @@ function normalizeReturnPath(returnTo: string | undefined): string {
   return cleaned;
 }
 
-const ACTION_URL = 'https://app.locallist.biz/auth-action';
+const ACTION_URL = 'https://local-list-wski21.firebaseapp.com';
 
 type LocationPermissionState = 'not_requested' | 'granted' | 'denied' | 'unavailable';
 type LocationReview = {
@@ -82,6 +82,8 @@ export default function SignUpScreen() {
   const [error, setError] = useState('');
   const [googleBusy, setGoogleBusy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resending, setResending] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationHint, setLocationHint] = useState('');
   const [locationPermission, setLocationPermission] = useState<LocationPermissionState>(
@@ -239,6 +241,27 @@ export default function SignUpScreen() {
     }
   };
 
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        try {
+          await sendEmailVerification(currentUser, { url: ACTION_URL });
+        } catch {
+          await sendEmailVerification(currentUser);
+        }
+        Alert.alert('Success', 'Verification email sent! Check your inbox.');
+      } else {
+        Alert.alert('Error', 'No signed-in user found. Please try logging in first.');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to send verification email. Please wait a moment and try again.');
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleEmailSignup = async () => {
     const trimmedFirstName = firstName.trim();
     const trimmedLastName = lastName.trim();
@@ -331,8 +354,9 @@ export default function SignUpScreen() {
           console.warn('Verification email fallback also failed after signup:', fallbackError);
           Alert.alert(
             'Verify Email',
-            'Your account was created, but we could not send a verification email right now. Please use "Resend Verification Email" from the verification screen after login.'
+            'Your account was created, but we could not send a verification email right now. Please use "Resend Verification Email" below.'
           );
+          setShowResend(true);
         }
       }
 
@@ -530,6 +554,12 @@ export default function SignUpScreen() {
               <Text style={styles.verificationText}>
                 We&apos;ll send a verification email after signup. Please verify your email to access all features and receive updates about your account.
               </Text>
+
+              {showResend ? (
+                <TouchableOpacity onPress={handleResendVerification} disabled={resending} style={styles.resendRow}>
+                  <Text style={styles.resendLink}>{resending ? 'Sending...' : 'Resend Verification Email'}</Text>
+                </TouchableOpacity>
+              ) : null}
 
               <View style={styles.bottomLinks}>
                 <TouchableOpacity
@@ -789,6 +819,15 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
     marginTop: 12,
+  },
+  resendRow: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  resendLink: {
+    color: '#4f46e5',
+    fontSize: 13,
+    fontWeight: '600',
   },
   bottomLinks: {
     marginTop: 20,
