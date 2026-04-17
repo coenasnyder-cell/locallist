@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 
-const ACTION_URL = 'https://local-list-wski21.firebaseapp.com';
+const ACTION_URL = 'https://locallist.biz/auth-action.html';
 
 export default function VerifyEmailPage() {
   const router = useRouter();

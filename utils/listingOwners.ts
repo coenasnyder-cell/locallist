@@ -30,20 +30,25 @@ export async function filterListingsWithExistingUsers<T extends { userId?: strin
     return [];
   }
 
-  const existingUserIds = new Set<string>();
-  const idChunks = chunkArray(listingUserIds, USER_ID_CHUNK_SIZE);
+  try {
+    const existingUserIds = new Set<string>();
+    const idChunks = chunkArray(listingUserIds, USER_ID_CHUNK_SIZE);
 
-  for (const idChunk of idChunks) {
-    const usersSnapshot = await getDocs(
-      query(collection(db, 'users'), where(documentId(), 'in', idChunk))
-    );
-    usersSnapshot.forEach((userDoc) => {
-      existingUserIds.add(userDoc.id);
+    for (const idChunk of idChunks) {
+      const usersSnapshot = await getDocs(
+        query(collection(db, 'users'), where(documentId(), 'in', idChunk))
+      );
+      usersSnapshot.forEach((userDoc) => {
+        existingUserIds.add(userDoc.id);
+      });
+    }
+
+    return listings.filter((item) => {
+      const ownerId = normalizeUserId(item.userId);
+      return !!ownerId && existingUserIds.has(ownerId);
     });
+  } catch (error) {
+    console.warn('filterListingsWithExistingUsers failed, returning all listings:', error);
+    return listings;
   }
-
-  return listings.filter((item) => {
-    const ownerId = normalizeUserId(item.userId);
-    return !!ownerId && existingUserIds.has(ownerId);
-  });
 }

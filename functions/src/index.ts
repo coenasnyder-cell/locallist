@@ -1498,16 +1498,28 @@ export const autoApproveService = onDocumentCreated(
 
       // Auto-approve the service
       const now = new Date();
-      await db.collection("services").doc(serviceId).update({
+      const isPremium = userData.businessTier === "premium" && userData.isPremium === true;
+
+      const updateFields: Record<string, unknown> = {
         isApproved: true,
         approvalStatus: "approved",
         autoApprovedAt: now.toISOString(),
         autoApprovedBySystem: true,
-      });
+      };
 
-      logger.info(`✅ Service ${serviceId} auto-approved for verified business ${userId}`, {
+      // Premium perk: auto-feature services for premium business users
+      if (isPremium) {
+        updateFields.isFeatured = true;
+        updateFields.featureTier = "premium";
+        updateFields.autoFeaturedByPremium = true;
+      }
+
+      await db.collection("services").doc(serviceId).update(updateFields);
+
+      logger.info(`✅ Service ${serviceId} auto-approved${isPremium ? " + auto-featured (premium)" : ""} for verified business ${userId}`, {
         serviceName: serviceData.serviceName,
         providerName: serviceData.providerName,
+        isPremium,
       });
 
       // Create admin notification

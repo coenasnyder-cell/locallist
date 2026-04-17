@@ -250,7 +250,7 @@ export default function Header({
                   try {
                     const auth = getAuth();
                     await Promise.allSettled([signOut(auth), signOutNativeGoogle()]);
-                    router.replace('/');
+                    router.replace('/publiclanding');
                     Alert.alert('Signed out', 'You are now signed out.');
                   } catch (e) {
                     Alert.alert('Error', 'Sign out failed.');

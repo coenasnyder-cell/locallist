@@ -210,7 +210,7 @@
         <p style="margin-top: 8px;">Your email has been verified. You can now access all features.</p>
       </div>
       <div style="text-align: center;">
-        <a href="https://app.locallist.biz/login.html" class="btn btn-primary">Return to Login</a>
+        <a href="myapp:///login" class="btn btn-primary">Open App</a>
       </div>
     </div>
 
@@ -231,7 +231,7 @@
         
         <div class="form-buttons">
           <button type="submit" class="btn btn-primary">Reset Password</button>
-          <a href="https://app.locallist.biz/login.html" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">Cancel</a>
+          <a href="myapp:///login" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">Cancel</a>
         </div>
       </form>
     </div>
@@ -254,7 +254,7 @@
         <p id="errorMessage" style="margin-top: 8px;">An error occurred. Please try again.</p>
       </div>
       <div style="text-align: center;">
-        <a href="https://app.locallist.biz/" class="btn btn-primary">Go to Home</a>
+        <a href="myapp:///" class="btn btn-primary">Open App</a>
       </div>
     </div>
 
@@ -362,7 +362,7 @@
         await auth.confirmPasswordReset(oobCode, newPassword);
         showState('resetComplete');
         setTimeout(() => {
-          window.location.href = 'https://app.locallist.biz/login.html';
+          window.location.href = 'myapp:///login';
         }, 1500);
       } catch (error) {
         console.error('Password reset error:', error);

@@ -15,7 +15,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn() && userDoc().role == 'admin';
+      return signedIn() && userDocExists() && userDoc().role == 'admin';
     }
 
     function isActiveAccount() {

@@ -12,7 +12,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.mycompany.locallist",
       "associatedDomains": [
-        "applinks:app.locallist.biz"
+        "applinks:locallist.biz"
       ],
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "We need access to your photo library to let you upload a profile picture.",
@@ -30,7 +30,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "app.locallist.biz",
+              "host": "locallist.biz",
               "pathPrefix": "/auth-action"
             }
           ],

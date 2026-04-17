@@ -5,7 +5,7 @@ import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet
 import FormInput from '../components/FormInput';
 import { app } from '../firebase';
 
-const ACTION_URL = 'https://local-list-wski21.firebaseapp.com';
+const ACTION_URL = 'https://locallist.biz/auth-action.html';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

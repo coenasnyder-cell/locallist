@@ -16,7 +16,7 @@ import SimpleSettingsPage from './SimpleSettingsPage';
 
 type SectionKey = 'marketplace' | 'yardSales' | 'events' | 'pets' | 'services';
 type SectionTab = 'active' | 'saved' | 'sold' | 'archived';
-type OnboardingStepKey = 'verifyEmail' | 'completeProfile' | 'postFirstListing' | 'readMessages' | 'firstSale';
+type OnboardingStepKey = 'verifyEmail' | 'completeProfile' | 'updateProfile' | 'postFirstListing' | 'readMessages' | 'firstSale';
 
 type AnyItem = Record<string, any>;
 
@@ -41,6 +41,7 @@ function defaultOnboardingChecks(): Record<OnboardingStepKey, boolean> {
   return {
     verifyEmail: false,
     completeProfile: false,
+    updateProfile: false,
     postFirstListing: false,
     readMessages: false,
     firstSale: false,
@@ -272,14 +273,14 @@ export default function Profile() {
 
   const hasVerifiedEmail = Boolean(user?.emailVerified) || manualOnboardingChecks.verifyEmail;
   const hasCompletedProfile = Boolean(
-    (userProfile?.name || userProfile?.displayName || user?.displayName) &&
-    (userProfile?.zipCode || userProfile?.zip || userProfile?.city)
+    userProfile?.zipCode || userProfile?.zip
   ) || manualOnboardingChecks.completeProfile;
+  const hasUpdatedProfile = manualOnboardingChecks.updateProfile;
   const totalOwnedPosts = listings.length + services.length + events.length + yardSales.length + pets.length;
   const hasPostedFirstListing = totalOwnedPosts > 0 || manualOnboardingChecks.postFirstListing;
   const hasReadMessages = manualOnboardingChecks.readMessages;
   const hasFirstSale = soldMarketplaceCount > 0 || manualOnboardingChecks.firstSale;
-  const onboardingCompletedSteps = [hasVerifiedEmail, hasCompletedProfile, hasPostedFirstListing, hasReadMessages, hasFirstSale].filter(Boolean).length;
+  const onboardingCompletedSteps = [hasVerifiedEmail, hasCompletedProfile, hasUpdatedProfile, hasPostedFirstListing, hasReadMessages, hasFirstSale].filter(Boolean).length;
 
   const getSectionItems = (section: SectionKey, tab: SectionTab): AnyItem[] => {
     if (section === 'marketplace') {
@@ -556,9 +557,17 @@ export default function Profile() {
   if (showSettings) {
     return (
       <SimpleSettingsPage
-        onClose={() => {
+        onClose={async () => {
           setShowSettings(false);
           fetchData();
+          // Reload onboarding checks in case updateProfile was marked
+          try {
+            const key = `${ONBOARDING_CHECKS_STORAGE_KEY}:${user.uid}`;
+            const saved = await AsyncStorage.getItem(key);
+            if (saved) {
+              setManualOnboardingChecks({ ...defaultOnboardingChecks(), ...JSON.parse(saved) });
+            }
+          } catch {}
         }}
       />
     );
@@ -693,7 +702,20 @@ export default function Profile() {
             <TouchableOpacity onPress={() => toggleManualOnboardingStep('completeProfile')} activeOpacity={0.8}>
               <Feather name={hasCompletedProfile ? 'check-circle' : 'circle'} size={16} color={hasCompletedProfile ? '#16a34a' : '#64748b'} />
             </TouchableOpacity>
-            <Text style={styles.welcomeStepText}>Complete your profile</Text>
+            <Text style={styles.welcomeStepText}>Verify your zip code</Text>
+          </View>
+
+          <View style={styles.welcomeStepRow}>
+            <TouchableOpacity onPress={() => toggleManualOnboardingStep('updateProfile')} activeOpacity={0.8}>
+              <Feather name={hasUpdatedProfile ? 'check-circle' : 'circle'} size={16} color={hasUpdatedProfile ? '#16a34a' : '#64748b'} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.welcomeStepLinkButton}
+              activeOpacity={0.75}
+              onPress={() => setShowSettings(true)}
+            >
+              <Text style={[styles.welcomeStepText, styles.welcomeStepLink]}>Update personal profile</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.welcomeStepRow}>
@@ -740,7 +762,7 @@ export default function Profile() {
             onPress={() => {
               Alert.alert(
                 'Your Progress',
-                `You have completed ${onboardingCompletedSteps}/5 setup steps.`,
+                `You have completed ${onboardingCompletedSteps}/6 setup steps.`,
                 [
                   { text: 'Verify Email', onPress: () => router.push('/verify-email') },
                   { text: 'Edit Profile', onPress: () => setShowSettings(true) },

@@ -62,7 +62,7 @@ function normalizeReturnPath(returnTo: string | undefined): string {
   return cleaned;
 }
 
-const ACTION_URL = 'https://local-list-wski21.firebaseapp.com';
+const ACTION_URL = 'https://locallist.biz/auth-action.html';
 
 type LocationPermissionState = 'not_requested' | 'granted' | 'denied' | 'unavailable';
 type LocationReview = {

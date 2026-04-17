@@ -2,31 +2,31 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import {
-    addDoc,
-    arrayRemove,
-    arrayUnion,
-    collection,
-    doc,
-    query as firestoreQuery,
-    getDoc,
-    onSnapshot,
-    orderBy,
-    serverTimestamp,
-    updateDoc,
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  query as firestoreQuery,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Alert,
-    Button,
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Button,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../firebase';
@@ -498,7 +498,7 @@ const ThreadChat = () => {
 
       <KeyboardAvoidingView
         style={styles.screen}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 76 : 0}
       >
         <View style={styles.chatShell}>

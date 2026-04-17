@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
@@ -51,6 +52,14 @@ export default function EditProfileComp() {
         zip,
       });
       Alert.alert('Profile updated', 'Your phone and zip code have been updated.');
+      // Mark the updateProfile onboarding step as completed
+      try {
+        const key = `profile-onboarding-checks-v1:${user.uid}`;
+        const saved = await AsyncStorage.getItem(key);
+        const checks = saved ? JSON.parse(saved) : {};
+        checks.updateProfile = true;
+        await AsyncStorage.setItem(key, JSON.stringify(checks));
+      } catch {}
     } catch (e) {
       Alert.alert('Error', 'There was a problem updating your profile.');
     }

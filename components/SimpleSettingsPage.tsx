@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -100,6 +101,14 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
           onPress: onClose,
         },
       ]);
+      // Mark the updateProfile onboarding step as completed
+      try {
+        const key = `profile-onboarding-checks-v1:${user.uid}`;
+        const saved = await AsyncStorage.getItem(key);
+        const checks = saved ? JSON.parse(saved) : {};
+        checks.updateProfile = true;
+        await AsyncStorage.setItem(key, JSON.stringify(checks));
+      } catch {}
     } catch (e) {
       Alert.alert('Error', 'There was a problem updating your profile.');
     }
@@ -207,17 +216,17 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
 
                       // Remove user-linked records first, then the profile document.
                       await Promise.all([
-                        deleteCollectionDocsForUser('listings', user.uid),
-                        deleteCollectionDocsForUser('services', user.uid),
-                        deleteCollectionDocsForUser('jobBoard', user.uid),
-                        deleteCollectionDocsForUser('deals', user.uid),
-                        deleteCollectionDocsForUser('events', user.uid),
-                        deleteCollectionDocsForUser('yardSales', user.uid),
-                        deleteCollectionDocsForUser('pets', user.uid),
-                        deleteCollectionDocsForUser('featurePurchases', user.uid),
-                        deleteCollectionDocsForUser('premiumPurchases', user.uid),
-                        deleteCollectionDocsForUser('saveListings', user.uid),
-                        deleteThreadsForUser(user.uid),
+                        deleteCollectionDocsForUser('listings', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('services', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('jobBoard', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('deals', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('events', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('yardSales', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('pets', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('featurePurchases', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('premiumPurchases', user.uid).catch(() => {}),
+                        deleteCollectionDocsForUser('saveListings', user.uid).catch(() => {}),
+                        deleteThreadsForUser(user.uid).catch(() => {}),
                         deleteDoc(doc(db, 'businessLocal', user.uid)).catch(() => {}),
                         deleteDoc(doc(db, 'shopLocal', user.uid)).catch(() => {}),
                       ]);
