@@ -30,6 +30,9 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
+      "cache": {
+        "disabled": true
+      },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
         "EXPO_PUBLIC_ANDROID_GOOGLE_CLIENT_ID": "280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com"

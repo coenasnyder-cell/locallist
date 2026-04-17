@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Old web exports (not needed for native builds)
+dist-web-check/
+dist-web-check-2/
+.expo-export-check/
+
+# Build logs
+eas-build-log*.txt
+
+# Local Android build artifacts
+android/build/
+android/.gradle/
+
+# Native generated
+.kotlin/
+ios/
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# IDE
+.idea/
+.vscode/
+
+# Docs (not needed for builds)
+*.md
+!README.md
+
+# Misc
+.DS_Store
+*.pem
+git
+master
+file-inventory.csv
