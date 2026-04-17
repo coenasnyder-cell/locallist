@@ -12,7 +12,7 @@ export function welcomeEmail(): { subject: string; html: string } {
 
         <!-- Logo -->
         <tr><td align="center" style="padding:40px 40px 32px;">
-          <img src="https://app.locallist.biz/assets/logo.png" alt="Local List — Harrison's Local Marketplace" width="200" style="display:block;" />
+          <img src="https://locallist.biz/assets/logo.png" alt="Local List — Harrison's Local Marketplace" width="200" style="display:block;" />
         </td></tr>
 
         <!-- Body -->

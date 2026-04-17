@@ -220,7 +220,7 @@ export const createCheckoutSession = onCall(
       // Determine base URL from the request or use environment variable
       const baseUrl = process.env.FUNCTIONS_EMULATOR === "true" 
         ? "http://localhost:8081" 
-        : "https://app.locallist.biz";
+        : "https://locallist.biz";
 
       const unitAmount = isService ? 1000 : 500;
       const durationDays = isService ? 30 : 7;
@@ -540,7 +540,7 @@ export const createPremiumUpgradeCheckoutSession = onCall(
     const isMobileApp = Boolean(request.data?.mobileApp);
     const baseUrl = process.env.FUNCTIONS_EMULATOR === "true"
       ? "http://localhost:8081"
-      : "https://app.locallist.biz";
+      : "https://locallist.biz";
 
     const successUrl = isMobileApp
       ? "myapp://auth-action?checkout=premium"

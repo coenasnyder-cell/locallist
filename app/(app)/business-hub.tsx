@@ -407,7 +407,7 @@ export default function BusinessHubScreen() {
         <View style={styles.webPromptCard}>
           <Text style={styles.webPromptTitle}>Want more detailed analytics?</Text>
           <Text style={styles.webPromptText}>Visit the Local List website for advanced reporting, historical trends, and detailed promotion breakdowns.</Text>
-          <TouchableOpacity style={styles.webPromptButton} onPress={() => Linking.openURL('https://app.locallist.biz')}>
+          <TouchableOpacity style={styles.webPromptButton} onPress={() => Linking.openURL('https://locallist.biz')}>
             <Text style={styles.webPromptButtonText}>Go to Website →</Text>
           </TouchableOpacity>
         </View>
