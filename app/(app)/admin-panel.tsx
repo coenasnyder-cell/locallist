@@ -80,14 +80,12 @@ export default function AdminTabScreen() {
             <Text style={styles.stateBody}>This panel is available to admin accounts only.</Text>
           </View>
         ) : currentPage === 'dashboard' ? (
-          <View>
-            <AdminMobileActionCenter
-              onNavigateToPendingUsers={handleNavigateToPendingUsers}
-              onNavigateToPendingBusinesses={handleNavigateToPendingBusinesses}
-              onNavigateToPendingListings={handleNavigateToPendingListings}
-              onNavigateToReports={handleNavigateToReports}
-            />
-          </View>
+          <AdminMobileActionCenter
+            onNavigateToPendingUsers={handleNavigateToPendingUsers}
+            onNavigateToPendingBusinesses={handleNavigateToPendingBusinesses}
+            onNavigateToPendingListings={handleNavigateToPendingListings}
+            onNavigateToReports={handleNavigateToReports}
+          />
         ) : currentPage === 'pending-users' ? (
           <AdminPendingApprovals />
         ) : currentPage === 'pending-businesses' ? (
