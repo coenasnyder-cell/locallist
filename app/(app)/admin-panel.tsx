@@ -8,23 +8,7 @@ import AdminMobileActionCenter from '../../components/AdminMobileActionCenter';
 import AdminPendingApprovals from '../../components/AdminPendingApprovals';
 import AdminPendingBusinesses from '../../components/AdminPendingBusinesses';
 
-const testEmailFunction = async (emailType: string) => {
-  try {
-    const functions = getFunctions();
-    const sendTestEmail = httpsCallable(functions, 'sendTestEmail');
-
-    const result = await sendTestEmail({
-      emailType,
-      recipientEmail: 'coena@locallist.biz' // Replace with your email
-    });
-
-    Alert.alert('Success', `Test ${emailType} email sent! Check your inbox.`);
-    console.log('Email sent:', result.data);
-  } catch (error: any) {
-    Alert.alert('Error', `Failed to send ${emailType} email: ${error.message}`);
-    console.error('Error:', error);
-  }
-};
+// Clean admin panel without test email functionality
 
 export default function AdminTabScreen() {
   const router = useRouter();
@@ -90,40 +74,6 @@ export default function AdminTabScreen() {
               onNavigateToPendingListings={handleNavigateToPendingListings}
               onNavigateToReports={handleNavigateToReports}
             />
-
-            {/* Test Email Buttons */}
-            <View style={styles.testEmailSection}>
-              <Text style={styles.testEmailTitle}>Test Email Templates</Text>
-              <View style={styles.testEmailButtons}>
-                <TouchableOpacity
-                  style={styles.testEmailBtn}
-                  onPress={() => testEmailFunction('welcome')}
-                >
-                  <Text style={styles.testEmailBtnText}>Test Welcome Email</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.testEmailBtn}
-                  onPress={() => testEmailFunction('premium')}
-                >
-                  <Text style={styles.testEmailBtnText}>Test Premium Email</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.testEmailBtn}
-                  onPress={() => testEmailFunction('featured')}
-                >
-                  <Text style={styles.testEmailBtnText}>Test Featured Email</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.testEmailBtn}
-                  onPress={() => testEmailFunction('message')}
-                >
-                  <Text style={styles.testEmailBtnText}>Test Message Email</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </View>
         ) : currentPage === 'pending-users' ? (
           <AdminPendingApprovals />
@@ -187,37 +137,5 @@ const styles = StyleSheet.create({
   },
   contentWrap: {
     flex: 1,
-  },
-  testEmailSection: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  testEmailTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: 12,
-  },
-  testEmailButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  testEmailBtn: {
-    backgroundColor: '#059669',
-    borderRadius: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    minWidth: 120,
-  },
-  testEmailBtnText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });
