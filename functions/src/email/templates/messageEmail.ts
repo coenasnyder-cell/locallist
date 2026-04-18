@@ -2,6 +2,7 @@ export function messageEmail(
   recipientName: string,
   senderName: string,
   messagePreview: string,
+  messageUrl = "https://locallist.biz/messages.html",
 ): { subject: string; html: string } {
   const preview =
     messagePreview.length > 200
@@ -33,6 +34,10 @@ export function messageEmail(
           </table>
           <p style="margin:0 0 8px;color:#3f3f46;font-size:16px;line-height:1.6;">
             Open the app to continue the conversation.
+          </p>
+          <p style="margin:0 0 24px;color:#3f3f46;font-size:16px;line-height:1.6;">
+            To view this message,
+            <a href="${messageUrl}" style="color:#2563eb;text-decoration:underline;">click here</a>.
           </p>
         </td></tr>
         <tr><td style="background:#fafafa;padding:24px 40px;border-top:1px solid #e4e4e7;">

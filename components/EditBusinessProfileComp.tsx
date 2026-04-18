@@ -2,9 +2,9 @@ import { useRouter } from 'expo-router';
 import { collection, doc, getDoc, getDocs, getFirestore, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { app } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
+import FormInput from './FormInput';
 import ImageUploader from './ImageUploader';
 
 export default function EditBusinessProfileComp({ onClose }: { onClose: () => void }) {
@@ -32,8 +32,6 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
   const [loading, setLoading] = useState(true);
   const [accountType, setAccountType] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
-  const [contactPickerOpen, setContactPickerOpen] = useState(false);
 
   const DEFAULT_BUSINESS_CATEGORIES = [
     'Restaurant',
@@ -341,24 +339,16 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
       />
 
       {/* 2. Business Category */}
-      <Text style={styles.label}>Business Category *</Text>
-      <View style={categoryPickerOpen ? { zIndex: 3000, marginBottom: 230 } : undefined}>
-        <DropDownPicker
-          open={categoryPickerOpen}
-          value={businessCategory || null}
-          items={categories.map((c) => ({ label: c, value: c }))}
-          setOpen={setCategoryPickerOpen}
-          setValue={(callback) => {
-            const next = typeof callback === 'function' ? callback(businessCategory || null) : callback;
-            setBusinessCategory(typeof next === 'string' ? next : '');
-          }}
-          placeholder="Select a category..."
-          style={{ borderColor: '#ccc', backgroundColor: '#f8f8f8' }}
-          dropDownContainerStyle={{ borderColor: '#ccc' }}
-          listMode="SCROLLVIEW"
-          maxHeight={220}
-        />
-      </View>
+      <FormInput
+        label="Business Category"
+        value={businessCategory}
+        onChangeText={setBusinessCategory}
+        required
+        type="picker"
+        options={categories}
+        placeholder="Select a category..."
+        dropdownMaxHeight={220}
+      />
 
       {/* 3. Business Description */}
       <Text style={styles.label}>Business Description *</Text>
@@ -417,31 +407,29 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
       />
 
       {/* 6. Preferred Contact Method */}
-      <Text style={styles.label}>Preferred Contact Method *</Text>
-      <View style={contactPickerOpen ? { zIndex: 2000, marginBottom: 200 } : undefined}>
-        <DropDownPicker
-          open={contactPickerOpen}
-          value={preferredContactMethod || null}
-          items={[
-            { label: 'Phone', value: 'phone' },
-            { label: 'Email', value: 'email' },
-            { label: 'Website', value: 'website' },
-            { label: 'Local List', value: 'local_list' },
-          ]}
-          setOpen={setContactPickerOpen}
-          setValue={(callback) => {
-            const next = typeof callback === 'function' ? callback(preferredContactMethod || null) : callback;
-            if (next === 'phone' || next === 'email' || next === 'website' || next === 'local_list') {
-              setPreferredContactMethod(next);
-            }
-          }}
-          placeholder="Select contact method"
-          style={{ borderColor: '#ccc', backgroundColor: '#f8f8f8' }}
-          dropDownContainerStyle={{ borderColor: '#ccc' }}
-          listMode="SCROLLVIEW"
-          maxHeight={200}
-        />
-      </View>
+      <FormInput
+        label="Preferred Contact Method"
+        value={
+          preferredContactMethod === 'phone'
+            ? 'Phone'
+            : preferredContactMethod === 'website'
+              ? 'Website'
+              : preferredContactMethod === 'local_list'
+                ? 'Local List'
+                : 'Email'
+        }
+        onChangeText={(nextValue) => {
+          if (nextValue === 'Phone') setPreferredContactMethod('phone');
+          else if (nextValue === 'Website') setPreferredContactMethod('website');
+          else if (nextValue === 'Local List') setPreferredContactMethod('local_list');
+          else setPreferredContactMethod('email');
+        }}
+        required
+        type="picker"
+        options={['Phone', 'Email', 'Website', 'Local List']}
+        placeholder="Select contact method"
+        dropdownMaxHeight={200}
+      />
 
       <View style={styles.switchRow}>
         <Text style={styles.switchLabel}>OK to message on Local List</Text>

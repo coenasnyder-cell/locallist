@@ -523,8 +523,9 @@ export default function PremiumUpgradeScreen() {
               <Text style={styles.pricingText}>
                 Upgrading to a premium membership is just{' '}
                 <Text style={styles.pricingStrong}>$10/month</Text>. We accept Apple Pay, Google Pay, and card
-                payments. To sign up, just click the &quot;Premium Account&quot; option below. You can also opt out by
-                signing up for a free account by choosing the &quot;Free Account&quot; option below.
+                payments, and you can cancel anytime. To sign up, just click the &quot;Premium Account&quot; option
+                below. You can also opt out by signing up for a free account by choosing the &quot;Free Account&quot;
+                option below.
               </Text>
             </View>
 

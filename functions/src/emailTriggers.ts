@@ -122,7 +122,8 @@ export const onMessageCreated = onDocumentCreated(
           continue;
         }
 
-        const template = messageEmail(recipientName, senderName, text);
+        const threadUrl = `https://locallist.biz/messages.html?threadId=${encodeURIComponent(event.params.threadId)}`;
+        const template = messageEmail(recipientName, senderName, text, threadUrl);
 
         try {
           await sendEmail({

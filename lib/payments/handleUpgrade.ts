@@ -49,6 +49,7 @@ export async function handleUpgrade(): Promise<UpgradeResult> {
       paymentIntentClientSecret,
       customerId,
       customerEphemeralKeySecret,
+      primaryButtonLabel: 'Subscribe for $10/month',
     });
 
     if (initError) {
