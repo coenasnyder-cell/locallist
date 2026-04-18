@@ -2022,7 +2022,7 @@
     async function sendVerificationEmailFromProfile() {
       try {
         await currentUser.sendEmailVerification({
-          url: 'https://app.locallist.biz/verify-email.html'
+          url: 'https://locallist.biz/verify-email.html'
         });
         alert('Verification email sent! Please check your inbox.');
       } catch (error) {

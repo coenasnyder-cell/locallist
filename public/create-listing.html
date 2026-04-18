@@ -654,7 +654,7 @@
     async function sendVerificationEmail() {
       try {
         await currentUser.sendEmailVerification({
-          url: 'https://app.locallist.biz/verify-email.html'
+          url: 'https://locallist.biz/verify-email.html'
         });
         showSuccess('Verification email sent! Please check your inbox and verify your email.');
         document.getElementById('verificationWarning').style.display = 'block';
