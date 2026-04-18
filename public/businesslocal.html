@@ -453,13 +453,21 @@
       </div>
 
       <form id="businessProfileForm">
-        <!-- Business Logo Section -->
-        <div class="section-title">Business Logo</div>
-        <div class="form-group">
-          <label class="form-label">Business Logo <span style="color: #999;">(Optional)</span></label>
-          <input type="file" id="businessLogo" class="form-input" accept="image/*">
-          <div class="hint">Recommended: PNG or JPG, square format. Max 5MB.</div>
-          <img id="logoPreview" class="logo-preview" alt="Logo preview">
+        <!-- Business Media Section -->
+        <div class="section-title">Business Media</div>
+        <div class="grid">
+          <div class="form-group">
+            <label class="form-label">Cover Image <span style="color: #999;">(Optional)</span></label>
+            <input type="file" id="businessCoverImage" class="form-input" accept="image/*">
+            <div class="hint">Recommended: a wide JPG or PNG banner image. Max 5MB.</div>
+            <img id="coverImagePreview" class="logo-preview" alt="Cover image preview">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Logo Image <span style="color: #999;">(Optional)</span></label>
+            <input type="file" id="businessPhotoSingle" class="form-input" accept="image/*">
+            <div class="hint">Recommended: PNG or JPG, square format. Max 5MB.</div>
+            <img id="photoSinglePreview" class="logo-preview" alt="Logo image preview">
+          </div>
         </div>
 
         <!-- Business Information Section -->
@@ -517,6 +525,7 @@
           <select id="preferredContactMethod" class="form-select" required>
             <option value="email">Email</option>
             <option value="phone">Phone</option>
+            <option value="website">Website</option>
             <option value="local_list">Local List Messaging</option>
           </select>
           <div class="hint">Choose the main contact option shown when users tap the Contact Seller button on your profile.</div>
@@ -600,6 +609,7 @@
           <input type="file" id="businessImages" class="form-input" accept="image/*" multiple>
           <div class="hint">Upload photos of your business, products, or storefront. You can select multiple files.</div>
           <div id="businessImagePreview" class="image-preview"></div>
+          <div class="hint">At least one image is required across your cover image, logo image, or gallery images.</div>
         </div>
 
         <!-- Submit Section -->
@@ -674,14 +684,17 @@
     const upgradeBusinessCta = document.getElementById('upgradeBusinessCta');
     const duplicateClaimCta = document.getElementById('duplicateClaimCta');
     const claimExistingBtn = document.getElementById('claimExistingBtn');
-    const businessLogoInput = document.getElementById('businessLogo');
-    const logoPreview = document.getElementById('logoPreview');
+    const businessCoverImageInput = document.getElementById('businessCoverImage');
+    const coverImagePreview = document.getElementById('coverImagePreview');
+    const businessPhotoSingleInput = document.getElementById('businessPhotoSingle');
+    const photoSinglePreview = document.getElementById('photoSinglePreview');
     const businessImagesInput = document.getElementById('businessImages');
     const businessImagePreview = document.getElementById('businessImagePreview');
     let currentUser = null;
     let currentUserRole = null;
     let existingBusinessProfileData = null;
-    let uploadedBusinessLogoUrl = null;
+    let uploadedBusinessCoverImageUrl = null;
+    let uploadedBusinessPhotoSingleUrl = null;
     let uploadedBusinessImageUrls = [];
     let isUploading = false;
     let duplicateListingId = null;
@@ -1000,18 +1013,24 @@
       }
     });
 
-    // Logo preview handler
-    businessLogoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
+    function bindSingleImagePreview(input, preview) {
+      if (!input || !preview) return;
+
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
         const reader = new FileReader();
         reader.onload = (event) => {
-          logoPreview.src = event.target.result;
-          logoPreview.style.display = 'block';
+          preview.src = event.target.result;
+          preview.style.display = 'block';
         };
         reader.readAsDataURL(file);
-      }
-    });
+      });
+    }
+
+    bindSingleImagePreview(businessCoverImageInput, coverImagePreview);
+    bindSingleImagePreview(businessPhotoSingleInput, photoSinglePreview);
 
     // Business images preview handler
     businessImagesInput.addEventListener('change', (e) => {
@@ -1106,11 +1125,19 @@
           renderBusinessCategorySelect(pendingUserBusinessCategory);
           document.getElementById('businessHours').value = profileData.businessHours || '';
 
-          // Show existing logo if available
-          if (profileData.businessLogo) {
-            logoPreview.src = profileData.businessLogo;
-            logoPreview.style.display = 'block';
-            uploadedBusinessLogoUrl = profileData.businessLogo;
+          const existingCoverImage = profileData.businessCoverImage || '';
+          const existingPhotoSingle = profileData.businessPhotoSingle || profileData.businessPhotosingle || profileData.businessLogo || '';
+
+          if (existingCoverImage) {
+            coverImagePreview.src = existingCoverImage;
+            coverImagePreview.style.display = 'block';
+            uploadedBusinessCoverImageUrl = existingCoverImage;
+          }
+
+          if (existingPhotoSingle) {
+            photoSinglePreview.src = existingPhotoSingle;
+            photoSinglePreview.style.display = 'block';
+            uploadedBusinessPhotoSingleUrl = existingPhotoSingle;
           }
         } catch (error) {
           console.error('Error loading user data:', error);
@@ -1148,7 +1175,8 @@
       const businessZipcode = document.getElementById('businessZipcode').value.trim();
       const businessCategory = document.getElementById('businessCategory').value.trim();
       const businessHours = document.getElementById('businessHours').value.trim();
-      const logoFile = businessLogoInput.files[0];
+      const coverImageFile = businessCoverImageInput.files[0];
+      const photoSingleFile = businessPhotoSingleInput.files[0];
       const imageFiles = Array.from(businessImagesInput.files || []);
 
       clearDuplicateClaimCta();
@@ -1193,6 +1221,11 @@
         return;
       }
 
+      if (preferredContactMethod === 'website' && !businessWebsite) {
+        showError('Add a website link if you want users to contact you through your website.');
+        return;
+      }
+
       if (preferredContactMethod === 'local_list' && !allowLocalListMessaging) {
         showError('Check the Local List messaging option to use it as your preferred contact method.');
         return;
@@ -1210,6 +1243,20 @@
 
       if (!businessZipcode) {
         showError('Zip code is required.');
+        return;
+      }
+
+      const hasAtLeastOneImage = Boolean(
+        coverImageFile ||
+        photoSingleFile ||
+        imageFiles.length ||
+        uploadedBusinessCoverImageUrl ||
+        uploadedBusinessPhotoSingleUrl ||
+        uploadedBusinessImageUrls.length
+      );
+
+      if (!hasAtLeastOneImage) {
+        showError('Please upload at least one image using the cover image, logo image, or gallery images fields.');
         return;
       }
 
@@ -1235,11 +1282,16 @@
           return;
         }
 
-        // Upload logo if new one selected
-        if (logoFile) {
-          const logoRef = storage.ref(`businessLogos/${currentUser.uid}/${logoFile.name}`);
-          await logoRef.put(logoFile);
-          uploadedBusinessLogoUrl = await logoRef.getDownloadURL();
+        if (coverImageFile) {
+          const coverImageRef = storage.ref(`businessCoverImages/${currentUser.uid}/${Date.now()}_${coverImageFile.name}`);
+          await coverImageRef.put(coverImageFile);
+          uploadedBusinessCoverImageUrl = await coverImageRef.getDownloadURL();
+        }
+
+        if (photoSingleFile) {
+          const photoSingleRef = storage.ref(`businessLogos/${currentUser.uid}/${Date.now()}_${photoSingleFile.name}`);
+          await photoSingleRef.put(photoSingleFile);
+          uploadedBusinessPhotoSingleUrl = await photoSingleRef.getDownloadURL();
         }
 
         // Keep existing gallery images unless the user uploads additional files.
@@ -1292,7 +1344,9 @@
           businessZipcode: businessZipcode || null,
           businessCategory: businessCategory,
           businessHours: businessHours || null,
-          businessLogo: uploadedBusinessLogoUrl || null,
+          businessCoverImage: uploadedBusinessCoverImageUrl || null,
+          businessPhotoSingle: uploadedBusinessPhotoSingleUrl || null,
+          businessLogo: uploadedBusinessPhotoSingleUrl || null,
           businessImages: businessImageUrlsToSave,
           userId: currentUser.uid,
           userEmail: currentUser.email,
@@ -1329,7 +1383,9 @@
           businessZipcode: businessZipcode || null,
           businessCategory: businessCategory,
           businessHours: businessHours || null,
-          businessLogo: uploadedBusinessLogoUrl || null
+          businessCoverImage: uploadedBusinessCoverImageUrl || null,
+          businessPhotoSingle: uploadedBusinessPhotoSingleUrl || null,
+          businessLogo: uploadedBusinessPhotoSingleUrl || null
         });
 
         existingBusinessProfileData = {

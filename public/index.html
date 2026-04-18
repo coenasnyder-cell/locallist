@@ -140,7 +140,7 @@
 
     .featured-badge {
       display: inline-block;
-      background: #f59e0b;
+      background: #475569;
       color: #fff;
       font-size: 10px;
       font-weight: 700;
@@ -190,7 +190,7 @@
       position: absolute;
       top: 6px;
       left: 6px;
-      background: #f59e0b;
+      background: #475569;
       color: #fff;
       font-size: 10px;
       font-weight: 700;
@@ -833,8 +833,7 @@
             <div class="card" onclick="window.location.href='single-listing.html?id=${doc.id}'" style="cursor: pointer; position: relative;">
               <div style="position: relative;">
                 ${imageHtml}
-                <span class="card-featured-overlay">⭐ Featured</span>
-                ${businessBadge}
+                <span class="card-featured-overlay">Featured</span>
               </div>
               <div class="card-content">
                 <div class="card-title">${listing.title || 'Untitled'}</div>
@@ -945,7 +944,6 @@
               <div style="position: relative;">
                 ${imageHtml}
                 ${featuredOverlay}
-                ${businessBadge}
               </div>
               <div class="card-content">
                 <div class="card-title">${listing.title || 'Untitled'}</div>

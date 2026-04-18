@@ -382,6 +382,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      border: 1px solid #e5e7eb;
     }
 
     .profile-card:hover {
@@ -392,7 +393,7 @@
     .profile-cover {
       width: 100%;
       height: 120px;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      background: #e2e8f0;
       position: relative;
       overflow: hidden;
     }
@@ -407,7 +408,13 @@
     .profile-cover-fallback {
       width: 100%;
       height: 100%;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e2e8f0;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .profile-image {
@@ -445,36 +452,62 @@
 
     .tier-badge {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: white;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 16px;
-      text-transform: uppercase;
+      top: 8px;
+      left: 8px;
+      background: #475569;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.3px;
+      z-index: 10;
+      opacity: 0.95;
     }
 
     .tier-badge.premium {
-      background: #FFD700;
-      color: #8B4513;
+      background: #475569;
+      color: #fff;
     }
 
     .profile-content {
-      padding: 0 16px 16px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
 
     .profile-name {
-      font-size: 20px;
-      font-weight: 800;
-      color: #333;
-      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-meta-row {
       display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      margin-top: 2px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .profile-meta-text {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .profile-location {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f766e;
+      line-height: 1.4;
     }
 
     .profile-description {
@@ -621,19 +654,20 @@
     .profile-footer {
       display: flex;
       gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #eee;
+      margin-top: 8px;
+      padding-top: 0;
+      border-top: none;
       flex-wrap: wrap;
     }
 
     .profile-footer button {
-      flex: 1 1 140px;
+      flex: 1 1 auto;
+      width: 100%;
       padding: 8px 12px;
       border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.3s;
     }
@@ -1184,9 +1218,9 @@
     }
 
     function createProfileCard(profile) {
-      const coverImageUrl = profile.businessCoverImage
-        || profile.businessBanner
+      const coverImageUrl = profile.businessPhotoSingle
         || (Array.isArray(profile.businessImages) && profile.businessImages.length ? profile.businessImages[0] : '')
+        || profile.businessLogo
         || '';
 
       const additionalImages = (Array.isArray(profile.businessImages) ? profile.businessImages : [])
@@ -1203,8 +1237,8 @@
         : '';
 
       const coverMarkup = coverImageUrl
-        ? `<img src="${coverImageUrl}" alt="${profile.businessName} cover banner" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;profile-cover-fallback&quot;></div>';">`
-        : '<div class="profile-cover-fallback"></div>';
+        ? `<img src="${coverImageUrl}" alt="${profile.businessName}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;profile-cover-fallback&quot;>No Image</div>';">`
+        : '<div class="profile-cover-fallback">No Image</div>';
 
       const businessImage = profile.businessLogo 
         ? `<img src="${profile.businessLogo}" alt="${profile.businessName}">`
@@ -1212,7 +1246,7 @@
 
       const tier = profile.businessTier || 'free';
       const tierBadge = tier === 'premium'
-        ? '<span class="tier-badge premium">⭐ Premium Featured</span>'
+        ? '<span class="tier-badge premium">Featured</span>'
         : '';
       const isClaimed = isBusinessClaimed(profile);
       const isVerified = isBusinessVerified(profile);
@@ -1226,6 +1260,8 @@
       const locationMarkup = locationLine
         ? `<div class="profile-contact">📍 ${locationLine}</div>`
         : '';
+      const categoryLabel = profile.businessCategory ? formatCategoryLabel(profile.businessCategory) : 'Uncategorized';
+      const locationLabel = profile.businessCity || locationLine || 'Location not listed';
       const ratingCount = Number(profile.ratingCount || 0);
       const ratingAverage = Number(profile.ratingAverage || 0);
       const hasReviews = Number.isFinite(ratingCount) && ratingCount > 0 && Number.isFinite(ratingAverage) && ratingAverage > 0;
@@ -1262,22 +1298,15 @@
             ${tierBadge}
           </div>
           <div class="profile-content">
-            <div class="profile-image">
-              ${businessImage}
-            </div>
             <div class="profile-name">
-              <span>${profile.businessName}</span>
+              <span>${profile.businessName || 'Business'}</span>
             </div>
-            <p class="profile-description">${profile.businessDescription || 'No description available'}</p>
-            ${reviewMarkup}
-            ${galleryMarkup}
-            ${locationMarkup}
-            ${profile.businessWebsite ? `<div class="profile-contact">🌐 <a href="${profile.businessWebsite}" target="_blank">Visit Website</a></div>` : ''}
-            ${claimedLabel}
-            ${socialMarkup}
-            ${claimInline}
+            <div class="profile-meta-row">
+              <span class="profile-meta-text">${categoryLabel}</span>
+              <span class="profile-location">📍 ${locationLabel}</span>
+            </div>
             <div class="profile-footer">
-              <button class="btn-view" onclick="viewDetails('${profile.id}')">View Details</button>
+              <button class="btn-view" onclick="event.stopPropagation(); viewDetails('${profile.id}')">View Details</button>
             </div>
           </div>
         </div>

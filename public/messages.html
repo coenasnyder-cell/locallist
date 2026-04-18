@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-533FSPH8JT');
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messages - Local List</title>
@@ -114,7 +106,7 @@
       border-radius: 4px;
       padding: 6px 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 12px;
       opacity: 0;
       transition: opacity 0.2s;
       z-index: 10;
@@ -408,7 +400,7 @@
     }
     
     .message-time {
-      font-size: 16px;
+      font-size: 12px;
       color: #999;
       margin-top: 4px;
     }
@@ -803,7 +795,7 @@
     }
     
     .message-select-time {
-      font-size: 16px;
+      font-size: 12px;
       color: #999;
       margin-top: 6px;
     }
@@ -1000,7 +992,7 @@
 
       .listing-context-btn {
         padding: 7px 10px;
-        font-size: 16px;
+        font-size: 12px;
       }
 
       .messages-area {
@@ -1060,7 +1052,7 @@
       </div>
       
       <div class="message-select-explanation">
-        <label for="messageReportExplanation">Why are you reporting this message? (optional)</label>
+        <label>Why are you reporting this message? (optional)</label>
         <textarea id="messageReportExplanation" placeholder="Please provide details about why you're reporting this message..."></textarea>
       </div>
       
@@ -1159,7 +1151,7 @@
       </div>
       
       <div class="report-modal-explanation active">
-        <label for="reportUserExplanationText" style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Please explain your reason for reporting this user (optional)</label>
+        <label style="display: block; font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">Please explain your reason for reporting this user (optional)</label>
         <textarea placeholder="Provide details about why you're reporting this user..." id="reportUserExplanationText" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px;"></textarea>
       </div>
       
@@ -1219,17 +1211,7 @@
       if (Object.prototype.hasOwnProperty.call(userPhotoCache, userId)) {
         return userPhotoCache[userId];
       }
-      try {
-        const userDoc = await db.collection('users').doc(userId).get();
-        const photoUrl = userDoc.exists ? getUserPhotoFromData(userDoc.data()) : '';
-        userPhotoCache[userId] = photoUrl || '';
-        return userPhotoCache[userId];
-      } catch (error) {
-        console.error('Error loading user photo:', error);
-        userPhotoCache[userId] = '';
-        return '';
-      }
-    }
+
 
     async function markThreadAsRead(threadId) {
       if (!threadId || !currentUser?.uid) return;
@@ -1246,6 +1228,17 @@
         }
       } catch (error) {
         console.log('Error marking thread as read:', error);
+      }
+    }
+      try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        const photoUrl = userDoc.exists ? getUserPhotoFromData(userDoc.data()) : '';
+        userPhotoCache[userId] = photoUrl || '';
+        return userPhotoCache[userId];
+      } catch (error) {
+        console.error('Error loading user photo:', error);
+        userPhotoCache[userId] = '';
+        return '';
       }
     }
     

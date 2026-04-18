@@ -214,6 +214,18 @@
       color: #475569;
     }
 
+    .seller-name a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .seller-name a:hover {
+      color: #334155;
+      border-bottom-color: currentColor;
+    }
+
     .seller-location {
       font-size: 13px;
       color: #666;
@@ -564,6 +576,37 @@
 
     let currentListing = null;
 
+    function escapeHtml(value) {
+      const div = document.createElement('div');
+      div.textContent = String(value || '');
+      return div.innerHTML;
+    }
+
+    async function getSellerProfileHref(userId) {
+      if (!userId) return '';
+
+      try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (!userDoc.exists) return '';
+
+        const userData = userDoc.data() || {};
+        const accountType = String(userData.accountType || '').trim().toLowerCase();
+
+        if (accountType === 'business') {
+          return `business-profile.html?id=${encodeURIComponent(userId)}`;
+        }
+
+        if (userData.publicProfileEnabled === false) {
+          return '';
+        }
+
+        return `user-profile.html?id=${encodeURIComponent(userId)}`;
+      } catch (error) {
+        console.warn('Could not determine seller profile link:', error);
+        return '';
+      }
+    }
+
     function getTodayDateKey() {
       const now = new Date();
       const y = now.getFullYear();
@@ -654,6 +697,7 @@
         }
 
         currentListing = { id: listingDoc.id, ...listingDoc.data() };
+        currentListing.sellerProfileHref = await getSellerProfileHref(currentListing.userId);
         await incrementListingViewCount(currentListing);
         await trackPromotionDailyEvent('marketplace', 'click', currentListing.userId || currentListing.businessId || '', `click_marketplace_${promotionId}_${currentListing.id}`);
         renderListing();
@@ -705,6 +749,9 @@
       const listingCondition = currentListing.condition || '';
       const listingLocation = currentListing.city || 'TBD';
       const sellerName = currentListing.sellerName || 'Local Seller';
+      const sellerNameHtml = currentListing.sellerProfileHref
+        ? `&#128100; <a href="${currentListing.sellerProfileHref}">${escapeHtml(sellerName)}</a>`
+        : `&#128100; ${escapeHtml(sellerName)}`;
 
       const eventDateRow = currentListing.eventDate
         ? `<div class="event-date-row">Event Date: ${currentListing.eventDate}</div>`
@@ -758,7 +805,7 @@
               <div class="seller-section">
                 <div class="seller-title">Seller Information</div>
                 <div class="seller-info">
-                  <div class="seller-name">👤 ${sellerName}</div>
+                  <div class="seller-name">${sellerNameHtml}</div>
                   <div class="seller-location">📍 ${listingLocation}</div>
                 </div>
               </div>

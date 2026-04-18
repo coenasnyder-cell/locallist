@@ -60,7 +60,8 @@
 
     .pet-services-promo {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+      align-items: stretch;
       gap: 12px;
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border: 1px solid #e2e8f0;
@@ -73,6 +74,8 @@
 
     .pet-services-promo-image {
       width: 100%;
+      height: 100%;
+      min-height: 220px;
       max-height: 300px;
       object-fit: cover;
       border-radius: 10px;
@@ -84,10 +87,11 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
-      text-align: center;
+      align-items: flex-start;
+      text-align: left;
       gap: 8px;
-      padding: 8px;
+      min-width: 0;
+      padding: 12px 14px;
     }
 
     .pet-services-promo-title {
@@ -107,7 +111,7 @@
     .pet-services-promo-actions {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 8px;
       margin-top: 4px;
     }
@@ -218,9 +222,10 @@
 
     .service-card-image {
       width: 100%;
-      height: 140px;
-      object-fit: cover;
-      background: #f0f0f0;
+      height: clamp(180px, 28vw, 280px);
+      object-fit: contain;
+      background: #f8fafc;
+      padding: 10px;
       display: block;
     }
 
@@ -240,13 +245,6 @@
       font-size: 13px;
       color: #666;
       margin-bottom: 4px;
-    }
-
-    .service-card-price {
-      font-size: 13px;
-      font-weight: 700;
-      color: #1565c0;
-      margin-top: 6px;
     }
 
     .services-chips {
@@ -305,11 +303,65 @@
       gap: 8px;
     }
 
+    .pet-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pet-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
     .pet-count {
       color: #999;
       font-size: 14px;
       font-weight: normal;
       margin-left: auto;
+    }
+
+    .pet-post-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .pet-post-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    .pet-post-btn-lost {
+      background: #fff7ed;
+      border-color: #fdba74;
+      color: #c2410c;
+    }
+
+    .pet-post-btn-found {
+      background: #faf5ff;
+      border-color: #d8b4fe;
+      color: #7e22ce;
+    }
+
+    .pet-post-btn-adoption {
+      background: #fdf2f8;
+      border-color: #f9a8d4;
+      color: #be185d;
     }
 
     .pet-section p {
@@ -475,97 +527,14 @@
       h1 {
         font-size: 24px;
       }
-    }
 
-    .cta-section {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 30px;
-      padding: 20px;
-      background: transparent;
-      box-shadow: none;
-    }
+      .pet-section-header {
+        align-items: flex-start;
+      }
 
-    .cta-button {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      gap: 10px;
-      min-height: 240px;
-      padding: 24px;
-      background: #f0f0f0;
-      border: 2px solid transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: visible;
-    }
-
-    .cta-button:hover {
-      transform: translateY(-2px);
-      box-shadow: none;
-    }
-
-    .cta-button-lost {
-      background: transparent;
-      border-color: transparent;
-      background-image: url('lost-pet-bg.jpg');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      color: #fff;
-    }
-
-    .cta-button-adoption {
-      background: transparent;
-      border-color: transparent;
-      background-image: url('adoption-bg.jpg');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      color: #fff;
-    }
-
-    .cta-button-found {
-      background: transparent;
-      border-color: transparent;
-      background-image: url('found-pet-bg.jpg');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      color: #fff;
-    }
-
-    .cta-button-emoji {
-      font-size: 34px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .cta-button-text {
-      font-size: 17px;
-      font-weight: 700;
-      color: #333;
-      position: relative;
-      z-index: 1;
-    }
-
-    .cta-button-lost .cta-button-text {
-      color: #fff;
-    }
-
-    .cta-button-adoption .cta-button-text {
-      color: #fff;
-    }
-
-    .cta-button-found .cta-button-text {
-      color: #fff;
+      .pet-post-btn {
+        width: 100%;
+      }
     }
 
     @media (max-width: 768px) {
@@ -573,16 +542,8 @@
         grid-template-columns: 1fr;
       }
 
-      .cta-section {
-        grid-template-columns: 1fr;
-      }
-
       .services-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .cta-button {
-        min-height: 220px;
       }
 
       .services-header-top {
@@ -597,12 +558,6 @@
   <div class="container">
     <h1>🐾 The Pet Corner</h1>
     <p class="subtitle">Your one-stop resource for lost pets, adoptions, and services for our furry friends</p>
-
-    <div class="cta-section">
-      <a href="create-pet-post.html?type=lost" class="cta-button cta-button-lost" aria-label="Report Lost Pet"></a>
-      <a href="create-found-pet.html" class="cta-button cta-button-found" aria-label="Report Found Pet"></a>
-      <a href="create-adoption-listing.html" class="cta-button cta-button-adoption" aria-label="Pets for Adoption"></a>
-    </div>
 
     <section class="pet-services-promo" aria-label="Benefits of listing a pet service">
       <img class="pet-services-promo-image" src="pethub.png" alt="Promote your pet services on Local List">
@@ -859,7 +814,6 @@
         const title = escapeHtml(service.title || 'Untitled Service');
         const image = service.image || placeholderSvg;
         const location = escapeHtml(service.location || 'Location TBD');
-        const price = escapeHtml(service.priceText || 'Contact for price');
         const label = service.type === 'service' ? 'Pet Services' : 'Marketplace Services';
 
         return `
@@ -869,7 +823,6 @@
               <div class="service-card-title">${title}</div>
               <div class="service-card-meta">Recently Posted • ${label}</div>
               <div class="service-card-meta">📍 ${location}</div>
-              <div class="service-card-price">${price}</div>
             </div>
           </a>
         `;
@@ -950,13 +903,34 @@
     }
 
     function renderSection(emoji, title, pets, type) {
+      const postLinks = {
+        lost: 'create-pet-post.html?type=lost',
+        found: 'create-found-pet.html',
+        adoption: 'create-adoption-listing.html'
+      };
+      const postLabels = {
+        lost: 'Post Lost Pet',
+        found: 'Post Found Pet',
+        adoption: 'Post Adoptable Pet'
+      };
+      const postBtnClass = type === 'lost'
+        ? 'pet-post-btn-lost'
+        : type === 'found'
+          ? 'pet-post-btn-found'
+          : 'pet-post-btn-adoption';
+      const postHref = postLinks[type] || '#';
+      const postLabel = postLabels[type] || 'Post Pet';
+
       let html = `
         <div class="pet-section">
-          <h2>
-            <span>${emoji}</span>
-            ${title}
-            <span class="pet-count">(${pets.length})</span>
-          </h2>
+          <div class="pet-section-header">
+            <h2 class="pet-section-title">
+              <span>${emoji}</span>
+              ${title}
+              <span class="pet-count">(${pets.length})</span>
+            </h2>
+            <a href="${postHref}" class="pet-post-btn ${postBtnClass}">+ ${postLabel}</a>
+          </div>
       `;
 
       if (pets.length === 0) {

@@ -1314,9 +1314,6 @@
         <div class="profile-header">
           ${logo}
           <div class="business-name">${profile.businessName || 'Business Name'}</div>
-          <div class="business-description">
-            ${profile.businessDescription || 'No description available'}
-          </div>
           <div class="rating-summary" id="reviewSummaryInline">
             <span>Loading rating...</span>
           </div>
@@ -1334,6 +1331,15 @@
         </div>
       `;
 
+      if (profile.businessDescription) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Description</div>
+            <div class="info-value" style="white-space: pre-wrap;">${profile.businessDescription}</div>
+          </div>
+        `;
+      }
+
       profileHTML += `
         <div class="info-item">
           <div class="info-label">Location</div>
@@ -1346,15 +1352,6 @@
           <div class="info-item">
             <div class="info-label">Category</div>
             <div class="info-value">${profile.businessCategory}</div>
-          </div>
-        `;
-      }
-
-      if (profile.businessHours) {
-        profileHTML += `
-          <div class="info-item">
-            <div class="info-label">Hours</div>
-            <div class="info-value" style="white-space: pre-wrap;">${profile.businessHours}</div>
           </div>
         `;
       }
@@ -1385,6 +1382,15 @@
           <div class="info-section contact-column">
             <div class="info-title">🔗 Contact Information</div>
       `;
+
+      if (profile.businessHours) {
+        profileHTML += `
+          <div class="info-item">
+            <div class="info-label">Hours</div>
+            <div class="info-value" style="white-space: pre-wrap;">${profile.businessHours}</div>
+          </div>
+        `;
+      }
 
       if (profile.businessWebsite) {
         profileHTML += `

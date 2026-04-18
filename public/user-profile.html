@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Local List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f3f5f7;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    #header-container {
+      min-height: 60px;
+    }
+
+    .page-shell {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 24px 16px 56px;
+    }
+
+    .hero-card,
+    .section-card,
+    .state-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .hero-card {
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .avatar,
+    .avatar-fallback {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      object-fit: cover;
+      border: 3px solid #e2e8f0;
+      background: #e5e7eb;
+    }
+
+    .avatar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #475569, #0f766e);
+      color: #fff;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(28px, 4vw, 36px);
+      line-height: 1.05;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .hero-copy p {
+      color: #475569;
+      font-size: 15px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .meta-card {
+      padding: 16px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .meta-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .meta-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .meta-subvalue {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .section-card {
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .review-list,
+    .listing-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .review-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      background: #fcfdff;
+    }
+
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .review-author {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .review-date {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .review-rating {
+      font-weight: 700;
+      color: #0f766e;
+      margin-bottom: 8px;
+    }
+
+    .review-text,
+    .review-meta {
+      color: #334155;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .review-meta {
+      margin-top: 8px;
+      color: #64748b;
+    }
+
+    .listing-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .listing-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .listing-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.09);
+    }
+
+    .listing-image,
+    .listing-image-fallback {
+      width: 100%;
+      height: 180px;
+    }
+
+    .listing-image {
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .listing-image-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      color: #475569;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .listing-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .listing-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .listing-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .listing-meta {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .state-card {
+      max-width: 560px;
+      margin: 56px auto 0;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .state-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .state-copy {
+      color: #64748b;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #0f172a;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .page-shell {
+        padding: 18px 12px 44px;
+      }
+
+      .hero-card,
+      .section-card {
+        padding: 18px;
+      }
+
+      .hero-top {
+        align-items: flex-start;
+      }
+
+      .meta-grid,
+      .listing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .listing-image,
+      .listing-image-fallback {
+        height: 160px;
+      }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="header-container"></div>
+  <main class="page-shell" id="pageShell">
+    <section class="state-card" id="stateCard">
+      <div class="state-title">Loading profile...</div>
+      <p class="state-copy">Fetching public profile details.</p>
+    </section>
+  </main>
+
+  <script src="header.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = window.firebaseDb;
+
+    function getProfileIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id') || params.get('userId') || '';
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement('div');
+      div.textContent = String(value || '');
+      return div.innerHTML;
+    }
+
+    function toMillis(value) {
+      if (!value) return 0;
+      if (typeof value.toMillis === 'function') return value.toMillis();
+      if (typeof value.toDate === 'function') return value.toDate().getTime();
+      const parsed = new Date(value).getTime();
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function formatDate(value, options) {
+      const ms = toMillis(value);
+      if (!ms) return '';
+      return new Intl.DateTimeFormat('en-US', options).format(new Date(ms));
+    }
+
+    function formatMemberSince(value) {
+      return formatDate(value, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }) || 'Recently joined';
+    }
+
+    function formatShortDate(value) {
+      return formatDate(value, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) || 'Recently';
+    }
+
+    function getDisplayName(userData) {
+      return String(userData?.displayName || userData?.name || 'Local List Member').trim() || 'Local List Member';
+    }
+
+    function getAvatarUrl(userData) {
+      return String(userData?.profileimage || userData?.profileImage || userData?.photoURL || '').trim();
+    }
+
+    function getInitial(userData) {
+      return getDisplayName(userData).charAt(0).toUpperCase() || 'U';
+    }
+
+    function isVisibleListing(item) {
+      const status = String(item?.status || '').toLowerCase();
+      if (status && status !== 'approved') return false;
+      if (item?.isActive === false) return false;
+      const expiresAt = toMillis(item?.expiresAt);
+      if (expiresAt && expiresAt < Date.now()) return false;
+      return true;
+    }
+
+    function isApprovedService(item) {
+      const status = String(item?.status || '').toLowerCase();
+      const approvalStatus = String(item?.approvalStatus || '').toLowerCase();
+      if (item?.isApproved === true) return true;
+      if (approvalStatus === 'approved') return true;
+      return status === 'approved' || status === '';
+    }
+
+    function formatListingPrice(item) {
+      if (item?.price === undefined || item?.price === null || item?.price === '') {
+        return 'Contact for price';
+      }
+
+      const priceNumber = Number(item.price);
+      if (Number.isFinite(priceNumber)) {
+        return '$' + priceNumber.toFixed(2);
+      }
+
+      return String(item.price);
+    }
+
+    function formatServicePrice(item) {
+      const priceType = String(item?.priceType || '').toLowerCase();
+      const amount = String(item?.priceAmount || '').trim();
+
+      if (priceType === 'quote') return 'Free Quote';
+      if (priceType === 'negotiable') return 'Negotiable';
+      if (!amount) return 'Price not listed';
+      if (priceType === 'hourly') return '$' + amount + '/hr';
+      if (priceType === 'fixed') return '$' + amount + ' flat';
+      return '$' + amount;
+    }
+
+    function formatRating(value) {
+      const numeric = Number(value || 0);
+      if (!Number.isFinite(numeric) || numeric <= 0) return 'Not rated yet';
+      return numeric.toFixed(1) + ' / 5';
+    }
+
+    function formatReviewRating(value) {
+      const numeric = Number(value || 0);
+      if (!Number.isFinite(numeric) || numeric <= 0) return 'Not rated';
+      const wholeStars = Math.max(1, Math.min(5, Math.round(numeric)));
+      return '*'.repeat(wholeStars) + ' ' + numeric.toFixed(1);
+    }
+
+    function renderState(title, copy) {
+      document.getElementById('pageShell').innerHTML = `
+        <section class="state-card">
+          <div class="state-title">${escapeHtml(title)}</div>
+          <p class="state-copy">${escapeHtml(copy)}</p>
+          <a class="back-link" href="javascript:history.length > 1 ? history.back() : window.location.href='index.html'">Go Back</a>
+        </section>
+      `;
+    }
+
+    function buildListingCards(items, type) {
+      if (!items.length) {
+        const label = type === 'service' ? 'No service listings yet.' : 'No marketplace listings yet.';
+        return `<div class="empty-state">${escapeHtml(label)}</div>`;
+      }
+
+      return `<div class="listing-grid">${
+        items.map((item) => {
+          const title = type === 'service'
+            ? String(item.serviceName || item.providerName || 'Service').trim() || 'Service'
+            : String(item.title || 'Untitled Listing').trim() || 'Untitled Listing';
+          const image = type === 'service'
+            ? String(item.serviceImage || '').trim()
+            : (Array.isArray(item.images) && item.images[0] ? String(item.images[0]).trim() : '');
+          const href = type === 'service'
+            ? `service-details.html?id=${encodeURIComponent(item.id)}`
+            : `single-listing.html?id=${encodeURIComponent(item.id)}`;
+          const price = type === 'service' ? formatServicePrice(item) : formatListingPrice(item);
+          const metaParts = type === 'service'
+            ? [item.category, item.serviceArea || item.city || item.zipCode]
+            : [item.category, item.city || item.zipCode];
+
+          return `
+            <a class="listing-card" href="${href}">
+              ${image
+                ? `<img class="listing-image" src="${escapeHtml(image)}" alt="${escapeHtml(title)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                : ''}
+              <div class="listing-image-fallback" style="${image ? 'display:none;' : 'display:flex;'}">Local List</div>
+              <div class="listing-body">
+                <div class="listing-title">${escapeHtml(title)}</div>
+                <div class="listing-price">${escapeHtml(price)}</div>
+                <div class="listing-meta">${escapeHtml(metaParts.filter(Boolean).join(' | ') || 'Local List')}</div>
+              </div>
+            </a>
+          `;
+        }).join('')
+      }</div>`;
+    }
+
+    function renderProfile(profile, approvedReviews, recentListings, serviceListings) {
+      const approvedRatings = approvedReviews
+        .map((item) => Number(item.rating || 0))
+        .filter((value) => Number.isFinite(value) && value > 0);
+
+      const computedAverage = approvedRatings.length
+        ? approvedRatings.reduce((sum, value) => sum + value, 0) / approvedRatings.length
+        : Number(profile?.ratingAverage || 0);
+      const computedCount = approvedRatings.length || Number(profile?.ratingCount || 0);
+      const ratingCountLabel = computedCount > 0
+        ? `${computedCount} approved review${computedCount === 1 ? '' : 's'}`
+        : 'No approved reviews yet';
+
+      const avatarUrl = getAvatarUrl(profile);
+      const displayName = getDisplayName(profile);
+      const reviewHtml = approvedReviews.length
+        ? `<div class="review-list">${
+            approvedReviews.slice(0, 6).map((item) => `
+              <article class="review-card">
+                <div class="review-top">
+                  <div class="review-author">${escapeHtml(item.userName || 'Community Member')}</div>
+                  <div class="review-date">${escapeHtml(formatShortDate(item.createdAt))}</div>
+                </div>
+                <div class="review-rating">${escapeHtml(formatReviewRating(item.rating))}</div>
+                <div class="review-text">${escapeHtml(String(item.reviewText || '').trim() || 'No comment provided.')}</div>
+                ${item.reviewTargetType ? `<div class="review-meta">Type: ${escapeHtml(item.reviewTargetType)}</div>` : ''}
+              </article>
+            `).join('')
+          }</div>`
+        : '<div class="empty-state">No approved reviews yet.</div>';
+
+      document.title = `${displayName} - Local List`;
+      document.getElementById('pageShell').innerHTML = `
+        <section class="hero-card">
+          <div class="hero-top">
+            ${avatarUrl
+              ? `<img class="avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+              : ''}
+            <div class="avatar-fallback" style="${avatarUrl ? 'display:none;' : 'display:flex;'}">${escapeHtml(getInitial(profile))}</div>
+            <div class="hero-copy">
+              <h1>${escapeHtml(displayName)}</h1>
+              <p>Local List member</p>
+            </div>
+          </div>
+
+          <div class="meta-grid">
+            <article class="meta-card">
+              <div class="meta-label">Member Since</div>
+              <div class="meta-value">${escapeHtml(formatMemberSince(profile.memberSince || profile.createdAt))}</div>
+            </article>
+            <article class="meta-card">
+              <div class="meta-label">ZIP Code</div>
+              <div class="meta-value">${escapeHtml(String(profile.zipCode || '').trim() || 'Not shared')}</div>
+            </article>
+            <article class="meta-card">
+              <div class="meta-label">Rating</div>
+              <div class="meta-value">${escapeHtml(formatRating(computedAverage))}</div>
+              <div class="meta-subvalue">${escapeHtml(ratingCountLabel)}</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <div class="section-title">Recent Reviews</div>
+              <div class="section-subtitle">Approved community feedback</div>
+            </div>
+          </div>
+          ${reviewHtml}
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <div class="section-title">Recent Listings</div>
+              <div class="section-subtitle">Marketplace posts from this member</div>
+            </div>
+          </div>
+          ${buildListingCards(recentListings, 'listing')}
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <div class="section-title">Service Listings</div>
+              <div class="section-subtitle">Services offered by this member</div>
+            </div>
+          </div>
+          ${buildListingCards(serviceListings, 'service')}
+        </section>
+      `;
+    }
+
+    async function loadUserProfile() {
+      const profileId = getProfileIdFromUrl();
+      if (!profileId) {
+        renderState('Profile not available', 'No profile ID was provided.');
+        return;
+      }
+
+      if (!db) {
+        renderState('Profile unavailable', 'The page could not connect to Local List right now.');
+        return;
+      }
+
+      try {
+        const userSnap = await db.collection('users').doc(profileId).get();
+        if (!userSnap.exists) {
+          renderState('Profile not available', 'This profile could not be found.');
+          return;
+        }
+
+        const profile = { id: userSnap.id, ...(userSnap.data() || {}) };
+        const accountType = String(profile.accountType || '').trim().toLowerCase();
+
+        if (accountType === 'business') {
+          window.location.replace(`business-profile.html?id=${encodeURIComponent(profileId)}`);
+          return;
+        }
+
+        if (profile.publicProfileEnabled === false) {
+          renderState('Profile not available', 'This member has not enabled a public profile.');
+          return;
+        }
+
+        const [listingsResult, servicesResult, reviewsResult] = await Promise.allSettled([
+          db.collection('listings').where('userId', '==', profileId).get(),
+          db.collection('services').where('userId', '==', profileId).get(),
+          db.collection('userReviews').where('ratedUserId', '==', profileId).get()
+        ]);
+
+        const listings = listingsResult.status === 'fulfilled'
+          ? listingsResult.value.docs
+            .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+            .filter(isVisibleListing)
+            .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))
+            .slice(0, 8)
+          : [];
+
+        const services = servicesResult.status === 'fulfilled'
+          ? servicesResult.value.docs
+            .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+            .filter((item) => item.isActive !== false && isApprovedService(item))
+            .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))
+            .slice(0, 8)
+          : [];
+
+        const approvedReviews = reviewsResult.status === 'fulfilled'
+          ? reviewsResult.value.docs
+            .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() || {}) }))
+            .filter((item) => String(item.status || '').toLowerCase() === 'approved')
+            .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))
+          : [];
+
+        renderProfile(profile, approvedReviews, listings, services);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+        renderState('Profile unavailable', 'Something went wrong while loading this public profile.');
+      }
+    }
+
+    loadUserProfile();
+  </script>
+</body>
+</html>
