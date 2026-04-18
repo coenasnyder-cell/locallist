@@ -12,6 +12,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Service Details - Local List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
       margin: 0;
@@ -19,185 +20,133 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: 100%;
+      overflow-y: auto;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: #f5f5f5;
-      color: #1f2937;
+      color: #333;
       min-height: 100vh;
     }
 
-    .page-header-wrapper {
-      background: linear-gradient(135deg, #1e3a5f 0%, #2d5491 100%);
-      width: 100%;
-      padding: 24px 0 20px;
-      box-shadow: 0 4px 12px rgba(30, 58, 95, 0.18);
-      margin-bottom: 16px;
-    }
-
-    .page-header {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 20px;
-      text-align: center;
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 800;
-      color: #fff;
-      margin: 0;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
     .container {
-      max-width: 980px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 0 20px 40px;
-    }
-
-    .back-row {
-      margin: 6px 0 14px;
-    }
-
-    .back-link {
-      color: #475569;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .back-link:hover {
-      text-decoration: underline;
+      padding: 20px;
+      padding-bottom: 60px;
     }
 
     .profile-header {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-
-    .hero-image {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      display: block;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
-    }
-
-    .hero-fallback {
-      width: 100%;
-      height: 220px;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 70px;
-    }
-
-    .header-content {
-      padding: 18px;
+      background: white;
+      border-radius: 12px;
+      padding: 40px 24px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
-    .service-name {
-      font-size: 30px;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 10px;
-    }
-
-    .meta-row {
+    .business-logo-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #f0f0f0;
       display: flex;
-      gap: 8px;
+      align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .pill {
-      border-radius: 999px;
+    .business-logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .business-name {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .business-description {
       font-size: 16px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border: 1px solid transparent;
-    }
-
-    .pill-category {
-      background: #e8f4f8;
-      color: #0f766e;
-      border-color: #bfe3ea;
-    }
-
-    .pill-price {
-      background: #ecfdf3;
-      color: #166534;
-      border-color: #bbf7d0;
-    }
-
-    .pill-tier {
-      background: #fef3c7;
-      color: #92400e;
-      border-color: #fcd34d;
-    }
-
-    .description {
-      color: #475569;
-      font-size: 15px;
+      color: #666;
       line-height: 1.6;
-      max-width: 760px;
+      max-width: 600px;
       margin: 0 auto;
-      white-space: pre-wrap;
     }
 
     .content-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
+      gap: 24px;
+      margin-bottom: 24px;
     }
 
-    .info-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      padding: 18px;
+    .business-column {
+      grid-column: 1;
     }
 
-    .card-title {
+    .contact-column {
+      grid-column: 2;
+    }
+
+    .info-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+
+    .info-title {
       font-size: 18px;
-      font-weight: 800;
-      color: #334155;
-      margin-bottom: 12px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: #475569;
+      margin: 16px 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .info-item {
-      margin-bottom: 12px;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
     .info-item:last-child {
       margin-bottom: 0;
-      border-bottom: none;
       padding-bottom: 0;
+      border-bottom: none;
     }
 
     .info-label {
       font-size: 16px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #64748b;
+      color: #999;
+      font-weight: 500;
       margin-bottom: 4px;
-      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
     .info-value {
-      color: #334155;
-      font-size: 15px;
+      font-size: 16px;
+      color: #333;
       word-break: break-word;
     }
 
@@ -210,83 +159,134 @@
       text-decoration: underline;
     }
 
-    .preferred-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      padding: 12px;
+    .info-images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .info-images-grid img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #e5e7eb;
+      transition: transform 0.2s ease;
+    }
+
+    .info-images-grid img:hover {
+      transform: scale(1.03);
+    }
+
+    .gallery-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .gallery-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3a4654;
+    }
+
+    .btn-secondary {
+      background: #f0f7fa;
+      color: #475569;
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e0eff5;
+    }
+
+    .empty-state {
+      background: white;
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      color: #666;
       margin-bottom: 12px;
     }
 
-    .preferred-title {
+    .empty-state p {
       font-size: 16px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #92400e;
-      margin-bottom: 6px;
-    }
-
-    .preferred-value {
-      color: #78350f;
-      font-weight: 700;
-      font-size: 15px;
-      word-break: break-word;
+      color: #999;
+      margin-bottom: 24px;
     }
 
     .actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-top: 12px;
+      justify-content: center;
     }
 
-    .btn {
-      border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 9px 12px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-primary {
-      background: #475569;
-      color: #fff;
-      border-color: #475569;
-    }
-
-    .btn-primary:hover {
-      background: #3b4a5a;
-      border-color: #3b4a5a;
-    }
-
-    .btn-secondary {
-      background: #f8fafc;
-      color: #334155;
-      border-color: #cbd5e1;
-    }
-
-    .btn-secondary:hover {
-      background: #eef2f7;
-    }
-
-    .empty-state {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 26px;
+    .loading {
       text-align: center;
-      color: #64748b;
-    }
-
-    .empty-state h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-      color: #334155;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
     }
 
     footer {
@@ -297,13 +297,214 @@
       padding: 18px;
     }
 
-    @media (max-width: 840px) {
+    .reviews-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .reviews-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .reviews-subtitle {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .review-login-cta {
+      display: inline-flex;
+      margin-top: 10px;
+    }
+
+    .review-form {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+    }
+
+    .review-form-row {
+      margin-bottom: 12px;
+    }
+
+    .review-form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-label {
+      display: block;
+      font-size: 16px;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .star-selector {
+      display: flex;
+      gap: 6px;
+    }
+
+    .star-btn {
+      border: none;
+      background: transparent;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      color: #cbd5e1;
+      padding: 0;
+    }
+
+    .star-btn.active {
+      color: #f59e0b;
+    }
+
+    .review-textarea {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1f2937;
+      background: #fff;
+    }
+
+    .review-textarea:focus {
+      outline: none;
+      border-color: #475569;
+      box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.15);
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .review-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+
+    .review-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .review-author {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .review-date {
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    .review-rating {
+      color: #f59e0b;
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .review-text {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .rating-summary {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .rating-stars {
+      letter-spacing: 1px;
+      color: #f59e0b;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid #d1d5db;
+      color: #475569;
+      background: #f8fafc;
+      text-decoration: none;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+
+    .social-link:hover {
+      color: #1f2937;
+      border-color: #94a3b8;
+      background: #eef2f7;
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
       .content-grid {
         grid-template-columns: 1fr;
       }
 
-      .service-name {
+      .business-column,
+      .contact-column {
+        grid-column: auto;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .business-name {
         font-size: 24px;
+      }
+
+      .profile-header {
+        padding: 24px 16px 16px;
       }
     }
   </style>
@@ -311,17 +512,7 @@
 <body>
   <div id="header-container"></div>
 
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <h1 class="page-title">Service Details</h1>
-    </div>
-  </div>
-
   <main class="container">
-    <div class="back-row">
-      <a class="back-link" href="serviceslist.html">← Back to Services</a>
-    </div>
-
     <div id="detailsContainer" class="empty-state">
       <p>Loading service details...</p>
     </div>
@@ -361,6 +552,17 @@
     const promotionId = pageParams.get('promo');
     const promotionStatsSession = new Set();
     let currentService = null;
+    let currentUser = null;
+    let selectedReviewRating = 0;
+
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+      if (currentService) {
+        loadReviewsForService(currentService).catch((error) => {
+          console.error('Error refreshing reviews after auth change:', error);
+        });
+      }
+    });
 
     function getTodayDateKey() {
       const now = new Date();
@@ -492,6 +694,274 @@
       `;
     }
 
+    function formatReviewDate(timestamp) {
+      const dateObj = timestamp && typeof timestamp.toDate === 'function' ? timestamp.toDate() : null;
+      if (!dateObj) return 'Just now';
+      return dateObj.toLocaleDateString();
+    }
+
+    function renderStarsFromRating(rating) {
+      const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+      const full = Math.round(safeRating);
+      return `${'★'.repeat(full)}${'☆'.repeat(5 - full)}`;
+    }
+
+    async function updateServiceRatingSummary(serviceId) {
+      const approvedSnap = await db.collection('serviceReviews')
+        .where('serviceId', '==', serviceId)
+        .where('status', '==', 'approved')
+        .get();
+
+      let total = 0;
+      const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+      approvedSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const rating = Math.max(1, Math.min(5, Number(data.rating) || 0));
+        if (!rating) return;
+        total += rating;
+        breakdown[rating] += 1;
+      });
+
+      const ratingCount = approvedSnap.size;
+      const ratingAverage = ratingCount > 0 ? Number((total / ratingCount).toFixed(2)) : 0;
+
+      try {
+        await db.collection('services').doc(serviceId).set({
+          ratingAverage,
+          ratingCount,
+          ratingBreakdown: breakdown,
+          updatedAt: new Date(),
+        }, { merge: true });
+      } catch (error) {
+        console.warn('Could not persist service rating summary:', error);
+      }
+
+      if (currentService && currentService.id === serviceId) {
+        currentService.ratingAverage = ratingAverage;
+        currentService.ratingCount = ratingCount;
+        currentService.ratingBreakdown = breakdown;
+      }
+
+      return { ratingAverage, ratingCount };
+    }
+
+    function getCurrentUserDisplayName() {
+      if (!currentUser) return 'Anonymous';
+      return currentUser.displayName || currentUser.email || 'Anonymous';
+    }
+
+    function renderReviewRatingSummary(summary) {
+      const summaryEl = document.getElementById('reviewSummaryInline');
+      if (!summaryEl) return;
+
+      const average = Number(summary?.ratingAverage || 0);
+      const count = Number(summary?.ratingCount || 0);
+      const stars = renderStarsFromRating(average);
+
+      if (count === 0) {
+        summaryEl.innerHTML = '<span>No reviews yet</span>';
+        return;
+      }
+
+      summaryEl.innerHTML = `
+        <span class="rating-stars">${stars}</span>
+        <span>${average.toFixed(1)} (${count} review${count === 1 ? '' : 's'})</span>
+      `;
+    }
+
+    function updateStarSelectorUI(rating) {
+      document.querySelectorAll('.star-btn').forEach((btn) => {
+        const starValue = Number(btn.getAttribute('data-star') || 0);
+        btn.classList.toggle('active', starValue <= rating);
+      });
+    }
+
+    function buildReviewFormMarkup(options) {
+      const { canReview, isOwner, existingReview } = options;
+
+      if (!currentUser) {
+        return `
+          <div class="reviews-subtitle">
+            Sign in to leave a review.
+            <div>
+              <button type="button" class="btn btn-secondary review-login-cta" onclick="window.location.href='login.html?next=' + encodeURIComponent(window.location.href)">Sign In to Review</button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (isOwner) {
+        return '<div class="reviews-subtitle">Service providers cannot review their own service.</div>';
+      }
+
+      if (!canReview) {
+        return '<div class="reviews-subtitle">Reviews are not available for this service right now.</div>';
+      }
+
+      if (existingReview) {
+        return '';
+      }
+
+      const presetRating = 0;
+      const presetText = '';
+      const submitLabel = 'Submit Review';
+
+      return `
+        <form id="reviewForm" class="review-form">
+          <div class="review-form-row">
+            <label class="review-label">Your Rating</label>
+            <div class="star-selector" id="starSelector">
+              ${[1, 2, 3, 4, 5].map((star) => `<button type="button" class="star-btn ${star <= presetRating ? 'active' : ''}" data-star="${star}" aria-label="Rate ${star} star${star === 1 ? '' : 's'}">★</button>`).join('')}
+            </div>
+          </div>
+          <div class="review-form-row">
+            <label class="review-label" for="reviewText">Your Review</label>
+            <textarea id="reviewText" class="review-textarea" placeholder="Share your experience with this service...">${presetText}</textarea>
+          </div>
+          <div class="review-actions">
+            <button type="submit" class="btn btn-primary" id="saveReviewBtn">${submitLabel}</button>
+          </div>
+        </form>
+      `;
+    }
+
+    function renderReviewsList(reviews) {
+      const listEl = document.getElementById('reviewsList');
+      if (!listEl) return;
+
+      if (!reviews.length) {
+        listEl.innerHTML = '<div class="reviews-subtitle">No reviews yet. Be the first to leave feedback.</div>';
+        return;
+      }
+
+      listEl.innerHTML = reviews.map((review) => `
+        <div class="review-item">
+          <div class="review-item-top">
+            <div class="review-author">${escapeHtml(review.userName || 'Local User')}</div>
+            <div class="review-date">${formatReviewDate(review.updatedAt || review.createdAt)}</div>
+          </div>
+          <div class="review-rating">${renderStarsFromRating(review.rating)}</div>
+          <div class="review-text">${escapeHtml(review.reviewText || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    async function loadReviewsForService(profile) {
+      if (!profile || !profile.id) return;
+
+      const serviceId = profile.id;
+      let reviewsSnap;
+      try {
+        reviewsSnap = await db.collection('serviceReviews')
+          .where('serviceId', '==', serviceId)
+          .where('status', '==', 'approved')
+          .orderBy('updatedAt', 'desc')
+          .get();
+      } catch (error) {
+        reviewsSnap = await db.collection('serviceReviews')
+          .where('serviceId', '==', serviceId)
+          .where('status', '==', 'approved')
+          .get();
+      }
+
+      const reviews = reviewsSnap.docs
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        .sort((a, b) => {
+          const aTime = a?.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
+          const bTime = b?.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
+          return bTime - aTime;
+        });
+
+      const ratingAverage = reviews.length
+        ? Number((reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0) / reviews.length).toFixed(2))
+        : 0;
+      const ratingCount = reviews.length;
+
+      renderReviewRatingSummary({ ratingAverage, ratingCount });
+      renderReviewsList(reviews);
+
+      const formContainer = document.getElementById('reviewFormContainer');
+      if (!formContainer) return;
+
+      const isOwner = !!(currentUser && profile.userId && currentUser.uid === profile.userId);
+      let existingReview = null;
+
+      if (currentUser) {
+        const existingId = `${serviceId}_${currentUser.uid}`;
+        const existingSnap = await db.collection('serviceReviews').doc(existingId).get();
+        if (existingSnap.exists) {
+          existingReview = { id: existingSnap.id, ...existingSnap.data() };
+        }
+      }
+
+      formContainer.innerHTML = buildReviewFormMarkup({
+        canReview: true,
+        isOwner,
+        existingReview,
+      });
+
+      selectedReviewRating = 0;
+
+      const reviewForm = document.getElementById('reviewForm');
+      if (!reviewForm) return;
+
+      const starSelector = document.getElementById('starSelector');
+      if (starSelector) {
+        starSelector.querySelectorAll('.star-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            selectedReviewRating = Number(btn.getAttribute('data-star') || 0);
+            updateStarSelectorUI(selectedReviewRating);
+          });
+        });
+      }
+
+      reviewForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentUser) {
+          alert('Please sign in to leave a review.');
+          return;
+        }
+
+        if (isOwner) {
+          alert('Service providers cannot review their own service.');
+          return;
+        }
+
+        if (!selectedReviewRating || selectedReviewRating < 1 || selectedReviewRating > 5) {
+          alert('Please select a rating from 1 to 5 stars.');
+          return;
+        }
+
+        const reviewText = String(document.getElementById('reviewText')?.value || '').trim();
+        if (!reviewText) {
+          alert('Please add a review message.');
+          return;
+        }
+
+        const reviewId = `${serviceId}_${currentUser.uid}`;
+        const now = new Date();
+        const payload = {
+          serviceId,
+          userId: currentUser.uid,
+          userName: getCurrentUserDisplayName(),
+          rating: selectedReviewRating,
+          reviewText,
+          status: 'approved',
+          updatedAt: now,
+        };
+
+        const existingSnap = await db.collection('serviceReviews').doc(reviewId).get();
+        if (!existingSnap.exists) {
+          payload.createdAt = now;
+        }
+
+        await db.collection('serviceReviews').doc(reviewId).set(payload, { merge: true });
+        await updateServiceRatingSummary(serviceId);
+        await loadReviewsForService(profile);
+      });
+    }
+
     function renderService(profile) {
       const serviceName = profile.serviceName || profile.businessName || 'Service';
       const description = profile.serviceDescription || profile.businessDescription || 'No description available.';
@@ -501,6 +971,7 @@
       const serviceImage = profile.serviceImage || profile.businessLogo || '';
       const serviceArea = profile.serviceArea || 'Not specified';
       const zipCode = profile.zipCode || 'Not specified';
+      const hours = String(profile.hours || '').trim();
       const tier = String(profile.businessTier || '').toLowerCase();
 
       const contactPhone = String(profile.contactPhone || '').trim();
@@ -511,105 +982,210 @@
       const preferred = resolvePreferredContact(profile);
       const priceLabel = formatPrice(profile);
 
-      const imageHtml = serviceImage
-        ? `<img class="hero-image" src="${escapeHtml(serviceImage)}" alt="${escapeHtml(serviceName)}">`
-        : `<div class="hero-fallback">${escapeHtml(categoryIcon)}</div>`;
+      const logoImageHtml = serviceImage
+        ? `<img src="${escapeHtml(serviceImage)}" alt="${escapeHtml(serviceName)}">`
+        : `<div style="font-size: 60px;">${escapeHtml(categoryIcon)}</div>`;
 
-      const tierHtml = tier === 'premium' ? '<span class="pill pill-tier">⭐ Premium</span>' : '';
+      const tierHtml = tier === 'premium' ? '<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700;margin-top:10px;">⭐ Premium</span>' : '';
 
-      let preferredValueHtml = '<div class="preferred-value">No preferred contact method provided</div>';
+      let preferredValueHtml = '<div class="info-value">No preferred contact method provided</div>';
       if (preferred) {
         if (preferred.label === 'Phone') {
-          preferredValueHtml = `<div class="preferred-value"><a href="tel:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
+          preferredValueHtml = `<div class="info-value"><a href="tel:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
         } else if (preferred.label === 'Email') {
-          preferredValueHtml = `<div class="preferred-value"><a href="mailto:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
+          preferredValueHtml = `<div class="info-value"><a href="mailto:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
         } else {
           const preferredUrl = normalizeUrl(preferred.value);
-          preferredValueHtml = `<div class="preferred-value"><a href="${escapeHtml(preferredUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(preferred.value)}</a></div>`;
+          preferredValueHtml = `<div class="info-value"><a href="${escapeHtml(preferredUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(preferred.value)}</a></div>`;
         }
       }
 
       const messagingBtn = profile.allowMessaging
-        ? `<button class="btn btn-primary" onclick="openMessageModal()">💬 Message Provider</button>`
+        ? `<button class="btn btn-primary" onclick="openMessageModal()">💬 Message</button>`
         : '';
 
       const actionButtons = [
         messagingBtn,
         contactPhone ? `<a class="btn btn-primary" href="tel:${escapeHtml(contactPhone)}">📞 Call</a>` : '',
         contactEmail ? `<a class="btn btn-primary" href="mailto:${escapeHtml(contactEmail)}">✉️ Email</a>` : '',
-        contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">🌐 Visit Website</a>` : ''
+        contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">🌐 Website</a>` : ''
       ].filter(Boolean).join('');
+
+      const socialLinks = [
+        {
+          key: 'facebookUrl',
+          url: profile.facebookUrl,
+          iconClass: 'fab fa-facebook-f',
+          label: 'Facebook',
+        },
+        {
+          key: 'instagramUrl',
+          url: profile.instagramUrl,
+          iconClass: 'fab fa-instagram',
+          label: 'Instagram',
+        },
+        {
+          key: 'tiktokUrl',
+          url: profile.tiktokUrl,
+          iconClass: 'fab fa-tiktok',
+          label: 'TikTok',
+        },
+        {
+          key: 'youtubeUrl',
+          url: profile.youtubeUrl,
+          iconClass: 'fab fa-youtube',
+          label: 'YouTube',
+        },
+      ].filter((item) => typeof item.url === 'string' && item.url.trim() !== '');
+
+      const socialLinksHtml = socialLinks.length > 0
+        ? `<div class="social-links">
+             ${socialLinks.map((link) => `
+               <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="social-link" title="${link.label}" aria-label="${link.label}">
+                 <i class="${link.iconClass}"></i>
+               </a>
+             `).join('')}
+           </div>`
+        : '';
 
       detailsContainer.innerHTML = `
         <article class="profile-header">
-          ${imageHtml}
-          <div class="header-content">
-            <h2 class="service-name">${escapeHtml(serviceName)}</h2>
-            <div class="meta-row">
-              <span class="pill pill-category">${escapeHtml(categoryIcon)} ${escapeHtml(category)}</span>
-              <span class="pill pill-price">💰 ${escapeHtml(priceLabel)}</span>
-              ${tierHtml}
-            </div>
-            <p class="description">${escapeHtml(description)}</p>
+          <div class="business-logo-container">
+            ${logoImageHtml}
           </div>
-        </article>
-
-        <section class="content-grid">
-          <div class="info-card">
-            <h3 class="card-title">Service Info</h3>
-            <div class="info-item">
-              <div class="info-label">Provider</div>
-              <div class="info-value">${escapeHtml(providerName)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Pricing</div>
-              <div class="info-value">${escapeHtml(priceLabel)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Service Area</div>
-              <div class="info-value">${escapeHtml(serviceArea)}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">ZIP Code</div>
-              <div class="info-value">${escapeHtml(zipCode)}</div>
-            </div>
+          <h2 class="business-name">${escapeHtml(serviceName)}</h2>
+          ${tierHtml}
+           <div class="reviews-section">
+          <div class="reviews-title">Reviews</div>
+          <div class="rating-summary" id="reviewSummaryInline">
+            <span>Loading rating...</span>
           </div>
+          <div id="reviewFormContainer"></div>
+          <div id="reviewsList"></div>
+        </div>
+         </article>
 
-          <div class="info-card">
-            <h3 class="card-title">Contact</h3>
-            <div class="preferred-box">
-              <div class="preferred-title">Preferred Contact${preferred ? `: ${escapeHtml(preferred.label)}` : ''}</div>
-              ${preferredValueHtml}
-            </div>
+<section class="content-grid">
 
-            ${contactPhone ? `
-              <div class="info-item">
-                <div class="info-label">Phone</div>
-                <div class="info-value"><a href="tel:${escapeHtml(contactPhone)}">${escapeHtml(contactPhone)}</a></div>
-              </div>
-            ` : ''}
+  <!-- LEFT COLUMN -->
+  <div class="info-section business-column">
 
-            ${contactEmail ? `
-              <div class="info-item">
-                <div class="info-label">Email</div>
-                <div class="info-value"><a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a></div>
-              </div>
-            ` : ''}
+    <div class="info-item">
+      <div class="info-title">Service Provider</div>
+      <div class="info-value">${escapeHtml(providerName)}</div>
+    </div>
 
-            ${contactWebsiteRaw ? `
-              <div class="info-item">
-                <div class="info-label">Website</div>
-                <div class="info-value"><a href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">${escapeHtml(contactWebsiteRaw)}</a></div>
-              </div>
-            ` : ''}
+    <div class="info-item">
+      <div class="info-label">Description</div>
+      <div class="business-description">${escapeHtml(description)}</div>
+    </div>
 
-            <div class="actions">
-              ${actionButtons || '<span class="info-value">No contact methods listed.</span>'}
-            </div>
-          </div>
-        </section>
+    <div class="info-item">
+      <div class="info-label">Category</div>
+      <div class="info-value">
+        ${escapeHtml(categoryIcon)} ${escapeHtml(category)}
+      </div>
+    </div>
+
+    <div class="info-item">
+      <div class="info-label">Service Area</div>
+      <div class="info-value">${escapeHtml(serviceArea)}</div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="info-section contact-column">
+
+    <h3 class="info-title">Contact Information</h3>
+
+    <div class="info-item">
+      <div class="info-label">Hours</div>
+      <div class="info-value">${hours || ''}</div>
+    </div>
+
+    <div class="info-item">
+      <div class="info-label">Website</div>
+      <div class="info-value">
+        ${contactWebsiteRaw && `
+          <a href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">
+            ${escapeHtml(contactWebsiteRaw)}
+          </a>
+        `}
+      </div>
+    </div>
+
+    <div class="info-item">
+      <div class="info-label">Preferred Contact</div>
+      <div class="info-value">
+        ${preferred ? escapeHtml(preferred.label) : 'Not specified'}
+      </div>
+      ${preferredValueHtml}
+    </div>
+
+    ${contactPhone && `
+      <div class="info-item">
+        <div class="info-label">Phone</div>
+        <div class="info-value">
+          <a href="tel:${escapeHtml(contactPhone)}">${escapeHtml(contactPhone)}</a>
+        </div>
+      </div>
+    `}
+
+    ${contactEmail && `
+      <div class="info-item">
+        <div class="info-label">Email</div>
+        <div class="info-value">
+          <a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a>
+        </div>
+      </div>
+    `}
+
+    <div class="info-item">
+      <div class="info-label">Social Media</div>
+      <div class="info-value">
+        ${socialLinks.length > 0 ? socialLinksHtml : ''}
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    ${actionButtons && `
+      <div class="info-item">
+        <div class="action-buttons">
+          ${actionButtons}
+        </div>
+      </div>
+    `}
+
+  </div>
+</div>
+${(() => {
+  const galleryImages =
+    profile.galleryImages ||
+    profile.serviceImages ||
+    profile.images ||
+    [];
+
+  console.log('Gallery Images:', galleryImages);
+
+  if (!galleryImages.length) return '';
+
+  return `
+    <section class="gallery-container">
+      <div class="gallery-section">
+        <div class="gallery-title">Gallery</div>
+        <div class="gallery">
+          ${galleryImages.map(img => `
+            <img src="${escapeHtml(img)}" alt="Gallery Image">
+          `).join('')}
+        </div>
+      </div>
+    </section>
+  `;
+})()}
+
       `;
-    }
+        }
 
     async function loadService() {
       const id = pageParams.get('id');
@@ -636,6 +1212,20 @@
         await incrementServiceViewCount(snap.id, data);
         await trackPromotionDailyEvent('service', 'click', data.userId || data.businessId || '', `click_service_${promotionId}_${snap.id}`);
         renderService(data);
+        try {
+          await loadReviewsForService(currentService);
+        } catch (reviewError) {
+          console.warn('Reviews unavailable for this service:', reviewError);
+          renderReviewRatingSummary({ ratingAverage: 0, ratingCount: 0 });
+          const formContainer = document.getElementById('reviewFormContainer');
+          const reviewsList = document.getElementById('reviewsList');
+          if (formContainer) {
+            formContainer.innerHTML = '<div class="reviews-subtitle">Reviews are currently unavailable.</div>';
+          }
+          if (reviewsList) {
+            reviewsList.innerHTML = '';
+          }
+        }
       } catch (error) {
         console.error('Error loading service details:', error);
         renderNotFound();

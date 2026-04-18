@@ -291,160 +291,133 @@
 
     .profiles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
       margin-bottom: 40px;
     }
 
     .profile-card {
-      background: white;
+      background: #fff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
       cursor: pointer;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .profile-card:hover {
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
       transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+    }
+
+    .featured-flag {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      z-index: 2;
+      background: #475569;
+      color: #fff;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      opacity: 0.95;
     }
 
     .profile-image {
       width: 100%;
-      height: 200px;
-      background: #f8f9fa;
+      height: 120px;
+      background: #e8f5f3;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-size: 16px;
       overflow: hidden;
-      position: relative;
-      padding: 20px;
     }
 
     .profile-image img {
-      width: 140px;
-      height: 140px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: block;
     }
 
     .profile-image span {
-      width: 140px;
-      height: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: #fff;
-      border: 4px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .tier-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: white;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 16px;
-      text-transform: uppercase;
-    }
-
-    .tier-badge.premium {
-      background: #FFD700;
-      color: #333;
+      font-size: 36px;
+      line-height: 1;
     }
 
     .profile-content {
-      padding: 16px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       flex: 1;
+      align-items: center;
+      text-align: center;
     }
 
     .profile-name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .profile-description {
       font-size: 14px;
-      color: #666;
-      margin-bottom: 12px;
-      line-height: 1.4;
-      flex: 1;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      -webkit-box-orient: vertical;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2px;
+      width: 100%;
+    }
+
+    .profile-name span {
+      display: block;
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .profile-contact {
-      font-size: 13px;
-      color: #888;
+    .profile-meta-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 2px;
       margin-bottom: 8px;
+      width: 100%;
+      flex-wrap: wrap;
     }
 
-    .profile-contact a {
+    .profile-category {
+      font-size: 12px;
       color: #475569;
-      text-decoration: none;
+      line-height: 1.4;
     }
 
-    .profile-contact a:hover {
-      text-decoration: underline;
+    .profile-location {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f766e;
+      line-height: 1.4;
     }
 
     .profile-footer {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #eee;
-    }
-
-    .profile-footer button {
-      flex: 1;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
+      width: 100%;
+      margin-top: auto;
     }
 
     .btn-view {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
       background: #475569;
-      color: white;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
     .btn-view:hover {
-      background: #087a9a;
-    }
-
-    .btn-contact {
-      background: #e8f4f8;
-      color: #475569;
-      border: 1px solid #475569;
-    }
-
-    .btn-contact:hover {
-      background: #d0e8f0;
+      background: #3b4a5a;
     }
 
     .empty-state {
@@ -462,27 +435,6 @@
     .empty-state p {
       font-size: 16px;
       margin-bottom: 24px;
-    }
-
-    /* Category badge on cards */
-    .category-badge {
-      display: inline-block;
-      background: #e8f4f8;
-      color: #475569;
-      border: 1px solid #b0d4e8;
-      border-radius: 12px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    /* Price badge */
-    .price-badge {
-      font-size: 13px;
-      color: #2e7d32;
-      font-weight: 600;
-      margin-bottom: 6px;
     }
 
     .loading {
@@ -734,7 +686,7 @@
                 serviceName:        profileData.businessName,
                 serviceDescription: profileData.businessDescription,
                 providerName:       profileData.businessName,
-                serviceImage:       profileData.businessLogo || null,
+                serviceImage:       profileData.serviceImage || profileData.businessCoverImage || profileData.businessPhotoSingle || profileData.businessLogo || null,
                 contactPhone:       profileData.businessPhone || null,
                 contactWebsite:     profileData.businessWebsite || null,
                 category:           'General Services',
@@ -828,60 +780,44 @@
 
     function createProfileCard(profile, isPromoted, promotion) {
       const name        = profile.serviceName || profile.businessName || 'Service';
-      const desc        = profile.serviceDescription || profile.businessDescription || 'No description available';
-      const phone       = profile.contactPhone || profile.businessPhone || null;
-      const website     = profile.contactWebsite || profile.businessWebsite || null;
-      const imageUrl    = profile.serviceImage || profile.businessLogo || null;
+      const imageUrl    = profile.serviceImage || profile.coverImage || profile.logoImage || profile.businessCoverImage || profile.businessPhotoSingle || profile.businessLogo || null;
       const catIcon     = profile.categoryIcon || '🔧';
-      const catLabel    = profile.category || 'Services';
-      const priceType   = profile.priceType;
-      const priceAmount = profile.priceAmount;
-      const viewCount   = profile.viewCount || 0;
+      const catLabel    = profile.category || 'Other';
+      const featuredValue = String(profile.isFeatured ?? '').trim().toLowerCase();
+      const explicitFeatured = profile.isFeatured === true || profile.isFeatured === 1 || featuredValue === 'true' || featuredValue === '1';
+      const location = profile.location
+        || [profile.city, profile.state].filter(Boolean).join(', ')
+        || profile.serviceArea
+        || 'Harrison';
 
       const imgHtml = imageUrl
         ? `<img src="${imageUrl}" alt="${name}">`
-        : `<span style="font-size:64px;opacity:0.9;">${catIcon}</span>`;
+        : `<span>${catIcon}</span>`;
 
-      const tier = profile.businessTier || 'free';
-      const tierBadge = tier === 'premium'
-        ? '<span class="tier-badge premium">⭐ Premium</span>'
-        : '';
+      const featuredBadge = explicitFeatured ? '<div class="featured-flag">⭐ Featured</div>' : '';
 
-      let priceHtml = '';
-      if (priceType === 'quote') {
-        priceHtml = '<div class="price-badge">💬 Free Quote</div>';
-      } else if (priceAmount) {
-        priceHtml = `<div class="price-badge">💰 ${priceAmount}</div>`;
-      } else if (priceType === 'negotiable') {
-        priceHtml = '<div class="price-badge">🤝 Negotiable</div>';
-      }
 
-      const promoBadge = isPromoted ? '<span class="promo-badge">PROMOTED</span>' : '';
       const promoOnClickArgs = isPromoted && promotion
         ? `, true, '${promotion.id}', '${promotion.businessId || ''}'`
         : '';
 
       return `
         <div class="profile-card" data-id="${profile.id}" data-source="${profile._source || 'legacy'}">
+          ${featuredBadge}
           <div class="profile-image">
             ${imgHtml}
-            ${tierBadge}
           </div>
           <div class="profile-content">
-            ${promoBadge}
-            <span class="category-badge">${catIcon} ${catLabel}</span>
             <div class="profile-name">
               <span>${name}</span>
             </div>
-            ${priceHtml}
-            <p class="profile-description">${desc}</p>
-            ${phone ? `<div class="profile-contact">📱 <a href="tel:${phone}">${phone}</a></div>` : ''}
-            ${website ? `<div class="profile-contact">🌐 <a href="${website}" target="_blank" rel="noopener noreferrer">Visit Website</a></div>` : ''}
+            <div class="profile-meta-row">
+              <div class="profile-category">${catLabel}</div>
+              <div class="profile-location">📍 ${location}</div>
+            </div>
             <div class="profile-footer">
               <button class="btn-view" onclick="viewDetails('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})">View Details</button>
-              ${profile.allowMessaging ? `<button class="btn-contact" onclick="navigateToDetail('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})" >💬 Message</button>` : (phone || website ? `<button class="btn-contact" onclick="contactBusiness('${profile.id}', '${profile._source || 'legacy'}'${promoOnClickArgs})" >Contact</button>` : '')}
             </div>
-            <div style="padding-top: 8px; border-top: 1px solid #eee; text-align: center; color: #64748b; font-size: 16px;">👁️ ${viewCount.toLocaleString()} ${viewCount === 1 ? 'view' : 'views'}</div>
           </div>
         </div>
       `;

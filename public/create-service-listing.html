@@ -167,11 +167,44 @@
       margin-top: 12px;
     }
 
+    .image-preview.show {
+      display: block;
+    }
+
     .image-preview img {
       max-height: 200px;
       max-width: 100%;
       border-radius: 8px;
       border: 1px solid #eee;
+    }
+
+    .image-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .image-preview-item {
+      position: relative;
+    }
+
+    .image-preview-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    .image-remove-btn {
+      margin-top: 10px;
+      padding: 6px 14px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     /* Price options */
@@ -480,8 +513,8 @@
         <div class="section-title" style="border-top:none;padding-top:0;margin-top:0;">📋 Service Details</div>
 
         <div class="field">
-          <label class="label label-required" for="serviceName">Service Title</label>
-          <input type="text" id="serviceName" class="input" placeholder="e.g. Professional Lawn Mowing" required maxlength="100">
+          <label class="label label-required" for="serviceName">Service Business Name</label>
+          <input type="text" id="serviceName" class="input" placeholder="e.g. Jane's Cleaning Co." required maxlength="100">
         </div>
 
         <div class="field">
@@ -493,15 +526,25 @@
         </div>
 
         <div class="field">
+          <label class="label" for="serviceMotto">Motto <span style="color:#999;">(Optional)</span></label>
+          <input type="text" id="serviceMotto" class="input" placeholder="e.g. Quality work you can trust" maxlength="120">
+        </div>
+
+        <div class="field">
           <label class="label label-required" for="serviceDescription">Description</label>
-          <textarea id="serviceDescription" class="textarea" placeholder="Describe your service, your experience, and what makes you stand out..." required maxlength="1000"></textarea>
+          <textarea id="serviceDescription" class="textarea" placeholder="Describe your service, experience, what's included..." required maxlength="1000"></textarea>
           <div class="hint"><span id="descCount">0</span>/1000 characters</div>
         </div>
 
-        <!-- ── Pricing ── -->
-        <div class="section-title">💰 Pricing</div>
-
         <div class="field">
+          <label class="label" for="businessHours">Business Hours <span style="color:#999;">(Optional)</span></label>
+          <textarea id="businessHours" class="textarea" placeholder="Mon-Fri: 9am-5pm&#10;Sat: 10am-2pm&#10;Sun: Closed" style="min-height: 90px;"></textarea>
+        </div>
+
+        <!-- ── Pricing ── -->
+        <div class="section-title" style="display:none;">💰 Pricing</div>
+
+        <div class="field" style="display:none;">
           <label class="label">Pricing Type</label>
           <div class="price-type-selector">
             <button type="button" class="price-type-btn active" data-type="hourly" onclick="setPriceType('hourly')">Hourly Rate</button>
@@ -511,7 +554,7 @@
           </div>
         </div>
 
-        <div class="field" id="priceField">
+        <div class="field" id="priceField" style="display:none;">
           <label class="label" for="priceAmount">Price / Rate <span style="color:#999;">(Optional)</span></label>
           <input type="text" id="priceAmount" class="input" placeholder="e.g. $35/hr  or  $150 flat rate">
         </div>
@@ -532,9 +575,9 @@
         <!-- ── Contact & Location ── -->
         <div class="section-title">📞 Contact &amp; Location</div>
 
-        <div class="field">
+        <div class="field" style="display:none;">
           <label class="label label-required" for="providerName">Your Name / Business Name</label>
-          <input type="text" id="providerName" class="input" placeholder="John Smith or Smith's Services" required maxlength="80">
+          <input type="text" id="providerName" class="input" placeholder="John Smith or Smith's Services" maxlength="80">
         </div>
 
         <div class="field">
@@ -544,6 +587,7 @@
             <option value="phone">Phone</option>
             <option value="email">Email</option>
             <option value="website">Website</option>
+            <option value="local_list">Local List</option>
           </select>
           <div class="hint" id="preferredContactMethodHint">Choose the method customers should use first.</div>
         </div>
@@ -553,7 +597,7 @@
             <label class="label" for="contactPhone">Phone <span id="contactPhoneOptional" style="color:#999;">(Optional)</span></label>
             <input type="tel" id="contactPhone" class="input" placeholder="(304) 555-0123">
           </div>
-          <div class="field" style="margin-bottom:0;">
+          <div class="field" style="margin-bottom:0; display:none;">
             <label class="label" for="contactEmail">Email <span id="contactEmailOptional" style="color:#999;">(Optional)</span></label>
             <input type="email" id="contactEmail" class="input" placeholder="you@example.com">
           </div>
@@ -566,7 +610,7 @@
 
         <div class="field" style="margin-top:18px;">
           <div class="checkbox-container" style="margin-top:0;margin-bottom:0;">
-            <input type="checkbox" id="allowMessaging" class="checkbox">
+            <input type="checkbox" id="allowMessaging" class="checkbox" checked>
             <label for="allowMessaging" class="checkbox-label">
               Allow customers to contact me through the Local List messaging system
               <span class="hint" style="display:block;margin-top:4px;">When enabled, customers can send you messages directly through the app.</span>
@@ -575,7 +619,7 @@
         </div>
 
         <div class="field-grid">
-          <div class="field" style="margin-bottom:0;">
+          <div class="field" style="margin-bottom:0; display:none;">
             <label class="label" for="serviceArea">Service Area</label>
             <input type="text" id="serviceArea" class="input" placeholder="Harrison & surrounding areas" maxlength="100">
           </div>
@@ -585,21 +629,79 @@
           </div>
         </div>
 
+        <div class="field-grid" style="margin-top:18px;">
+          <div class="field" style="margin-bottom:0;">
+            <label class="label label-required" for="city">City</label>
+            <input type="text" id="city" class="input" placeholder="Your city" maxlength="80" required>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label class="label label-required" for="state">State</label>
+            <input type="text" id="state" class="input" placeholder="State" maxlength="40" required>
+          </div>
+        </div>
+
         <div class="field" style="margin-top:18px;">
-          <label class="label label-required">Service Photo</label>
+          <label class="label" for="streetAddress">Street Address <span style="color:#999;">(Optional)</span></label>
+          <input type="text" id="streetAddress" class="input" placeholder="123 Main Street, Suite 100" maxlength="150">
+        </div>
+
+        <div class="field-grid" style="margin-top:18px;">
+          <div class="field" style="margin-bottom:0;">
+            <label class="label" for="facebookUrl">Facebook URL <span style="color:#999;">(Optional)</span></label>
+            <input type="url" id="facebookUrl" class="input" placeholder="https://facebook.com/your-page">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label class="label" for="youtubeUrl">YouTube URL <span style="color:#999;">(Optional)</span></label>
+            <input type="url" id="youtubeUrl" class="input" placeholder="https://youtube.com/@your-channel">
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:18px;">
+          <label class="label">Cover Image</label>
           <div class="image-upload-area" onclick="document.getElementById('serviceImage').click()">
             <input type="file" id="serviceImage" accept="image/*" onchange="previewImage(event)">
             <div id="uploadPrompt">
               <div style="font-size:36px;">📷</div>
-              <div style="font-weight:600;color:#475569;margin-top:8px;">Click to upload a photo</div>
+              <div style="font-weight:600;color:#475569;margin-top:8px;">Click to upload a cover image</div>
               <div style="font-size:12px;color:#999;margin-top:4px;">PNG or JPG, max 5MB</div>
             </div>
             <div class="image-preview" id="imagePreview">
-              <img id="previewImg" src="" alt="Service photo preview">
+              <img id="previewImg" src="" alt="Cover image preview">
               <br>
-              <button type="button" onclick="removeImage(event)" style="margin-top:10px;padding:6px 14px;background:#f44336;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">✕ Remove</button>
+              <button type="button" class="image-remove-btn" onclick="removeImage(event)">✕ Remove</button>
             </div>
           </div>
+        </div>
+
+        <div class="field" style="margin-top:18px;">
+          <label class="label">Logo Image</label>
+          <div class="image-upload-area" onclick="document.getElementById('logoImage').click()">
+            <input type="file" id="logoImage" accept="image/*" onchange="previewLogoImage(event)">
+            <div id="logoUploadPrompt">
+              <div style="font-size:36px;">ðŸ”–</div>
+              <div style="font-weight:600;color:#475569;margin-top:8px;">Click to upload a logo image</div>
+              <div style="font-size:12px;color:#999;margin-top:4px;">PNG or JPG, max 5MB</div>
+            </div>
+            <div class="image-preview" id="logoImagePreview">
+              <img id="logoPreviewImg" src="" alt="Logo image preview">
+              <br>
+              <button type="button" class="image-remove-btn" onclick="removeLogoImage(event)">✕ Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:18px;">
+          <label class="label">Gallery</label>
+          <div class="image-upload-area" onclick="document.getElementById('galleryImages').click()">
+            <input type="file" id="galleryImages" accept="image/*" multiple onchange="previewGalleryImages(event)">
+            <div id="galleryUploadPrompt">
+              <div style="font-size:36px;">ðŸ–¼ï¸</div>
+              <div style="font-weight:600;color:#475569;margin-top:8px;">Click to upload gallery images</div>
+              <div style="font-size:12px;color:#999;margin-top:4px;">Select multiple PNG or JPG images, max 5MB each</div>
+            </div>
+            <div class="image-preview-grid" id="galleryPreview"></div>
+          </div>
+          <div class="hint">At least one image is required across your cover image, logo image, or gallery.</div>
         </div>
 
         <div class="field" style="margin-top:18px;">
@@ -641,6 +743,8 @@
     let selectedCategory = '';
     let currentPriceType = 'hourly';
     let serviceImageFile = null;
+    let logoImageFile = null;
+    let galleryImageFiles = [];
 
     // ── Category definitions ──────────────────────────────────────────────
     const CATEGORIES = [
@@ -707,7 +811,7 @@
       reader.onload = (e) => {
         document.getElementById('previewImg').src = e.target.result;
         document.getElementById('uploadPrompt').style.display = 'none';
-        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('imagePreview').classList.add('show');
       };
       reader.readAsDataURL(file);
     }
@@ -718,20 +822,103 @@
       document.getElementById('serviceImage').value = '';
       document.getElementById('previewImg').src = '';
       document.getElementById('uploadPrompt').style.display = 'block';
-      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('imagePreview').classList.remove('show');
+    }
+
+    function previewLogoImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image must be less than 5MB.');
+        event.target.value = '';
+        return;
+      }
+      logoImageFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('logoPreviewImg').src = e.target.result;
+        document.getElementById('logoUploadPrompt').style.display = 'none';
+        document.getElementById('logoImagePreview').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogoImage(event) {
+      event.stopPropagation();
+      logoImageFile = null;
+      document.getElementById('logoImage').value = '';
+      document.getElementById('logoPreviewImg').src = '';
+      document.getElementById('logoUploadPrompt').style.display = 'block';
+      document.getElementById('logoImagePreview').classList.remove('show');
+    }
+
+    function previewGalleryImages(event) {
+      const files = Array.from(event.target.files || []);
+      const oversized = files.find((file) => file.size > 5 * 1024 * 1024);
+      if (oversized) {
+        showError('Each gallery image must be less than 5MB.');
+        event.target.value = '';
+        return;
+      }
+
+      galleryImageFiles = files;
+      const preview = document.getElementById('galleryPreview');
+      const prompt = document.getElementById('galleryUploadPrompt');
+      preview.innerHTML = '';
+
+      if (!galleryImageFiles.length) {
+        prompt.style.display = 'block';
+        return;
+      }
+
+      prompt.style.display = 'none';
+
+      galleryImageFiles.forEach((file, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-preview-item';
+
+        const img = document.createElement('img');
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'image-remove-btn';
+        removeBtn.textContent = '✕ Remove';
+        removeBtn.onclick = (e) => removeGalleryImage(e, index);
+
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          img.src = loadEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(removeBtn);
+        preview.appendChild(wrapper);
+      });
+    }
+
+    function removeGalleryImage(event, indexToRemove) {
+      event.stopPropagation();
+      galleryImageFiles = galleryImageFiles.filter((_, index) => index !== indexToRemove);
+
+      const input = document.getElementById('galleryImages');
+      const dt = new DataTransfer();
+      galleryImageFiles.forEach((file) => dt.items.add(file));
+      input.files = dt.files;
+
+      previewGalleryImages({ target: input });
     }
 
     function getPreferredContactFieldId(method) {
       if (method === 'phone') return 'contactPhone';
-      if (method === 'email') return 'contactEmail';
       if (method === 'website') return 'contactWebsite';
       return '';
     }
 
     function getPreferredContactLabel(method) {
       if (method === 'phone') return 'phone number';
-      if (method === 'email') return 'email address';
+      if (method === 'email') return 'account email';
       if (method === 'website') return 'website URL';
+      if (method === 'local_list') return 'Local List messaging';
       return 'contact information';
     }
 
@@ -742,13 +929,11 @@
 
       const optionalMap = {
         phone: document.getElementById('contactPhoneOptional'),
-        email: document.getElementById('contactEmailOptional'),
         website: document.getElementById('contactWebsiteOptional')
       };
 
       const inputMap = {
         phone: document.getElementById('contactPhone'),
-        email: document.getElementById('contactEmail'),
         website: document.getElementById('contactWebsite')
       };
 
@@ -764,6 +949,16 @@
 
       if (!method) {
         hint.textContent = 'Choose the method customers should use first.';
+        return;
+      }
+
+      if (method === 'email') {
+        hint.textContent = 'Your account email will be used for contact.';
+        return;
+      }
+
+      if (method === 'local_list') {
+        hint.textContent = 'Turn on Local List messaging below if you want customers to contact you in-app.';
         return;
       }
 
@@ -845,6 +1040,27 @@
       return await ref.getDownloadURL();
     }
 
+    async function uploadLogoImage(userId) {
+      if (!logoImageFile || !storage) return null;
+      const ext = logoImageFile.name.split('.').pop();
+      const fileName = `services/${userId}/logos/${Date.now()}.${ext}`;
+      const ref = storage.ref(fileName);
+      await ref.put(logoImageFile);
+      return await ref.getDownloadURL();
+    }
+
+    async function uploadGalleryImages(userId) {
+      if (!galleryImageFiles.length || !storage) return [];
+      const uploads = galleryImageFiles.map(async (file, index) => {
+        const ext = file.name.split('.').pop();
+        const fileName = `services/${userId}/gallery/${Date.now()}_${index}.${ext}`;
+        const ref = storage.ref(fileName);
+        await ref.put(file);
+        return await ref.getDownloadURL();
+      });
+      return Promise.all(uploads);
+    }
+
     // ── Form submit ───────────────────────────────────────────────────────
     async function handleSubmit(event) {
       event.preventDefault();
@@ -862,19 +1078,12 @@
         return;
       }
 
-      // Validate image upload
-      if (!serviceImageFile) {
-        showError('Please upload a service photo.');
-        document.getElementById('serviceImage').focus();
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post My Service';
-        return;
-      }
-
       // Validate preferred contact method and matching contact info
       const phone   = document.getElementById('contactPhone').value.trim();
-      const email   = document.getElementById('contactEmail').value.trim();
       const website = document.getElementById('contactWebsite').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const state = document.getElementById('state').value.trim();
+      const allowMessaging = document.getElementById('allowMessaging').checked;
       const preferredContactMethod = document.getElementById('preferredContactMethod').value;
       const wantsFeaturedService = document.getElementById('wantsFeaturedService').checked;
 
@@ -895,13 +1104,42 @@
         return;
       }
 
+      if (!city) {
+        showError('City is required.');
+        document.getElementById('city').focus();
+        return;
+      }
+
+      if (!state) {
+        showError('State is required.');
+        document.getElementById('state').focus();
+        return;
+      }
+
+      const hasAtLeastOneImage = Boolean(serviceImageFile || logoImageFile || galleryImageFiles.length);
+      if (!hasAtLeastOneImage) {
+        showError('Please upload at least one image using the cover image, logo image, or gallery.');
+        document.getElementById('serviceImage').focus();
+        return;
+      }
+
       const preferredFieldId = getPreferredContactFieldId(preferredContactMethod);
-      const preferredField = document.getElementById(preferredFieldId);
-      const preferredValue = preferredField ? preferredField.value.trim() : '';
+      const preferredField = preferredFieldId ? document.getElementById(preferredFieldId) : null;
+      const preferredValue = preferredContactMethod === 'email'
+        ? String(currentUser.email || '').trim()
+        : preferredContactMethod === 'local_list'
+          ? 'Local List'
+          : (preferredField ? preferredField.value.trim() : '');
 
       if (!preferredValue) {
         showError(`Please provide your ${getPreferredContactLabel(preferredContactMethod)} because it is your preferred contact method.`);
         if (preferredField) preferredField.focus();
+        return;
+      }
+
+      if (preferredContactMethod === 'local_list' && !allowMessaging) {
+        showError('Turn on Local List messaging if you want it to be your preferred contact method.');
+        document.getElementById('allowMessaging').focus();
         return;
       }
 
@@ -916,35 +1154,51 @@
       submitBtn.textContent = 'Posting...';
 
       try {
-        let imageUrl = null;
+        let coverImageUrl = null;
+        let logoImageUrl = null;
+        let galleryImageUrls = [];
         if (serviceImageFile) {
-          submitBtn.textContent = 'Uploading image...';
-          imageUrl = await uploadImage(currentUser.uid);
+          submitBtn.textContent = 'Uploading cover image...';
+          coverImageUrl = await uploadImage(currentUser.uid);
+        }
+
+        if (logoImageFile) {
+          submitBtn.textContent = 'Uploading logo image...';
+          logoImageUrl = await uploadLogoImage(currentUser.uid);
+        }
+
+        if (galleryImageFiles.length) {
+          submitBtn.textContent = 'Uploading gallery images...';
+          galleryImageUrls = await uploadGalleryImages(currentUser.uid);
         }
 
         const catObj = CATEGORIES.find(c => c.id === selectedCategory);
-        const priceAmount = document.getElementById('priceAmount').value.trim();
         const serviceName = document.getElementById('serviceName').value.trim();
+        const serviceImage = coverImageUrl || logoImageUrl || galleryImageUrls[0] || null;
 
         const serviceData = {
           userId:             currentUser.uid,
-          providerName:       document.getElementById('providerName').value.trim(),
           serviceName:        serviceName,
           category:           catObj ? catObj.label : selectedCategory,
           categoryId:         selectedCategory,
-          categoryIcon:       catObj ? catObj.icon : '📋',
+          serviceMotto:       document.getElementById('serviceMotto').value.trim() || null,
           serviceDescription: document.getElementById('serviceDescription').value.trim(),
-          serviceImage:       imageUrl,
-          priceType:          currentPriceType,
-          priceAmount:        priceAmount || null,
+          businessHours:      document.getElementById('businessHours').value.trim() || null,
+          serviceImage:       serviceImage,
+          streetAddress:      document.getElementById('streetAddress').value.trim() || null,
+          city:               city,
+          state:              state,
+          zipCode:            document.getElementById('zipCode').value.trim(),
           preferredContactMethod,
           preferredContactValue: preferredValue,
+          allowMessaging:     allowMessaging,
           contactPhone:       phone || null,
-          contactEmail:       email || null,
           contactWebsite:     website || null,
-          allowMessaging:     document.getElementById('allowMessaging').checked,
-          serviceArea:        document.getElementById('serviceArea').value.trim() || null,
-          zipCode:            document.getElementById('zipCode').value.trim(),
+          facebookUrl:        document.getElementById('facebookUrl').value.trim() || null,
+          youtubeUrl:         document.getElementById('youtubeUrl').value.trim() || null,
+          coverImage:         coverImageUrl,
+          logoImage:          logoImageUrl,
+          galleryImages:      galleryImageUrls,
           isActive:           true,
           isApproved:         false,
           approvalStatus:     'pending',
@@ -1000,6 +1254,8 @@
         currentUser = user;
         document.getElementById('serviceForm').style.display = 'block';
         document.getElementById('authGate').style.display = 'none';
+        document.getElementById('contactEmail').value = user.email || '';
+        handlePreferredContactChange();
         // Pre-fill provider name
         if (user.displayName) {
           document.getElementById('providerName').value = user.displayName;
