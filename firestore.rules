@@ -15,7 +15,10 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn() && userDocExists() && userDoc().role == 'admin';
+      return signedIn() && (
+        request.auth.token.admin == true
+        || (userDocExists() && userDoc().role == 'admin')
+      );
     }
 
     function isActiveAccount() {
@@ -141,46 +144,49 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['accountType']) || request.resource.data.accountType in ['personal', 'user'])
         && (!request.resource.data.keys().hasAny(['publicProfileEnabled']) || request.resource.data.publicProfileEnabled is bool);
       allow read: if signedIn();
-      allow update: if signedIn()
-        && request.auth.uid == document
-        && (
-          // Protect critical fields - they cannot be changed by users, but allow first-time initialization on legacy/stub docs.
-          (!request.resource.data.keys().hasAny(['role'])
-            || !resource.data.keys().hasAny(['role'])
-            || request.resource.data.role == resource.data.role)
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == document
           && (
-            !request.resource.data.keys().hasAny(['status'])
-            || !resource.data.keys().hasAny(['status'])
-            || request.resource.data.status == resource.data.status
-            || request.resource.data.status in ['pending', 'approved']
+            // Protect critical fields - they cannot be changed by users, but allow first-time initialization on legacy/stub docs.
+            (!request.resource.data.keys().hasAny(['role'])
+              || !resource.data.keys().hasAny(['role'])
+              || request.resource.data.role == resource.data.role)
+            && (
+              !request.resource.data.keys().hasAny(['status'])
+              || !resource.data.keys().hasAny(['status'])
+              || request.resource.data.status == resource.data.status
+              || request.resource.data.status in ['pending', 'approved']
+            )
+            && (!request.resource.data.keys().hasAny(['isDisabled'])
+              || !resource.data.keys().hasAny(['isDisabled'])
+              || request.resource.data.isDisabled == resource.data.isDisabled)
+            && (!request.resource.data.keys().hasAny(['isBanned'])
+              || !resource.data.keys().hasAny(['isBanned'])
+              || request.resource.data.isBanned == resource.data.isBanned)
+            && (!request.resource.data.keys().hasAny(['zipApproved'])
+              || !resource.data.keys().hasAny(['zipApproved'])
+              || request.resource.data.zipApproved == resource.data.zipApproved)
+            && (!request.resource.data.keys().hasAny(['accountType'])
+              || !resource.data.keys().hasAny(['accountType'])
+              || request.resource.data.accountType == resource.data.accountType
+              || request.resource.data.accountType in ['personal', 'user'])
+            && (!request.resource.data.keys().hasAny(['email'])
+              || !resource.data.keys().hasAny(['email'])
+              || request.resource.data.email == resource.data.email)
+            // Users may update their own profile names
+            && (!request.resource.data.keys().hasAny(['displayName'])
+              || request.resource.data.displayName == resource.data.displayName
+              || (request.resource.data.displayName is string
+                && request.resource.data.displayName.size() >= 2
+                && request.resource.data.displayName.size() <= 80))
+            && (!request.resource.data.keys().hasAny(['name'])
+              || request.resource.data.name == resource.data.name
+              || (request.resource.data.name is string
+                && request.resource.data.name.size() >= 2
+                && request.resource.data.name.size() <= 80))
           )
-          && (!request.resource.data.keys().hasAny(['isDisabled'])
-            || !resource.data.keys().hasAny(['isDisabled'])
-            || request.resource.data.isDisabled == resource.data.isDisabled)
-          && (!request.resource.data.keys().hasAny(['isBanned'])
-            || !resource.data.keys().hasAny(['isBanned'])
-            || request.resource.data.isBanned == resource.data.isBanned)
-          && (!request.resource.data.keys().hasAny(['zipApproved'])
-            || !resource.data.keys().hasAny(['zipApproved'])
-            || request.resource.data.zipApproved == resource.data.zipApproved)
-          && (!request.resource.data.keys().hasAny(['accountType'])
-            || !resource.data.keys().hasAny(['accountType'])
-            || request.resource.data.accountType == resource.data.accountType
-            || request.resource.data.accountType in ['personal', 'user'])
-          && (!request.resource.data.keys().hasAny(['email'])
-            || !resource.data.keys().hasAny(['email'])
-            || request.resource.data.email == resource.data.email)
-          // Users may update their own profile names
-          && (!request.resource.data.keys().hasAny(['displayName'])
-            || request.resource.data.displayName == resource.data.displayName
-            || (request.resource.data.displayName is string
-              && request.resource.data.displayName.size() >= 2
-              && request.resource.data.displayName.size() <= 80))
-          && (!request.resource.data.keys().hasAny(['name'])
-            || request.resource.data.name == resource.data.name
-            || (request.resource.data.name is string
-              && request.resource.data.name.size() >= 2
-              && request.resource.data.name.size() <= 80))
         );
       allow delete: if request.auth.uid == document || isAdmin();
     }
@@ -190,12 +196,15 @@ service cloud.firestore {
         && request.auth.uid == userId
         && request.resource.data.userId == userId
         && request.resource.data.status == 'pending';
-      allow update: if signedIn()
-        && request.auth.uid == userId
-        && resource.data.userId == userId
-        && request.resource.data.userId == userId
-        && resource.data.status == 'pending'
-        && request.resource.data.status == 'pending';
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == userId
+          && resource.data.userId == userId
+          && request.resource.data.userId == userId
+          && resource.data.status == 'pending'
+          && request.resource.data.status == 'pending'
+        );
       allow read: if request.auth.uid == userId || isAdmin();
       allow delete: if isAdmin();
     }

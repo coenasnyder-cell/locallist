@@ -7,11 +7,13 @@ import AdminListings from '../../components/AdminListings';
 import AdminMobileActionCenter from '../../components/AdminMobileActionCenter';
 import AdminPendingApprovals from '../../components/AdminPendingApprovals';
 import AdminPendingBusinesses from '../../components/AdminPendingBusinesses';
+import { useAdminStatus } from '../../hooks/useAdminStatus';
 
 // Clean admin panel without test email functionality
 
 export default function AdminTabScreen() {
   const router = useRouter();
+  const { isAdmin, loading } = useAdminStatus();
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'pending-users' | 'pending-businesses' | 'pending-listings' | 'pending-reports'>('dashboard');
 
   const handleNavigateToPendingUsers = () => {
@@ -66,7 +68,18 @@ export default function AdminTabScreen() {
       <Text style={styles.title}>{getTitle()}</Text>
 
       <View style={styles.contentWrap}>
-        {currentPage === 'dashboard' ? (
+        {loading ? (
+          <View style={styles.stateCard}>
+            <Text style={styles.stateTitle}>Checking authorization...</Text>
+            <Text style={styles.stateBody}>Verifying your admin access.</Text>
+          </View>
+        ) : !isAdmin ? (
+          <View style={styles.stateCard}>
+            <Feather name="lock" size={28} color="#dc2626" />
+            <Text style={styles.stateTitle}>Access Denied</Text>
+            <Text style={styles.stateBody}>This panel is available to admin accounts only.</Text>
+          </View>
+        ) : currentPage === 'dashboard' ? (
           <View>
             <AdminMobileActionCenter
               onNavigateToPendingUsers={handleNavigateToPendingUsers}
@@ -137,5 +150,26 @@ const styles = StyleSheet.create({
   },
   contentWrap: {
     flex: 1,
+  },
+  stateCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    gap: 8,
+  },
+  stateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  stateBody: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
   },
 });

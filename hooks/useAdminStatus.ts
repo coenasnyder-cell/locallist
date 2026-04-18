@@ -1,7 +1,7 @@
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { app } from '../firebase';
+import { resolveAdminStatus } from '../utils/adminUtils';
 
 export function useAdminStatus() {
   const [user, setUser] = useState<User | null>(null);
@@ -10,33 +10,37 @@ export function useAdminStatus() {
 
   useEffect(() => {
     const auth = getAuth(app);
+    let isMounted = true;
+
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (!isMounted) {
+        return;
+      }
+
       setUser(authUser);
       setLoading(true);
 
-      if (authUser) {
-        try {
-          const db = getFirestore(app);
-          const userDoc = await getDoc(doc(db, 'users', authUser.uid));
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setIsAdmin(userData.role === 'admin');
-          } else {
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error('Error checking admin status:', error);
+      try {
+        const nextIsAdmin = await resolveAdminStatus(authUser);
+        if (isMounted) {
+          setIsAdmin(nextIsAdmin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        if (isMounted) {
           setIsAdmin(false);
         }
-      } else {
-        setIsAdmin(false);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   return { user, isAdmin, loading };
