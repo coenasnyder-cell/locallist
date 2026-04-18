@@ -35,7 +35,8 @@ export default function AdminMobileActionCenter({
           businesses: businessSnap.data().count,
           services: servicesSnap.data().count,
         });
-      } catch {
+      } catch (error) {
+        console.error('Error fetching admin stats:', error);
         setStats({ users: 0, listings: 0, businesses: 0, services: 0 });
       }
     };
@@ -68,10 +69,14 @@ export default function AdminMobileActionCenter({
             </View>
           </>
         ) : (
-          <ActivityIndicator size="small" color="#64748b" style={{ flex: 1, paddingVertical: 16 }} />
+          <View style={styles.statCard}>
+            <ActivityIndicator size="small" color="#64748b" />
+            <Text style={styles.statLabel}>Loading...</Text>
+          </View>
         )}
       </View>
 
+      {/* Always show navigation cards */}
       <TouchableOpacity style={styles.card} onPress={onNavigateToPendingUsers} activeOpacity={0.8}>
         <Feather name="users" size={22} color="#0ea5e9" />
         <View style={styles.cardText}>
