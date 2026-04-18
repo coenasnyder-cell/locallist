@@ -410,7 +410,13 @@ export default function CreateServiceListingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.content, styles.scrollContent]}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>List a Service</Text>
           <Text style={styles.heroSubtitle}>Offer your skills to the local community</Text>
@@ -617,7 +623,9 @@ export default function CreateServiceListingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f5f7' },
+  scrollView: { flex: 1 },
   content: { padding: 14, paddingBottom: 32, gap: 12 },
+  scrollContent: { flexGrow: 1 },
   hero: {
     backgroundColor: '#ffffff',
     borderWidth: 1,

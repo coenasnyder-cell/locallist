@@ -45,7 +45,7 @@ export function welcomeEmail(): { subject: string; html: string } {
           </p>
 
           <p style="margin:0 0 24px;">
-            <a href="https://app.locallist.biz" style="color:#2563eb;font-size:16px;line-height:1.6;text-decoration:underline;">Explore your community or create your first listing today.</a>
+            <a href="https://locallist.biz" style="color:#2563eb;font-size:16px;line-height:1.6;text-decoration:underline;">Explore your community or create your first listing today.</a>
           </p>
 
           <p style="margin:0 0 24px;color:#3f3f46;font-size:16px;line-height:1.6;">

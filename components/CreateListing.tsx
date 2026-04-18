@@ -693,11 +693,12 @@ const styles = StyleSheet.create({
 		>
 				<View style={{ flex: 1 }}>
 						<ScrollView 
+							style={{ flex: 1 }}
 							contentContainerStyle={styles.scrollContainer} 
 							keyboardShouldPersistTaps="handled"
 							nestedScrollEnabled
 							keyboardDismissMode="on-drag"
-							showsVerticalScrollIndicator={false}
+							showsVerticalScrollIndicator={true}
 						>
 							<Text style={styles.formTitle}>Create Marketplace Listing</Text>
 							<Text style={draftRestored ? styles.draftRestoredHint : styles.draftHint}>

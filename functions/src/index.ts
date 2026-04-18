@@ -19,6 +19,69 @@ import Stripe from "stripe";
 // Email triggers (Resend)
 export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onUserCreated } from "./emailTriggers.js";
 
+// Email test function - send test emails for each template (TEMPORARILY UNSECURED FOR TESTING)
+export const sendTestEmail = onCall(
+  { secrets: ["RESEND_API_KEY"] },
+  async (request) => {
+    // TEMP: Removed admin check for testing - ADD BACK AFTER TESTING
+    // const auth = request.auth;
+    // if (!auth || !auth.token.admin) {
+    //   throw new Error("Unauthorized: Admin access required");
+    // }
+
+    const { emailType, recipientEmail } = request.data;
+
+    if (!recipientEmail || typeof recipientEmail !== "string") {
+      throw new Error("recipientEmail is required");
+    }
+
+    if (!emailType || typeof emailType !== "string") {
+      throw new Error("emailType is required (welcome, message, featured, premium)");
+    }
+
+    try {
+      const { sendEmail, welcomeEmail, premiumSubscriptionEmail, featuredListingEmail, messageEmail } = await import(
+        "./email/index.js"
+      );
+
+      let template;
+
+      switch (emailType.toLowerCase()) {
+        case "welcome":
+          template = welcomeEmail();
+          break;
+
+        case "premium":
+          template = premiumSubscriptionEmail();
+          break;
+
+        case "featured":
+          template = featuredListingEmail("Test Listing Title", 7);
+          break;
+
+        case "message":
+          template = messageEmail("John Doe", "Jane Smith", "Hey, I'm interested in your listing. Is it still available?");
+          break;
+
+        default:
+          throw new Error(`Unknown emailType: ${emailType}. Supported types: welcome, premium, featured, message`);
+      }
+
+      await sendEmail({
+        to: recipientEmail,
+        subject: template.subject,
+        html: template.html,
+      });
+
+      logger.info(`Test ${emailType} email sent successfully`, { recipientEmail });
+      return { success: true, message: `Test ${emailType} email sent to ${recipientEmail}` };
+    } catch (error) {
+      logger.error("Failed to send test email", { emailType, recipientEmail, error });
+      throw error;
+    }
+  }
+);
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 

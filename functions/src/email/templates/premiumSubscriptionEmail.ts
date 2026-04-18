@@ -12,7 +12,7 @@ export function premiumSubscriptionEmail(): { subject: string; html: string } {
 
         <!-- Logo -->
         <tr><td align="center" style="padding:40px 40px 32px;">
-          <img src="https://app.locallist.biz/assets/logo.png" alt="Local List — Harrison's Local Marketplace" width="200" style="display:block;" />
+          <img src="https://locallist.biz/assets/logo.png" alt="Local List — Harrison's Local Marketplace" width="200" style="display:block;" />
         </td></tr>
 
         <!-- Body -->
@@ -42,7 +42,7 @@ export function premiumSubscriptionEmail(): { subject: string; html: string } {
           <!-- CTA Button -->
           <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
             <tr><td align="center" style="background:#2563eb;border-radius:6px;">
-              <a href="https://app.locallist.biz/(tabs)/profilebutton" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:16px;font-weight:bold;text-decoration:none;">
+              <a href="https://locallist.biz" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:16px;font-weight:bold;text-decoration:none;">
                 Update Your Business Profile
               </a>
             </td></tr>

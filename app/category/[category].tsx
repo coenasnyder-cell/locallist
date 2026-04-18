@@ -64,7 +64,11 @@ export default function CategoryPage() {
     <View style={styles.container}>
       <Text style={styles.header}>{category} Listings</Text>
       <View style={styles.listingsContainer}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           {loading ? (
             <Text>Loading...</Text>
           ) : filteredListings.length === 0 ? (
@@ -102,5 +106,11 @@ const styles = StyleSheet.create({
   listingsContainer: {
     flex: 1,
     paddingHorizontal: 12,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
 });
