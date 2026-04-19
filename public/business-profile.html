@@ -35,23 +35,23 @@
     .container {
       max-width: 900px;
       margin: 0 auto;
-      padding: 20px;
-      padding-bottom: 60px;
+      padding: 10px;
+      padding-bottom: 20px;
     }
 
     .profile-header {
       background: white;
       border-radius: 12px;
-      padding: 40px 24px 24px;
-      margin-bottom: 24px;
+      padding: 10px 12px 14px;
+      margin-bottom: 10px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
     .business-logo-container {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 24px;
+      width: 100px;
+      height: 80px;
+      margin: 0 auto 16px;
       border-radius: 50%;
       overflow: hidden;
       background: #f0f0f0;
@@ -178,7 +178,6 @@
     .info-images-grid img:hover {
       transform: scale(1.03);
     }
-
     .location-map-card {
       margin-top: 16px;
       border: 1px solid #e5e7eb;
@@ -262,7 +261,87 @@
     .gallery img:hover {
       transform: scale(1.05);
     }
+.action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin-top: 14px;
+    }
 
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #475569;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3a4654;
+    }
+
+    .btn-secondary {
+      background: #f0f7fa;
+      color: #475569;
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #e0eff5;
+    }
+
+    .empty-state {
+      background: white;
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
+    }
+
+    footer {
+      margin-top: 28px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+    }
     .rating-summary {
       margin-top: 10px;
       display: flex;
@@ -284,9 +363,9 @@
     .reviews-section {
       background: #fff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 10px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: 24px;
+      margin-bottom: 10px;
     }
 
     .reviews-title {
@@ -671,6 +750,15 @@
     </div>
   </div>
 
+  <footer>
+    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+    <div class="footer-meta">
+      <a href="terms.html">Terms of Use</a>
+      <span>|</span>
+      <a href="privacy.html">Privacy Policy</a>
+    </div>
+  </footer>
+
   <div id="imageModal" class="image-modal" onclick="closeImageModal()">
     <button class="modal-close" onclick="closeImageModal()">✕</button>
     <img id="modalImage" class="modal-image" alt="Enlarged image">
@@ -700,6 +788,10 @@
   <script>
     const db = window.firebaseDb;
     const auth = window.firebaseAuth || firebase.auth();
+      function getBusinessIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('id') || urlParams.get('businessId');
+    }
     let currentBusinessProfile = null;
     let currentUser = null;
     let selectedReviewRating = 0;
@@ -712,12 +804,6 @@
         });
       }
     });
-
-    function getBusinessIdFromUrl() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('id') || urlParams.get('businessId');
-    }
-
     function getTodayDateKey() {
       const now = new Date();
       const y = now.getFullYear();
@@ -747,7 +833,6 @@
         }
       }
     }
-
     async function incrementBusinessProfileViewCount(profile) {
       if (!profile || !profile.id) return;
 
@@ -759,12 +844,10 @@
         sessionStorage.setItem(sessionKey, '1');
         return;
       }
-
       try {
         if (profile.__sourceCollection === 'users') {
           return;
         }
-
         const targetCollection = profile.__sourceCollection === 'shopLocal' ? 'shopLocal' : 'businessLocal';
         await db.collection(targetCollection).doc(profile.id).update({
           viewCount: firebase.firestore.FieldValue.increment(1)
@@ -776,7 +859,6 @@
         console.warn('Could not increment business profile view count:', error);
       }
     }
-
     async function loadBusinessProfile() {
       try {
         const businessId = getBusinessIdFromUrl();
@@ -1313,7 +1395,7 @@
       let profileHTML = `
         <div class="profile-header">
           ${logo}
-          <div class="business-name">${profile.businessName || 'Business Name'}</div>
+          <div class="business-name">${profile.businessMotto || 'Business Motto'}</div>
           <div class="rating-summary" id="reviewSummaryInline">
             <span>Loading rating...</span>
           </div>
@@ -1364,25 +1446,11 @@
           </div>
         `;
       }
-
-      if (mergedImages.length > 0) {
-        profileHTML += `
-          <div class="info-item">
-            <div class="info-label">Images</div>
-            <div class="info-images-grid">
-              ${mergedImages.map((img, idx) => `<img src="${img}" alt="Business image ${idx + 1}" onclick="openImageModal('${img}')">`).join('')}
-            </div>
-          </div>
-        `;
-      }
-
       profileHTML += `
           </div>
-
           <div class="info-section contact-column">
             <div class="info-title">🔗 Contact Information</div>
       `;
-
       if (profile.businessHours) {
         profileHTML += `
           <div class="info-item">
@@ -1390,8 +1458,6 @@
             <div class="info-value" style="white-space: pre-wrap;">${profile.businessHours}</div>
           </div>
         `;
-      }
-
       if (profile.businessWebsite) {
         profileHTML += `
           <div class="info-item">
@@ -1415,8 +1481,7 @@
           </div>
         `;
       }
-
-      if (socialLinks.length > 0) {
+       if (socialLinks.length > 0) {
         profileHTML += `
           <div class="info-item">
             <div class="info-label">Social Media</div>
@@ -1429,8 +1494,27 @@
             </div>
           </div>
         `;
-      }
+       }
+profileHTML += `
+ <div class="action-buttons">`;
 
+if (profile.businessWebsite) {
+  profileHTML += `
+    <button class="btn btn-primary" onclick="window.open('${profile.businessWebsite}', '_blank')">
+      Visit Website
+    </button>
+  `;
+}
+if (preferredContact) {
+  profileHTML += `
+    <button class="btn btn-secondary" onclick="openContactModal()">
+      Contact Seller
+    </button>
+  `;
+}
+profileHTML += `
+  </div>
+`;
       if (!hasContactInfo) {
         profileHTML += `
           <div class="info-item">
@@ -1438,12 +1522,11 @@
           </div>
         `;
       }
-
       profileHTML += `
           </div>
         </div>
       `;
-
+      }
       // Gallery Section
       if (profile.businessImages && profile.businessImages.length > 0) {
         profileHTML += `
@@ -1472,33 +1555,7 @@
           ${createLocationMapMarkup(profile)}
         </div>
       `;
-
-      // Action Buttons
-      profileHTML += `
-        <div class="action-buttons">
-      `;
-
-      if (profile.businessWebsite) {
-        profileHTML += `
-          <button class="btn btn-primary" onclick="window.open('${profile.businessWebsite}', '_blank')">
-            Visit Website
-          </button>
-        `;
-      }
-
-      if (preferredContact) {
-        profileHTML += `
-          <button class="btn btn-secondary" onclick="openContactModal()">
-            Contact Seller
-          </button>
-        `;
-      }
-
-      profileHTML += `
-        </div>
-      `;
-
-      document.getElementById('profileContent').innerHTML = profileHTML;
+     document.getElementById('profileContent').innerHTML = profileHTML;
     }
 
     function showEmptyState(message) {

@@ -36,22 +36,17 @@
       max-width: 900px;
       margin: 0 auto;
       padding: 20px;
-      padding-bottom: 60px;
+      padding-bottom: 20px;
     }
-
-    .profile-header {
-      background: white;
-      border-radius: 12px;
-      padding: 40px 24px 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .business-logo-container {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 24px;
+.profile-header {
+     display: flex;
+  flex-direction: column;
+}
+    
+.business-logo-container {
+      width: 100px;
+      height: 80px;
+      margin: 0 auto 16px;
       border-radius: 50%;
       overflow: hidden;
       background: #f0f0f0;
@@ -61,20 +56,47 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .business-logo-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+.cover-image img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.profile-image-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;   /* 👈 outline */
+  position: relative;
+  margin-top: -40px;         /* 👈 pulls it up over cover */
+  margin-left: 16px;
+  background: white;
+}
 
-    .business-name {
+.profile-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+ 
+.header-text {
+  padding: 8px 16px;
+}
+
+.review-summary-top {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+    .service-name {
       font-size: 32px;
       font-weight: bold;
       color: #333;
       margin-bottom: 12px;
     }
 
-    .business-description {
+    .service-description {
       font-size: 16px;
       color: #666;
       line-height: 1.6;
@@ -89,20 +111,18 @@
       margin-bottom: 24px;
     }
 
-    .business-column {
+    .service-column {
       grid-column: 1;
     }
 
     .contact-column {
       grid-column: 2;
     }
-
-    .info-section {
+.info-section {
       background: white;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      text-align: left;
     }
 
     .info-title {
@@ -110,8 +130,7 @@
       font-weight: 600;
       color: #333;
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
+        text-align: left;  
       gap: 8px;
     }
 
@@ -122,12 +141,14 @@
       margin: 16px 0 10px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      text-align: left;  
     }
 
     .info-item {
       margin-bottom: 16px;
       padding-bottom: 16px;
       border-bottom: 1px solid #f0f0f0;
+            text-align: left;  
     }
 
     .info-item:last-child {
@@ -142,17 +163,21 @@
       font-weight: 500;
       margin-bottom: 4px;
       text-transform: uppercase;
+      text-align: left;  
     }
 
     .info-value {
       font-size: 16px;
       color: #333;
       word-break: break-word;
+      text-align: left;  
     }
 
     .info-value a {
       color: #475569;
       text-decoration: none;
+      text-align: left;
+
     }
 
     .info-value a:hover {
@@ -296,17 +321,34 @@
       text-align: center;
       padding: 18px;
     }
+        .rating-summary {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .rating-stars {
+      letter-spacing: 1px;
+      color: #f59e0b;
+      font-size: 16px;
+      font-weight: 700;
+    }
 
     .reviews-section {
       background: #fff;
       border-radius: 12px;
-      padding: 20px;
+      padding: 14px 16px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     .reviews-title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 700;
       color: #1f2937;
       margin-bottom: 8px;
@@ -490,23 +532,17 @@
         grid-template-columns: 1fr;
       }
 
-      .business-column,
+      .service-column,
       .contact-column {
         grid-column: auto;
       }
 
-      .action-buttons {
-        grid-template-columns: 1fr;
-      }
-
-      .business-name {
+      .service-name {
         font-size: 24px;
       }
 
-      .profile-header {
-        padding: 24px 16px 16px;
-      }
     }
+
   </style>
 </head>
 <body>
@@ -543,6 +579,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script>
     const db   = window.firebaseDb  || firebase.firestore();
@@ -751,25 +788,27 @@
       return currentUser.displayName || currentUser.email || 'Anonymous';
     }
 
-    function renderReviewRatingSummary(summary) {
-      const summaryEl = document.getElementById('reviewSummaryInline');
-      if (!summaryEl) return;
+function renderReviewRatingSummary(summary) {
+  const summaryEl = document.getElementById('reviewSummaryInline');
+  const topEl = document.getElementById('reviewSummaryTop');
 
-      const average = Number(summary?.ratingAverage || 0);
-      const count = Number(summary?.ratingCount || 0);
-      const stars = renderStarsFromRating(average);
+  const average = Number(summary?.ratingAverage || 0);
+  const count = Number(summary?.ratingCount || 0);
+  const stars = renderStarsFromRating(average);
 
-      if (count === 0) {
-        summaryEl.innerHTML = '<span>No reviews yet</span>';
-        return;
-      }
+  let html;
 
-      summaryEl.innerHTML = `
-        <span class="rating-stars">${stars}</span>
-        <span>${average.toFixed(1)} (${count} review${count === 1 ? '' : 's'})</span>
-      `;
-    }
-
+  if (count === 0) {
+    html = '<span>No reviews yet</span>';
+  } else {
+    html = `
+      <span class="rating-stars">${stars}</span>
+      <span>${average.toFixed(1)} (${count} review${count === 1 ? '' : 's'})</span>
+    `;
+  }
+  if (summaryEl) summaryEl.innerHTML = html;
+  if (topEl) topEl.innerHTML = html;
+}
     function updateStarSelectorUI(rating) {
       document.querySelectorAll('.star-btn').forEach((btn) => {
         const starValue = Number(btn.getAttribute('data-star') || 0);
@@ -830,12 +869,7 @@
       const listEl = document.getElementById('reviewsList');
       if (!listEl) return;
 
-      if (!reviews.length) {
-        listEl.innerHTML = '<div class="reviews-subtitle">No reviews yet. Be the first to leave feedback.</div>';
-        return;
-      }
-
-      listEl.innerHTML = reviews.map((review) => `
+        listEl.innerHTML = reviews.map((review) => `
         <div class="review-item">
           <div class="review-item-top">
             <div class="review-author">${escapeHtml(review.userName || 'Local User')}</div>
@@ -982,9 +1016,11 @@
       const preferred = resolvePreferredContact(profile);
       const priceLabel = formatPrice(profile);
 
-      const logoImageHtml = serviceImage
-        ? `<img src="${escapeHtml(serviceImage)}" alt="${escapeHtml(serviceName)}">`
-        : `<div style="font-size: 60px;">${escapeHtml(categoryIcon)}</div>`;
+const logoImageHtml = `
+  <div class="business-logo-container">
+    <img src="${escapeHtml(serviceImage)}" alt="Service Image">
+  </div>
+`;
 
       const tierHtml = tier === 'premium' ? '<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700;margin-top:10px;">⭐ Premium</span>' : '';
 
@@ -1049,56 +1085,52 @@
         : '';
 
       detailsContainer.innerHTML = `
-        <article class="profile-header">
-          <div class="business-logo-container">
-            ${logoImageHtml}
-          </div>
-          <h2 class="business-name">${escapeHtml(serviceName)}</h2>
-          ${tierHtml}
-           <div class="reviews-section">
-          <div class="reviews-title">Reviews</div>
-          <div class="rating-summary" id="reviewSummaryInline">
-            <span>Loading rating...</span>
-          </div>
-          <div id="reviewFormContainer"></div>
-          <div id="reviewsList"></div>
-        </div>
-         </article>
+
+<section class="profile-header">
+
+  <!-- COVER IMAGE -->
+  <div class="cover-image">
+    <img src="${escapeHtml(profile.coverImage || profile.serviceImage)}" alt="Cover">
+  </div>
+
+  <!-- PROFILE IMAGE (overlay) -->
+  <div class="profile-image-wrapper">
+    <img src="${escapeHtml(profile.serviceImage)}" alt="Logo">
+  </div>
+
+  <!-- TEXT -->
+  <div class="header-text">
+    <h1 class="service-name">${escapeHtml(serviceName)}</h1>
+    <div id="reviewSummaryTop"></div>
+  </div>
+
+</section>
 
 <section class="content-grid">
-
   <!-- LEFT COLUMN -->
-  <div class="info-section business-column">
-
+  <div class="info-section">
+    <h3 class="info-title">Service Information</h3>
     <div class="info-item">
-      <div class="info-title">Service Provider</div>
       <div class="info-value">${escapeHtml(providerName)}</div>
     </div>
-
     <div class="info-item">
       <div class="info-label">Description</div>
-      <div class="business-description">${escapeHtml(description)}</div>
+      <div class="info-value">${escapeHtml(description)}</div>
     </div>
-
     <div class="info-item">
       <div class="info-label">Category</div>
       <div class="info-value">
         ${escapeHtml(categoryIcon)} ${escapeHtml(category)}
       </div>
     </div>
-
     <div class="info-item">
       <div class="info-label">Service Area</div>
       <div class="info-value">${escapeHtml(serviceArea)}</div>
     </div>
-
-  </div>
-
+</div>
   <!-- RIGHT COLUMN -->
-  <div class="info-section contact-column">
-
+  <div class="info-section">
     <h3 class="info-title">Contact Information</h3>
-
     <div class="info-item">
       <div class="info-label">Hours</div>
       <div class="info-value">${hours || ''}</div>
@@ -1156,17 +1188,16 @@
         </div>
       </div>
     `}
-
   </div>
-</div>
+</section>
 ${(() => {
-  const galleryImages =
-    profile.galleryImages ||
-    profile.serviceImages ||
-    profile.images ||
-    [];
-
-  console.log('Gallery Images:', galleryImages);
+const galleryImages = [
+  ...(Array.isArray(profile.galleryImages) ? profile.galleryImages : []),
+  ...(Array.isArray(profile.serviceImages) ? profile.serviceImages : []),
+  profile.serviceImage,
+  profile.coverImage
+]
+.filter(img => typeof img === 'string' && img.trim().length > 0);
 
   if (!galleryImages.length) return '';
 
@@ -1179,8 +1210,15 @@ ${(() => {
             <img src="${escapeHtml(img)}" alt="Gallery Image">
           `).join('')}
         </div>
-      </div>
     </section>
+    <section class="reviews-section">
+      <div class="reviews-header">
+        <h2 class="reviews-title">Customer Reviews</h2>
+        <div id="reviewSummaryInline" class="rating-summary"></div>
+      </div>
+      <div id="reviewFormContainer"></div>
+      <div id="reviewsList" class="reviews-list"></div>
+      </section>
   `;
 })()}
 
@@ -1211,7 +1249,8 @@ ${(() => {
         currentService = { id: snap.id, ...data };
         await incrementServiceViewCount(snap.id, data);
         await trackPromotionDailyEvent('service', 'click', data.userId || data.businessId || '', `click_service_${promotionId}_${snap.id}`);
-        renderService(data);
+        renderService(currentService);
+        renderReviewRatingSummary({ ratingAverage: 0, ratingCount: 0 });
         try {
           await loadReviewsForService(currentService);
         } catch (reviewError) {
@@ -1354,4 +1393,5 @@ ${(() => {
     loadService();
   </script>
 </body>
+
 </html>
