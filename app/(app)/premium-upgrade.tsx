@@ -15,6 +15,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { auth, db } from '@/firebase';
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 import { handleUpgrade, STRIPE_UPGRADE_CANCELED } from '@/lib/payments/handleUpgrade';
 
 type CompareRow = { feature: string; free: 'yes' | 'no'; premium: 'yes' | 'no' };
@@ -443,7 +445,11 @@ export default function PremiumUpgradeScreen() {
     router.push('/(app)/upgrade-business' as any);
   };
 
-  return (
+return (
+  <StripeProvider
+    publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''}
+    merchantIdentifier="merchant.com.mycompany.locallist"
+  >
     <View style={styles.flex}>
       <View style={styles.toolbar}>
         <TouchableOpacity
@@ -557,6 +563,7 @@ export default function PremiumUpgradeScreen() {
           </View>
         </>
       )}
-    </View>
-  );
+  </View>
+  </StripeProvider>
+);
 }

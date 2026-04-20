@@ -19,11 +19,14 @@ import { useAuth } from '../hooks/useAuth';
 
 const globalFontStyle = { fontFamily: 'Inter' as const };
 
-(Text as any).defaultProps = (Text as any).defaultProps ?? {};
-(Text as any).defaultProps.style = [globalFontStyle, (Text as any).defaultProps.style];
+if (!(global as any).__fontSet) {
+  (Text as any).defaultProps = (Text as any).defaultProps ?? {};
+  (Text as any).defaultProps.style = [globalFontStyle, (Text as any).defaultProps.style];
 
-(TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
-(TextInput as any).defaultProps.style = [globalFontStyle, (TextInput as any).defaultProps.style];
+  (TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
+  (TextInput as any).defaultProps.style = [globalFontStyle, (TextInput as any).defaultProps.style];
+
+  (global as any).__fontSet = true;}
 
 if (process.env.NODE_ENV === 'development') {
   LogBox.ignoreLogs([
@@ -58,52 +61,52 @@ const HIDE_HEADER_ROUTES = [
   '/verify-email',
   '/forgot-password',
   '/account-restricted',
-  '/threadchat',
   '/publiclanding',
   '/termsOfUse',
   '/privacy-policy',
-  '/contact-public'
+  '/contact-public',
 ];
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
-  const { user } = useAuth();
+const auth = useAuth();
+const user = auth?.user; if (!auth) return null;
 
-  const hideHeader =
-    HIDE_HEADER_ROUTES.some((r) => pathname.includes(r)) ||
-    (pathname === '/' && !user);
+const hideHeader = React.useMemo(() => {
+  const path = pathname || "";
+  return (
+    HIDE_HEADER_ROUTES.some((r) => path.includes(r)) ||
+    (path === '/' && !user)
+  );
+}, [pathname, user]);
 
   useEffect(() => {
     console.log('[RootLayout] mounted');
     return () => console.log('[RootLayout] unmounted');
   }, []);
 
-  return (
-    <StripeProvider
-      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''}
-      merchantIdentifier="merchant.com.mycompany.locallist">
-        
-        <SafeAreaProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            {!hideHeader && <Header />}
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(app)" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="login" />
-              <Stack.Screen name="signInOrSignUp" />
-              <Stack.Screen name="signup" />
-              <Stack.Screen name="zipCodeverify" options={{ gestureEnabled: false, animation: 'none' }} />
-              <Stack.Screen name="verify-email" />
-              <Stack.Screen name="forgot-password" />
-              <Stack.Screen name="account-restricted" />
-              <Stack.Screen name="privacy-policy" />
-              <Stack.Screen name="termsOfUse" />
-              <Stack.Screen name="contact-public" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </SafeAreaProvider>
-    </StripeProvider>
-  );
-}
+return (
+  <SafeAreaProvider>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      {!hideHeader && <Header />}
+
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(app)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signInOrSignUp" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="zipCodeverify" options={{ gestureEnabled: false, animation: 'none' }} />
+        <Stack.Screen name="verify-email" />
+        <Stack.Screen name="forgot-password" />
+        <Stack.Screen name="account-restricted" />
+        <Stack.Screen name="privacy-policy" />
+        <Stack.Screen name="termsOfUse" />
+        <Stack.Screen name="contact-public" />
+      </Stack>
+
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  </SafeAreaProvider>
+);}
