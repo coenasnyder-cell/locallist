@@ -1,8 +1,7 @@
-import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function SectionTitle({ children }: React.PropsWithChildren<{}>) {
   return (
@@ -12,37 +11,19 @@ function SectionTitle({ children }: React.PropsWithChildren<{}>) {
 
 export default function TermsOfUseScreen() {
   const router = useRouter();
-
+  const insets = useSafeAreaInsets();
 
   return (
-<View style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+    
+        <View style={styles.container}>
+          <Text style={styles.backButton} onPress={() => router.back()}>← Back</Text>
+          <Text style={styles.mainTitle}>Terms & Conditions</Text>
 
-        {/* LOGO */}
-        <View style={styles.logoSection}>
-          <Image
-  source={require('../assets/images/logo.png')}
-  contentFit="contain"/>
-        </View>
-        {/* MAIN CONTENT */}
-<View style={styles.titleRow}>
-  <TouchableOpacity
-    onPress={() => router.back()}
-    style={styles.arrowButton}
-    activeOpacity={0.8}
-  >
-    <Feather name="arrow-left" size={24} color="#333" />
-  </TouchableOpacity>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoRowText}>Updated: 02/07/2026</Text>
+          </View>
 
-  <View style={styles.titleCenterWrapper}>
-    <Text style={styles.infoRowText}>Terms & Conditions Updated:02/07/2026</Text>
-  </View>
-</View> 
-
-<View style={styles.contentBox}>
+          <View style={styles.contentBox}>
             <Text style={styles.introText}>
               Welcome to Local List. By creating an account or using this app, you agree to the following terms.
             </Text>
@@ -105,74 +86,70 @@ export default function TermsOfUseScreen() {
               If you have questions, contact support at support@locallist.biz or through the Contact Us page in the app.
             </Text>
           </View>
+
           <View style={styles.footer}>
-         <Text style={styles.footerCopy}>© 2026 Local List. A local marketplace for Harrison.</Text>
-         <View style={styles.footerLinksRow}>
-         <TouchableOpacity onPress={() => router.push('/termsOfUse' as any)} activeOpacity={0.8}>
-         <Text style={styles.footerLink}>Terms of Use</Text>
-          </TouchableOpacity>
-          <Text style={styles.footerDivider}>|</Text>
-        <TouchableOpacity onPress={() => router.push('/privacy-policy' as any)} activeOpacity={0.8}>
-          <Text style={styles.footerLink}>Privacy Policy</Text>
-         </TouchableOpacity>
-         </View>
+                  <Text style={styles.footerCopy}>© 2026 Local List. A local marketplace for Harrison.</Text>
+                  <View style={styles.footerLinksRow}>
+                    <TouchableOpacity onPress={() => router.push('/terms-conditions' as any)} activeOpacity={0.8}>
+                      <Text style={styles.footerLink}>Terms of Use</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.footerDivider}>|</Text>
+                    <TouchableOpacity onPress={() => router.push('/policy-privacy' as any)} activeOpacity={0.8}>
+                      <Text style={styles.footerLink}>Privacy Policy</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
         </View>
-      </ScrollView>
-    </View>
   );
 }
-  
-
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F6F8",
+    backgroundColor: "#f5f5f5",
   },
+
   scrollContainer: {
-  paddingHorizontal: 16,
-  paddingTop: 20,
-  paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingVertical: 28,
   },
 
   container: {
-  paddingHorizontal: 16,
-  marginTop: 10,
-},
-titleRow: {
-    flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 10,
-  },
-  arrowButton: {
-    position: 'absolute',
-    left: 0,
-    padding: 4,
-    zIndex: 2,
-  },
-  titleCenterWrapper: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 36,
-    marginBottom: 10,
   },
-  titleText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#333',
-    textAlign: 'center',
+
+  mainTitle: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#475569",
+    marginBottom: 12,
+    textAlign: "center",
+    letterSpacing: 0.2,
   },
 
   logoSection: {
-     paddingTop: 20,
-  paddingBottom: 10,
-  alignItems: 'center',
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centeredLogo: {
     width: 140,
     height: 66,
   },
+  backButton: {
+    alignSelf: 'center',
+    backgroundColor: '#334155',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+
   infoRow: {
     backgroundColor: "transparent",
     paddingVertical: 5,
@@ -183,22 +160,24 @@ titleRow: {
   },
 
   infoRowText: {
-  fontSize: 17,
-  fontWeight: "700",
-  color: "#333",
-  textAlign: "center",
+    color: "#475569",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
   },
 
   contentBox: {
-  backgroundColor: "#fff",
-  borderRadius: 18,
-  padding: 18,
-  marginBottom: 20,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.08,
-  shadowRadius: 6,
-  elevation: 3,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 28,
+    marginBottom: 20,
+    borderTopColor: "#475569",
+    borderTopWidth: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 3,
   },
 
   introText: {

@@ -11,7 +11,7 @@ const requiredFiles = [
   'BETA_ROLLOUT_PLAYBOOK.md',
   'public/privacy.html',
   'public/terms.html',
-  'app/(app)/privacy.tsx',
+  'app/(app)/privacy-policy.tsx',
   'app/(app)/termsOfUse.tsx',
   'app/(app)/beta-testing.tsx',
   'app/(app)/beta-feedback.tsx',

@@ -4,16 +4,16 @@ import { getAuth } from "firebase/auth";
 import { addDoc, collection, getFirestore, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+	Alert,
+	Keyboard,
+	KeyboardAvoidingView,
+	Platform,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { app } from "../firebase";

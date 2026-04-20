@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Messages</title>
+</head>
+
+<body>
+
+  <h2>Public Messages</h2>
+
+  <!-- 🔥 THIS IS REQUIRED -->
+  <div id="messagesContainer"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_REAL_KEY",
+      authDomain: "local-list-wski21.firebaseapp.com",
+      projectId: "local-list-wski21",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const container = document.getElementById("messagesContainer");
+
+    const q = query(
+      collection(db, "publicMessages"),
+      orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        const messageDiv = document.createElement("div");
+        messageDiv.style.background = "#fff";
+        messageDiv.style.padding = "12px";
+        messageDiv.style.marginBottom = "10px";
+        messageDiv.style.borderRadius = "8px";
+
+        messageDiv.innerHTML = `
+          <strong>${data.publicMessageEmail}</strong><br/>
+          ${data.publicSenderName || ""}<br/>
+          ${data.publicMessageText}<br/>
+          <small>${new Date(data.createdAt).toLocaleString()}</small>
+        `;
+
+        container.appendChild(messageDiv);
+      });
+    });
+  </script>
+
+</body>
+</html>

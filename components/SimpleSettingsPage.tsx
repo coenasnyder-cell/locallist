@@ -405,7 +405,7 @@ export default function SimpleSettingsPage({ onClose }: { onClose: () => void })
           Need more details before deleting? Review our account deletion and data handling policies.
         </Text>
         <View style={styles.policyLinkRow}>
-          <TouchableOpacity onPress={() => router.push('/privacy')}>
+          <TouchableOpacity onPress={() => router.push('/privacy-policy')}>
             <Text style={styles.policyLinkText}>Privacy Policy</Text>
           </TouchableOpacity>
           <Text style={styles.policyLinkSeparator}>|</Text>

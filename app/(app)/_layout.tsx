@@ -62,6 +62,8 @@ export default function AppLayout() {
           <Stack.Screen name="pet-corner" />
           <Stack.Screen name="business-hub" />
           <Stack.Screen name="admin-panel" />
+          <Stack.Screen name="contact-public" />
+        
         </Stack>
   );
 }

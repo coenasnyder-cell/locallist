@@ -7,8 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
-    BackHandler,
-    Image,
+    BackHandler,  
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -22,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { app, auth } from '../firebase';
 import { useAccountStatus } from '../hooks/useAccountStatus';
 import { signOutNativeGoogle } from '../utils/nativeGoogleAuth';
+import { Image } from 'expo-image';
 
 /**
  * Mandatory gate: name + ZIP for Harrison / local service area.
@@ -67,7 +67,7 @@ export default function ZipCodeVerifyScreen() {
   };
 
   const openPrivacy = () => {
-    router.push('/privacy' as any);
+    router.push('/privacy-policy' as any);
   };
 
   const handleLogout = () => {
@@ -225,7 +225,7 @@ export default function ZipCodeVerifyScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.topHeader, { paddingTop: Math.max(insets.top, 12) }]}> 
-        <Image source={require('../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Image source={require('../assets/images/logo.png')} style={styles.logo} contentFit="contain" />
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.88}>
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>

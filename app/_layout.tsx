@@ -3,11 +3,13 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppRegistry, LogBox, Text, TextInput } from 'react-native';
+if (!(global as any).__stripeTaskRegistered) {
+  AppRegistry.registerHeadlessTask('StripeKeepJsAwakeTask', () => async () => {});
+  (global as any).__stripeTaskRegistered = true;
+}
+
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-// Register Stripe headless task to suppress Android warning
-AppRegistry.registerHeadlessTask('StripeKeepJsAwakeTask', () => async () => {});
 
 import Header from '@/components/Header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -58,6 +60,9 @@ const HIDE_HEADER_ROUTES = [
   '/account-restricted',
   '/threadchat',
   '/publiclanding',
+  '/termsOfUse',
+  '/privacy-policy',
+  '/contact-public'
 ];
 
 export default function RootLayout() {
@@ -77,8 +82,8 @@ export default function RootLayout() {
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ''}
-      merchantIdentifier="merchant.com.mycompany.locallist"
-    >
+      merchantIdentifier="merchant.com.mycompany.locallist">
+        
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             {!hideHeader && <Header />}
@@ -92,8 +97,9 @@ export default function RootLayout() {
               <Stack.Screen name="verify-email" />
               <Stack.Screen name="forgot-password" />
               <Stack.Screen name="account-restricted" />
-              <Stack.Screen name="privacy" />
+              <Stack.Screen name="privacy-policy" />
               <Stack.Screen name="termsOfUse" />
+              <Stack.Screen name="contact-public" />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

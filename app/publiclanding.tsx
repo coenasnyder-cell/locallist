@@ -209,9 +209,9 @@ export default function PublicLanding() {
         </View>
       )}
         <View style={styles.ctaSection}>
-        <Text style={styles.ctaTitle}>Ready to join your local community?</Text>
+        <Text style={styles.ctaTitle}>Welcome To Local List?</Text>
         <Text style={styles.ctaSubtitle}>
-          Sign in to browse full details, contact sellers, and post your own listings.
+          Sign in to browse, buy and sell locally, and view what is happening in your local community.
         </Text>
 
         <View style={styles.ctaButtonRow}>
@@ -292,18 +292,40 @@ export default function PublicLanding() {
         )}
       </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerCopy}>© 2026 Local List. A local marketplace for Harrison.</Text>
-        <View style={styles.footerLinksRow}>
-          <TouchableOpacity onPress={() => router.push('/termsOfUse' as any)} activeOpacity={0.8}>
-            <Text style={styles.footerLink}>Terms of Use</Text>
-          </TouchableOpacity>
-          <Text style={styles.footerDivider}>|</Text>
-          <TouchableOpacity onPress={() => router.push('/privacy' as any)} activeOpacity={0.8}>
-            <Text style={styles.footerLink}>Privacy Policy</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+<View style={styles.footer}>
+  <Text style={styles.footerCopy}>
+    © 2026 Local List. A local marketplace for Harrison.
+  </Text>
+
+  <View style={styles.footerLinksRow}>
+    <TouchableOpacity
+      onPress={() => router.push('/termsOfUse' as any)}
+      activeOpacity={0.8}
+    >
+      <Text style={styles.footerLink}>Terms of Use</Text>
+    </TouchableOpacity>
+
+    <Text style={styles.footerDivider}>|</Text>
+
+    <TouchableOpacity
+      onPress={() => router.push('/privacy-policy' as any)}
+      activeOpacity={0.8}
+    >
+      <Text style={styles.footerLink}>Privacy Policy</Text>
+    </TouchableOpacity>
+
+    {/* 🔥 ADD THIS */}
+    <Text style={styles.footerDivider}>|</Text>
+
+    <TouchableOpacity
+      onPress={() => router.push('/contact-public' as any)}
+      activeOpacity={0.8}
+    >
+      <Text style={styles.footerLink}>Contact</Text>
+    </TouchableOpacity>
+
+  </View>
+</View>
     </ScrollView>
   );
 }
