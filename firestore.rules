@@ -1,13 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
-   match /publicMessages/{doc} {
-      allow create: if true;   // anyone can send
-      allow read: if true;     // allow admin page to read
-    }
-    match /{document=**} {
-      allow read, write: if false;
-    }
   match /databases/{database}/documents {
+
+    // Contact Us submissions (Public & Auth)
+    match /publicMessages/{doc} {
+      allow create: if true; // anyone can send
+      allow read: if isAdmin(); // only admins can see them
+    }
+
     function signedIn() {
       return request.auth != null;
     }
@@ -167,20 +167,20 @@ service cloud.firestore {
               || request.resource.data.status in ['pending', 'approved']
             )
             && (!request.resource.data.keys().hasAny(['isDisabled'])
-              || !resource.data.keys().hasAny(['isDisabled'])
+              || !request.resource.data.keys().hasAny(['isDisabled'])
               || request.resource.data.isDisabled == resource.data.isDisabled)
             && (!request.resource.data.keys().hasAny(['isBanned'])
-              || !resource.data.keys().hasAny(['isBanned'])
+              || !request.resource.data.keys().hasAny(['isBanned'])
               || request.resource.data.isBanned == resource.data.isBanned)
             && (!request.resource.data.keys().hasAny(['zipApproved'])
-              || !resource.data.keys().hasAny(['zipApproved'])
+              || !request.resource.data.keys().hasAny(['zipApproved'])
               || request.resource.data.zipApproved == resource.data.zipApproved)
             && (!request.resource.data.keys().hasAny(['accountType'])
-              || !resource.data.keys().hasAny(['accountType'])
+              || !request.resource.data.keys().hasAny(['accountType'])
               || request.resource.data.accountType == resource.data.accountType
               || request.resource.data.accountType in ['personal', 'user'])
             && (!request.resource.data.keys().hasAny(['email'])
-              || !resource.data.keys().hasAny(['email'])
+              || !request.resource.data.keys().hasAny(['email'])
               || request.resource.data.email == resource.data.email)
             // Users may update their own profile names
             && (!request.resource.data.keys().hasAny(['displayName'])
@@ -373,7 +373,7 @@ service cloud.firestore {
     allow read: if true; // Allow public read access to all business profiles
     allow update: if isPublicViewCountIncrement()
       || isAdmin()
-      || (signedIn() && resource.data.userId == request.auth.uid && userDoc().accountType == 'business');
+      || (signedIn() && request.resource.data.userId == request.auth.uid && userDoc().accountType == 'business');
     allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
   }
 

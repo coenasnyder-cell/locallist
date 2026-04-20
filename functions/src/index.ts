@@ -17,7 +17,7 @@ import { onCall, onRequest } from "firebase-functions/v2/https";
 import Stripe from "stripe";
 
 // Email triggers (Resend)
-export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onUserCreated } from "./emailTriggers.js";
+export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onPublicMessageCreated, onUserCreated } from "./emailTriggers.js";
 
 // Email test function - send test emails for each template (TEMPORARILY UNSECURED FOR TESTING)
 export const sendTestEmail = onCall(

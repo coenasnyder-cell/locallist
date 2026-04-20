@@ -154,6 +154,44 @@ export const onMessageCreated = onDocumentCreated(
 );
 
 /**
+ * Sends a notification email to support when a public contact message is created.
+ */
+export const onPublicMessageCreated = onDocumentCreated(
+  {
+    document: "publicMessages/{messageId}",
+    secrets: ["RESEND_API_KEY"],
+  },
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) return;
+
+    const data = snapshot.data();
+    const email = data.publicMessageEmail;
+    const name = data.publicSenderName || "Public User";
+    const message = data.publicMessageText;
+
+    try {
+      await sendEmail({
+        to: "support@locallist.biz", // Update this to your support email address
+        subject: `New Public Contact: ${name}`,
+        html: `
+          <h3>New Support Message from Public Form</h3>
+          <p><strong>From:</strong> ${name} (${email})</p>
+          <p><strong>Message:</strong></p>
+          <p style="white-space: pre-wrap;">${message}</p>
+        `,
+      });
+      logger.info("Public contact email sent to support", { messageId: event.params.messageId, email });
+    } catch (error) {
+      logger.error("Failed to send public contact email", {
+        messageId: event.params.messageId,
+        error,
+      });
+    }
+  }
+);
+
+/**
  * Sends a featured listing confirmation email when a featurePurchases document is created.
  */
 export const onFeaturePurchaseCreated = onDocumentCreated(
@@ -257,7 +295,7 @@ export const onPremiumPurchaseCreated = onDocumentCreated(
     try {
       const userSnap = await db.collection("users").doc(userId).get();
       if (!userSnap.exists) {
-        logger.warn("User not found for premium purchase email", { userId });
+        logger.warn("User found for premium purchase email", { userId });
         return;
       }
 

@@ -1,12 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { StripeProvider } from '@stripe/stripe-react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { AppRegistry, LogBox, Text, TextInput } from 'react-native';
-if (!(global as any).__stripeTaskRegistered) {
-  AppRegistry.registerHeadlessTask('StripeKeepJsAwakeTask', () => async () => {});
-  (global as any).__stripeTaskRegistered = true;
-}
+import { ActivityIndicator, LogBox, Text, TextInput, View } from 'react-native';
 
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -26,7 +21,8 @@ if (!(global as any).__fontSet) {
   (TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
   (TextInput as any).defaultProps.style = [globalFontStyle, (TextInput as any).defaultProps.style];
 
-  (global as any).__fontSet = true;}
+  (global as any).__fontSet = true;
+}
 
 if (process.env.NODE_ENV === 'development') {
   LogBox.ignoreLogs([
@@ -70,43 +66,53 @@ const HIDE_HEADER_ROUTES = [
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
-const auth = useAuth();
-const user = auth?.user; if (!auth) return null;
+  const auth = useAuth();
+  const user = auth?.user;
 
-const hideHeader = React.useMemo(() => {
-  const path = pathname || "";
-  return (
-    HIDE_HEADER_ROUTES.some((r) => path.includes(r)) ||
-    (path === '/' && !user)
-  );
-}, [pathname, user]);
+  const hideHeader = React.useMemo(() => {
+    const path = pathname || "";
+    return (
+      HIDE_HEADER_ROUTES.some((r) => path.includes(r)) ||
+      (path === '/' && !user)
+    );
+  }, [pathname, user]);
 
   useEffect(() => {
     console.log('[RootLayout] mounted');
     return () => console.log('[RootLayout] unmounted');
   }, []);
 
-return (
-  <SafeAreaProvider>
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {!hideHeader && <Header />}
+  // Show a loading spinner while auth is initializing
+  if (auth.loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colorScheme === 'dark' ? '#121212' : '#ffffff' }}>
+        <ActivityIndicator size="large" color="#475569" />
+      </View>
+    );
+  }
 
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(app)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="signInOrSignUp" />
-        <Stack.Screen name="signup" />
-        <Stack.Screen name="zipCodeverify" options={{ gestureEnabled: false, animation: 'none' }} />
-        <Stack.Screen name="verify-email" />
-        <Stack.Screen name="forgot-password" />
-        <Stack.Screen name="account-restricted" />
-        <Stack.Screen name="privacy-policy" />
-        <Stack.Screen name="termsOfUse" />
-        <Stack.Screen name="contact-public" />
-      </Stack>
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        {!hideHeader && <Header />}
 
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  </SafeAreaProvider>
-);}
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="signInOrSignUp" />
+          <Stack.Screen name="signup" />
+          <Stack.Screen name="zipCodeverify" options={{ gestureEnabled: false, animation: 'none' }} />
+          <Stack.Screen name="verify-email" />
+          <Stack.Screen name="forgot-password" />
+          <Stack.Screen name="account-restricted" />
+          <Stack.Screen name="privacy-policy" />
+          <Stack.Screen name="termsOfUse" />
+          <Stack.Screen name="contact-public" />
+        </Stack>
+
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
