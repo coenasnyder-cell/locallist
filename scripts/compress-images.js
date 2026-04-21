@@ -1,3 +1,4 @@
+/* eslint-env node */
 /**
  * Compress large hub images in assets/images/ and public/.
  *

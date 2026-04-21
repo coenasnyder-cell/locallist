@@ -1,4 +1,4 @@
-import { LinearGradient } from "expo-linear-gradient";
+ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, getFirestore, serverTimestamp } from "firebase/firestore";

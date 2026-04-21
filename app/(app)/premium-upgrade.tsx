@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   tableHeadRow: {
     borderTopWidth: 0,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f8faff',
   },
   tableCell: {
     paddingVertical: 10,

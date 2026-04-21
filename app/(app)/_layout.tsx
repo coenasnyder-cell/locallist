@@ -1,5 +1,14 @@
 import { Stack } from 'expo-router';
 import React, { useEffect } from 'react';
+import { AppRegistry } from 'react-native';
+
+// Register Stripe background task inside (app) layout to suppress native warnings
+// as requested to keep it out of the root layout.
+try {
+  AppRegistry.registerHeadlessTask('StripeKeepJsAwakeTask', () => async () => {});
+} catch (e) {
+  // Task might already be registered
+}
 
 export default function AppLayout() {
 
@@ -62,8 +71,6 @@ export default function AppLayout() {
           <Stack.Screen name="pet-corner" />
           <Stack.Screen name="business-hub" />
           <Stack.Screen name="admin-panel" />
-          <Stack.Screen name="contact-public" />
-        
         </Stack>
   );
 }

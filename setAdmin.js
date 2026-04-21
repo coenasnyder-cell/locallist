@@ -1,3 +1,4 @@
+/* eslint-env node */
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK using default credentials from Firebase CLI

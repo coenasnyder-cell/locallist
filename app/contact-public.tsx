@@ -67,6 +67,14 @@ export default function ContactPublic() {
           <View style={styles.titleCenterWrapper}>
             <Text style={styles.infoRowText}>Contact Us</Text>
           </View>
+          {/* Spacer to balance the arrow button on the left */}
+          <View style={styles.arrowButton} />
+        </View>
+
+        <View style={styles.subtitleWrapper}>
+          <Text style={styles.subtitleText}>
+            If you need help, have a question, or want to report an issue, we're here to help, please use the form below to contact support.
+          </Text>
         </View>
 
         <View style={styles.contentBox}>
@@ -114,6 +122,17 @@ const styles = StyleSheet.create({
   titleCenterWrapper: { flex: 1, alignItems: "center" },
 
   infoRowText: { fontSize: 18, fontWeight: "700" },
+
+  subtitleWrapper: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  subtitleText: {
+    fontSize: 14,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 20,
+  },
 
   contentBox: {
     backgroundColor: "#fff",

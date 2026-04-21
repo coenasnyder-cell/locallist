@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global firebase */
+
 // Shared Header Component for all pages
 // Load this script in every HTML page to automatically inject the header
 
@@ -447,13 +450,13 @@
 
     function getAuthInstance() {
       if (window.firebaseAuth) return window.firebaseAuth;
-      if (window.firebase && typeof firebase.auth === 'function') return firebase.auth();
+      if (window.firebase && typeof window.firebase.auth === 'function') return window.firebase.auth();
       return null;
     }
 
     function getDbInstance() {
       if (window.firebaseDb) return window.firebaseDb;
-      if (window.firebase && typeof firebase.firestore === 'function') return firebase.firestore();
+      if (window.firebase && typeof window.firebase.firestore === 'function') return window.firebase.firestore();
       return null;
     }
 
@@ -804,6 +807,7 @@
           notificationBadgeIntervalId = setInterval(updateNotificationBadge, 30000);
         } else {
           applyProfileNavTarget(false);
+          updateHeaderButtons();
         }
       });
     }
