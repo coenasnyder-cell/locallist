@@ -27,7 +27,7 @@ type ServiceListing = {
 
 type PetHubSectionFilter = 'all' | 'services' | 'lost' | 'found' | 'adoption';
 
-const SECTION_FILTER_OPTIONS: Array<{ value: PetHubSectionFilter; label: string }> = [
+const SECTION_FILTER_OPTIONS: { value: PetHubSectionFilter; label: string }[] = [
   { value: 'all', label: 'All Sections' },
   { value: 'services', label: 'Pet Services' },
   { value: 'lost', label: 'Lost Pets' },

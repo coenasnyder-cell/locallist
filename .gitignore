@@ -43,7 +43,11 @@ app-example
 
 # generated native folders
 /ios
-/android/*
-!/android/app/
-/android/app/*
-!/android/app/google-services.json
+/android/
+
+# Ignore specific local build reports and artifacts
+report.json
+eslint.config.js.txt
+index.html
+new.sh
+*.apk

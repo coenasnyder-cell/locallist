@@ -50,6 +50,7 @@
     "release:step7": "npm run release:step6 && npm run beta:readiness"
   },
   "dependencies": {
+    "@eslint/js": "^10.0.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
@@ -95,7 +96,7 @@
   "devDependencies": {
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.0",
-    "eslint": "^9.25.0",
+    "eslint": "^9.39.4",
     "eslint-config-expo": "~10.0.0",
     "expo-module-scripts": "^5.0.8",
     "firebase-admin": "^13.6.1",

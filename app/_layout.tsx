@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack , usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, LogBox, Text, TextInput, View } from 'react-native';
 
@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import Header from '@/components/Header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { usePathname } from 'expo-router';
+
 import React, { useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
