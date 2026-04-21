@@ -514,7 +514,7 @@ export default function EventsListScreen() {
                 router.back();
                 return;
               }
-              router.replace('/(tabs)/communitybutton');
+              router.replace('../(tabs)/communitybutton');
             }}
           />
         </View>
@@ -530,7 +530,7 @@ export default function EventsListScreen() {
             <Text style={styles.benefitsText}>
               Hosting something in the community? Post your event on Local List to reach local attendees, share key details in one place, and help more people discover what is happening.
             </Text>
-            <TouchableOpacity style={styles.benefitsCta} onPress={() => router.push('/create-event-listing' as any)} activeOpacity={0.86}>
+            <TouchableOpacity style={styles.benefitsCta} onPress={() => router.push('./create-event-listing')} activeOpacity={0.86}>
               <Text style={styles.benefitsCtaText}>+ Post Your Event</Text>
             </TouchableOpacity>
           </View>

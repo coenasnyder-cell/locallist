@@ -51,7 +51,7 @@ export default function ReportMessageScreen() {
       router.back();
       return;
     }
-    router.replace('/(tabs)/messagesbutton');
+    router.replace('../(tabs)/messagesbutton');
   };
 
   useEffect(() => {

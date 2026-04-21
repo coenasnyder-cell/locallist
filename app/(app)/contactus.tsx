@@ -13,7 +13,7 @@ export default function ContactUsScreen() {
       return;
     }
 
-    router.replace('/(app)/support-hub');
+    router.replace('./support-hub');
   };
 
   return (

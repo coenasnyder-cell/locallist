@@ -393,6 +393,10 @@ export default function PremiumUpgradeScreen() {
     try {
       const result = await handleUpgrade();
 
+      if (result === STRIPE_UPGRADE_CANCELED) {
+        return;
+      }
+
       if (result.success) {
         let premiumActive = false;
 
@@ -409,7 +413,7 @@ export default function PremiumUpgradeScreen() {
           Alert.alert('Premium active', 'You now have Premium business tools.', [
             {
               text: 'Go to Business Hub',
-              onPress: () => router.replace('/(app)/business-hub'),
+              onPress: () => router.replace('./business-hub'),
             },
             { text: 'OK', style: 'cancel' },
           ]);
@@ -421,12 +425,10 @@ export default function PremiumUpgradeScreen() {
         }
         return;
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upgrade failed. Please try again.';
 
-      if (result.error === STRIPE_UPGRADE_CANCELED) {
-        return;
-      }
-
-      if (result.error === 'Sign in to upgrade to Premium.') {
+      if (message === 'Sign in to upgrade to Premium.') {
         router.push({
           pathname: '/signInOrSignUp' as any,
           params: { mode: 'login', returnTo: '/premium-upgrade' },
@@ -434,8 +436,8 @@ export default function PremiumUpgradeScreen() {
         return;
       }
 
-      console.log('premium-upgrade:', result.error);
-      Alert.alert('Upgrade failed', result.error);
+      console.log('premium-upgrade:', message);
+      Alert.alert('Upgrade failed', message);
     } finally {
       setBusy(false);
     }
@@ -453,7 +455,7 @@ return (
     <View style={styles.flex}>
       <View style={styles.toolbar}>
         <TouchableOpacity
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/shoplocallist'))}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('./shoplocallist'))}
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="Go back"
@@ -474,7 +476,7 @@ return (
             </View>
             <Text style={styles.successTitle}>You&apos;re on Premium</Text>
             <Text style={styles.successBody}>Manage your business from Business Hub.</Text>
-            <TouchableOpacity style={styles.successBtn} onPress={() => router.replace('/(app)/business-hub')}>
+            <TouchableOpacity style={styles.successBtn} onPress={() => router.replace('./business-hub')}>
               <Feather name="briefcase" size={16} color="#fff" />
               <Text style={styles.successBtnText}>Open Business Hub</Text>
             </TouchableOpacity>

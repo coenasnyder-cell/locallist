@@ -219,7 +219,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
 
       if (existingMatch) {
         router.push({
-          pathname: "/threadchat",
+          pathname: "./threadchat",
           params: { threadId: existingMatch.id }
         });
         return;
@@ -246,7 +246,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
     const docRef = await addDoc(threadsRef, threadData);
 
     router.push({
-      pathname: "/threadchat",
+      pathname: "./threadchat",
       params: { threadId: docRef.id }
     });
 
@@ -448,7 +448,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
                     </View>
                   )}
                   {listing.userId ? (
-                    <TouchableOpacity onPress={() => router.push({ pathname: '/(app)/public-profile', params: { userId: listing.userId } })}>
+                    <TouchableOpacity onPress={() => router.push({ pathname: './public-profile', params: { userId: listing.userId } })}>
                       <Text style={[styles.sellerName, styles.profileLink]}>{listing.sellerName}</Text>
                     </TouchableOpacity>
                   ) : (
@@ -501,7 +501,7 @@ export default function SingleListing({ listing }: { listing: Listing }) {
                   <TouchableOpacity
                     key={item.id}
                     style={styles.sellerOtherCard}
-                    onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+                    onPress={() => router.push({ pathname: './listing', params: { id: item.id } })}
                   >
                     {item.images?.[0] ? (
                       <Image source={{ uri: item.images[0] }} style={styles.sellerOtherImage} contentFit="cover" />

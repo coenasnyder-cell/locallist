@@ -251,7 +251,7 @@ export default function HomeScreen() {
             paddingVertical: 12,
             alignItems: 'center',
           }}
-          onPress={() => router.push('/(tabs)/communitybutton')}
+          onPress={() => router.push('./communitybutton')}
         >
           <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Open Community Hub</Text>
         </TouchableOpacity>
@@ -307,7 +307,7 @@ export default function HomeScreen() {
                   city={item.city}
                   isFeatured={item.isFeatured}
                   imageSource={item.imageSource}
-                  onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+                  onPress={() => router.push({ pathname: '../(app)/listing', params: { id: item.id } })}
                 />
               </View>
             );
@@ -324,7 +324,7 @@ export default function HomeScreen() {
             alignSelf: 'center',
             minWidth: 210,
           }}
-          onPress={() => router.push('/(tabs)/browsebutton')}
+          onPress={() => router.push('./browsebutton')}
         >
           <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
             View All Recent Listings
@@ -375,7 +375,7 @@ export default function HomeScreen() {
                   title={item.title}
                   price={item.subtitle}
                   imageSource={item.imageSource}
-                  onPress={() => router.push({ pathname: '/(app)/pet-details', params: { petId: item.id } })}
+                  onPress={() => router.push({ pathname: '../(app)/pet-details', params: { petId: item.id } })}
                 />
               </View>
             );
@@ -392,7 +392,7 @@ export default function HomeScreen() {
             alignSelf: 'center',
             minWidth: 190,
           }}
-          onPress={() => router.push('/(app)/browse-pets')}
+          onPress={() => router.push('../(app)/browse-pets')}
         >
           <Text style={{ color: '#fff', fontWeight: '700', textAlign: 'center', fontSize: 14 }}>
             View All Pet Listings

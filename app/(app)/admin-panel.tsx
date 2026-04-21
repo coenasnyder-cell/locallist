@@ -54,7 +54,7 @@ export default function AdminTabScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(tabs)/profilebutton')}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.push('../(tabs)/profilebutton')}>
           <Feather name="arrow-left" size={18} color="#fff" />
           <Text style={styles.backBtnText}>Back to Profile</Text>
         </TouchableOpacity>

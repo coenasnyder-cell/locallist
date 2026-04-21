@@ -33,7 +33,7 @@ export default function CreateJobListingPage() {
 
   const handleBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/(tabs)/browsebutton' as any);
+    else router.replace('../(tabs)/browsebutton');
   };
 
   const [jobTitle, setJobTitle] = useState('');
@@ -102,7 +102,7 @@ export default function CreateJobListingPage() {
     loginPromptShownRef.current = true;
     Alert.alert('Login Required', 'Please sign in to create a job listing.', [
       { text: 'Not Now', style: 'cancel' },
-      { text: 'Log In', onPress: () => router.push('/login') },
+      { text: 'Log In', onPress: () => router.push('../login') },
     ]);
   }, [loading, user, router]);
 
@@ -119,7 +119,7 @@ export default function CreateJobListingPage() {
     if (!user) {
       Alert.alert('Login Required', 'Please sign in to post a job.', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Log In', onPress: () => router.push('/login') },
+        { text: 'Log In', onPress: () => router.push('../login') },
       ]);
       return;
     }
@@ -188,7 +188,7 @@ export default function CreateJobListingPage() {
       setSalaryInfo('');
       setJobRequirements('');
 
-      router.replace('/(tabs)/profilebutton' as any);
+      router.replace('../(tabs)/profilebutton');
     } catch {
       Alert.alert('Error', 'Could not create job listing.');
     } finally {

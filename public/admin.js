@@ -1,4 +1,6 @@
 (function () {
+  const firebase = window.firebase || null;
+  const Chart = window.Chart || null;
   const db = window.firebaseDb;
   const auth = window.firebaseAuth;
   const storage = window.firebaseStorage;
@@ -44,16 +46,6 @@
     const div = document.createElement('div');
     div.textContent = text || '';
     return div.innerHTML;
-  }
-
-  function formatDate(ts) {
-    if (!ts) return 'N/A';
-    try {
-      const date = ts.toDate ? ts.toDate() : new Date(ts);
-      return date.toLocaleString();
-    } catch (error) {
-      return 'N/A';
-    }
   }
 
   async function loadTopPriorityCounts() {
@@ -279,7 +271,7 @@
 
       // Users chart
       const usersCtx = document.getElementById('chartNewUsers');
-      if (usersCtx) {
+      if (usersCtx && Chart) {
         if (hubUsersChart) hubUsersChart.destroy();
         hubUsersChart = new Chart(usersCtx, {
           ...chartDefaults,
@@ -297,7 +289,7 @@
 
       // Listings chart
       const listingsCtx = document.getElementById('chartNewListings');
-      if (listingsCtx) {
+      if (listingsCtx && Chart) {
         if (hubListingsChart) hubListingsChart.destroy();
         hubListingsChart = new Chart(listingsCtx, {
           ...chartDefaults,
@@ -1114,7 +1106,7 @@
           try {
             await db.collection('users').doc(userId).update({ blockedUsers: [] });
             loadBlockedUsers();
-          } catch (error) {
+          } catch {
             alert('Failed to clear blocked users.');
           }
         });
@@ -1641,7 +1633,7 @@
       .map((part) => {
         try {
           return decodeURIComponent(part);
-        } catch (error) {
+        } catch {
           return '';
         }
       })
@@ -1675,7 +1667,7 @@
         .replace(/^([a-zA-Z0-9-]+_){2,}/, '');
 
       return cleaned || `Proof Image ${idx + 1}`;
-    } catch (error) {
+    } catch {
       return `Proof Image ${idx + 1}`;
     }
   }
@@ -2022,7 +2014,7 @@
               reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
             }, { merge: true });
             await loadPendingApprovals();
-          } catch (error) {
+          } catch {
             alert('Failed to approve user.');
           }
         });
@@ -2189,7 +2181,7 @@
             }
 
             loadPendingListings();
-          } catch (error) { alert('Failed to approve listing.'); }
+          } catch { alert('Failed to approve listing.'); }
         });
       });
 
@@ -2200,7 +2192,7 @@
           try {
             await db.collection('listings').doc(id).update({ status: 'rejected' });
             loadPendingListings();
-          } catch (error) { alert('Failed to reject listing.'); }
+          } catch { alert('Failed to reject listing.'); }
         });
       });
 
@@ -2212,7 +2204,7 @@
           try {
             await db.collection('listings').doc(id).update({ status: 'deleted' });
             loadPendingListings();
-          } catch (error) { alert('Failed to delete listing.'); }
+          } catch { alert('Failed to delete listing.'); }
         });
       });
 
@@ -2224,7 +2216,7 @@
           try {
             await db.collection('listings').doc(id).update({ status: 'pending' });
             loadPendingListings();
-          } catch (error) { alert('Failed to revoke listing approval.'); }
+          } catch { alert('Failed to revoke listing approval.'); }
         });
       });
     } catch (error) {
@@ -2320,7 +2312,7 @@
               approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
-          } catch (error) { alert('Failed to approve service.'); }
+          } catch { alert('Failed to approve service.'); }
         });
       });
 
@@ -2334,7 +2326,7 @@
               rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
-          } catch (error) { alert('Failed to reject service.'); }
+          } catch { alert('Failed to reject service.'); }
         });
       });
 
@@ -2349,7 +2341,7 @@
               deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
-          } catch (error) { alert('Failed to delete service.'); }
+          } catch { alert('Failed to delete service.'); }
         });
       });
 
@@ -2364,7 +2356,7 @@
               featuredAt: !featuredNow ? firebase.firestore.FieldValue.serverTimestamp() : null,
             });
             loadPendingServices();
-          } catch (error) { alert('Failed to update feature status.'); }
+          } catch { alert('Failed to update feature status.'); }
         });
       });
     } catch (error) {
@@ -2545,7 +2537,7 @@
             });
             loadPendingBusinessProfiles();
             loadDashboardCounts();
-          } catch (error) { alert('Failed to revoke business approval.'); }
+          } catch { alert('Failed to revoke business approval.'); }
         });
       });
 
@@ -2562,7 +2554,7 @@
             });
             loadPendingBusinessProfiles();
             loadVerifiedBusinessesCount();
-          } catch (error) { alert('Failed to verify business.'); }
+          } catch { alert('Failed to verify business.'); }
         });
       });
 
@@ -2822,7 +2814,7 @@
       } else {
         loadReportedListings();
       }
-    } catch (error) {
+    } catch {
       alert('Failed to update report.');
     }
   }
@@ -3269,7 +3261,7 @@
     // Hub is shown by default; each section loads on demand when its card is clicked.
   }
 
-  if (!db || !auth) {
+  if (!db || !auth || !firebase?.firestore) {
     setStatus('error', 'Firebase is not initialized. Check firebase-config.js and SDK scripts.');
     showContent(false);
     return;

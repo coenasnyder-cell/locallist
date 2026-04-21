@@ -89,7 +89,7 @@ const [threads, setThreads] = useState<Thread[]>([]);
       }
     }
     router.push({
-      pathname: '/threadchat',
+      pathname: '../(app)/threadchat',
       params: { threadId }
     });
   };
@@ -133,7 +133,7 @@ const [threads, setThreads] = useState<Thread[]>([]);
       router.back();
       return;
     }
-    router.replace('/(tabs)/messagesbutton');
+    router.replace('./messagesbutton');
   };
 
 const filteredThreads = threads.filter((thread) => {

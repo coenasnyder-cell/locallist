@@ -1,6 +1,3 @@
-/* eslint-env browser */
-/* global firebase */
-
 // Shared Header Component for all pages
 // Load this script in every HTML page to automatically inject the header
 
@@ -527,13 +524,13 @@
           userName: userName || 'Profile',
           isAdmin: isAdmin
         };
-      } catch (err) {
+      } catch {
         return { isLoggedIn: false, userName: 'Profile', isAdmin: false };
       }
     }
     
     function updateHeaderButtons() {
-      const { isLoggedIn, userName, isAdmin } = checkAuthStatus();
+      const { isLoggedIn, isAdmin } = checkAuthStatus();
       
       const adminBtn = document.getElementById('adminBtn');
       const notificationsBtn = document.getElementById('notificationsBtn');

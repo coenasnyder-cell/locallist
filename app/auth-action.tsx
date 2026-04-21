@@ -52,7 +52,7 @@ export default function AuthActionPage() {
         }
 
         router.replace({
-          pathname: '/create-service-listing',
+          pathname: './(app)/create-service-listing',
           params: {
             ...(serviceId ? { serviceId } : {}),
             posted: '1',
@@ -70,7 +70,7 @@ export default function AuthActionPage() {
       }
 
       router.replace({
-        pathname: '/(app)/listing-posted',
+        pathname: './(app)/listing-posted',
         params: {
           ...(listingId ? { listingId } : {}),
           checkout: 'featured',
@@ -85,7 +85,7 @@ export default function AuthActionPage() {
       }
 
       router.replace({
-        pathname: '/(app)/premium-upgrade',
+        pathname: './(app)/premium-upgrade',
         params: {
           checkout: 'premium',
         },
@@ -104,7 +104,7 @@ export default function AuthActionPage() {
         }
 
         router.replace({
-          pathname: '/create-service-listing',
+          pathname: './(app)/create-service-listing',
           params: {
             ...(serviceId ? { serviceId } : {}),
             posted: '1',
@@ -121,7 +121,7 @@ export default function AuthActionPage() {
       }
 
       router.replace({
-        pathname: '/(app)/create-listing',
+        pathname: './(app)/create-listing',
         params: {
           featureCanceled: '1',
         },
@@ -135,7 +135,7 @@ export default function AuthActionPage() {
       }
 
       router.replace({
-        pathname: '/(app)/premium-upgrade',
+        pathname: './(app)/premium-upgrade',
         params: {
           premiumCanceled: '1',
         },
@@ -166,7 +166,7 @@ export default function AuthActionPage() {
           [
             {
               text: 'OK',
-              onPress: () => router.replace('/login')
+              onPress: () => router.replace('./login')
             }
           ]
         );
@@ -248,7 +248,7 @@ export default function AuthActionPage() {
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.replace('/')}
+                onPress={() => router.replace('./index')}
               >
                 <Text style={styles.buttonText}>Go to Home</Text>
               </TouchableOpacity>
@@ -286,7 +286,7 @@ export default function AuthActionPage() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.secondaryButton}
-                onPress={() => router.replace('/login')}
+                onPress={() => router.replace('./login')}
               >
                 <Text style={styles.secondaryButtonText}>Back to Login</Text>
               </TouchableOpacity>
@@ -302,7 +302,7 @@ export default function AuthActionPage() {
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
-                  router.push('/login');
+                  router.push('./login');
                 }}
               >
                 <Text style={styles.buttonText}>Go to Login</Text>
@@ -310,7 +310,7 @@ export default function AuthActionPage() {
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={() => {
-                  router.push('/');
+                  router.push('./index');
                 }}
               >
                 <Text style={styles.secondaryButtonText}>Return to Home</Text>

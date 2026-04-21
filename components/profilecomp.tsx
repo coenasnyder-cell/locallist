@@ -423,52 +423,52 @@ export default function Profile() {
   };
 
   const openCreateHub = () => {
-    router.push('/(tabs)/browsebutton');
+    router.push('./browsebutton');
   };
 
   const handleOpenItem = (section: SectionKey, tab: SectionTab, item: AnyItem) => {
     if (tab === 'saved' && item.id) {
       if (section === 'events') {
-        router.push('/(app)/eventslist');
+        router.push('../(app)/eventslist');
         return;
       }
       if (section === 'yardSales') {
-        router.push('/(app)/yardsalelistings');
+        router.push('../(app)/yardsalelistings');
         return;
       }
 
       if (section === 'pets') {
         const petId = item.listingId || item.id;
-        router.push({ pathname: '/(app)/pet-details', params: { id: petId } });
+        router.push({ pathname: '../(app)/pet-details', params: { id: petId } });
         return;
       }
 
       if (section === 'marketplace') {
         const listingId = item.listingId || item.id;
         if (listingId) {
-          router.push({ pathname: '/listing', params: { id: listingId } });
+          router.push({ pathname: '../(app)/listing', params: { id: listingId } });
         }
       }
       return;
     }
 
     if (section === 'marketplace') {
-      router.push({ pathname: '/listing', params: { id: item.id } });
+      router.push({ pathname: '../(app)/listing', params: { id: item.id } });
       return;
     }
 
     if (section === 'yardSales') {
-      router.push('/(app)/yardsalelistings');
+      router.push('../(app)/yardsalelistings');
       return;
     }
 
     if (section === 'events') {
-      router.push('/(app)/eventslist');
+      router.push('../(app)/eventslist');
       return;
     }
 
     if (section === 'pets') {
-      router.push({ pathname: '/(app)/pet-details', params: { id: item.id } });
+      router.push({ pathname: '../(app)/pet-details', params: { id: item.id } });
     }
   };
 
@@ -646,7 +646,7 @@ export default function Profile() {
           <Text style={styles.userName}>{userProfile?.name || user.displayName || 'User'}</Text>
         </View>
         {isAdmin ? (
-          <TouchableOpacity onPress={() => router.push('/admin')} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={() => router.push('../admin')} style={{ marginRight: 12 }}>
             <Feather name="shield" size={24} color="#F44336" />
           </TouchableOpacity>
         ) : null}
@@ -743,7 +743,7 @@ export default function Profile() {
               activeOpacity={0.75}
               onPress={() => {
                 setManualOnboardingStep('readMessages', true);
-                router.push('/(tabs)/messagesbutton');
+                router.push('./messagesbutton');
               }}
             >
               <Text style={[styles.welcomeStepText, styles.welcomeStepLink]}>{'Read your messages\nGet your first sale.'}</Text>
@@ -764,7 +764,7 @@ export default function Profile() {
                 'Your Progress',
                 `You have completed ${onboardingCompletedSteps}/6 setup steps.`,
                 [
-                  { text: 'Verify Email', onPress: () => router.push('/verify-email') },
+                  { text: 'Verify Email', onPress: () => router.push('../verify-email') },
                   { text: 'Edit Profile', onPress: () => setShowSettings(true) },
                   {
                     text: 'Post Listing',
@@ -777,7 +777,7 @@ export default function Profile() {
                     text: 'Messages',
                     onPress: () => {
                       setManualOnboardingStep('readMessages', true);
-                      router.push('/(tabs)/messagesbutton');
+                      router.push('./messagesbutton');
                     },
                   },
                   { text: 'Close', style: 'cancel' },
@@ -794,7 +794,7 @@ export default function Profile() {
         <TouchableOpacity
           style={styles.hubPromoCard}
           activeOpacity={0.85}
-          onPress={() => router.push('/(app)/business-hub' as any)}
+          onPress={() => router.push('../(app)/business-hub')}
         >
           <Image
             source={require('../assets/images/businesshubs.png')}
@@ -835,7 +835,7 @@ export default function Profile() {
           </TouchableOpacity>
 
           {!isBusinessAccount ? (
-            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('/(app)/premium-upgrade')}>
+            <TouchableOpacity style={[styles.actionCard, styles.actionCardUpgrade]} onPress={() => router.push('../(app)/premium-upgrade')}>
               <Text style={styles.actionCardText}>Upgrade Business</Text>
             </TouchableOpacity>
           ) : null}
@@ -855,27 +855,27 @@ export default function Profile() {
               >
                 <Text style={styles.sectionTitle}>{SECTION_LABELS[section]}</Text>
                 {section === 'marketplace' ? (
-                  <TouchableOpacity onPress={() => router.push('/(app)/create-listing' as any)} style={styles.sectionCreateLink}>
+                  <TouchableOpacity onPress={() => router.push('../(app)/create-listing')} style={styles.sectionCreateLink}>
                     <Text style={styles.sectionCreateLinkText}>Create A Listing</Text>
                   </TouchableOpacity>
                 ) : null}
                 {section === 'yardSales' ? (
-                  <TouchableOpacity onPress={() => router.push('/(app)/create-yard-sale' as any)} style={styles.sectionCreateLink}>
+                  <TouchableOpacity onPress={() => router.push('../(app)/create-yard-sale')} style={styles.sectionCreateLink}>
                     <Text style={styles.sectionCreateLinkText}>Create A Yard Sale</Text>
                   </TouchableOpacity>
                 ) : null}
                 {section === 'events' ? (
-                  <TouchableOpacity onPress={() => router.push('/(app)/create-event-listing' as any)} style={styles.sectionCreateLink}>
+                  <TouchableOpacity onPress={() => router.push('../(app)/create-event-listing')} style={styles.sectionCreateLink}>
                     <Text style={styles.sectionCreateLinkText}>Create An Event</Text>
                   </TouchableOpacity>
                 ) : null}
                 {section === 'services' ? (
-                  <TouchableOpacity onPress={() => router.push('/(app)/create-service-listing' as any)} style={styles.sectionCreateLink}>
+                  <TouchableOpacity onPress={() => router.push('../(app)/create-service-listing')} style={styles.sectionCreateLink}>
                     <Text style={styles.sectionCreateLinkText}>Create A Service</Text>
                   </TouchableOpacity>
                 ) : null}
                 {section === 'pets' ? (
-                  <TouchableOpacity onPress={() => router.push('/(app)/pet-corner' as any)} style={styles.sectionCreateLink}>
+                  <TouchableOpacity onPress={() => router.push('../(app)/pet-corner')} style={styles.sectionCreateLink}>
                     <Text style={styles.sectionCreateLinkText}>Add A Pet Listing</Text>
                   </TouchableOpacity>
                 ) : null}

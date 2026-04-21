@@ -8,7 +8,7 @@ export default function CommunityGuidelinesScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(app)/support-hub')}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('./support-hub')}>
         <Text style={styles.backButtonText}>Back to Support Hub</Text>
       </TouchableOpacity>
       <View style={styles.card}>

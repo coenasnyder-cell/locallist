@@ -203,7 +203,7 @@ export default function PublicProfileScreen() {
         }
 
         if (accountType === 'business') {
-          router.replace({ pathname: '/(app)/businessprofile', params: { id: profileId } });
+          router.replace({ pathname: './businessprofile', params: { id: profileId } });
           return;
         }
 
@@ -403,7 +403,7 @@ export default function PublicProfileScreen() {
               city={item.city || item.zipCode || ''}
               imageSource={Array.isArray(item.images) && item.images[0] ? { uri: item.images[0] } : undefined}
               isFeatured={!!item.isFeatured}
-              onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+              onPress={() => router.push({ pathname: './listing', params: { id: item.id } })}
             />
           ))
         )}
@@ -423,7 +423,7 @@ export default function PublicProfileScreen() {
               key={item.id}
               style={styles.serviceCard}
               activeOpacity={0.88}
-              onPress={() => router.push({ pathname: '/(app)/service-details', params: { id: item.id } })}
+              onPress={() => router.push({ pathname: './service-details', params: { id: item.id } })}
             >
               {item.serviceImage ? (
                 <Image source={{ uri: item.serviceImage }} style={styles.serviceImage} contentFit="cover" />

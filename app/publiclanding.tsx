@@ -53,7 +53,7 @@ export default function PublicLanding() {
   const shouldShowQuote = displaySettings.showQuoteOfDay && quoteText.length > 0;
 
   const handlePreviewTap = () => {
-    router.push('/signInOrSignUp');
+    router.push('./signInOrSignUp');
   };
 
   useEffect(() => {
@@ -215,11 +215,11 @@ export default function PublicLanding() {
         </Text>
 
         <View style={styles.ctaButtonRow}>
-          <TouchableOpacity style={[styles.ctaButton, styles.secondaryButton]} onPress={() => router.push('/login')}>
+          <TouchableOpacity style={[styles.ctaButton, styles.secondaryButton]} onPress={() => router.push('./login')}>
             <Text style={styles.secondaryButtonText}>Log In</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.ctaButton, styles.primaryButton]} onPress={() => router.push('/signup')}>
+          <TouchableOpacity style={[styles.ctaButton, styles.primaryButton]} onPress={() => router.push('./signup')}>
             <Text style={styles.primaryButtonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -299,7 +299,7 @@ export default function PublicLanding() {
 
   <View style={styles.footerLinksRow}>
     <TouchableOpacity
-      onPress={() => router.push('/termsOfUse' as any)}
+      onPress={() => router.push('./termsOfUse')}
       activeOpacity={0.8}
     >
       <Text style={styles.footerLink}>Terms of Use</Text>
@@ -308,7 +308,7 @@ export default function PublicLanding() {
     <Text style={styles.footerDivider}>|</Text>
 
     <TouchableOpacity
-      onPress={() => router.push('/privacy-policy' as any)}
+      onPress={() => router.push('./privacy-policy')}
       activeOpacity={0.8}
     >
       <Text style={styles.footerLink}>Privacy Policy</Text>
@@ -318,7 +318,7 @@ export default function PublicLanding() {
     <Text style={styles.footerDivider}>|</Text>
 
     <TouchableOpacity
-      onPress={() => router.push('/contact-public' as any)}
+      onPress={() => router.push('./contact-public')}
       activeOpacity={0.8}
     >
       <Text style={styles.footerLink}>Contact</Text>

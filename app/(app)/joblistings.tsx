@@ -1,8 +1,8 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    Image,
     ScrollView,
     StyleSheet,
     Text,
@@ -81,7 +81,7 @@ export default function JobListingsScreen() {
               router.back();
               return;
             }
-            router.replace('/(tabs)/communitybutton');
+            router.replace('../(tabs)/communitybutton');
           }}
         />
       </View>
@@ -94,7 +94,7 @@ export default function JobListingsScreen() {
         <View style={styles.benefitsCard}>
           <Image source={require('../../assets/images/jobhub.png')} style={styles.benefitsImage} contentFit="cover" />
           <View style={styles.benefitsContent}>
-            <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('/(app)/create-job-listing' as any)}>
+            <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('./create-job-listing')}>
               <Text style={styles.postButtonText}>+ Post A Job</Text>
             </TouchableOpacity>
           </View>
@@ -116,7 +116,7 @@ export default function JobListingsScreen() {
               key={job.id}
               style={styles.card}
               activeOpacity={0.88}
-              onPress={() => router.push({ pathname: '/(app)/job-details', params: { id: job.id } })}
+              onPress={() => router.push({ pathname: './job-details', params: { id: job.id } })}
             >
               <Text style={styles.title}>{job.jobTitle || 'Untitled role'}</Text>
               <Text style={styles.company}>{job.companyName || 'Company not specified'}</Text>

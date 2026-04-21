@@ -63,11 +63,11 @@ export default function ZipCodeVerifyScreen() {
   };
 
   const openTerms = () => {
-    router.push('/termsOfUse' as any);
+    router.push('./termsOfUse');
   };
 
   const openPrivacy = () => {
-    router.push('/privacy-policy' as any);
+    router.push('./privacy-policy');
   };
 
   const handleLogout = () => {
@@ -80,7 +80,7 @@ export default function ZipCodeVerifyScreen() {
           try {
             await Promise.allSettled([auth.signOut(), signOutNativeGoogle()]);
           } finally {
-            router.replace('/');
+            router.replace('./index');
           }
         },
       },
@@ -199,7 +199,7 @@ export default function ZipCodeVerifyScreen() {
       if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
         router.replace(normalizeReturnPath(returnTo) as any);
       } else {
-        router.replace('/(tabs)' as any);
+        router.replace('./(tabs)/index');
       }
     } catch (e: unknown) {
       const message =

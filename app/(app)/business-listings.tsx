@@ -358,13 +358,13 @@ export default function BusinessListingsScreen() {
                 onPress={() => {
                   if (item.kind === 'marketplace' || item.kind === 'featured' || item.kind === 'sold' || item.kind === 'pending') {
                     const id = item.listingId || item.id;
-                    router.push({ pathname: '/listing', params: { id } });
+                    router.push({ pathname: './listing', params: { id } });
                   }
                   if (item.kind === 'services') {
-                    router.push({ pathname: '/(app)/service-details', params: { id: item.id } });
+                    router.push({ pathname: './service-details', params: { id: item.id } });
                   }
                   if (item.kind === 'saved' && item.listingId) {
-                    router.push({ pathname: '/listing', params: { id: item.listingId } });
+                    router.push({ pathname: './listing', params: { id: item.listingId } });
                   }
                 }}
               >

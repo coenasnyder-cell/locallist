@@ -1,19 +1,17 @@
-/* eslint-env node */
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK using default credentials from Firebase CLI
 // Make sure you're logged in: firebase login
 const serviceAccountPath = require('path').join(__dirname, 'serviceAccountKey.json');
 
-let app;
 try {
   const serviceAccount = require(serviceAccountPath);
-  app = admin.initializeApp({
+  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
-} catch (e) {
+} catch {
   console.log('Service account key not found. Using default Firebase credentials...');
-  app = admin.initializeApp({
+  admin.initializeApp({
     projectId: 'local-list-wski21',
   });
 }

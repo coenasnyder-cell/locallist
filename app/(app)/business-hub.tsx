@@ -241,11 +241,11 @@ export default function BusinessHubScreen() {
   }, [isBusinessAccount, profile, user?.uid]);
 
   if (!loading && !user) {
-    return <Redirect href="/signInOrSignUp" />;
+    return <Redirect href={{ pathname: '../signInOrSignUp' }} />;
   }
 
   if (!loading && user && profile && !isBusinessAccount) {
-    return <Redirect href="/(tabs)/profilebutton" />;
+    return <Redirect href={{ pathname: '../(tabs)/profilebutton' }} />;
   }
 
   const tools: HubTool[] = [
@@ -253,31 +253,31 @@ export default function BusinessHubScreen() {
       title: 'Business Settings',
       description: 'Update your business profile details, contact information, and branding.',
       cta: 'Open Settings',
-      onPress: () => router.push('/business-settings'),
+      onPress: () => router.push({ pathname: './business-settings' }),
     },
     {
       title: 'Listings Manager',
       description: 'Manage your marketplace listings, services, and deal content in one place.',
       cta: 'Open Listings',
-      onPress: () => router.push('/(app)/business-listings'),
+      onPress: () => router.push({ pathname: './business-listings' }),
     },
     {
       title: 'Post & Promote',
       description: 'Create jobs, deals, and service posts to grow your local visibility.',
       cta: 'Open Post & Promote',
-      onPress: () => router.push('/post-promote'),
+      onPress: () => router.push({ pathname: './post-promote' }),
     },
     {
       title: 'Leads and Inbox',
       description: 'Track inbound inquiries and unread conversations from shoppers.',
       cta: 'Open Leads & Inbox',
-      onPress: () => router.push('/threadchat'),
+      onPress: () => router.push({ pathname: './threadchat' }),
     },
     {
       title: 'Reputation Tools',
       description: 'Review snapshot and momentum for your business profile.',
       cta: 'Open Reputation',
-      onPress: () => router.push('/business-reputation'),
+      onPress: () => router.push({ pathname: './business-reputation' }),
     },
   ];
 
@@ -302,10 +302,10 @@ export default function BusinessHubScreen() {
             <Text style={styles.userName}>{displayName}</Text>
             <Text style={styles.userEmail}>{email}</Text>
             <View style={styles.userActions}>
-              <TouchableOpacity onPress={() => router.push('/business-settings')}>
+              <TouchableOpacity onPress={() => router.push({ pathname: './business-settings' })}>
                 <Text style={styles.inlineLink}>Update Profile</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push('/blocked-users')}>
+              <TouchableOpacity onPress={() => router.push({ pathname: './blocked-users' })}>
                 <Text style={styles.inlineLink}>Blocked Users</Text>
               </TouchableOpacity>
             </View>
@@ -323,12 +323,15 @@ export default function BusinessHubScreen() {
           </Text>
 
           <View style={styles.claimSetupActions}>
-            <TouchableOpacity style={styles.claimSetupButton} onPress={() => router.push('/business-settings')}>
+            <TouchableOpacity
+              style={styles.claimSetupButton}
+              onPress={() => router.push({ pathname: './business-settings' })}
+            >
               <Text style={styles.claimSetupButtonText}>Open Business Settings</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.claimSetupSecondaryButton}
-              onPress={() => router.push({ pathname: '/(app)/businessprofile', params: { id: user?.uid || '' } })}
+              onPress={() => router.push({ pathname: './businessprofile', params: { id: user?.uid || '' } })}
             >
               <Text style={styles.claimSetupSecondaryButtonText}>View Public Listing</Text>
             </TouchableOpacity>
@@ -435,7 +438,7 @@ export default function BusinessHubScreen() {
             } catch (error) {
               Alert.alert('Logout Error', 'Could not sign out right now. Please try again.');
             } finally {
-              router.replace('/');
+              router.replace({ pathname: '../index' });
             }
           }}
         >

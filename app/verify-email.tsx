@@ -74,14 +74,14 @@ export default function VerifyEmailPage() {
 
             <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={() => router.push('/login')}
+              onPress={() => router.push('./login')}
             >
               <Text style={styles.secondaryButtonText}>Back to Sign In</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.tertiaryLink}
-              onPress={() => router.replace(isNewUser === 'true' ? '/(tabs)/profilebutton' : '/(tabs)')}
+              onPress={() => router.replace(isNewUser === 'true' ? './(tabs)/profilebutton' : './(tabs)/index')}
             >
               <Text style={styles.tertiaryLinkText}>
                 {isNewUser === 'true' ? 'Complete Your Profile' : 'Continue Browsing'}

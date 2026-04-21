@@ -63,7 +63,7 @@ export default function AllListings() {
           location={item.location || item.zipCode}
           isFeatured={Boolean(item.isFeatured)}
           imageSource={Array.isArray(item.images) && item.images[0] ? { uri: item.images[0] } : undefined}
-          onPress={() => router.push({ pathname: '/listing', params: { id: item.id } })}
+          onPress={() => router.push({ pathname: './listing', params: { id: item.id } })}
         />
       </View>
     );

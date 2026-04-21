@@ -132,7 +132,7 @@ export default function CreateServiceListing() {
           <Text style={styles.successSubtitle}>
             Your service has been submitted for review. {featureRequested ? 'Featured status will be applied after verification.' : ''}
           </Text>
-          <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace('/(tabs)')}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace('../(tabs)/index')}>
             <Text style={styles.primaryButtonText}>Return Home</Text>
           </TouchableOpacity>
         </View>

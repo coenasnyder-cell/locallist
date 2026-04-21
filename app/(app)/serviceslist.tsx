@@ -174,7 +174,7 @@ export default function ServicesList() {
   };
 
   const handleOpenService = (id: string) => {
-    router.push({ pathname: '/(app)/service-details', params: { id } });
+    router.push({ pathname: './service-details', params: { id } });
   };
 
   const formatPrice = (item: ServiceListing) => {
@@ -235,7 +235,7 @@ export default function ServicesList() {
               router.back();
               return;
             }
-            router.replace('/(tabs)/communitybutton');
+              router.replace('../(tabs)/communitybutton');
           }}
         />
       </View>
@@ -249,7 +249,7 @@ export default function ServicesList() {
           />
           <TouchableOpacity
             style={styles.postButton}
-            onPress={() => router.push('/(app)/create-service-listing')}
+            onPress={() => router.push('./create-service-listing')}
           >
             <Text style={styles.postButtonText}>+ Post a Service</Text>
           </TouchableOpacity>

@@ -49,7 +49,7 @@ const stripeConfig = {
       if (firebase.firestore.setLogLevel) {
         firebase.firestore.setLogLevel('error');
       }
-    } catch (error) {
+    } catch {
       // Ignore if settings were already locked by an earlier Firestore operation.
     }
   }

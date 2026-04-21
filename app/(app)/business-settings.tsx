@@ -143,7 +143,7 @@ export default function BusinessSettingsScreen() {
           <View style={styles.panel}>
             <Text style={styles.helperText}>Business settings are available for business accounts only.</Text>
             <View style={styles.heroActions}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/')}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('../index')}>
                 <Text style={styles.backBtnText}>Back to Home</Text>
               </TouchableOpacity>
             </View>
@@ -175,12 +175,12 @@ export default function BusinessSettingsScreen() {
               <View style={styles.panelHeader}>
                 <Text style={styles.panelTitle}>Business Profile</Text>
                 <View style={styles.ctaRow}>
-                  <TouchableOpacity style={styles.btn} onPress={() => router.push('/businesslocal')}>
+                  <TouchableOpacity style={styles.btn} onPress={() => router.push('./businesslocal')}>
                     <Text style={styles.btnText}>Edit Business Profile</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.btn, styles.secondaryBtn]}
-                    onPress={() => router.push({ pathname: '/(app)/businessprofile', params: { id: user?.uid || '' } })}
+                    onPress={() => router.push({ pathname: './businessprofile', params: { id: user?.uid || '' } })}
                   >
                     <Text style={styles.btnText}>View Public Profile</Text>
                   </TouchableOpacity>

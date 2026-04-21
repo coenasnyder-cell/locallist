@@ -90,7 +90,7 @@ export default function FeaturedListingsPage() {
   }, []);
 
   const handlePress = (id: string) => {
-    router.push({ pathname: '/listing', params: { id } });
+    router.push({ pathname: './listing', params: { id } });
   };
 
   const renderItem = ({ item: listing }: { item: any }) => (

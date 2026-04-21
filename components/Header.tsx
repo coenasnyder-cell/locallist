@@ -217,7 +217,7 @@ export default function Header({
 
         <View style={styles.center}>
           <TouchableOpacity
-            onPress={() => router.push('/(tabs)')}
+            onPress={() => handleNavigate('/(tabs)/index')}
             accessibilityLabel="App logo"
             style={[styles.logoButton, compact && styles.logoButtonCompact]}
           >
@@ -228,7 +228,7 @@ export default function Header({
         <View style={styles.right}>
           {!user && !loading && (
             <TouchableOpacity
-              onPress={() => router.push('/signInOrSignUp')}
+              onPress={() => handleNavigate('/signInOrSignUp')}
               accessibilityLabel="Login"
               style={styles.rightButton}
             >
@@ -239,7 +239,7 @@ export default function Header({
           {user && (
             <>
               <TouchableOpacity
-                onPress={() => router.push('/(app)/support-hub')}
+                onPress={() => handleNavigate('/(app)/support-hub')}
                 accessibilityLabel="Support"
                 style={styles.rightButton}
               >
@@ -250,7 +250,7 @@ export default function Header({
                   try {
                     const auth = getAuth();
                     await Promise.allSettled([signOut(auth), signOutNativeGoogle()]);
-                    router.replace('/publiclanding');
+                    router.replace('/publiclanding' as any);
                     Alert.alert('Signed out', 'You are now signed out.');
                   } catch (e) {
                     Alert.alert('Error', 'Sign out failed.');

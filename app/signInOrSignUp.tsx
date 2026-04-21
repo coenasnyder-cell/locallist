@@ -87,7 +87,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)' as any);
+    router.replace('./(tabs)/index');
   }
 
   function requiresZipSetup(profileData: Record<string, unknown> | null): boolean {
@@ -142,7 +142,7 @@ export default function SignInOrSignUp() {
 
     if (needsSetup) {
       router.replace({
-        pathname: '/zipCodeverify' as any,
+        pathname: './zipCodeverify',
         params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
       });
       return;
@@ -153,7 +153,7 @@ export default function SignInOrSignUp() {
 
   const goToSignup = () => {
     router.push({
-      pathname: '/signup' as any,
+      pathname: './signup',
       params: typeof returnTo === 'string' && returnTo.startsWith('/') ? { returnTo } : undefined,
     });
   };
@@ -169,7 +169,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('/(tabs)' as any);
+    router.replace('./(tabs)/index');
   };
 
   const handleGoogleLogin = async () => {
@@ -328,11 +328,11 @@ export default function SignInOrSignUp() {
                   <Text style={styles.bottomLink}>Sign up</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/forgot-password')}>
+                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('./forgot-password')}>
                   <Text style={styles.bottomLink}>Forgot password?</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('/contactus' as any)}>
+                <TouchableOpacity style={styles.forgotLink} onPress={() => router.push('./(app)/contactus')}>
                   <Text style={styles.bottomLink}>Trouble logging in? Contact Us</Text>
                 </TouchableOpacity>
 
