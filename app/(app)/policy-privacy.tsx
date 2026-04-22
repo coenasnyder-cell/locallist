@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
         {/* LOGO */}
         <View style={styles.logoSection}>
           <Image
-  source={require('../assets/images/logo.png')}
+  source={require('../../assets/images/logo.png')}
   contentFit="contain"/>
         </View>
         {/* MAIN CONTENT */}
