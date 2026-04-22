@@ -1,4 +1,4 @@
-import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import { app } from '../firebase';
@@ -13,10 +13,10 @@ const SiteSettings = () => {
       setLoading(true);
       try {
         const db = getFirestore(app);
-        const settingsRef = doc(db, 'siteSettings', 'main');
+        const settingsRef = doc(db, 'community_settings', 'display');
         const settingsSnap = await getDoc(settingsRef);
         if (settingsSnap.exists()) {
-          setQuote(settingsSnap.data().quoteOfTheDay || '');
+          setQuote(settingsSnap.data().quoteOfDayText || '');
         }
       } catch (e) {
         Alert.alert('Error', 'Failed to load site settings.');
@@ -30,8 +30,8 @@ const SiteSettings = () => {
     setSaving(true);
     try {
       const db = getFirestore(app);
-      const settingsRef = doc(db, 'siteSettings', 'main');
-      await updateDoc(settingsRef, { quoteOfTheDay: quote });
+      const settingsRef = doc(db, 'community_settings', 'display');
+      await setDoc(settingsRef, { quoteOfDayText: quote }, { merge: true });
       Alert.alert('Success', 'Quote of the Day updated.');
     } catch (e) {
       Alert.alert('Error', 'Failed to update quote.');

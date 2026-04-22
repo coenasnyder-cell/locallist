@@ -197,7 +197,7 @@
       </div>
     </section>
 
-    <div id="statusBanner" class="status-banner status-loading">Checking account access and loading analytics...</div>
+    <div id="statusBanner" class="status-banner status-loading">Checking account access and analytics plan...</div>
 
     <section id="analyticsSection" class="hidden">
       <div class="section-title">Profile</div>
@@ -408,6 +408,19 @@
         </div>
       </div>
     </section>
+
+    <section id="premiumGate" class="hidden">
+      <div class="panel">
+        <div class="panel-title">Premium Analytics</div>
+        <p class="note" style="margin-top: 8px;">
+          Advanced analytics on the web are available for Premium business accounts. Your Business Hub still includes the basic analytics snapshot.
+        </p>
+        <div class="back-row" style="margin-top: 12px;">
+          <a class="btn btn-primary" href="profile.html">Upgrade to Premium</a>
+          <a class="btn btn-secondary" href="business-hub.html">Back to Business Hub</a>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -461,11 +474,33 @@
     function showAnalytics() {
       document.getElementById('analyticsSection').classList.remove('hidden');
       document.getElementById('upgradeGate').classList.add('hidden');
+      document.getElementById('premiumGate').classList.add('hidden');
     }
 
     function showGate() {
       document.getElementById('analyticsSection').classList.add('hidden');
       document.getElementById('upgradeGate').classList.remove('hidden');
+      document.getElementById('premiumGate').classList.add('hidden');
+    }
+
+    function showPremiumGate() {
+      document.getElementById('analyticsSection').classList.add('hidden');
+      document.getElementById('upgradeGate').classList.add('hidden');
+      document.getElementById('premiumGate').classList.remove('hidden');
+    }
+
+    function normalizeBusinessTier(userData, businessLocalData) {
+      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
+      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
+      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
+      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
+      const tier = fromUser || fromLocal || fromSubscription || 'free';
+
+      if (userData?.isPremium === true && premiumStatus === 'active') {
+        return 'premium';
+      }
+
+      return tier === 'premium' ? 'premium' : 'free';
     }
 
     async function loadAnalyticsForBusiness(user, userData) {
@@ -649,8 +684,12 @@
         try {
           const userDoc = await db.collection('users').doc(user.uid).get();
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+          const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get().catch(() => null);
+          const businessLocalData = businessLocalDoc && businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
           const isBusiness = userData.accountType === 'business';
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+          const businessTier = normalizeBusinessTier(userData, businessLocalData);
+          const hasPremiumAnalytics = isAdmin || businessTier === 'premium';
 
           if (!isBusiness && !isAdmin) {
             setStatus('status-locked', 'Business account required to access analytics.');
@@ -658,8 +697,14 @@
             return;
           }
 
+          if (!hasPremiumAnalytics) {
+            setStatus('status-locked', 'Premium business account required for advanced analytics.');
+            showPremiumGate();
+            return;
+          }
+
           showAnalytics();
-          setStatus('status-access', isBusiness ? 'Business analytics loaded.' : 'Admin preview mode: analytics loaded.');
+          setStatus('status-access', isBusiness ? 'Premium business analytics loaded.' : 'Admin preview mode: analytics loaded.');
           await loadAnalyticsForBusiness(user, userData);
         } catch (error) {
           console.error('Error loading business analytics:', error);

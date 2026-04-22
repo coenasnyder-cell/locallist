@@ -661,6 +661,10 @@
           <h3>📣 Promotions</h3>
           <p>Boost visibility and create deals.</p>
         </a>
+        <a class="card" id="advancedAnalyticsCard" href="profile.html">
+          <h3 id="advancedAnalyticsTitle">Upgrade for Advanced Analytics</h3>
+          <p id="advancedAnalyticsCopy">Premium businesses unlock deeper web analytics and trend reporting.</p>
+        </a>
       </div>
 
       <p class="section-label">Performance Overview</p>
@@ -915,6 +919,37 @@
       }
     }
 
+    function normalizeBusinessTier(userData, businessLocalData) {
+      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
+      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
+      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
+      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
+      const tier = fromUser || fromLocal || fromSubscription || 'free';
+
+      if (userData?.isPremium === true && premiumStatus === 'active') {
+        return 'premium';
+      }
+
+      return tier === 'premium' ? 'premium' : 'free';
+    }
+
+    function updateAnalyticsAccessCard(canAccessAdvanced) {
+      const card = document.getElementById('advancedAnalyticsCard');
+      const title = document.getElementById('advancedAnalyticsTitle');
+      const copy = document.getElementById('advancedAnalyticsCopy');
+      if (!card || !title || !copy) return;
+
+      if (canAccessAdvanced) {
+        card.href = 'business-analytics.html';
+        title.textContent = 'Advanced Analytics';
+        copy.textContent = 'Open your premium web analytics for breakdowns, trend reporting, and deeper performance detail.';
+      } else {
+        card.href = 'profile.html';
+        title.textContent = 'Upgrade for Advanced Analytics';
+        copy.textContent = 'Your basic analytics stay here in Business Hub. Upgrade to Premium for advanced web analytics and trends.';
+      }
+    }
+
     function openModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
@@ -1037,7 +1072,8 @@
       return result;
     }
 
-    async function loadLeadsInboxSnapshot(businessId) {
+    async function loadLeadsInboxSnapshot(businessId, options = {}) {
+      const canAccessAdvanced = options.canAccessAdvanced === true;
       setText('leadTotalThreads', '-');
       setText('leadUnreadCount', '-');
       setText('leadUniqueBuyers', '-');
@@ -1078,8 +1114,8 @@
 
         setText('leadTotalThreads', formatNumber(total));
         setText('leadUnreadCount', formatNumber(unread));
-        setText('leadUniqueBuyers', formatNumber(buyers.size));
-        setText('leadRecent7d', formatNumber(recent7d));
+        setText('leadUniqueBuyers', canAccessAdvanced ? formatNumber(buyers.size) : 'Premium');
+        setText('leadRecent7d', canAccessAdvanced ? formatNumber(recent7d) : 'Premium');
 
         snapshot.total = total;
         snapshot.unread = unread;
@@ -1096,8 +1132,9 @@
       return snapshot;
     }
 
-    async function loadBusinessHubAnalytics(businessId, businessData) {
-      const leadsSnapshot = await loadLeadsInboxSnapshot(businessId);
+    async function loadBusinessHubAnalytics(businessId, businessData, options = {}) {
+      const canAccessAdvanced = options.canAccessAdvanced === true;
+      const leadsSnapshot = await loadLeadsInboxSnapshot(businessId, { canAccessAdvanced });
 
       const allTimeViews = Number(businessData?.viewCount || 0);
       const rolling = await loadProfileRollingViewWindows(businessId);
@@ -1111,7 +1148,7 @@
       setText('viewsAllTime', formatNumber(allTimeViews));
       setText('viewsAllTimeSub', 'Total profile views');
 
-      if (rolling.hasDailyData) {
+      if (canAccessAdvanced && rolling.hasDailyData) {
         setText('views7Day', formatNumber(sevenDayViews));
         setOptionalCopy('views7DaySub', 'Last 7 days');
         setText('views30Day', formatNumber(thirtyDayViews));
@@ -1129,13 +1166,13 @@
           setOptionalCopy('viewsAnalyticsNote', '');
         }
       } else {
-        setText('views7Day', '-');
-        setOptionalCopy('views7DaySub', '');
-        setText('views30Day', '-');
-        setOptionalCopy('views30DaySub', '');
-        setText('viewsTrend', '-');
-        setOptionalCopy('viewsTrendSub', '');
-        setOptionalCopy('viewsAnalyticsNote', '');
+        setText('views7Day', canAccessAdvanced ? '-' : 'Premium');
+        setOptionalCopy('views7DaySub', canAccessAdvanced ? '' : 'Upgrade for 7-day trend reporting');
+        setText('views30Day', canAccessAdvanced ? '-' : 'Premium');
+        setOptionalCopy('views30DaySub', canAccessAdvanced ? '' : 'Upgrade for 30-day view history');
+        setText('viewsTrend', canAccessAdvanced ? '-' : 'Premium');
+        setOptionalCopy('viewsTrendSub', canAccessAdvanced ? '' : 'Upgrade for trend comparison');
+        setOptionalCopy('viewsAnalyticsNote', canAccessAdvanced ? '' : 'Advanced web analytics are available on Premium.');
       }
 
       const ratingAverage = Number(businessData?.ratingAverage || 0);
@@ -1167,17 +1204,20 @@
           if (ts >= prevMonthStart && ts <= prevMonthEnd) previousMonthCount += 1;
         });
 
-        setText('newReviewsThisMonth', formatNumber(thisMonthCount));
-        setOptionalCopy('newReviewsThisMonthSub', '');
+        setText('newReviewsThisMonth', canAccessAdvanced ? formatNumber(thisMonthCount) : 'Premium');
+        setOptionalCopy('newReviewsThisMonthSub', canAccessAdvanced ? '' : 'Upgrade for monthly review insights');
 
-        if (previousMonthCount > 0) {
+        if (canAccessAdvanced && previousMonthCount > 0) {
           const delta = thisMonthCount - previousMonthCount;
           const percent = Math.round((delta / previousMonthCount) * 100);
           setText('monthlyReviewTrend', `${percent >= 0 ? '+' : ''}${percent}%`);
           setOptionalCopy('monthlyReviewTrendSub', '');
-        } else {
+        } else if (canAccessAdvanced) {
           setText('monthlyReviewTrend', thisMonthCount > 0 ? '+100%' : '0%');
           setOptionalCopy('monthlyReviewTrendSub', '');
+        } else {
+          setText('monthlyReviewTrend', 'Premium');
+          setOptionalCopy('monthlyReviewTrendSub', 'Upgrade for trend reporting');
         }
       } catch (error) {
         console.warn('Could not load monthly review analytics:', error);
@@ -1276,9 +1316,12 @@
           const isAdmin = isAdminRole || isAdminLocal;
 
           const isBusiness = data.accountType === 'business';
+          const businessTier = normalizeBusinessTier(data, businessLocalData);
+          const canAccessAdvancedAnalytics = isAdmin || businessTier === 'premium';
 
           if (isBusiness || isAdmin) {
-            await loadBusinessHubAnalytics(user.uid, businessData);
+            updateAnalyticsAccessCard(canAccessAdvancedAnalytics);
+            await loadBusinessHubAnalytics(user.uid, businessData, { canAccessAdvanced: canAccessAdvancedAnalytics });
             await loadBusinessVerificationStatus(user.uid, businessData);
 
             // Update Add A Business card: always go to businesslocal.html (create or edit)

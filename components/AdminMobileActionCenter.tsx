@@ -5,17 +5,29 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { app } from '../firebase';
 
 type Props = {
+  onNavigateToAnalytics: () => void;
   onNavigateToPendingUsers: () => void;
+  onNavigateToUsers: () => void;
   onNavigateToPendingBusinesses: () => void;
   onNavigateToPendingListings: () => void;
+  onNavigateToFeaturePurchases: () => void;
+  onNavigateToReportedMessages: () => void;
+  onNavigateToReportedListings: () => void;
   onNavigateToReports: () => void;
+  onNavigateToSiteSettings: () => void;
 };
 
 export default function AdminMobileActionCenter({
+  onNavigateToAnalytics,
   onNavigateToPendingUsers,
+  onNavigateToUsers,
   onNavigateToPendingBusinesses,
   onNavigateToPendingListings,
+  onNavigateToFeaturePurchases,
+  onNavigateToReportedMessages,
+  onNavigateToReportedListings,
   onNavigateToReports,
+  onNavigateToSiteSettings,
 }: Props) {
   const [stats, setStats] = useState<{ users: number; listings: number; businesses: number; services: number } | null>(null);
 
@@ -76,12 +88,30 @@ export default function AdminMobileActionCenter({
         )}
       </View>
 
+      <TouchableOpacity style={styles.card} onPress={onNavigateToAnalytics} activeOpacity={0.8}>
+        <Feather name="bar-chart-2" size={22} color="#2563eb" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Analytics</Text>
+          <Text style={styles.cardSubtitle}>Review user, listing, and report metrics</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
       {/* Always show navigation cards */}
       <TouchableOpacity style={styles.card} onPress={onNavigateToPendingUsers} activeOpacity={0.8}>
         <Feather name="users" size={22} color="#0ea5e9" />
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>Pending Users</Text>
           <Text style={styles.cardSubtitle}>Review and approve new user registrations</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={onNavigateToUsers} activeOpacity={0.8}>
+        <Feather name="user-check" size={22} color="#1d4ed8" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>User Management</Text>
+          <Text style={styles.cardSubtitle}>Search, disable, ban, suspend, and convert accounts</Text>
         </View>
         <Feather name="chevron-right" size={20} color="#94a3b8" />
       </TouchableOpacity>
@@ -104,11 +134,47 @@ export default function AdminMobileActionCenter({
         <Feather name="chevron-right" size={20} color="#94a3b8" />
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.card} onPress={onNavigateToFeaturePurchases} activeOpacity={0.8}>
+        <Feather name="credit-card" size={22} color="#f59e0b" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Featured Purchases</Text>
+          <Text style={styles.cardSubtitle}>Review and verify featured listing purchase records</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={onNavigateToReportedMessages} activeOpacity={0.8}>
+        <Feather name="message-square" size={22} color="#7c3aed" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Reported Messages</Text>
+          <Text style={styles.cardSubtitle}>Review flagged chat messages from users</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={onNavigateToReportedListings} activeOpacity={0.8}>
+        <Feather name="image" size={22} color="#ea580c" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Reported Listings</Text>
+          <Text style={styles.cardSubtitle}>Review flagged listings and listing details</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.card} onPress={onNavigateToReports} activeOpacity={0.8}>
         <Feather name="flag" size={22} color="#ef4444" />
         <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>Reports</Text>
-          <Text style={styles.cardSubtitle}>View and manage reported content</Text>
+          <Text style={styles.cardTitle}>All Reports</Text>
+          <Text style={styles.cardSubtitle}>Open the combined report queue across all sources</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={onNavigateToSiteSettings} activeOpacity={0.8}>
+        <Feather name="settings" size={22} color="#334155" />
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>Site Settings</Text>
+          <Text style={styles.cardSubtitle}>Update the quote and other shared display content</Text>
         </View>
         <Feather name="chevron-right" size={20} color="#94a3b8" />
       </TouchableOpacity>

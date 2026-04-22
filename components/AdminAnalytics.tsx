@@ -1,7 +1,6 @@
-import { useRouter } from 'expo-router';
 import { collection, collectionGroup, getCountFromServer, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { app } from '../firebase';
 
 type ZipCount = { zip: string; count: number };
@@ -18,7 +17,6 @@ type SummaryStats = {
 };
 
 export default function AdminAnalytics() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<SummaryStats>({
     totalUsers: 0,
@@ -136,13 +134,6 @@ export default function AdminAnalytics() {
             <Text style={styles.performanceValue}>{stats.totalMessages}</Text>
           </View>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.analyticsButton}
-          onPress={() => router.push('/admin-analytics-detail' as any)}
-        >
-          <Text style={styles.analyticsButtonText}>Open Analytics</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
@@ -248,18 +239,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111',
-  },
-  analyticsButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-  },
-  analyticsButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
   },
   grid: {
     flexDirection: 'row',

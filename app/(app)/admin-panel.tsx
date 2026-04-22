@@ -3,10 +3,16 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AdminAllReports from '../../components/AdminAllReports';
+import AdminAnalytics from '../../components/AdminAnalytics';
+import AdminFeaturePurchases from '../../components/AdminFeaturePurchases';
 import AdminListings from '../../components/AdminListings';
 import AdminMobileActionCenter from '../../components/AdminMobileActionCenter';
 import AdminPendingApprovals from '../../components/AdminPendingApprovals';
 import AdminPendingBusinesses from '../../components/AdminPendingBusinesses';
+import AdminReportedListings from '../../components/AdminReportedListings';
+import AdminReportedMessages from '../../components/AdminReportedMessages';
+import AdminSiteSettings from '../../components/AdminSiteSettings';
+import AdminUsersList from '../../components/AdminUsersList';
 import { useAdminStatus } from '../../hooks/useAdminStatus';
 
 // Clean admin panel without test email functionality
@@ -14,10 +20,30 @@ import { useAdminStatus } from '../../hooks/useAdminStatus';
 export default function AdminTabScreen() {
   const router = useRouter();
   const { isAdmin, loading } = useAdminStatus();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'pending-users' | 'pending-businesses' | 'pending-listings' | 'pending-reports'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<
+    'dashboard'
+    | 'analytics'
+    | 'pending-users'
+    | 'users'
+    | 'pending-businesses'
+    | 'pending-listings'
+    | 'feature-purchases'
+    | 'reported-messages'
+    | 'reported-listings'
+    | 'pending-reports'
+    | 'site-settings'
+  >('dashboard');
+
+  const handleNavigateToAnalytics = () => {
+    setCurrentPage('analytics');
+  };
 
   const handleNavigateToPendingUsers = () => {
     setCurrentPage('pending-users');
+  };
+
+  const handleNavigateToUsers = () => {
+    setCurrentPage('users');
   };
 
   const handleNavigateToPendingBusinesses = () => {
@@ -28,8 +54,24 @@ export default function AdminTabScreen() {
     setCurrentPage('pending-listings');
   };
 
+  const handleNavigateToFeaturePurchases = () => {
+    setCurrentPage('feature-purchases');
+  };
+
+  const handleNavigateToReportedMessages = () => {
+    setCurrentPage('reported-messages');
+  };
+
+  const handleNavigateToReportedListings = () => {
+    setCurrentPage('reported-listings');
+  };
+
   const handleNavigateToReports = () => {
     setCurrentPage('pending-reports');
+  };
+
+  const handleNavigateToSiteSettings = () => {
+    setCurrentPage('site-settings');
   };
 
   const handleBackToDashboard = () => {
@@ -38,14 +80,26 @@ export default function AdminTabScreen() {
 
   const getTitle = () => {
     switch (currentPage) {
+      case 'analytics':
+        return 'Analytics';
       case 'pending-users':
         return 'Pending Users';
+      case 'users':
+        return 'User Management';
       case 'pending-businesses':
         return 'Pending Businesses';
       case 'pending-listings':
         return 'Pending Listings';
+      case 'feature-purchases':
+        return 'Featured Purchases';
+      case 'reported-messages':
+        return 'Reported Messages';
+      case 'reported-listings':
+        return 'Reported Listings';
       case 'pending-reports':
         return 'All Reports';
+      case 'site-settings':
+        return 'Site Settings';
       default:
         return 'Admin Action Center';
     }
@@ -81,17 +135,35 @@ export default function AdminTabScreen() {
           </View>
         ) : currentPage === 'dashboard' ? (
           <AdminMobileActionCenter
+            onNavigateToAnalytics={handleNavigateToAnalytics}
             onNavigateToPendingUsers={handleNavigateToPendingUsers}
+            onNavigateToUsers={handleNavigateToUsers}
             onNavigateToPendingBusinesses={handleNavigateToPendingBusinesses}
             onNavigateToPendingListings={handleNavigateToPendingListings}
+            onNavigateToFeaturePurchases={handleNavigateToFeaturePurchases}
+            onNavigateToReportedMessages={handleNavigateToReportedMessages}
+            onNavigateToReportedListings={handleNavigateToReportedListings}
             onNavigateToReports={handleNavigateToReports}
+            onNavigateToSiteSettings={handleNavigateToSiteSettings}
           />
+        ) : currentPage === 'analytics' ? (
+          <AdminAnalytics />
         ) : currentPage === 'pending-users' ? (
           <AdminPendingApprovals />
+        ) : currentPage === 'users' ? (
+          <AdminUsersList />
         ) : currentPage === 'pending-businesses' ? (
           <AdminPendingBusinesses />
+        ) : currentPage === 'feature-purchases' ? (
+          <AdminFeaturePurchases />
+        ) : currentPage === 'reported-messages' ? (
+          <AdminReportedMessages />
+        ) : currentPage === 'reported-listings' ? (
+          <AdminReportedListings />
         ) : currentPage === 'pending-reports' ? (
           <AdminAllReports />
+        ) : currentPage === 'site-settings' ? (
+          <AdminSiteSettings />
         ) : (
           <AdminListings />
         )}

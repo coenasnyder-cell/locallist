@@ -164,6 +164,9 @@
       border: 1px solid #fca5a5;
       color: #991b1b;
     }
+    .hidden {
+      display: none;
+    }
 
     footer {
       background: #333;
@@ -195,6 +198,14 @@
     <section class="panel" aria-label="Create a deal form">
       <h1>Create A Deal</h1>
       <p class="subtitle">Post deals for businesses, service providers, and admin campaigns. This form writes directly to your <strong>deals</strong> collection.</p>
+
+      <div id="premiumGate" class="message error hidden" role="status" aria-live="polite">
+        Premium business account required. Deal posting is available for Premium business members only.
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn primary" type="button" onclick="window.location.href='profile.html'">Upgrade to Premium</button>
+          <button class="btn secondary" type="button" onclick="window.location.href='promotion-center.html'">Back to Post &amp; Promote</button>
+        </div>
+      </div>
 
       <form id="dealForm">
         <div class="form-grid">
@@ -267,6 +278,40 @@
     function setMessage(type, text) {
       formMessage.className = `message ${type}`;
       formMessage.textContent = text;
+    }
+
+    function normalizeBusinessTier(profileData) {
+      const fromUser = String(profileData?.businessTier || '').trim().toLowerCase();
+      const fromSubscription = String(profileData?.subscriptionPlan || '').trim().toLowerCase();
+      const premiumStatus = String(profileData?.premiumStatus || '').trim().toLowerCase();
+      const tier = fromUser || fromSubscription || 'free';
+
+      if (profileData?.isPremium === true && premiumStatus === 'active') {
+        return 'premium';
+      }
+
+      return tier === 'premium' ? 'premium' : 'free';
+    }
+
+    function hasPremiumDealPostingAccess(profileData) {
+      const isBusiness = String(profileData?.accountType || '').toLowerCase() === 'business';
+      return isAdminUser || (isBusiness && normalizeBusinessTier(profileData) === 'premium');
+    }
+
+    function updateAccessState(profileData) {
+      const premiumGate = document.getElementById('premiumGate');
+      if (hasPremiumDealPostingAccess(profileData)) {
+        premiumGate.classList.add('hidden');
+        dealForm.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Deal';
+        return;
+      }
+
+      premiumGate.classList.remove('hidden');
+      dealForm.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Premium Required';
     }
 
     function toFirestoreTimestamp(dateValue) {
@@ -351,10 +396,12 @@
           const isLocalAdmin = localStorage.getItem('isAdmin') === 'true';
           isAdminUser = isRoleAdmin || isLocalAdmin;
           updateAdminDealOptionVisibility();
+          updateAccessState(data);
         } catch (error) {
           console.error('Could not verify admin status:', error);
           isAdminUser = localStorage.getItem('isAdmin') === 'true';
           updateAdminDealOptionVisibility();
+          updateAccessState({});
         }
       });
     }
@@ -367,6 +414,15 @@
 
       if (!db || !firebase || !firebase.firestore) {
         setMessage('error', 'Firestore is not initialized. Please refresh and try again.');
+        return;
+      }
+
+      const currentUserData = auth && auth.currentUser
+        ? ((await db.collection('users').doc(auth.currentUser.uid).get()).data() || {})
+        : {};
+
+      if (!hasPremiumDealPostingAccess(currentUserData)) {
+        setMessage('error', 'Premium business account required. Upgrade to Premium to post deals.');
         return;
       }
 

@@ -150,6 +150,9 @@
       border: 1px solid #bbf7d0;
       color: #065f46;
     }
+    .hidden {
+      display: none;
+    }
 
     footer {
       background: #333;
@@ -180,6 +183,14 @@
 
       <div id="errorMessage" class="alert alert-error"></div>
       <div id="successMessage" class="alert alert-success"></div>
+
+      <div id="premiumGate" class="alert alert-error hidden">
+        Premium business account required. Job posting is available for Premium business members only.
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button" onclick="window.location.href='profile.html'">Upgrade to Premium</button>
+          <button class="btn btn-secondary" type="button" onclick="window.location.href='promotion-center.html'">Back to Post &amp; Promote</button>
+        </div>
+      </div>
 
       <form id="jobForm">
         <div class="form-group">
@@ -312,6 +323,55 @@
       return userProfileData?.accountType === 'business';
     }
 
+    function isAdminUser() {
+      return String(userProfileData?.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+    }
+
+    function normalizeBusinessTier(profileData) {
+      const fromUser = String(profileData?.businessTier || '').trim().toLowerCase();
+      const fromSubscription = String(profileData?.subscriptionPlan || '').trim().toLowerCase();
+      const premiumStatus = String(profileData?.premiumStatus || '').trim().toLowerCase();
+      const tier = fromUser || fromSubscription || 'free';
+
+      if (profileData?.isPremium === true && premiumStatus === 'active') {
+        return 'premium';
+      }
+
+      return tier === 'premium' ? 'premium' : 'free';
+    }
+
+    function hasPremiumPostingAccess() {
+      return isAdminUser() || (isBusinessAccount() && normalizeBusinessTier(userProfileData) === 'premium');
+    }
+
+    function updateAccessState() {
+      const premiumGate = document.getElementById('premiumGate');
+
+      if (!isBusinessAccount()) {
+        showError('Business account required. Only business accounts can post job listings.');
+        premiumGate.classList.add('hidden');
+        form.classList.remove('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Business Account Required';
+        return;
+      }
+
+      if (!hasPremiumPostingAccess()) {
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        premiumGate.classList.remove('hidden');
+        form.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Premium Required';
+        return;
+      }
+
+      premiumGate.classList.add('hidden');
+      form.classList.remove('hidden');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Job';
+    }
+
     function showError(message) {
       errorMessage.textContent = message;
       errorMessage.style.display = 'block';
@@ -369,14 +429,7 @@
         document.getElementById('companyName').value = userProfileData.businessName;
       }
 
-      if (!isBusinessAccount()) {
-        showError('Business account required. Only business accounts can post job listings.');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Business Account Required';
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Job';
-      }
+      updateAccessState();
     }
 
     function redirectToLogin() {
@@ -406,6 +459,11 @@
 
       if (!isBusinessAccount()) {
         showError('Business account required. Only business accounts can post job listings.');
+        return;
+      }
+
+      if (!hasPremiumPostingAccess()) {
+        showError('Premium business account required. Upgrade to Premium to post job listings.');
         return;
       }
 

@@ -224,6 +224,9 @@
       border-color: #475569;
       box-shadow: 0 3px 10px rgba(71, 85, 105, 0.15);
     }
+    #servicePostCard { order: 2; }
+    #jobPostCard { order: 3; }
+    #dealsPostCard { order: 4; }
     .section-label {
       font-size: 13px;
       font-weight: 700;
@@ -273,15 +276,15 @@
           <h3>🏪 Add A Business</h3>
           <p>Edit or update your existing business profile.</p>
         </a>
-        <a class="card" href="create-job-listing.html">
+        <a class="card" id="jobPostCard" href="create-job-listing.html">
           <h3>💼 Job Post</h3>
           <p>Post hiring opportunities to reach local candidates.</p>
         </a>
-        <a class="card" href="create-deal-listing.html">
+        <a class="card" id="dealsPostCard" href="create-deal-listing.html">
           <h3>🔥 Deals</h3>
           <p>Promote discounts and special offers to local shoppers.</p>
         </a>
-        <a class="card" href="create-service-listing.html">
+        <a class="card" id="servicePostCard" href="create-service-listing.html">
           <h3>🧰 Add A Service</h3>
           <p>List your professional services for local customers to find.</p>
         </a>
@@ -387,8 +390,50 @@
       const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
       const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
       const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
+      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
       const tier = fromUser || fromLocal || fromSubscription || 'free';
+
+      if (userData?.isPremium === true && premiumStatus === 'active') {
+        return 'premium';
+      }
+
       return tier === 'premium' ? 'premium' : 'free';
+    }
+
+    function hasPremiumPostingAccess() {
+      return state.isAdmin || state.businessTier === 'premium';
+    }
+
+    function applyPostingAccess() {
+      const jobCard = document.getElementById('jobPostCard');
+      const dealsCard = document.getElementById('dealsPostCard');
+      if (!jobCard || !dealsCard) return;
+
+      const jobTitle = jobCard.querySelector('h3');
+      const jobCopy = jobCard.querySelector('p');
+      const dealsTitle = dealsCard.querySelector('h3');
+      const dealsCopy = dealsCard.querySelector('p');
+
+      if (!jobTitle || !jobCopy || !dealsTitle || !dealsCopy) return;
+
+      if (hasPremiumPostingAccess()) {
+        jobCard.href = 'create-job-listing.html';
+        jobTitle.textContent = 'Job Post';
+        jobCopy.textContent = 'Post hiring opportunities to reach local candidates.';
+
+        dealsCard.href = 'create-deal-listing.html';
+        dealsTitle.textContent = 'Deals';
+        dealsCopy.textContent = 'Promote discounts and special offers to local shoppers.';
+        return;
+      }
+
+      jobCard.href = 'profile.html';
+      jobTitle.textContent = 'Upgrade to Post Jobs';
+      jobCopy.textContent = 'Job posting is available for Premium business accounts only.';
+
+      dealsCard.href = 'profile.html';
+      dealsTitle.textContent = 'Upgrade to Post Deals';
+      dealsCopy.textContent = 'Deal posting is available for Premium business accounts only.';
     }
 
     async function loadMyPromotions() {
@@ -514,6 +559,7 @@
 
           state.isAdmin = isAdmin;
           state.businessTier = normalizeBusinessTier(userData, businessLocalData);
+          applyPostingAccess();
 
           if (!isBusiness && !isAdmin) {
             setStatus('status-locked', 'Business account required to use Post & Promote.');
