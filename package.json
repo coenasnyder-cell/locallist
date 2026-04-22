@@ -50,7 +50,6 @@
     "release:step7": "npm run release:step6 && npm run beta:readiness"
   },
   "dependencies": {
-    "@eslint/js": "^10.0.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
