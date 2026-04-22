@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global firebase */
+
 // Shared Header Component for all pages
 // Load this script in every HTML page to automatically inject the header
 
@@ -377,6 +380,27 @@
           padding: 8px 10px;
         }
 
+        .menu-overlay {
+          top: 86px;
+          height: calc(100% - 86px);
+        }
+
+        .menu-sidebar {
+          top: 86px;
+          left: -300px;
+          height: calc(100% - 86px);
+          padding: 24px 20px 20px;
+          overflow-y: auto;
+        }
+
+        .menu-sidebar h3 {
+          display: none !important;
+          margin: 0;
+          padding: 0;
+          height: 0;
+          overflow: hidden;
+        }
+
         .logo-container {
           flex: 1;
           min-width: 0;
@@ -524,13 +548,13 @@
           userName: userName || 'Profile',
           isAdmin: isAdmin
         };
-      } catch {
+      } catch (err) {
         return { isLoggedIn: false, userName: 'Profile', isAdmin: false };
       }
     }
     
     function updateHeaderButtons() {
-      const { isLoggedIn, isAdmin } = checkAuthStatus();
+      const { isLoggedIn, userName, isAdmin } = checkAuthStatus();
       
       const adminBtn = document.getElementById('adminBtn');
       const notificationsBtn = document.getElementById('notificationsBtn');

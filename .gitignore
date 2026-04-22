@@ -8,7 +8,11 @@ node_modules/
 /.expo
 /.expo/*
 .firebase/
+# Generated web exports
 dist/
+dist-web-check/
+dist-web-check-2/
+.expo-export-check/
 web-build/
 expo-env.d.ts
 
