@@ -1154,7 +1154,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr id="rowPendingListings">
                 <td><span class="admin-item-title">⏳ Pending Listings</span></td>
                 <td><span class="count-pill" id="priorityPendingListings">0</span></td>
                 <td>
@@ -1163,7 +1163,7 @@
                   </div>
                 </td>
               </tr>
-              <tr>
+              <tr id="rowServiceQueue">
                 <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
                 <td><span class="count-pill" id="priorityServiceApprovalQueue">0</span></td>
                 <td>
@@ -1172,7 +1172,7 @@
                   </div>
                 </td>
               </tr>
-              <tr>
+              <tr id="rowReportedListings">
                 <td><span class="admin-item-title">🚩 Reported Listings</span></td>
                 <td><span class="count-pill" id="priorityReportedListings">0</span></td>
                 <td>
@@ -1181,13 +1181,18 @@
                   </div>
                 </td>
               </tr>
-              <tr>
+              <tr id="rowReportedMessages">
                 <td><span class="admin-item-title">💬 Reported Messages</span></td>
                 <td><span class="count-pill" id="priorityReportedMessages">0</span></td>
                 <td>
                   <div class="row-actions">
                     <button class="btn small" onclick="window.navigateToTab('reported-messages')">Review</button>
                   </div>
+                </td>
+              </tr>
+              <tr id="rowNoPriorityTasks" style="display: none;">
+                <td colspan="3" style="text-align: center; color: #64748b; padding: 16px 12px;">
+                  No tasks right now.
                 </td>
               </tr>
             </tbody>

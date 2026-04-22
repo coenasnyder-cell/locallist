@@ -79,7 +79,7 @@
 
     .hero-copy {
       max-width: 680px;
-      color: #ffffff;
+      color: #475569;
       text-align: center;
       margin: 0 auto;
     }
@@ -126,20 +126,20 @@
 
     .deal-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
     }
 
     .deal-card {
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px 16px 16px;
+      border-radius: 14px;
+      padding: 14px 12px 12px;
       background: #fff;
       text-align: left;
       box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
 
@@ -164,7 +164,7 @@
 
     .deal-card-thumb {
       width: 100%;
-      height: 140px;
+      height: 112px;
       object-fit: contain;
       object-position: center;
       display: block;
@@ -179,11 +179,11 @@
     }
 
     .urgency {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 8px;
     }
 
@@ -200,7 +200,7 @@
     }
 
     .deal-card h3 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       margin: 0;
       text-align: center;
@@ -219,8 +219,8 @@
 
     .meta-chip {
       border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 11px;
+      padding: 3px 8px;
+      font-size: 10px;
       font-weight: 700;
       background: #eef2ff;
       color: #3730a3;
@@ -243,9 +243,9 @@
     }
 
     .deal-card .deal-desc {
-      font-size: 15px;
+      font-size: 13px;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.45;
       margin: 0;
       flex-grow: 1;
     }
@@ -273,10 +273,9 @@
       font-size: 15px;
       font-weight: 700;
       color: #fff;
-      background: var(--brand);
+      background: 475569;
       border-radius: 10px;
       text-decoration: none;
-      transition: background 0.2s ease;
     }
 
     .deal-view-btn:hover {
@@ -331,6 +330,12 @@
       }
     }
 
+    @media (max-width: 900px) {
+      .deal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 640px) {
       .page-wrap {
         padding: 14px 10px 30px;
@@ -357,7 +362,37 @@
       }
 
       .deal-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .deal-card {
+        border-radius: 12px;
+        padding: 10px;
+        gap: 6px;
+      }
+
+      .deal-card-thumb {
+        height: 88px;
+      }
+
+      .deal-card h3 {
+        font-size: 14px;
+      }
+
+      .deal-card .deal-desc {
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .urgency {
+        font-size: 11px;
+        padding: 2px 6px;
+      }
+
+      .meta-chip {
+        padding: 2px 7px;
+        font-size: 9px;
       }
     }
   </style>
@@ -367,11 +402,8 @@
 
   <main class="page-wrap">
     <section class="hero" aria-label="Deals highlight banner">
-      <img src="communityhub.png" alt="Shoppers and local businesses in the community">
-      <div class="hero-overlay">
         <div class="hero-copy">
           <h1>Discover local deals happening right now</h1>
-        </div>
       </div>
     </section>
 

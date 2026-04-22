@@ -52,6 +52,19 @@
     return div.innerHTML;
   }
 
+  function toggleRow(rowId, count) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.style.display = count > 0 ? '' : 'none';
+  }
+
+  function toggleNoPriorityTasksRow(counts) {
+    const emptyRow = document.getElementById('rowNoPriorityTasks');
+    if (!emptyRow) return;
+    const hasVisibleTasks = counts.some((count) => count > 0);
+    emptyRow.style.display = hasVisibleTasks ? 'none' : '';
+  }
+
   async function loadTopPriorityCounts() {
     const pendingListingsEl = document.getElementById('priorityPendingListings');
     const serviceQueueEl = document.getElementById('priorityServiceApprovalQueue');
@@ -76,6 +89,11 @@
         db.collection('businessLocal').get(),
       ]);
 
+      const pendingListingsCount = pendingListingsSnap.size || 0;
+      const serviceQueueCount = pendingServicesSnap.size || 0;
+      const reportedListingsCount = pendingReportedListingsSnap.size || 0;
+      const reportedMessagesCount = pendingReportedMessagesSnap.size || 0;
+
       const pendingBizProfilesCount = businessLocalSnap.docs.filter((d) => {
         const data = d.data() || {};
         if (data.isApproved === true) return false;
@@ -83,17 +101,28 @@
         return s !== 'rejected' && s !== 'deleted';
       }).length;
 
-      pendingListingsEl.textContent = String(pendingListingsSnap.size || 0);
-      serviceQueueEl.textContent = String(pendingServicesSnap.size || 0);
-      reportedListingsEl.textContent = String(pendingReportedListingsSnap.size || 0);
-      reportedMessagesEl.textContent = String(pendingReportedMessagesSnap.size || 0);
+      pendingListingsEl.textContent = String(pendingListingsCount);
+      serviceQueueEl.textContent = String(serviceQueueCount);
+      reportedListingsEl.textContent = String(reportedListingsCount);
+      reportedMessagesEl.textContent = String(reportedMessagesCount);
 
-      if (modPendingListingsEl) modPendingListingsEl.textContent = String(pendingListingsSnap.size || 0);
-      if (modServiceQueueEl) modServiceQueueEl.textContent = String(pendingServicesSnap.size || 0);
-      if (modReportedListingsEl) modReportedListingsEl.textContent = String(pendingReportedListingsSnap.size || 0);
-      if (modReportedMessagesEl) modReportedMessagesEl.textContent = String(pendingReportedMessagesSnap.size || 0);
+      if (modPendingListingsEl) modPendingListingsEl.textContent = String(pendingListingsCount);
+      if (modServiceQueueEl) modServiceQueueEl.textContent = String(serviceQueueCount);
+      if (modReportedListingsEl) modReportedListingsEl.textContent = String(reportedListingsCount);
+      if (modReportedMessagesEl) modReportedMessagesEl.textContent = String(reportedMessagesCount);
       if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = String((pendingBusinessReviewsSnap.size || 0) + (pendingReviewRemovalSnap.size || 0));
       setCountPill('modPendingBusinessProfiles', pendingBizProfilesCount);
+
+      toggleRow('rowPendingListings', pendingListingsCount);
+      toggleRow('rowServiceQueue', serviceQueueCount);
+      toggleRow('rowReportedListings', reportedListingsCount);
+      toggleRow('rowReportedMessages', reportedMessagesCount);
+      toggleNoPriorityTasksRow([
+        pendingListingsCount,
+        serviceQueueCount,
+        reportedListingsCount,
+        reportedMessagesCount,
+      ]);
     } catch (error) {
       console.error('Top priority counts load error:', error);
       pendingListingsEl.textContent = '-';
@@ -105,6 +134,12 @@
       if (modReportedListingsEl) modReportedListingsEl.textContent = '-';
       if (modReportedMessagesEl) modReportedMessagesEl.textContent = '-';
       if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = '-';
+
+      toggleRow('rowPendingListings', 1);
+      toggleRow('rowServiceQueue', 1);
+      toggleRow('rowReportedListings', 1);
+      toggleRow('rowReportedMessages', 1);
+      toggleNoPriorityTasksRow([1, 1, 1, 1]);
     }
   }
 

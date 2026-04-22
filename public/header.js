@@ -15,7 +15,6 @@
       <h3>Menu</h3>
       <a href="index.html" onclick="toggleMenu(); return true;">Home</a>
       <a href="browse.html" onclick="toggleMenu(); return true;">Local List Marketplace</a>
-      <a href="list-hub.html" onclick="toggleMenu(); return true;">List Hub</a>
       <a href="community-hub.html" onclick="toggleMenu(); return true;">Community Hub</a>
       <a href="support-legal-hub.html" onclick="toggleMenu(); return true;">Support Hub</a>
       <a href="messages.html" onclick="toggleMenu(); return true;">Messages</a>
@@ -54,7 +53,6 @@
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="index.html" class="desktop-nav-link">Home</a>
       <a href="browse.html" class="desktop-nav-link">Marketplace</a>
-      <a href="list-hub.html" class="desktop-nav-link">List Hub</a>
       <a href="community-hub.html" class="desktop-nav-link">Community Hub</a>
       <a href="support-legal-hub.html" class="desktop-nav-link">Support Hub</a>
       <a href="messages.html" class="desktop-nav-link">Messages</a>
