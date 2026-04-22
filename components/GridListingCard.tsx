@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#1a1a1a',
-    numberOfLines: 1,
   },
   priceInline: {
     fontSize: 13,

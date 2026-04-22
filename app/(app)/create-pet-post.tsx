@@ -35,7 +35,7 @@ export default function CreatePetPostScreen() {
       return;
     }
 
-    router.push('/(app)/pet-corner' as any);
+    router.push('./pet-corner');
   }, [router]);
 
   React.useEffect(() => {
@@ -51,7 +51,7 @@ export default function CreatePetPostScreen() {
     loginPromptShownRef.current = true;
     Alert.alert('Login Required', 'You need to be logged in to create a pet post.', [
       { text: 'Back', style: 'cancel', onPress: navigateToPetHub },
-      { text: 'Log In', onPress: () => router.push('/login') },
+      { text: 'Log In', onPress: () => router.push('../login') },
     ]);
   }, [user, loading, navigateToPetHub]);
 
@@ -104,7 +104,7 @@ export default function CreatePetPostScreen() {
       });
 
       router.replace({
-        pathname: '/(app)/listing-posted' as any,
+        pathname: './listing-posted',
         params: {
           petId: createdPetDoc.id,
           postType,

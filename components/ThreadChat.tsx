@@ -277,7 +277,7 @@ const ThreadChat = () => {
       router.back();
       return;
     }
-    router.replace('/(tabs)/messagesbutton');
+    router.replace('../(tabs)/messagesbutton');
   };
 
   const handleViewListing = () => {
@@ -285,18 +285,18 @@ const ThreadChat = () => {
     if (!listingId) return;
 
     if (listingType === 'pet') {
-      router.push({ pathname: '/(app)/pet-details', params: { id: listingId } });
+      router.push({ pathname: './pet-details', params: { id: listingId } });
       return;
     }
 
-    router.push({ pathname: '/listing', params: { id: listingId } });
+    router.push({ pathname: './listing', params: { id: listingId } });
   };
 
   const handleOpenReportMessage = () => {
     if (!threadId) return;
     closeReportMenu();
     router.push({
-      pathname: '/(app)/report-message' as any,
+      pathname: './report-message',
       params: {
         threadId,
         listingTitle,
@@ -308,7 +308,7 @@ const ThreadChat = () => {
     if (!otherUserSummary.id) return;
     closeReportMenu();
     router.push({
-      pathname: '/(app)/report-user' as any,
+      pathname: './report-user',
       params: {
         threadId,
         userId: otherUserSummary.id,
@@ -466,7 +466,7 @@ const ThreadChat = () => {
 
   const openUserProfile = (userId: string | null) => {
     if (!userId) return;
-    router.push({ pathname: '/(app)/public-profile', params: { userId } });
+    router.push({ pathname: './public-profile', params: { userId } });
   };
 
   const renderAvatar = (summary: UserSummary, variant: 'sender' | 'receiver') => {

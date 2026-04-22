@@ -411,7 +411,7 @@ function BusinessLeadsScreen() {
 			});
 		} catch {}
 
-		router.push({ pathname: '/threadchat', params: { threadId } });
+		router.push({ pathname: './threadchat', params: { threadId } });
 	};
 
 	const confirmResetResponseMetrics = () => {
@@ -445,7 +445,7 @@ function BusinessLeadsScreen() {
 	};
 
 	if (!loading && !user) {
-		return <Redirect href="/login" />;
+		return <Redirect href="../login" />;
 	}
 
 	if (loading || waitingForProfile) {
@@ -666,7 +666,7 @@ export default function ThreadChatRoute() {
 	}
 
 	if (!user) {
-		return <Redirect href="/login" />;
+		return <Redirect href="../login" />;
 	}
 
 	if (threadId) {

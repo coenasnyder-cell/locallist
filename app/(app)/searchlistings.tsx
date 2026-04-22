@@ -46,7 +46,7 @@ export default function SearchListings() {
 	}, [search]);
 
 	const handlePress = (id: string) => {
-		router.push({ pathname: '/listing', params: { id } });
+		router.push({ pathname: './listing', params: { id } });
 	};
 
 	return (

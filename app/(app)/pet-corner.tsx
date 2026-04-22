@@ -147,7 +147,7 @@ export default function PetHubScreen() {
 
   const handlePetPress = (pet: Pet) => {
     router.push({
-      pathname: '/(app)/pet-details' as any,
+      pathname: './pet-details',
       params: {
         petId: pet.id,
         postType: pet.postType,
@@ -156,23 +156,23 @@ export default function PetHubScreen() {
   };
 
   const handleCreateLostPet = () => {
-    router.push('/(app)/create-pet-post?type=lost' as any);
+    router.push('./create-pet-post?type=lost');
   };
 
   const handleCreateFoundPet = () => {
-    router.push('/(app)/create-pet-post?type=found' as any);
+    router.push('./create-pet-post?type=found');
   };
 
   const handleCreateAdoption = () => {
-    router.push('/(app)/create-adoption-listing');
+    router.push('./create-adoption-listing');
   };
 
   const handleCreatePetService = () => {
-    router.push('/(app)/create-service-listing' as any);
+    router.push('./create-service-listing');
   };
 
   const handleServicePress = (serviceId: string) => {
-    router.push({ pathname: '/(app)/service-details' as any, params: { id: serviceId } });
+    router.push({ pathname: './service-details', params: { id: serviceId } });
   };
 
   const handleCreateByType = (postType: 'lost' | 'found' | 'adoption') => {
@@ -254,7 +254,7 @@ export default function PetHubScreen() {
 
         <TouchableOpacity
           style={styles.viewAllButton}
-          onPress={() => router.push('/(app)/serviceslist' as any)}
+          onPress={() => router.push('./serviceslist')}
           activeOpacity={0.85}
         >
           <Text style={styles.viewAllText}>View All Pet Services</Text>
@@ -318,7 +318,7 @@ export default function PetHubScreen() {
           style={styles.viewAllButton}
           onPress={() =>
             router.push({
-              pathname: '/(app)/browse-pets' as any,
+              pathname: './browse-pets',
               params: { category: postType },
             })
           }

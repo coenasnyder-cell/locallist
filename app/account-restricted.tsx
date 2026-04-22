@@ -13,7 +13,7 @@ export default function AccountRestrictedPage() {
     setSigningOut(true);
     try {
       await Promise.allSettled([signOut(getAuth(app)), signOutNativeGoogle()]);
-      router.replace('/');
+      router.replace('./index');
     } finally {
       setSigningOut(false);
     }

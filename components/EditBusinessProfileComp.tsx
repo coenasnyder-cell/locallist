@@ -297,7 +297,7 @@ export default function EditBusinessProfileComp({ onClose }: { onClose: () => vo
 
         <TouchableOpacity
           style={styles.upgradeButton}
-          onPress={() => router.push('/(app)/upgrade-business')}
+          onPress={() => router.push('../(app)/upgrade-business')}
         >
           <Text style={styles.upgradeButtonText}>Upgrade To A Business Account</Text>
         </TouchableOpacity>

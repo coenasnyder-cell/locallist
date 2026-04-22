@@ -42,7 +42,7 @@ export default function AllListings() {
   }, []);
 
   const handlePress = (id: string) => {
-    router.push({ pathname: '/listing', params: { id } });
+    router.push({ pathname: './listing', params: { id } });
   };
 
   return (

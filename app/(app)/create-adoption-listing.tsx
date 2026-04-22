@@ -21,7 +21,7 @@ export default function CreateAdoptionListingScreen() {
       return;
     }
 
-    router.replace('/(app)/pet-corner' as any);
+    router.replace('./pet-corner');
   }, [router]);
 
   const [petName, setPetName] = React.useState('');
@@ -49,7 +49,7 @@ export default function CreateAdoptionListingScreen() {
     loginPromptShownRef.current = true;
     Alert.alert('Login Required', 'You need to be logged in to create an adoption listing.', [
       { text: 'Back', style: 'cancel', onPress: navigateToPetHub },
-      { text: 'Log In', onPress: () => router.push('/signInOrSignUp') },
+      { text: 'Log In', onPress: () => router.push('../signInOrSignUp') },
     ]);
   }, [user, loading, navigateToPetHub]);
 
@@ -101,7 +101,7 @@ export default function CreateAdoptionListingScreen() {
       });
 
       router.replace({
-        pathname: '/(app)/listing-posted' as any,
+        pathname: './listing-posted',
         params: {
           petId: createdPetDoc.id,
           postType: 'adoption',

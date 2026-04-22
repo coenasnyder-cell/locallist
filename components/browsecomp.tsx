@@ -121,7 +121,7 @@ export default function BrowseComp() {
 				<View style={styles.listHubHighlightTextWrap}>
 					<TouchableOpacity
 						style={styles.listHubHighlightButton}
-						onPress={() => router.push('/(app)/create-listing' as any)}
+						onPress={() => router.push('../(app)/create-listing')}
 					>
 						<Text style={styles.listHubHighlightButtonText}>List Your Items</Text>
 					</TouchableOpacity>
@@ -209,7 +209,7 @@ export default function BrowseComp() {
 										isFeatured={Boolean(listing.isFeatured)}
 										imageSource={Array.isArray(listing.images) && listing.images[0] ? { uri: listing.images[0] } : undefined}
 										onPress={() => router.push({
-											pathname: '/listing',
+											pathname: '../(app)/listing',
 											params: { id: listing.id }
 										})}
 									/>

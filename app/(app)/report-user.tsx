@@ -39,7 +39,7 @@ export default function ReportUserScreen() {
       router.back();
       return;
     }
-    router.replace('/(tabs)/messagesbutton');
+    router.replace('../(tabs)/messagesbutton');
   };
 
   const canSubmit = useMemo(() => Boolean(selectedReason && reportedUserId), [reportedUserId, selectedReason]);

@@ -275,7 +275,7 @@ export default function YardSaleListingsScreen() {
     const dateLabel = formatDateRange(sale.yardsaleDate, sale.yardsaleEndDate || sale.yardsaleExpires);
 
     const handlePress = () => {
-      router.push({ pathname: '/(app)/yard-sale-detail', params: { id: sale.id } } as any);
+      router.push({ pathname: './yard-sale-detail', params: { id: sale.id } });
     };
 
     return (
@@ -325,7 +325,7 @@ export default function YardSaleListingsScreen() {
                 router.back();
                 return;
               }
-              router.replace('/(tabs)/communitybutton');
+              router.replace('../(tabs)/communitybutton');
             }}
           />
         </View>
@@ -335,11 +335,11 @@ export default function YardSaleListingsScreen() {
         </View>
 
         <View style={styles.promoRow}>
-          <TouchableOpacity style={styles.promoImageLink} onPress={() => router.push('/create-yard-sale' as any)} activeOpacity={0.86}>
+          <TouchableOpacity style={styles.promoImageLink} onPress={() => router.push('./create-yard-sale')} activeOpacity={0.86}>
             <Image source={require('../../assets/images/yardsale.png')} style={styles.promoImage} contentFit="cover" />
           </TouchableOpacity>
           <View style={styles.promoTextWrap}>
-            <TouchableOpacity style={styles.promoButton} onPress={() => router.push('/create-yard-sale' as any)} activeOpacity={0.86}>
+            <TouchableOpacity style={styles.promoButton} onPress={() => router.push('./create-yard-sale')} activeOpacity={0.86}>
               <Text style={styles.promoButtonText}>Post Your Yard Sale</Text>
             </TouchableOpacity>
           </View>

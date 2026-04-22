@@ -107,10 +107,10 @@ const SignupComp: React.FC = () => {
           'Pending Approval',
           `Your account with zip code ${zipCode} is pending admin approval. You'll be notified once approved.\n\nA verification email has been sent to ${email}. Please verify your email before logging in.`
         );
-        router.push('/'); // Redirect to home
+        router.push('./index'); // Redirect to home
       } else {
         Alert.alert('Success', `Account created! A verification email has been sent to ${email}. Please verify your email before logging in.`);
-        router.push('/');
+        router.push('./index');
       }
     } catch (error) {
       let message = 'Unknown error';
@@ -140,7 +140,7 @@ const SignupComp: React.FC = () => {
           <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={submitting}>
             <Text style={styles.buttonText}>{submitting ? 'Creating...' : 'Create Account'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/login')}>
+          <TouchableOpacity style={styles.loginButton} onPress={() => router.push('./login')}>
             <Text style={styles.loginButtonText}>Already have an account? Log In</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, { backgroundColor: '#4caf50', marginTop: 8 }]} onPress={checkVerification} disabled={checkingVerification}>

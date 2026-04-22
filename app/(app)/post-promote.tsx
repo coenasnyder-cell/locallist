@@ -15,25 +15,25 @@ const ACTIONS: PromoteAction[] = [
   {
     title: '🏪 Add A Business',
     description: 'Edit or update your existing business profile.',
-    route: '/businesslocal',
+    route: './businesslocal',
     cta: 'Open Business Profile',
   },
   {
     title: '💼 Job Post',
     description: 'Post hiring opportunities to reach local candidates.',
-    route: '/(app)/create-job-listing',
+    route: './create-job-listing',
     cta: 'Create Job Post',
   },
   {
     title: '🔥 Deals',
     description: 'Promote discounts and special offers to local shoppers.',
-    route: '/create-deal-listing',
+    route: './create-deal-listing',
     cta: 'Create Deal',
   },
   {
     title: '🧰 Add A Service',
     description: 'List your professional services for local customers to find.',
-    route: '/(app)/create-listing',
+    route: './create-listing',
     params: { category: 'Services' },
     cta: 'Create Service',
   },
@@ -104,7 +104,7 @@ export default function PostPromoteScreen() {
       <View style={styles.infoPanel}>
         <Text style={styles.infoPanelTitle}>Want To Manage Your Current Listings and Promotions?</Text>
         <Text style={styles.infoPanelSubtitle}>To view all your promotions and listings, go to Listings Manager.</Text>
-        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/(app)/business-listings')}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('./business-listings')}>
           <Text style={styles.primaryBtnText}>Open Listings Manager</Text>
         </TouchableOpacity>
       </View>

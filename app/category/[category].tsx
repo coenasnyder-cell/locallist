@@ -80,7 +80,7 @@ export default function CategoryPage() {
                 title={listing.title}
                 subtitle={listing.subtitle}
                 imageSource={listing.imageSource}
-                onPress={() => router.push({ pathname: '/listing', params: { id: listing.id } })}
+                onPress={() => router.push({ pathname: '../(app)/listing', params: { id: listing.id } })}
               />
             ))
           )}

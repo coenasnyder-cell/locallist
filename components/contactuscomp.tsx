@@ -21,7 +21,7 @@ import { app } from "../firebase";
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const SUPPORT_EMAIL = "support@locallist.com";
+const SUPPORT_EMAIL = "support@locallist.biz";
 
 const sectionTitleStyle = {
   fontSize: 16,
@@ -125,7 +125,7 @@ export default function ContactUsComp() {
 						if (router.canGoBack()) {
 							router.back();
 						} else {
-							router.replace("/(tabs)");
+							router.replace("../(tabs)");
 						}
 					},
 				},

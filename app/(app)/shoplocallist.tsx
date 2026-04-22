@@ -239,13 +239,13 @@ export default function ShopLocalList() {
 
   const handleViewDetails = (profile: ShopLocalProfile) => {
     router.push({
-      pathname: '/(app)/businessprofile',
+      pathname: './businessprofile',
       params: { id: profile.id || profile.userId },
     });
   };
 
   const handleAddBusinessPress = () => {
-    router.push(isBusinessAccount ? '/(app)/businesslocal' as any : '/(app)/premium-upgrade' as any);
+    router.push(isBusinessAccount ? './businesslocal' : './premium-upgrade');
   };
 
   const handleViewDetailsAlert = (profile: ShopLocalProfile) => {
@@ -324,7 +324,7 @@ export default function ShopLocalList() {
               router.back();
               return;
             }
-            router.replace('/(tabs)/communitybutton');
+            router.replace('../(tabs)/communitybutton');
           }}
         />
         <View style={styles.benefitsRow}>
