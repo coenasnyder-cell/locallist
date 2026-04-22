@@ -217,7 +217,7 @@ export default function Header({
 
         <View style={styles.center}>
           <TouchableOpacity
-            onPress={() => handleNavigate('/(tabs)/index')}
+            onPress={() => handleNavigate('/(tabs)')}
             accessibilityLabel="App logo"
             style={[styles.logoButton, compact && styles.logoButtonCompact]}
           >

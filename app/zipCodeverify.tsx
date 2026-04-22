@@ -46,17 +46,17 @@ export default function ZipCodeVerifyScreen() {
 
   const normalizeReturnPath = (value: string | undefined): string => {
     if (!value || !value.startsWith('/')) {
-      return '/(tabs)/index';
+      return '/(tabs)';
     }
 
     const cleaned = value.replace(/^\/\(app\)(?=\/|$)/, '') || '/';
 
     if (cleaned === '/(tabs)' || cleaned === '/(tabs)/' || cleaned === '/(tabs)/index') {
-      return '/(tabs)/index';
+      return '/(tabs)';
     }
 
     if (cleaned === '/_sitemap' || cleaned === '/+not-found') {
-      return '/(tabs)/index';
+      return '/(tabs)';
     }
 
     return cleaned;
@@ -199,7 +199,7 @@ export default function ZipCodeVerifyScreen() {
       if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
         router.replace(normalizeReturnPath(returnTo) as any);
       } else {
-        router.replace('/(tabs)/index' as any);
+        router.replace('/(tabs)' as any);
       }
     } catch (e: unknown) {
       const message =
