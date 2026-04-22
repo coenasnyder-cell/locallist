@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
 
           <Text style={styles.sectionTitle}>Contact</Text>
           <Text style={styles.bodyText}>
-            If you have questions about this Privacy Policy, contact support through the Contact Us page or by emailing us at support@locallist.com.
+            If you have questions about this Privacy Policy, contact support through the Contact Us page or by emailing us at support@locallist.biz.
           </Text>
         </View>
 

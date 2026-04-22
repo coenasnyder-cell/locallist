@@ -31,6 +31,9 @@ export const onUserCreated = onDocumentCreated(
         to: email,
         subject: template.subject,
         html: template.html,
+        uid: event.params.userId,
+        unsubscribeType: "digests",
+        respectPreferences: false,
       });
       logger.info("Welcome email sent", { userId: event.params.userId, email });
     } catch (error) {
@@ -81,10 +84,17 @@ export const onMessageCreated = onDocumentCreated(
       }
 
       const threadData = threadSnap.data()!;
-      const participants: string[] = threadData.participants || [];
+      const participants = Array.isArray(threadData.participantIds)
+        ? threadData.participantIds
+        : Array.isArray(threadData.participants)
+          ? threadData.participants
+          : [];
 
       // Recipient = the other participant(s) in the thread
-      const recipientIds = participants.filter((id) => id !== senderId);
+      const recipientIds = participants
+        .filter((id): id is string => typeof id === "string" && id.trim().length > 0)
+        .map((id) => id.trim())
+        .filter((id) => id !== senderId);
 
       if (recipientIds.length === 0) {
         logger.info("No recipients for message notification", {
@@ -114,8 +124,8 @@ export const onMessageCreated = onDocumentCreated(
           continue;
         }
 
-        // Respect notification preferences if they exist
-        if (recipientData.emailNotifications === false) {
+        // Respect the current notification preference field and the legacy one.
+        if (recipientData.messageNotification === false || recipientData.emailNotifications === false) {
           logger.info("Recipient opted out of email notifications", {
             recipientId,
           });
@@ -130,6 +140,8 @@ export const onMessageCreated = onDocumentCreated(
             to: recipientEmail,
             subject: template.subject,
             html: template.html,
+            uid: recipientId,
+            unsubscribeType: "messages",
           });
           logger.info("Message notification email sent", {
             recipientId,
@@ -251,6 +263,9 @@ export const onFeaturePurchaseCreated = onDocumentCreated(
         to: email,
         subject: template.subject,
         html: template.html,
+        uid: userId,
+        unsubscribeType: "digests",
+        respectPreferences: false,
       });
 
       logger.info("Featured listing confirmation email sent", {
@@ -312,6 +327,9 @@ export const onPremiumPurchaseCreated = onDocumentCreated(
         to: email,
         subject: template.subject,
         html: template.html,
+        uid: userId,
+        unsubscribeType: "digests",
+        respectPreferences: false,
       });
 
       logger.info("Premium subscription confirmation email sent", {

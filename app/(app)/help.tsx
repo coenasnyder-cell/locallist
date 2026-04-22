@@ -102,7 +102,7 @@ export default function Help() {
       items: [
         {
           q: "How do I contact support?",
-          a: "Use the Contact page in the app or email support at support@locallist.com.",
+          a: "Use the Contact page in the app or email support at support@locallist.biz.",
         },
         {
           q: "What information should I include?",

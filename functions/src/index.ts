@@ -19,6 +19,67 @@ import Stripe from "stripe";
 // Email triggers (Resend)
 export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onPublicMessageCreated, onUserCreated } from "./emailTriggers.js";
 
+export const unsubscribe = onRequest(async (req, res) => {
+  const uid = String(req.query.uid || "").trim();
+  const type = String(req.query.type || "").trim().toLowerCase();
+
+  if (!uid || (type !== "messages" && type !== "digests")) {
+    res.status(400).send("Invalid unsubscribe link");
+    return;
+  }
+
+  try {
+    const db = getFirestore();
+    const userRef = db.collection("users").doc(uid);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    if (type === "messages") {
+      await userRef.set({
+        messageNotification: false,
+        notifications: {
+          messages: false,
+        },
+      }, { merge: true });
+    } else {
+      await userRef.set({
+        digestNotification: false,
+        notifications: {
+          digests: false,
+        },
+      }, { merge: true });
+    }
+
+    res
+      .status(200)
+      .set("Content-Type", "text/html; charset=utf-8")
+      .send(`
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unsubscribed | Local List</title>
+  </head>
+  <body style="margin:0;padding:32px;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;">
+      <h1 style="margin:0 0 12px;font-size:24px;">Email preference updated</h1>
+      <p style="margin:0;color:#475569;line-height:1.6;">
+        You will no longer receive ${type === "messages" ? "message notification" : "digest"} emails from Local List.
+      </p>
+    </div>
+  </body>
+</html>`.trim());
+  } catch (error) {
+    logger.error("Failed to unsubscribe email preference", { uid, type, error });
+    res.status(500).send("Could not update your email preference right now");
+  }
+});
+
 // Email test function - send test emails for each template (TEMPORARILY UNSECURED FOR TESTING)
 export const sendTestEmail = onCall(
   { secrets: ["RESEND_API_KEY"] },
