@@ -40,17 +40,17 @@ export const screenOptions = {
 
 function normalizeReturnPath(returnTo: string | undefined): string {
   if (!returnTo || !returnTo.startsWith('/')) {
-    return '/(tabs)';
+    return '/(tabs)/index';
   }
 
   const cleaned = returnTo.replace(/^\/\(app\)(?=\/|$)/, '') || '/';
 
-  if (cleaned === '/(tabs)' || cleaned === '/(tabs)/') {
-    return '/(tabs)';
+  if (cleaned === '/(tabs)' || cleaned === '/(tabs)/' || cleaned === '/(tabs)/index') {
+    return '/(tabs)/index';
   }
 
   if (cleaned === '/_sitemap' || cleaned === '/+not-found' || cleaned.includes('+not-found')) {
-    return '/(tabs)';
+    return '/(tabs)/index';
   }
 
   return cleaned;
@@ -87,7 +87,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('./(tabs)/index');
+    router.replace('/(tabs)/index' as any);
   }
 
   function requiresZipSetup(profileData: Record<string, unknown> | null): boolean {
@@ -169,7 +169,7 @@ export default function SignInOrSignUp() {
       return;
     }
 
-    router.replace('./(tabs)/index');
+    router.replace('/(tabs)/index' as any);
   };
 
   const handleGoogleLogin = async () => {

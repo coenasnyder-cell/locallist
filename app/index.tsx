@@ -26,7 +26,7 @@ export default function AppEntry() {
   }
 
   if (loggedIn) {
-    return <Redirect href="./(tabs)/index" />;
+    return <Redirect href={"/(tabs)/index" as any} />;
   }
 
   return <PublicLanding />;

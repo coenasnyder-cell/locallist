@@ -41,6 +41,7 @@ const DEFAULT_DISPLAY_SETTINGS: CommunityDisplaySettings = {
   showQuoteOfDay: true,
   quoteOfDayText: '',
 };
+const PUBLIC_PREVIEW_LIMIT = 6;
 
 export default function PublicLanding() {
   const router = useRouter();
@@ -236,7 +237,7 @@ export default function PublicLanding() {
         ) : recentListings.length === 0 ? (
           <Text style={styles.emptyText}>No recent listings found.</Text>
         ) : (
-          recentListings.slice(0, 8).map((item) => {
+          recentListings.slice(0, PUBLIC_PREVIEW_LIMIT).map((item) => {
             const isNew = item.createdAt && Date.now() - item.createdAt < 2 * 60 * 60 * 1000;
             return (
               <View key={item.id} style={styles.cardWrapper}>
@@ -270,7 +271,7 @@ export default function PublicLanding() {
         ) : recentPetListings.length === 0 ? (
           <Text style={styles.emptyText}>No recent pet listings found.</Text>
         ) : (
-          recentPetListings.slice(0, 8).map((item) => {
+          recentPetListings.slice(0, PUBLIC_PREVIEW_LIMIT).map((item) => {
             const isNew = item.createdAt && Date.now() - item.createdAt < 2 * 60 * 60 * 1000;
             return (
               <View key={item.id} style={styles.cardWrapper}>
