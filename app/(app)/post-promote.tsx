@@ -13,25 +13,13 @@ type PromoteAction = {
 
 const ACTIONS: PromoteAction[] = [
   {
-    title: '🏪 Add A Business',
+    title: 'Add A Business',
     description: 'Edit or update your existing business profile.',
     route: './businesslocal',
     cta: 'Open Business Profile',
   },
   {
-    title: '💼 Job Post',
-    description: 'Post hiring opportunities to reach local candidates.',
-    route: './create-job-listing',
-    cta: 'Create Job Post',
-  },
-  {
-    title: '🔥 Deals',
-    description: 'Promote discounts and special offers to local shoppers.',
-    route: './create-deal-listing',
-    cta: 'Create Deal',
-  },
-  {
-    title: '🧰 Add A Service',
+    title: 'Add A Service',
     description: 'List your professional services for local customers to find.',
     route: './create-listing',
     params: { category: 'Services' },
@@ -69,9 +57,7 @@ export default function PostPromoteScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.hero}>
         <Text style={styles.title}>Post & Promote</Text>
-        <Text style={styles.subtitle}>
-          Build and launch local promotions in minutes, then monitor impressions, clicks, and leads.
-        </Text>
+        <Text style={styles.subtitle}>Manage the mobile posting tools for your business profile and services.</Text>
         <View style={styles.heroActions}>
           <TouchableOpacity style={styles.heroBackBtn} onPress={() => router.back()}>
             <Text style={styles.heroBackBtnText}>Back to Business Hub</Text>
@@ -108,7 +94,6 @@ export default function PostPromoteScreen() {
           <Text style={styles.primaryBtnText}>Open Listings Manager</Text>
         </TouchableOpacity>
       </View>
-
     </ScrollView>
   );
 }

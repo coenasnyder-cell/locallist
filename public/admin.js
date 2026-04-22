@@ -16,10 +16,14 @@
     reports: {
       messages: [],
       listings: [],
+      pendingBusinessReviews: [],
+      reviewRemovalRequests: [],
     },
     reportFilters: {
       messages: 'pending',
       listings: 'pending',
+      pendingBusinessReviews: 'pending',
+      reviewRemovalRequests: 'pending',
     },
     selectedReport: null,
     selectedReportType: null,
@@ -57,15 +61,18 @@
     const modServiceQueueEl = document.getElementById('modServiceQueue');
     const modReportedListingsEl = document.getElementById('modReportedListings');
     const modReportedMessagesEl = document.getElementById('modReportedMessages');
+    const modPendingReviewsManagementEl = document.getElementById('modPendingReviewsManagement');
 
     if (!pendingListingsEl || !serviceQueueEl || !reportedListingsEl || !reportedMessagesEl) return;
 
     try {
-      const [pendingListingsSnap, pendingServicesSnap, pendingReportedListingsSnap, pendingReportedMessagesSnap, businessLocalSnap] = await Promise.all([
+      const [pendingListingsSnap, pendingServicesSnap, pendingReportedListingsSnap, pendingReportedMessagesSnap, pendingBusinessReviewsSnap, pendingReviewRemovalSnap, businessLocalSnap] = await Promise.all([
         db.collection('listings').where('status', '==', 'pending').get(),
         db.collection('services').where('approvalStatus', '==', 'pending').get(),
         db.collection('reportedListings').where('status', '==', 'pending').get(),
         db.collection('reportedMessages').where('status', '==', 'pending').get(),
+        db.collection('businessReviews').where('status', '==', 'pending').get(),
+        db.collection('reviewRemovalRequests').where('status', '==', 'pending').get(),
         db.collection('businessLocal').get(),
       ]);
 
@@ -85,6 +92,7 @@
       if (modServiceQueueEl) modServiceQueueEl.textContent = String(pendingServicesSnap.size || 0);
       if (modReportedListingsEl) modReportedListingsEl.textContent = String(pendingReportedListingsSnap.size || 0);
       if (modReportedMessagesEl) modReportedMessagesEl.textContent = String(pendingReportedMessagesSnap.size || 0);
+      if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = String((pendingBusinessReviewsSnap.size || 0) + (pendingReviewRemovalSnap.size || 0));
       setCountPill('modPendingBusinessProfiles', pendingBizProfilesCount);
     } catch (error) {
       console.error('Top priority counts load error:', error);
@@ -96,6 +104,7 @@
       if (modServiceQueueEl) modServiceQueueEl.textContent = '-';
       if (modReportedListingsEl) modReportedListingsEl.textContent = '-';
       if (modReportedMessagesEl) modReportedMessagesEl.textContent = '-';
+      if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = '-';
     }
   }
 
@@ -454,7 +463,10 @@
         loadPendingApprovals();
         break;
       case 'reports':
-        // No dynamic load needed — UI is static, exports are on-demand
+        loadReviewRemovalRequests();
+        break;
+      case 'reviews-management':
+        loadReviewsManagement();
         break;
       case 'pending-listings':
         loadPendingListings();
@@ -2604,6 +2616,285 @@
     }
   }
 
+  async function loadReviewsManagement() {
+    await Promise.all([
+      loadPendingBusinessReviews(),
+      loadReviewRemovalRequests(),
+    ]);
+  }
+
+  async function loadPendingBusinessReviews() {
+    const list = document.getElementById('pendingBusinessReviewsList');
+    if (!list) return;
+
+    list.innerHTML = '<div class="empty-state">Loading business reviews...</div>';
+
+    try {
+      const snap = await db.collection('businessReviews').get();
+      state.reports.pendingBusinessReviews = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      renderPendingBusinessReviews();
+    } catch (error) {
+      console.error('Pending business reviews load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load business reviews.</div>';
+    }
+  }
+
+  function renderPendingBusinessReviews() {
+    const list = document.getElementById('pendingBusinessReviewsList');
+    if (!list) return;
+
+    const filter = state.reportFilters.pendingBusinessReviews || 'pending';
+    const rows = state.reports.pendingBusinessReviews
+      .filter((review) => {
+        const status = String(review.status || 'pending').toLowerCase();
+        if (filter === 'pending') {
+          return status === 'pending';
+        }
+        return status !== 'pending';
+      })
+      .sort((left, right) => {
+        const leftTime = left?.updatedAt?.toDate ? left.updatedAt.toDate().getTime() : 0;
+        const rightTime = right?.updatedAt?.toDate ? right.updatedAt.toDate().getTime() : 0;
+        return rightTime - leftTime;
+      });
+
+    if (!rows.length) {
+      list.innerHTML = '<div class="empty-state">No business reviews found.</div>';
+      return;
+    }
+
+    list.innerHTML = rows.map((review) => {
+      const status = String(review.status || 'pending').toLowerCase();
+      const notes = String(review.adminNotes || '').trim();
+      return `
+        <div class="list-item">
+          <div class="list-row">
+            <div>
+              <div class="list-title">${escapeHtml(review.userName || review.userEmail || 'Local User')}</div>
+              <div class="list-meta">Business ID: ${escapeHtml(review.businessId || 'N/A')} | Rating: ${escapeHtml(String(review.rating || 'N/A'))}</div>
+              <div class="list-meta">Status: ${escapeHtml(status)} | Submitted: ${formatDate(review.createdAt || review.updatedAt)}</div>
+              <div class="list-meta">Review: ${escapeHtml(review.reviewText || 'No review text provided')}</div>
+              ${notes ? `<div class="list-meta">Admin Notes: ${escapeHtml(notes)}</div>` : ''}
+            </div>
+            <div class="list-actions">
+              ${status === 'pending' ? `
+                <button class="btn small" data-action="approve-business-review" data-review-id="${review.id}">Approve</button>
+                <button class="btn secondary small" data-action="reject-business-review" data-review-id="${review.id}">Reject</button>
+              ` : `
+                <div class="list-meta">Reviewed: ${formatDate(review.reviewedAt || review.updatedAt)}</div>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('[data-action="approve-business-review"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const reviewId = btn.getAttribute('data-review-id');
+        if (!reviewId) return;
+        const notes = window.prompt('Optional admin note for this approval:', '') || '';
+        await updateBusinessReviewStatus(reviewId, 'approved', notes);
+      });
+    });
+
+    list.querySelectorAll('[data-action="reject-business-review"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const reviewId = btn.getAttribute('data-review-id');
+        if (!reviewId) return;
+        const notes = window.prompt('Why are you rejecting this review?', '') || '';
+        await updateBusinessReviewStatus(reviewId, 'rejected', notes);
+      });
+    });
+  }
+
+  async function updateBusinessReviewStatus(reviewId, status, adminNotes) {
+    const review = state.reports.pendingBusinessReviews.find((item) => item.id === reviewId);
+    if (!review) return;
+
+    try {
+      await db.collection('businessReviews').doc(reviewId).set({
+        status,
+        adminNotes: adminNotes || '',
+        reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
+        reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      if (review.businessId) {
+        await refreshBusinessReviewSummary(String(review.businessId));
+      }
+
+      await loadPendingBusinessReviews();
+    } catch (error) {
+      console.error('Failed to update business review:', error);
+      alert('Failed to update business review.');
+    }
+  }
+
+  async function refreshBusinessReviewSummary(businessId) {
+    if (!businessId) return;
+
+    const approvedSnap = await db.collection('businessReviews')
+      .where('businessId', '==', businessId)
+      .where('status', '==', 'approved')
+      .get();
+
+    let total = 0;
+    const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    approvedSnap.forEach((docSnap) => {
+      const data = docSnap.data() || {};
+      const rating = Math.max(1, Math.min(5, Number(data.rating) || 0));
+      if (!rating) return;
+      total += rating;
+      breakdown[rating] += 1;
+    });
+
+    const ratingCount = approvedSnap.size;
+    const ratingAverage = ratingCount > 0 ? Number((total / ratingCount).toFixed(2)) : 0;
+
+    const payload = {
+      ratingAverage,
+      ratingCount,
+      ratingBreakdown: breakdown,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    await Promise.allSettled([
+      db.collection('businessLocal').doc(businessId).set(payload, { merge: true }),
+      db.collection('users').doc(businessId).set(payload, { merge: true }),
+    ]);
+  }
+
+  async function loadReviewRemovalRequests() {
+    const list = document.getElementById('reviewRemovalRequestsList');
+    if (!list) return;
+
+    list.innerHTML = '<div class="empty-state">Loading review removal requests...</div>';
+
+    try {
+      const snap = await db.collection('reviewRemovalRequests').get();
+      state.reports.reviewRemovalRequests = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      renderReviewRemovalRequests();
+    } catch (error) {
+      console.error('Review removal requests load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load review removal requests.</div>';
+    }
+  }
+
+  function renderReviewRemovalRequests() {
+    const list = document.getElementById('reviewRemovalRequestsList');
+    if (!list) return;
+
+    const filter = state.reportFilters.reviewRemovalRequests || 'pending';
+    const rows = state.reports.reviewRemovalRequests
+      .filter((request) => {
+        const status = String(request.status || 'pending').toLowerCase();
+        if (filter === 'pending') {
+          return status === 'pending';
+        }
+        return status !== 'pending';
+      })
+      .sort((left, right) => {
+        const leftTime = left?.updatedAt?.toDate ? left.updatedAt.toDate().getTime() : 0;
+        const rightTime = right?.updatedAt?.toDate ? right.updatedAt.toDate().getTime() : 0;
+        return rightTime - leftTime;
+      });
+
+    if (!rows.length) {
+      list.innerHTML = '<div class="empty-state">No review removal requests found.</div>';
+      return;
+    }
+
+    list.innerHTML = rows.map((request) => {
+      const status = String(request.status || 'pending').toLowerCase();
+      const reviewPreview = String(request.reviewText || '').trim();
+      const notes = String(request.adminNotes || '').trim();
+
+      return `
+        <div class="list-item">
+          <div class="list-row">
+            <div>
+              <div class="list-title">${escapeHtml(request.businessName || 'Business Account')}</div>
+              <div class="list-meta">Status: ${escapeHtml(status)} | Requested: ${formatDate(request.createdAt || request.updatedAt)}</div>
+              <div class="list-meta">Reviewer: ${escapeHtml(request.reviewAuthorName || 'Local User')} | Rating: ${escapeHtml(String(request.reviewRating || 'N/A'))}</div>
+              <div class="list-meta">Reason: ${escapeHtml(request.reason || 'No reason provided')}</div>
+              ${reviewPreview ? `<div class="list-meta">Review: ${escapeHtml(reviewPreview)}</div>` : ''}
+              ${notes ? `<div class="list-meta">Admin Notes: ${escapeHtml(notes)}</div>` : ''}
+            </div>
+            <div class="list-actions">
+              ${status === 'pending' ? `
+                <button class="btn small" data-action="approve-review-removal" data-request-id="${request.id}">Approve</button>
+                <button class="btn secondary small" data-action="reject-review-removal" data-request-id="${request.id}">Reject</button>
+              ` : `
+                <div class="list-meta">Reviewed: ${formatDate(request.reviewedAt || request.updatedAt)}</div>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('[data-action="approve-review-removal"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const requestId = btn.getAttribute('data-request-id');
+        if (!requestId) return;
+        const notes = window.prompt('Optional admin note for this approval:', '') || '';
+        await updateReviewRemovalRequestStatus(requestId, 'approved', notes);
+      });
+    });
+
+    list.querySelectorAll('[data-action="reject-review-removal"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const requestId = btn.getAttribute('data-request-id');
+        if (!requestId) return;
+        const notes = window.prompt('Why are you rejecting this removal request?', '') || '';
+        await updateReviewRemovalRequestStatus(requestId, 'rejected', notes);
+      });
+    });
+  }
+
+  async function updateReviewRemovalRequestStatus(requestId, status, adminNotes) {
+    const request = state.reports.reviewRemovalRequests.find((item) => item.id === requestId);
+    if (!request) return;
+
+    try {
+      await db.collection('reviewRemovalRequests').doc(requestId).set({
+        status,
+        adminNotes: adminNotes || '',
+        reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
+        reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      if (status === 'approved' && request.reviewId) {
+        await db.collection('businessReviews').doc(String(request.reviewId)).set({
+          status: 'removed',
+          removalRequestId: requestId,
+          removalApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          removalApprovedBy: auth.currentUser ? auth.currentUser.uid : null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+
+        if (request.businessId) {
+          await refreshBusinessReviewSummary(String(request.businessId));
+        }
+      }
+
+      await loadReviewRemovalRequests();
+    } catch (error) {
+      console.error('Failed to update review removal request:', error);
+      alert('Failed to update review removal request.');
+    }
+  }
+
   async function loadAutoApprovals() {
     const list = document.getElementById('autoApprovalsList');
     const filterSelect = document.getElementById('autoApprovalsFilter');
@@ -2835,6 +3126,52 @@
         renderReports(target);
       });
     });
+  }
+
+  function initReviewRemovalFilters() {
+    const filterTabs = document.querySelectorAll('[data-review-removal-filter]');
+    filterTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const filter = tab.getAttribute('data-review-removal-filter');
+        if (!filter) return;
+
+        document.querySelectorAll('[data-review-removal-filter]').forEach((btn) => {
+          btn.classList.toggle('active', btn === tab);
+        });
+
+        state.reportFilters.reviewRemovalRequests = filter;
+        renderReviewRemovalRequests();
+      });
+    });
+
+    const refreshBtn = document.getElementById('refreshReviewRemovalRequests');
+    if (refreshBtn && !refreshBtn.hasListener) {
+      refreshBtn.hasListener = true;
+      refreshBtn.addEventListener('click', loadReviewRemovalRequests);
+    }
+  }
+
+  function initPendingReviewFilters() {
+    const filterTabs = document.querySelectorAll('[data-pending-reviews-filter]');
+    filterTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const filter = tab.getAttribute('data-pending-reviews-filter');
+        if (!filter) return;
+
+        document.querySelectorAll('[data-pending-reviews-filter]').forEach((btn) => {
+          btn.classList.toggle('active', btn === tab);
+        });
+
+        state.reportFilters.pendingBusinessReviews = filter;
+        renderPendingBusinessReviews();
+      });
+    });
+
+    const refreshBtn = document.getElementById('refreshReviewsManagement');
+    if (refreshBtn && !refreshBtn.hasListener) {
+      refreshBtn.hasListener = true;
+      refreshBtn.addEventListener('click', loadReviewsManagement);
+    }
   }
 
   // ─── CSV EXPORT HELPERS ────────────────────────────────────────────────────
@@ -3213,6 +3550,7 @@
     'pending-services': 'Pending Services',
     'reported-listings': 'Reported Listings',
     'reported-messages': 'Reported Messages',
+    'reviews-management': 'Reviews Management',
     'business-users': 'Business Users',
     'service-providers': 'Service Providers',
     'feature-purchases-listings': 'Featured Listing Purchases',
@@ -3248,6 +3586,8 @@
   function initAdminPanel() {
     initTabs();
     initReportFilters();
+    initPendingReviewFilters();
+    initReviewRemovalFilters();
     initRefreshButtons();
     initModal();
     loadTopPriorityCounts();

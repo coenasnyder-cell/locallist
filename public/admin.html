@@ -1270,6 +1270,11 @@
                 <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Review</button></div></td>
               </tr>
               <tr>
+                <td><span class="admin-item-title">Reviews Management</span></td>
+                <td><span class="count-pill" id="modPendingReviewsManagement">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reviews-management')">Open Queue</button></div></td>
+              </tr>
+              <tr>
                 <td><span class="admin-item-title">Listing Safety Review Queue</span></td>
                 <td><span class="count-pill">-</span></td>
                 <td><div class="row-actions"><button class="btn secondary small" onclick="window.comingSoon('Listing Safety Review Queue')">Coming Soon</button></div></td>
@@ -1873,6 +1878,42 @@
               </label>
               <button class="btn small" onclick="window.exportServiceListingPosters()">Export CSV</button>
             </div>
+          </div>
+
+        </section>
+
+        <section id="tab-reviews-management" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">Reviews Management</div>
+            <button class="btn secondary" id="refreshReviewsManagement">Refresh</button>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">⭐ Pending Reviews</div>
+                <div class="report-card-desc">Approve or reject business reviews before they appear publicly.</div>
+              </div>
+            </div>
+            <div class="filter-tabs" style="margin-bottom: 12px;">
+              <button class="filter-tab active" data-pending-reviews-filter="pending">Pending</button>
+              <button class="filter-tab" data-pending-reviews-filter="reviewed">Reviewed</button>
+            </div>
+            <div class="list" id="pendingBusinessReviewsList"></div>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
+                <div class="report-card-title">🧹 Review Removal Requests</div>
+                <div class="report-card-desc">Business-submitted requests to remove published reviews. Approving a request removes the review from public business pages.</div>
+              </div>
+            </div>
+            <div class="filter-tabs" style="margin-bottom: 12px;">
+              <button class="filter-tab active" data-review-removal-filter="pending">Pending</button>
+              <button class="filter-tab" data-review-removal-filter="reviewed">Reviewed</button>
+            </div>
+            <div class="list" id="reviewRemovalRequestsList"></div>
           </div>
         </section>
 

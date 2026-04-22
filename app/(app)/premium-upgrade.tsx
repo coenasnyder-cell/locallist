@@ -22,13 +22,15 @@ import { handleUpgrade, STRIPE_UPGRADE_CANCELED } from '@/lib/payments/handleUpg
 type CompareRow = { feature: string; free: 'yes' | 'no'; premium: 'yes' | 'no' };
 
 const COMPARE_ROWS: CompareRow[] = [
-  { feature: 'Business profile and posting', free: 'yes', premium: 'yes' },
+  { feature: 'Business profile access', free: 'yes', premium: 'yes' },
+  { feature: 'Service posting', free: 'yes', premium: 'yes' },
+  { feature: 'Advanced posting access (jobs and deals)', free: 'no', premium: 'yes' },
   { feature: 'Messaging', free: 'yes', premium: 'yes' },
-  { feature: 'Basic analytics', free: 'yes', premium: 'yes' },
-  { feature: 'Customer interest insights', free: 'no', premium: 'yes' },
-  { feature: 'Review management', free: 'no', premium: 'yes' },
+  { feature: 'Basic business analytics', free: 'yes', premium: 'yes' },
+  { feature: 'Advanced web analytics', free: 'no', premium: 'yes' },
+  { feature: 'Trend and insight reporting', free: 'no', premium: 'yes' },
   { feature: 'Featured placement', free: 'no', premium: 'yes' },
-  { feature: 'Deals boost', free: 'no', premium: 'yes' },
+  { feature: 'Premium visibility boost', free: 'no', premium: 'yes' },
 ];
 
 const styles = StyleSheet.create({
@@ -493,8 +495,8 @@ return (
               <Text style={styles.heroEyebrow}></Text>
               <Text style={styles.heroTitle}>Grow your business locally</Text>
               <Text style={styles.heroSubtitle}>
-                Reach locals with featured placement, deeper analytics, and reputation tools, or start free and upgrade
-                anytime.
+                Start with the core business tools and a basic analytics snapshot, then upgrade for advanced web
+                analytics, advanced posting access for jobs and deals, stronger visibility, and premium placement.
               </Text>
             </View>
 
@@ -531,9 +533,11 @@ return (
               <Text style={styles.pricingText}>
                 Upgrading to a premium membership is just{' '}
                 <Text style={styles.pricingStrong}>$10/month</Text>. We accept Apple Pay, Google Pay, and card
-                payments, and you can cancel anytime. To sign up, just click the &quot;Premium Account&quot; option
-                below. You can also opt out by signing up for a free account by choosing the &quot;Free Account&quot;
-                option below.
+                payments, and you can cancel anytime. Free business accounts keep the basic hub tools and analytics,
+                while Premium unlocks advanced analytics on the web, advanced posting access for jobs and deals, and
+                added visibility features. To sign up, just click the &quot;Premium Account&quot; option below. You
+                can also opt out by signing up for a free account by choosing the &quot;Free Account&quot; option
+                below.
               </Text>
             </View>
 

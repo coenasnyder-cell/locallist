@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -11,7 +10,6 @@ import {
 } from 'react-native';
 import ScreenTitleRow from '../../components/ScreenTitleRow';
 import { app } from '../../firebase';
-import { useAccountStatus } from '../../hooks/useAccountStatus';
 
 type JobListing = {
   id: string;
@@ -43,8 +41,6 @@ export default function JobListingsScreen() {
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { profile } = useAccountStatus();
-  const isBusinessUser = profile?.accountType === 'business';
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -89,17 +85,6 @@ export default function JobListingsScreen() {
       <View style={styles.hero}>
         <Text style={styles.heroSubtitle}>Browse local opportunities and find your next role.</Text>
       </View>
-
-      {isBusinessUser && (
-        <View style={styles.benefitsCard}>
-          <Image source={require('../../assets/images/jobhub.png')} style={styles.benefitsImage} contentFit="cover" />
-          <View style={styles.benefitsContent}>
-            <TouchableOpacity style={styles.postButton} activeOpacity={0.86} onPress={() => router.push('./create-job-listing')}>
-              <Text style={styles.postButtonText}>+ Post A Job</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
 
       {loading ? (
         <View style={styles.emptyState}>
@@ -176,57 +161,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
     textAlign: 'center',
-  },
-  benefitsCard: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    padding: 8,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  benefitsImage: {
-    width: '100%',
-    height: 220,
-    borderRadius: 10,
-    marginBottom: 12,
-    backgroundColor: '#64748b',
-  },
-  benefitsContent: {
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-  },
-  benefitsTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#334155',
-    lineHeight: 23,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  benefitsText: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: '#475569',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  postButton: {
-    borderRadius: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    backgroundColor: '#475569',
-  },
-  postButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#ffffff',
   },
   emptyState: {
     borderWidth: 1,

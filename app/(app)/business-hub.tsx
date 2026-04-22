@@ -263,7 +263,7 @@ export default function BusinessHubScreen() {
     },
     {
       title: 'Post & Promote',
-      description: 'Create jobs, deals, and service posts to grow your local visibility.',
+      description: 'Open mobile posting tools for your business profile and services.',
       cta: 'Open Post & Promote',
       onPress: () => router.push({ pathname: './post-promote' }),
     },
