@@ -1163,15 +1163,7 @@
                   </div>
                 </td>
               </tr>
-              <tr id="rowServiceQueue">
-                <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
-                <td><span class="count-pill" id="priorityServiceApprovalQueue">0</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button>
-                  </div>
-                </td>
-              </tr>
+              
               <tr id="rowReportedListings">
                 <td><span class="admin-item-title">🚩 Reported Listings</span></td>
                 <td><span class="count-pill" id="priorityReportedListings">0</span></td>
@@ -1198,8 +1190,192 @@
             </tbody>
           </table>
         </div>
-
         <div class="table-section">
+          <p class="hub-section-label">🚨 Safety Moderation</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Pending Listings</span></td>
+                <td><span class="count-pill" id="modPendingListings">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button></div></td>
+              </tr>
+              <tr id="rowServiceQueue">
+                <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
+                <td><span class="count-pill" id="priorityServiceApprovalQueue">0</span></td>
+                <td>
+                <div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button></div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Pending Business Profiles</span></td>
+                <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openBusinessProfilesView('pending')">Open</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Reported Listings</span></td>
+                <td><span class="count-pill" id="modReportedListings">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-listings')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Reported Messages</span></td>
+                <td><span class="count-pill" id="modReportedMessages">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Reviews Management</span></td>
+                <td><span class="count-pill" id="modPendingReviewsManagement">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reviews-management')">Open Queue</button></div></td>
+              </tr>
+              </tbody>
+          </table>
+        </div>
+        <div class="table-section">
+          <p class="hub-section-label">&#127978; Marketplace</p>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Featured Listings</span></td>
+                <td><span class="count-pill" id="marketplaceFeaturedCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openPremiumPurchasesView('listing')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Marketplace Reports</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="table-section">
+          <p class="hub-section-label">&#129514; Business Management</p>
+          <div class="hub-analytics-panel" style="margin: 0 0 12px;">
+            <div class="hub-analytics-header">
+              <span class="hub-analytics-title">Business Snapshot</span>
+              <div class="row-actions">
+                <button class="btn secondary small" id="refreshBusinessSnapshot">Refresh</button>
+              </div>
+            </div>
+            <div class="hub-analytics-stats">
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="businessNewThisMonth">&#8212;</div>
+                <div class="hub-stat-label">New This Month</div>
+                <div class="hub-stat-sub">business signups</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="businessActiveTotal">&#8212;</div>
+                <div class="hub-stat-label">Active Businesses</div>
+                <div class="hub-stat-sub">approved profiles</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="businessPremiumTotal">&#8212;</div>
+                <div class="hub-stat-label">Premium Businesses</div>
+                <div class="hub-stat-sub">paid plans</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="businessVerifiedTotal">&#8212;</div>
+                <div class="hub-stat-label">Verified Businesses</div>
+                <div class="hub-stat-sub">verified badge</div>
+              </div>
+            </div>
+            <div class="hub-analytics-charts">
+              <div class="hub-chart-wrap">
+                <div class="hub-chart-title">Business Signups / Month</div>
+                <canvas id="chartBusinessGrowth" height="120"></canvas>
+              </div>
+            </div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Business Users</span></td>
+                <td><span class="count-pill" id="businessUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openBusinessProfilesView('active')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Business Claims</span></td>
+                <td><span class="count-pill" id="businessClaimsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-claims')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Business Reports</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+         <div class="table-section">
+          <p class="hub-section-label">&#127978; Services</p>
+          <div class="hub-analytics-panel" style="margin: 0 0 12px;">
+            <div class="hub-analytics-header">
+              <span class="hub-analytics-title">Services Snapshot</span>
+              <div class="row-actions">
+                <button class="btn secondary small" id="refreshServiceSnapshot">Refresh</button>
+              </div>
+            </div>
+            <div class="hub-analytics-stats" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="serviceListingsTotal">&#8212;</div>
+                <div class="hub-stat-label">Total Service Listings</div>
+                <div class="hub-stat-sub">active, non-deleted</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="servicePremiumTotal">&#8212;</div>
+                <div class="hub-stat-label">Premium Service Listings</div>
+                <div class="hub-stat-sub">featured services</div>
+              </div>
+            </div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">Service Providers</span></td>
+                <td><span class="count-pill" id="serviceProvidersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('service-providers')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Service Featured Purchases</span></td>
+                <td><span class="count-pill" data-count-key="marketplaceFeaturedCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openPremiumPurchasesView('service')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Service Reports</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+          </tbody>
+          </table>
+        </div>
+         <div class="table-section">
           <p class="hub-section-label">⚙️ Site Settings</p>
           <table class="admin-table">
             <thead>
@@ -1219,7 +1395,7 @@
           </table>
         </div>
          <div class="table-section">
-          <p class="hub-section-label">Messaging Admin Tasks</p>
+          <p class="hub-section-label">Messaging Management</p>
           <table class="admin-table">
             <thead>
               <tr>
@@ -1229,67 +1405,81 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><span class="admin-item-title">Public Messages</span></td>
-                <td><span class="count-pill">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('public-messages')">Open</button></div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-section">
-          <p class="hub-section-label">🚨 Moderation</p>
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Count</th>
-                <th style="text-align:right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="admin-item-title">Pending Listings</span></td>
-                <td><span class="count-pill" id="modPendingListings">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Service Approval Queue</span></td>
-                <td><span class="count-pill" id="modServiceQueue">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Pending Business Profiles</span></td>
-                <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-business-profiles')">Open Queue</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Reported Listings</span></td>
-                <td><span class="count-pill" id="modReportedListings">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-listings')">Review</button></div></td>
-              </tr>
               <tr>
                 <td><span class="admin-item-title">Reported Messages</span></td>
-                <td><span class="count-pill" id="modReportedMessages">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Review</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Reviews Management</span></td>
-                <td><span class="count-pill" id="modPendingReviewsManagement">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reviews-management')">Open Queue</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Listing Safety Review Queue</span></td>
                 <td><span class="count-pill">-</span></td>
-                <td><div class="row-actions"><button class="btn secondary small" onclick="window.comingSoon('Listing Safety Review Queue')">Coming Soon</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Open</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">Email Digest Report</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
               </tr>
             </tbody>
           </table>
         </div>
-
         <div class="table-section">
-          <p class="hub-section-label">&#127978; Marketplace Control</p>
+          <p class="hub-section-label">👥 User Management</p>
+          <div class="hub-analytics-panel" style="margin: 0 0 12px;">
+            <div class="hub-analytics-header">
+              <span class="hub-analytics-title">User Snapshot</span>
+              <div class="row-actions">
+                <button class="btn secondary small" id="refreshUserSnapshot">Refresh</button>
+              </div>
+            </div>
+            <div class="hub-analytics-stats">
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="userStatsTotal">&#8212;</div>
+                <div class="hub-stat-label">Total Users</div>
+                <div class="hub-stat-sub">all accounts</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="userStatsPending">&#8212;</div>
+                <div class="hub-stat-label">Pending Users</div>
+                <div class="hub-stat-sub">approval queue</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="userStatsBusiness">&#8212;</div>
+                <div class="hub-stat-label">Business Users</div>
+                <div class="hub-stat-sub">business accounts</div>
+              </div>
+              <div class="hub-stat-card">
+                <div class="hub-stat-value" id="userStatsRegular">&#8212;</div>
+                <div class="hub-stat-label">Regular Users</div>
+                <div class="hub-stat-sub">non-business accounts</div>
+              </div>
+            </div>
+            <div class="hub-analytics-charts">
+              <div class="hub-chart-wrap">
+                <div class="hub-chart-title">New Users / Month</div>
+                <canvas id="chartUserGrowth" height="120"></canvas>
+              </div>
+            </div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Count</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="admin-item-title">User Management</span></td>
+                <td><span class="count-pill" id="totalUsersCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('user-management')">Open</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">User Reports</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+          <div class="table-section">
+          <p class="hub-section-label">Payments Management</p>
           <table class="admin-table">
             <thead>
               <tr>
@@ -1301,99 +1491,23 @@
             <tbody>
               <tr>
                 <td><span class="admin-item-title">Featured Listing Purchases</span></td>
-                <td><span class="count-pill" id="marketplaceFeaturedCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-listings')">Manage</button></div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-section">
-          <p class="hub-section-label">&#129514; Business Management</p>
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Count</th>
-                <th style="text-align:right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="admin-item-title">Business Users</span></td>
-                <td><span class="count-pill" id="businessUsersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-users')">Manage</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Service Providers</span></td>
-                <td><span class="count-pill" id="serviceProvidersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('service-providers')">Manage</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Business Claims</span></td>
-                <td><span class="count-pill" id="businessClaimsCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-claims')">Review</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Verified Businesses</span></td>
-                <td><span class="count-pill" id="verifiedBusinessesCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('verified-businesses')">Manage</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Pending Business Profiles</span></td>
-                <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-business-profiles')">Open Queue</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Featured Listing Purchases</span></td>
-                <td><span class="count-pill" id="featuredListingPurchasesCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-listings')">Manage</button></div></td>
+                <td><span class="count-pill" data-count-key="marketplaceFeaturedCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openPremiumPurchasesView('listing')">Manage</button></div></td>
               </tr>
               <tr>
                 <td><span class="admin-item-title">Featured Service Provider Purchases</span></td>
                 <td><span class="count-pill" id="featuredServicePurchasesCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('feature-purchases-services')">Manage</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openPremiumPurchasesView('service')">Manage</button></div></td>
+              </tr>
+                <tr>
+                <td><span class="admin-item-title">Purchases Report</span></td>
+                <td><span class="count-pill" id="purchasesReportCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
               </tr>
             </tbody>
           </table>
         </div>
-
-        <div class="table-section">
-          <p class="hub-section-label">👥 User Management</p>
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Count</th>
-                <th style="text-align:right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="admin-item-title">Pending Users</span></td>
-                <td><span class="count-pill" id="pendingUsersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-approvals')">Review</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Blocked / Flagged Users</span></td>
-                <td><span class="count-pill" id="blockedUsersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('blocked')">Manage</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">All Users Stats</span></td>
-                <td><span class="count-pill" id="totalUsersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('analytics')">View Stats</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Business Users Stats</span></td>
-                <td><span class="count-pill" id="businessUserStatsCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('business-users')">View Stats</button></div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-section">
+               <div class="table-section">
           <p class="hub-section-label">📊 Reports &amp; Exports</p>
           <table class="admin-table">
             <thead>
@@ -1411,12 +1525,7 @@
               </tr>
               <tr>
                 <td><span class="admin-item-title">Upgrade Campaign Targets</span></td>
-                <td><span class="count-pill" id="upgradeTargetsCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
-              </tr>
-              <tr>
-                <td><span class="admin-item-title">Purchases Report</span></td>
-                <td><span class="count-pill" id="purchasesReportCount">-</span></td>
+                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
                 <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
               </tr>
             </tbody>
@@ -1557,30 +1666,28 @@
           <div class="list" id="serviceProvidersList"></div>
         </section>
 
-        <section id="tab-feature-purchases-listings" class="tab-section">
+        <section id="tab-premium-purchases" class="tab-section">
           <div class="section-header">
-            <div class="section-title">Featured Listing Purchases</div>
-            <button class="btn secondary" id="refreshFeaturePurchasesListings">Refresh</button>
+            <div class="section-title">Premium Purchases</div>
+            <button class="btn secondary" id="refreshPremiumPurchases">Refresh</button>
           </div>
-          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn secondary" id="filterPendingListings" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">Pending</button>
-            <button class="btn secondary" id="filterCompletedListings">Completed</button>
-            <button class="btn secondary" id="filterAllListings">All</button>
+          <div style="display:grid;gap:12px;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <select id="premiumPurchasesTypeFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit;">
+                <option value="all">All Premium Purchases</option>
+                <option value="listing">Featured Listings</option>
+                <option value="service">Featured Services</option>
+              </select>
+              <select id="premiumPurchasesStatusFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit;">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div id="premiumPurchasesSummary" class="list-meta"></div>
           </div>
-          <div class="list" id="featurePurchasesListingsList"></div>
-        </section>
-
-        <section id="tab-feature-purchases-services" class="tab-section">
-          <div class="section-header">
-            <div class="section-title">Featured Service Purchases</div>
-            <button class="btn secondary" id="refreshFeaturePurchasesServices">Refresh</button>
-          </div>
-          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn secondary" id="filterPendingServices" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">Pending</button>
-            <button class="btn secondary" id="filterCompletedServices">Completed</button>
-            <button class="btn secondary" id="filterAllServices">All</button>
-          </div>
-          <div class="list" id="featurePurchasesServicesList"></div>
+          <div class="list" id="premiumPurchasesList"></div>
         </section>
 
         <section id="tab-business-claims" class="tab-section">
@@ -1737,6 +1844,26 @@
               <div id="communitySettingsStatus" class="status-banner" style="margin-top: 12px; display: none;"></div>
             </div>
           </form>
+        </section>
+
+        <section id="tab-user-management" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">User Management</div>
+            <button class="btn secondary" id="refreshUserManagement">Refresh</button>
+          </div>
+          <div style="display: grid; gap: 12px; margin-bottom: 16px;">
+            <select id="userManagementFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit;">
+              <option value="all">All Users</option>
+              <option value="pending">Pending Users</option>
+              <option value="blocked">Blocked / Flagged Users</option>
+              <option value="business">Business Users</option>
+              <option value="regular">Regular Users</option>
+            </select>
+            <input type="text" id="userManagementSearchInput" placeholder="Search by name, email, ZIP, or account type..."
+              style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
+            <div id="userManagementSummary" class="list-meta"></div>
+          </div>
+          <div class="list" id="userManagementList"></div>
         </section>
 
         <section id="tab-blocked" class="tab-section">
@@ -1940,9 +2067,20 @@
 
         <section id="tab-pending-business-profiles" class="tab-section">
           <div class="section-header">
-            <div class="section-title">Pending Business Profiles</div>
+            <div class="section-title">Business Profiles</div>
             <button class="btn secondary" id="refreshPendingBusinessProfiles">Refresh</button>
           </div>
+          <div class="filter-tabs" style="margin-bottom: 12px;">
+            <button class="filter-tab active" data-business-profile-filter="pending" data-label="Pending">Pending</button>
+            <button class="filter-tab" data-business-profile-filter="active" data-label="Active">Active</button>
+            <button class="filter-tab" data-business-profile-filter="premium" data-label="Premium">Premium</button>
+            <button class="filter-tab" data-business-profile-filter="verified" data-label="Verified">Verified</button>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <input type="text" id="businessProfilesSearchInput" placeholder="Search by business name, owner, email, city, ZIP, or user ID..."
+              style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
+          </div>
+          <div id="businessProfilesSummary" class="list-meta" style="margin-bottom: 12px;"></div>
           <div class="list" id="pendingBusinessProfilesList"></div>
         </section>
 

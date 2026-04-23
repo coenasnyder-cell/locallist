@@ -237,13 +237,18 @@
   }
 
   function setCountPill(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = String(value);
+    const elements = document.querySelectorAll(`[id="${id}"], [data-count-key="${id}"]`);
+    if (!elements.length) return;
+    elements.forEach((el) => {
+      el.textContent = String(value);
+    });
   }
 
   // Chart.js instances — kept so we can destroy before re-render
   let hubUsersChart = null;
   let hubListingsChart = null;
+  let businessGrowthChart = null;
+  let userGrowthChart = null;
 
   async function loadHubAnalytics() {
     // Build last-7-days date labels and buckets
@@ -354,6 +359,231 @@
     }
   }
 
+  async function loadBusinessSnapshot() {
+    try {
+      const [businessProfilesSnap, businessUsersSnap] = await Promise.all([
+        db.collection('businessLocal').get(),
+        db.collection('users').where('accountType', '==', 'business').get(),
+      ]);
+
+      const usersById = new Map();
+      const usersByEmail = new Map();
+      businessUsersSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        usersById.set(docSnap.id, data);
+        const email = String(data.email || '').trim().toLowerCase();
+        if (email) usersByEmail.set(email, data);
+      });
+
+      let activeCount = 0;
+      let premiumCount = 0;
+      let verifiedCount = 0;
+
+      businessProfilesSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        if (!isApprovedBusinessProfileRecord(data)) return;
+
+        activeCount += 1;
+        if (isVerifiedBusinessRecord(data)) verifiedCount += 1;
+
+        const linkedUser = usersById.get(docSnap.id)
+          || usersById.get(String(data.userId || '').trim())
+          || usersByEmail.get(String(data.userEmail || '').trim().toLowerCase())
+          || null;
+        const subscriptionPlan = linkedUser?.subscriptionPlan || data.subscriptionPlan || data.businessTier || 'free';
+        if (isPremiumBusinessProfileRecord({ subscriptionPlan, businessTier: data.businessTier })) {
+          premiumCount += 1;
+        }
+      });
+
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthStartTs = firebase.firestore.Timestamp.fromDate(monthStart);
+      const newThisMonthSnap = await db.collection('users')
+        .where('accountType', '==', 'business')
+        .where('createdAt', '>=', monthStartTs)
+        .get();
+
+      const monthLabels = [];
+      const monthKeys = [];
+      for (let i = 5; i >= 0; i -= 1) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+        monthLabels.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+      }
+
+      const monthlyCounts = new Array(monthKeys.length).fill(0);
+      businessUsersSnap.forEach((docSnap) => {
+        const createdAt = docSnap.data()?.createdAt;
+        if (!createdAt?.toDate) return;
+        const d = createdAt.toDate();
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const idx = monthKeys.indexOf(key);
+        if (idx >= 0) monthlyCounts[idx] += 1;
+      });
+
+      document.getElementById('businessNewThisMonth').textContent = String(newThisMonthSnap.size);
+      document.getElementById('businessActiveTotal').textContent = String(activeCount);
+      document.getElementById('businessPremiumTotal').textContent = String(premiumCount);
+      document.getElementById('businessVerifiedTotal').textContent = String(verifiedCount);
+
+      const chartEl = document.getElementById('chartBusinessGrowth');
+      if (chartEl && Chart) {
+        if (businessGrowthChart) businessGrowthChart.destroy();
+        businessGrowthChart = new Chart(chartEl, {
+          type: 'line',
+          data: {
+            labels: monthLabels,
+            datasets: [{
+              label: 'Business Signups',
+              data: monthlyCounts,
+              borderColor: '#0f766e',
+              backgroundColor: 'rgba(15, 118, 110, 0.12)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4,
+              pointBackgroundColor: '#0f766e',
+              borderWidth: 2,
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { size: 11 } },
+                grid: { color: '#f1f5f9' },
+              },
+              x: {
+                ticks: { font: { size: 10 } },
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Business snapshot load error:', error);
+    }
+  }
+
+  async function loadServiceSnapshot() {
+    try {
+      const servicesSnap = await db.collection('services').get();
+      let totalServices = 0;
+      let premiumServices = 0;
+
+      servicesSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        if (data.isActive === false) return;
+        if (String(data.approvalStatus || '').toLowerCase() === 'deleted') return;
+
+        totalServices += 1;
+
+        const featured = (
+          data.isFeatured === true ||
+          data.isFeatured === 1 ||
+          String(data.isFeatured || '').toLowerCase() === 'true'
+        );
+
+        if (featured) premiumServices += 1;
+      });
+
+      const totalEl = document.getElementById('serviceListingsTotal');
+      const premiumEl = document.getElementById('servicePremiumTotal');
+      if (totalEl) totalEl.textContent = String(totalServices);
+      if (premiumEl) premiumEl.textContent = String(premiumServices);
+    } catch (error) {
+      console.error('Service snapshot load error:', error);
+    }
+  }
+
+  async function loadUserSnapshot() {
+    try {
+      const [usersSnap, approvalsSnap] = await Promise.all([
+        db.collection('users').get(),
+        db.collection('pendingApprovals').get(),
+      ]);
+
+      const totalUsers = usersSnap.size;
+      const pendingUsers = approvalsSnap.docs.filter((docSnap) => String(docSnap.data()?.status || 'pending').toLowerCase() === 'pending').length;
+      const businessUsers = usersSnap.docs.filter((docSnap) => normalizeUserAccountType(docSnap.data()) === 'business').length;
+      const regularUsers = totalUsers - businessUsers;
+
+      const totalEl = document.getElementById('userStatsTotal');
+      const pendingEl = document.getElementById('userStatsPending');
+      const businessEl = document.getElementById('userStatsBusiness');
+      const regularEl = document.getElementById('userStatsRegular');
+      if (totalEl) totalEl.textContent = String(totalUsers);
+      if (pendingEl) pendingEl.textContent = String(pendingUsers);
+      if (businessEl) businessEl.textContent = String(businessUsers);
+      if (regularEl) regularEl.textContent = String(regularUsers);
+
+      const now = new Date();
+      const monthLabels = [];
+      const monthKeys = [];
+      for (let i = 5; i >= 0; i -= 1) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+        monthLabels.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+      }
+
+      const monthlyCounts = new Array(monthKeys.length).fill(0);
+      usersSnap.forEach((docSnap) => {
+        const createdAt = docSnap.data()?.createdAt;
+        if (!createdAt?.toDate) return;
+        const d = createdAt.toDate();
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const idx = monthKeys.indexOf(key);
+        if (idx >= 0) monthlyCounts[idx] += 1;
+      });
+
+      const chartEl = document.getElementById('chartUserGrowth');
+      if (chartEl && Chart) {
+        if (userGrowthChart) userGrowthChart.destroy();
+        userGrowthChart = new Chart(chartEl, {
+          type: 'line',
+          data: {
+            labels: monthLabels,
+            datasets: [{
+              label: 'New Users',
+              data: monthlyCounts,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.12)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4,
+              pointBackgroundColor: '#2563eb',
+              borderWidth: 2,
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { size: 11 } },
+                grid: { color: '#f1f5f9' },
+              },
+              x: {
+                ticks: { font: { size: 10 } },
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error('User snapshot load error:', error);
+    }
+  }
+
   async function loadDashboardCounts() {
     try {
       const [businessLocalSnap, allPurchasesSnap, businessUsersSnap, businessClaimsSnap,
@@ -377,6 +607,33 @@
       }).length;
       setCountPill('modPendingBusinessProfiles', pendingBizCount);
 
+      const businessUsersById = new Map();
+      const businessUsersByEmail = new Map();
+      businessUsersSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        businessUsersById.set(docSnap.id, data);
+        const email = String(data.email || '').trim().toLowerCase();
+        if (email) businessUsersByEmail.set(email, data);
+      });
+
+      const activeBusinessCount = businessLocalSnap.docs.filter((docSnap) => {
+        const data = docSnap.data() || {};
+        return isApprovedBusinessProfileRecord(data);
+      }).length;
+
+      const premiumBusinessCount = businessLocalSnap.docs.filter((docSnap) => {
+        const data = docSnap.data() || {};
+        if (!isApprovedBusinessProfileRecord(data)) return false;
+
+        const linkedUser = businessUsersById.get(docSnap.id)
+          || businessUsersById.get(String(data.userId || '').trim())
+          || businessUsersByEmail.get(String(data.userEmail || '').trim().toLowerCase())
+          || null;
+        const subscriptionPlan = linkedUser?.subscriptionPlan || data.subscriptionPlan || data.businessTier || 'free';
+
+        return isPremiumBusinessProfileRecord({ subscriptionPlan, businessTier: data.businessTier });
+      }).length;
+
       // Featured purchases split by type
       let featuredListingCount = 0;
       let featuredServiceCount = 0;
@@ -390,10 +647,13 @@
       setCountPill('featuredListingPurchasesCount', featuredListingCount);
       setCountPill('featuredServicePurchasesCount', featuredServiceCount);
 
-      // Business users
-      const bizCount = businessUsersSnap.size;
-      setCountPill('businessUsersCount', bizCount);
-      setCountPill('businessUserStatsCount', bizCount);
+      // Business profile category counts
+      setCountPill('businessUsersCount', activeBusinessCount);
+      setCountPill('businessUserStatsCount', activeBusinessCount);
+      setCountPill('premiumBusinessProfilesCount', premiumBusinessCount);
+      setCountPill('userBusinessCount', businessUsersSnap.size);
+      const regularUsersCount = allUsersSnap.docs.filter((d) => normalizeUserAccountType(d.data()) !== 'business').length;
+      setCountPill('regularUsersCount', regularUsersCount);
 
       // Pending business claims (default status = 'pending' when field absent)
       const pendingClaimsCount = businessClaimsSnap.docs.filter((d) => {
@@ -413,6 +673,10 @@
         ...disabledUsersSnap.docs.map((d) => d.id),
         ...bannedUsersSnap.docs.map((d) => d.id),
       ]);
+      allUsersSnap.forEach((docSnap) => {
+        const blockedUsers = Array.isArray(docSnap.data()?.blockedUsers) ? docSnap.data().blockedUsers : [];
+        if (blockedUsers.length > 0) blockedIds.add(docSnap.id);
+      });
       setCountPill('blockedUsersCount', blockedIds.size);
 
       // Total users
@@ -473,11 +737,17 @@
       case 'service-providers':
         loadServiceProviders();
         break;
+      case 'user-management':
+        loadUserManagement();
+        break;
       case 'feature-purchases-listings':
-        loadFeaturePurchasesListings();
+        loadPremiumPurchases();
         break;
       case 'feature-purchases-services':
-        loadFeaturePurchasesServices();
+        loadPremiumPurchases();
+        break;
+      case 'premium-purchases':
+        loadPremiumPurchases();
         break;
       case 'business-claims':
         loadBusinessClaims();
@@ -619,6 +889,46 @@
   let allBusinessUsers = [];
   let allServiceProviders = [];
   let allVerifiedBusinesses = [];
+  let allBusinessProfiles = [];
+  const businessProfilesViewState = {
+    filter: 'pending',
+    search: '',
+  };
+  let allUsersForManagement = [];
+  let pendingApprovalsForManagement = [];
+  const userManagementState = {
+    filter: 'all',
+    search: '',
+  };
+
+  function normalizeUserAccountType(data) {
+    return String(data?.accountType || 'user').toLowerCase();
+  }
+
+  function isBlockedOrFlaggedUser(data) {
+    if (!data) return false;
+    const blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : [];
+    return blockedUsers.length > 0 || data.isDisabled === true || data.isBanned === true;
+  }
+
+  function isPendingBusinessProfileRecord(data) {
+    if (!data) return false;
+    if (data.isApproved === true) return false;
+    const status = String(data.approvalStatus || '').toLowerCase();
+    return status !== 'rejected' && status !== 'deleted';
+  }
+
+  function isApprovedBusinessProfileRecord(data) {
+    if (!data) return false;
+    const status = String(data.approvalStatus || '').toLowerCase();
+    return data.isApproved === true || status === 'approved';
+  }
+
+  function isPremiumBusinessProfileRecord(item) {
+    const plan = String(item?.subscriptionPlan || '').toLowerCase();
+    const tier = String(item?.businessTier || '').toLowerCase();
+    return (plan !== '' && plan !== 'free') || (tier !== '' && tier !== 'free');
+  }
 
   async function loadBusinessUsers() {
     const list = document.getElementById('businessUsersList');
@@ -1037,7 +1347,7 @@
               <button class="btn secondary small" data-action="view-verified-docs" data-file-urls="${docs.map((url) => encodeURIComponent(url)).join(',')}">View Files</button>
               <button class="btn small" data-action="reverify-business" data-id="${biz.id}">Re-verify</button>
               <button class="btn danger small" data-action="remove-verified-badge" data-id="${biz.id}">Remove Badge</button>
-              <button class="btn small" onclick="window.navigateToTab('pending-business-profiles')">Review Pending Profiles</button>
+              <button class="btn small" onclick="window.openBusinessProfilesView('pending')">Review Pending Profiles</button>
             </div>
           </div>
         </div>
@@ -1153,6 +1463,7 @@
           try {
             await db.collection('users').doc(userId).update({ blockedUsers: [] });
             loadBlockedUsers();
+            loadUserSnapshot();
           } catch {
             alert('Failed to clear blocked users.');
           }
@@ -1164,9 +1475,268 @@
     }
   }
 
+  async function loadUserManagement() {
+    const list = document.getElementById('userManagementList');
+    const filterEl = document.getElementById('userManagementFilter');
+    const searchInput = document.getElementById('userManagementSearchInput');
+    const summaryEl = document.getElementById('userManagementSummary');
+    if (!list || !filterEl || !searchInput || !summaryEl) return;
+
+    list.innerHTML = '<div class="empty-state">Loading users...</div>';
+
+    try {
+      const [usersSnap, approvalsSnap] = await Promise.all([
+        db.collection('users').get(),
+        db.collection('pendingApprovals').orderBy('requestedAt', 'desc').get(),
+      ]);
+
+      allUsersForManagement = usersSnap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+
+      pendingApprovalsForManagement = approvalsSnap.docs.map((docSnap) => {
+        const data = docSnap.data() || {};
+        return {
+          id: docSnap.id,
+          userId: data.userId || data.uid || data.userUid || data.accountId || '',
+          name: data.name || 'Unknown',
+          email: data.email || 'Unknown',
+          zipCode: data.zipCode || 'Unknown',
+          requestedAt: data.requestedAt,
+          reviewedAt: data.reviewedAt,
+          status: String(data.status || 'pending').toLowerCase(),
+        };
+      });
+
+      filterEl.value = userManagementState.filter;
+      searchInput.value = userManagementState.search;
+
+      filterEl.onchange = (event) => {
+        userManagementState.filter = String(event.target.value || 'all');
+        renderUserManagement();
+      };
+
+      searchInput.oninput = (event) => {
+        userManagementState.search = String(event.target.value || '');
+        renderUserManagement();
+      };
+
+      renderUserManagement();
+    } catch (error) {
+      console.error('User management load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load users.</div>';
+    }
+
+    function renderUserManagement() {
+      const filter = userManagementState.filter || 'all';
+      const query = String(userManagementState.search || '').toLowerCase().trim();
+      let items = [];
+
+      if (filter === 'pending') {
+        items = pendingApprovalsForManagement.filter((item) => item.status === 'pending');
+        if (query) {
+          items = items.filter((item) => {
+            const fields = [item.name, item.email, item.zipCode].map((value) => String(value || '').toLowerCase());
+            return fields.some((value) => value.includes(query));
+          });
+        }
+        summaryEl.textContent = `Showing ${items.length} pending user approval${items.length === 1 ? '' : 's'}.`;
+        list.innerHTML = items.length
+          ? items.map(renderPendingApprovalCard).join('')
+          : '<div class="empty-state">No pending users match your search.</div>';
+      } else {
+        items = allUsersForManagement.filter((user) => {
+          const accountType = normalizeUserAccountType(user);
+          if (filter === 'blocked') return isBlockedOrFlaggedUser(user);
+          if (filter === 'business') return accountType === 'business';
+          if (filter === 'regular') return accountType !== 'business';
+          return true;
+        });
+
+        if (query) {
+          items = items.filter((item) => {
+            const fields = [
+              item.name,
+              item.displayName,
+              item.email,
+              item.zipCode,
+              item.businessName,
+              item.status,
+              item.accountType,
+            ].map((value) => String(value || '').toLowerCase());
+            return fields.some((value) => value.includes(query));
+          });
+        }
+
+        const labelMap = {
+          all: 'all users',
+          blocked: 'blocked or flagged users',
+          business: 'business users',
+          regular: 'regular users',
+        };
+        summaryEl.textContent = `Showing ${items.length} ${labelMap[filter] || 'users'}.`;
+        list.innerHTML = items.length
+          ? items.map((item) => renderUserManagementCard(item, filter)).join('')
+          : `<div class="empty-state">No ${labelMap[filter] || 'users'} match your search.</div>`;
+      }
+
+      list.querySelectorAll('[data-action="approve-user"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.getAttribute('data-user-id');
+          const approvalId = btn.getAttribute('data-approval-id') || userId;
+          if (!userId) return;
+          try {
+            await db.collection('users').doc(userId).update({
+              status: 'approved',
+              zipApproved: true,
+              isDisabled: false,
+              isBanned: false,
+            });
+            await db.collection('pendingApprovals').doc(approvalId).set({
+              status: 'approved',
+              reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
+            }, { merge: true });
+            await loadUserManagement();
+            await loadDashboardCounts();
+            await loadUserSnapshot();
+          } catch (actionError) {
+            console.error('Approve user error:', actionError);
+            alert('Failed to approve user.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="reject-user"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const userId = (btn.getAttribute('data-user-id') || '').trim();
+          const approvalId = btn.getAttribute('data-approval-id') || userId;
+          if (!approvalId) return;
+          if (!confirm('Reject this approval request?')) return;
+
+          try {
+            await db.collection('pendingApprovals').doc(approvalId).set({
+              status: 'rejected',
+              reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
+            }, { merge: true });
+
+            if (userId) {
+              await db.collection('users').doc(userId).set({
+                status: 'rejected',
+                zipApproved: false,
+                isDisabled: true,
+              }, { merge: true });
+            }
+
+            await loadUserManagement();
+            await loadDashboardCounts();
+            await loadUserSnapshot();
+          } catch (actionError) {
+            console.error('Reject user error:', actionError);
+            alert('Failed to reject user.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="clear-user-blocks"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.getAttribute('data-user-id');
+          if (!userId) return;
+          if (!confirm('Clear all blocked users for this account?')) return;
+          try {
+            await db.collection('users').doc(userId).set({ blockedUsers: [] }, { merge: true });
+            await loadUserManagement();
+            await loadDashboardCounts();
+            await loadUserSnapshot();
+          } catch (actionError) {
+            console.error('Clear user blocks error:', actionError);
+            alert('Failed to clear blocked users.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="restore-user-access"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.getAttribute('data-user-id');
+          if (!userId) return;
+          if (!confirm('Restore access for this user?')) return;
+          try {
+            await db.collection('users').doc(userId).set({
+              isDisabled: false,
+              isBanned: false,
+            }, { merge: true });
+            await loadUserManagement();
+            await loadDashboardCounts();
+            await loadUserSnapshot();
+          } catch (actionError) {
+            console.error('Restore user access error:', actionError);
+            alert('Failed to restore user access.');
+          }
+        });
+      });
+    }
+
+    function renderPendingApprovalCard(item) {
+      return `
+        <div class="list-item">
+          <div class="list-row">
+            <div>
+              <div class="list-title">${escapeHtml(item.name)}</div>
+              <div class="list-meta">${escapeHtml(item.email)} | ${escapeHtml(item.zipCode)}</div>
+              <div class="list-meta">Requested: ${formatDate(item.requestedAt)}</div>
+            </div>
+            <div class="list-actions">
+              <button class="btn small" data-action="approve-user" data-user-id="${item.userId}" data-approval-id="${item.id}">Approve</button>
+              <button class="btn secondary small" data-action="reject-user" data-user-id="${item.userId}" data-approval-id="${item.id}">Reject</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUserManagementCard(user, filter) {
+      const accountType = normalizeUserAccountType(user);
+      const blockedUsers = Array.isArray(user.blockedUsers) ? user.blockedUsers : [];
+      const hasBlockedUsers = blockedUsers.length > 0;
+      const disabled = user.isDisabled === true;
+      const banned = user.isBanned === true;
+      const badges = [
+        accountType === 'business' ? '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#e0f2fe;color:#075985;border:1px solid #7dd3fc;font-size:11px;font-weight:700;margin-left:8px;">BUSINESS</span>' : '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;font-size:11px;font-weight:700;margin-left:8px;">REGULAR</span>',
+        disabled ? '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-size:11px;font-weight:700;margin-left:8px;">DISABLED</span>' : '',
+        banned ? '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#fde68a;color:#92400e;border:1px solid #fbbf24;font-size:11px;font-weight:700;margin-left:8px;">BANNED</span>' : '',
+        hasBlockedUsers ? '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;font-size:11px;font-weight:700;margin-left:8px;">BLOCKS</span>' : '',
+      ].filter(Boolean).join('');
+
+      return `
+        <div class="list-item">
+          <div class="list-row">
+            <div>
+              <div class="list-title">${escapeHtml(user.name || user.displayName || 'Unknown User')}${badges}</div>
+              <div class="list-meta">${escapeHtml(user.email || 'No email')} | ZIP: ${escapeHtml(user.zipCode || 'N/A')}</div>
+              <div class="list-meta">Account Type: ${escapeHtml(accountType)} | Status: ${escapeHtml(user.status || 'unknown')}</div>
+              ${user.businessName ? `<div class="list-meta">Business: ${escapeHtml(user.businessName)}</div>` : ''}
+              ${hasBlockedUsers ? `<div class="list-meta">Blocked IDs: ${escapeHtml(blockedUsers.join(', '))}</div>` : ''}
+            </div>
+            <div class="list-actions">
+              ${(disabled || banned) ? `<button class="btn small" data-action="restore-user-access" data-user-id="${user.id}">Restore Access</button>` : ''}
+              ${hasBlockedUsers ? `<button class="btn danger small" data-action="clear-user-blocks" data-user-id="${user.id}">Clear Blocks</button>` : ''}
+              ${(filter === 'business' || accountType === 'business') ? '<button class="btn secondary small" onclick="window.openBusinessProfilesView(\'active\')">Business Profiles</button>' : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   let allFeaturePurchases = [];
   let currentListingPurchaseFilter = 'all';
   let currentServicePurchaseFilter = 'all';
+  const premiumPurchasesState = {
+    scope: 'all',
+    status: 'all',
+  };
   let allBusinessClaims = [];
   let currentBusinessClaimsFilter = 'pending';
 
@@ -1498,11 +2068,68 @@
   }
 
   async function loadFeaturePurchasesListings() {
-    await loadFeaturePurchasesByType('listing', 'featurePurchasesListingsList', currentListingPurchaseFilter);
+    premiumPurchasesState.scope = 'listing';
+    await loadPremiumPurchases();
   }
 
   async function loadFeaturePurchasesServices() {
-    await loadFeaturePurchasesByType('service', 'featurePurchasesServicesList', currentServicePurchaseFilter);
+    premiumPurchasesState.scope = 'service';
+    await loadPremiumPurchases();
+  }
+
+  async function loadPremiumPurchases() {
+    const list = document.getElementById('premiumPurchasesList');
+    const typeFilterEl = document.getElementById('premiumPurchasesTypeFilter');
+    const statusFilterEl = document.getElementById('premiumPurchasesStatusFilter');
+    const summaryEl = document.getElementById('premiumPurchasesSummary');
+    if (!list || !typeFilterEl || !statusFilterEl || !summaryEl) return;
+
+    list.innerHTML = '<div class="empty-state">Loading premium purchases...</div>';
+
+    try {
+      await fetchFeaturePurchases();
+
+      typeFilterEl.value = premiumPurchasesState.scope;
+      statusFilterEl.value = premiumPurchasesState.status;
+
+      typeFilterEl.onchange = (event) => {
+        premiumPurchasesState.scope = String(event.target.value || 'all');
+        renderPremiumPurchases();
+      };
+
+      statusFilterEl.onchange = (event) => {
+        premiumPurchasesState.status = String(event.target.value || 'all');
+        renderPremiumPurchases();
+      };
+
+      renderPremiumPurchases();
+    } catch (error) {
+      console.error('Premium purchases load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load premium purchases.</div>';
+    }
+
+    function renderPremiumPurchases() {
+      const scope = premiumPurchasesState.scope || 'all';
+      const status = premiumPurchasesState.status || 'all';
+
+      let purchases = allFeaturePurchases;
+      if (scope !== 'all') {
+        purchases = purchases.filter((purchase) => purchase.itemType === scope);
+      }
+      if (status !== 'all') {
+        purchases = purchases.filter((purchase) => String(purchase.status || 'pending').toLowerCase() === status);
+      }
+
+      const scopeLabelMap = {
+        all: 'all premium purchases',
+        listing: 'featured listing purchases',
+        service: 'featured service purchases',
+      };
+      const statusLabel = status === 'all' ? 'all statuses' : status;
+      summaryEl.textContent = `Showing ${purchases.length} ${scopeLabelMap[scope] || 'premium purchases'} with ${statusLabel}.`;
+
+      displayFeaturePurchases(purchases, 'all', 'premiumPurchasesList', loadPremiumPurchases);
+    }
   }
 
   function displayFeaturePurchases(purchases, filter, listElementId, reloadFn) {
@@ -1529,6 +2156,9 @@
       const itemTypeLabel = purchase.itemType === 'service' ? 'Featured Service' : 'Featured Listing';
       const targetId = purchase.itemType === 'service' ? purchase.serviceId : purchase.listingId;
       const itemBg = isPending ? 'style="background: #fffbf0; border-left: 4px solid #ffc107;"' : '';
+      const expiresAtLabel = purchase.expiresAt
+        ? formatDate(purchase.expiresAt)
+        : 'N/A';
       
       return `
         <div class="list-item" ${itemBg}>
@@ -1539,8 +2169,8 @@
               <div class="list-meta">For: ${escapeHtml(itemTypeLabel)}</div>
               <div class="list-meta">User: ${escapeHtml(purchase.userName)}</div>
               <div class="list-meta">Amount: $${purchase.amount || 0} ${purchase.currency || 'USD'}</div>
-              <div class="list-meta">Purchased: ${formatDate(purchase.purchasedAt)}</div>
-              <div class="list-meta">Expires: ${purchase.expiresAt ? new Date(purchase.expiresAt).toLocaleDateString() : 'N/A'}</div>
+              <div class="list-meta">Purchase Date: ${formatDate(purchase.purchasedAt)}</div>
+              <div class="list-meta">Expires: ${expiresAtLabel}</div>
               <div class="list-meta">Payment Method: ${escapeHtml(purchase.paymentMethod || 'N/A')}</div>
               ${purchase.notes ? `<div class="list-meta">Notes: ${escapeHtml(purchase.notes)}</div>` : ''}
               <div class="list-meta">
@@ -1613,6 +2243,7 @@
           
           alert(`Feature purchase approved! ${isService ? 'Service' : 'Listing'} is now featured.`);
           if (typeof reloadFn === 'function') reloadFn();
+          if (isService) loadServiceSnapshot();
         } catch (error) {
           console.error('Error approving purchase:', error);
           alert('Failed to approve purchase: ' + error.message);
@@ -2061,6 +2692,7 @@
               reviewedBy: auth.currentUser ? auth.currentUser.uid : null,
             }, { merge: true });
             await loadPendingApprovals();
+            await loadUserSnapshot();
           } catch {
             alert('Failed to approve user.');
           }
@@ -2095,6 +2727,7 @@
             }
 
             await loadPendingApprovals();
+            await loadUserSnapshot();
           } catch (error) {
             console.error('Reject approval error:', error);
             alert('Failed to reject user.');
@@ -2359,6 +2992,7 @@
               approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
+            loadServiceSnapshot();
           } catch { alert('Failed to approve service.'); }
         });
       });
@@ -2373,6 +3007,7 @@
               rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
+            loadServiceSnapshot();
           } catch { alert('Failed to reject service.'); }
         });
       });
@@ -2388,6 +3023,7 @@
               deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
             loadPendingServices();
+            loadServiceSnapshot();
           } catch { alert('Failed to delete service.'); }
         });
       });
@@ -2403,6 +3039,7 @@
               featuredAt: !featuredNow ? firebase.firestore.FieldValue.serverTimestamp() : null,
             });
             loadPendingServices();
+            loadServiceSnapshot();
           } catch { alert('Failed to update feature status.'); }
         });
       });
@@ -2614,6 +3251,329 @@
     } catch (error) {
       console.error('Pending business profiles load error:', error);
       list.innerHTML = '<div class="empty-state">Failed to load business profiles.</div>';
+    }
+  }
+
+  async function loadPendingBusinessProfiles() {
+    const list = document.getElementById('pendingBusinessProfilesList');
+    const searchInput = document.getElementById('businessProfilesSearchInput');
+    const summaryEl = document.getElementById('businessProfilesSummary');
+    if (!list || !searchInput || !summaryEl) return;
+    list.innerHTML = '<div class="empty-state">Loading business profiles...</div>';
+
+    try {
+      const [businessSnap, businessUsersSnap] = await Promise.all([
+        db.collection('businessLocal').get(),
+        db.collection('users').where('accountType', '==', 'business').get(),
+      ]);
+
+      const usersById = new Map();
+      const usersByEmail = new Map();
+
+      businessUsersSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const record = { id: docSnap.id, ...data };
+        usersById.set(docSnap.id, record);
+
+        const email = String(data.email || '').trim().toLowerCase();
+        if (email) usersByEmail.set(email, record);
+      });
+
+      allBusinessProfiles = businessSnap.docs.map((docSnap) => {
+        const data = docSnap.data() || {};
+        const linkedUser = usersById.get(docSnap.id)
+          || usersById.get(String(data.userId || '').trim())
+          || usersByEmail.get(String(data.userEmail || '').trim().toLowerCase())
+          || null;
+        const verificationDocs = getVerificationDocs(data);
+        const subscriptionPlan = linkedUser?.subscriptionPlan || data.subscriptionPlan || data.businessTier || 'free';
+        const subscriptionStatus = linkedUser?.subscriptionStatus || data.subscriptionStatus || 'active';
+        const isPending = isPendingBusinessProfileRecord(data);
+        const isActive = isApprovedBusinessProfileRecord(data);
+        const isVerified = isVerifiedBusinessRecord(data);
+        const sortTime = (
+          (isVerified && data?.verifiedAt?.toDate ? data.verifiedAt.toDate().getTime() : 0) ||
+          (isActive && data?.approvedAt?.toDate ? data.approvedAt.toDate().getTime() : 0) ||
+          (data?.createdAt?.toDate ? data.createdAt.toDate().getTime() : 0)
+        );
+
+        return {
+          id: docSnap.id,
+          ...data,
+          linkedUserId: linkedUser?.id || data.userId || '',
+          linkedUserName: linkedUser?.name || linkedUser?.displayName || data.userName || '',
+          linkedUserEmail: linkedUser?.email || data.userEmail || '',
+          linkedUserZip: linkedUser?.zipCode || data.zipCode || '',
+          subscriptionPlan,
+          subscriptionStatus,
+          verificationDocs,
+          isPending,
+          isActive,
+          isVerified,
+          isPremium: isPremiumBusinessProfileRecord({ subscriptionPlan, businessTier: data.businessTier }),
+          sortTime,
+        };
+      }).filter((item) => {
+        const status = String(item.approvalStatus || '').toLowerCase();
+        return status !== 'rejected' && status !== 'deleted';
+      }).sort((a, b) => (b.sortTime || 0) - (a.sortTime || 0));
+
+      searchInput.value = businessProfilesViewState.search;
+      searchInput.oninput = (event) => {
+        businessProfilesViewState.search = String(event.target.value || '');
+        renderBusinessProfilesView();
+      };
+
+      document.querySelectorAll('[data-business-profile-filter]').forEach((btn) => {
+        btn.onclick = () => {
+          businessProfilesViewState.filter = btn.getAttribute('data-business-profile-filter') || 'pending';
+          renderBusinessProfilesView();
+        };
+      });
+
+      renderBusinessProfilesView();
+    } catch (error) {
+      console.error('Pending business profiles load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load business profiles.</div>';
+    }
+
+    function renderBusinessProfilesView() {
+      const filter = businessProfilesViewState.filter || 'pending';
+      const query = String(businessProfilesViewState.search || '').toLowerCase().trim();
+      const counts = {
+        pending: allBusinessProfiles.filter((item) => item.isPending).length,
+        active: allBusinessProfiles.filter((item) => item.isActive).length,
+        premium: allBusinessProfiles.filter((item) => item.isActive && item.isPremium).length,
+        verified: allBusinessProfiles.filter((item) => item.isVerified).length,
+      };
+
+      document.querySelectorAll('[data-business-profile-filter]').forEach((btn) => {
+        const key = btn.getAttribute('data-business-profile-filter') || '';
+        const label = btn.getAttribute('data-label') || btn.textContent || '';
+        btn.classList.toggle('active', key === filter);
+        btn.textContent = `${label} (${counts[key] || 0})`;
+      });
+
+      const filteredItems = allBusinessProfiles.filter((item) => {
+        const passesFilter = (
+          (filter === 'pending' && item.isPending) ||
+          (filter === 'active' && item.isActive) ||
+          (filter === 'premium' && item.isActive && item.isPremium) ||
+          (filter === 'verified' && item.isVerified)
+        );
+
+        if (!passesFilter) return false;
+        if (!query) return true;
+
+        const searchParts = [
+          item.businessName,
+          item.linkedUserName,
+          item.linkedUserEmail,
+          item.userEmail,
+          item.linkedUserId,
+          item.userId,
+          item.businessCity,
+          item.businessState,
+          item.zipCode,
+          item.linkedUserZip,
+          item.businessCategory,
+        ].map((value) => String(value || '').toLowerCase());
+
+        return searchParts.some((value) => value.includes(query));
+      });
+
+      const filterLabel = filter.charAt(0).toUpperCase() + filter.slice(1);
+      summaryEl.textContent = `Showing ${filteredItems.length} ${filterLabel.toLowerCase()} business profile${filteredItems.length === 1 ? '' : 's'}.`;
+
+      if (filteredItems.length === 0) {
+        list.innerHTML = `<div class="empty-state">No ${filter.toLowerCase()} business profiles match your search.</div>`;
+        return;
+      }
+
+      list.innerHTML = filteredItems.map((item) => renderBusinessProfileCard(item)).join('');
+
+      list.querySelectorAll('[data-action="approve-business-profile"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const profileId = btn.getAttribute('data-id');
+          if (!profileId) return;
+          if (!confirm('Approve this business profile and make it publicly visible?')) return;
+          const shouldVerify = confirm('Mark this business as verified local and show the verified badge? Click Cancel to approve without badge.');
+          try {
+            await db.collection('businessLocal').doc(profileId).update({
+              isApproved: true,
+              approvalStatus: 'approved',
+              isActive: true,
+              isVerified: shouldVerify,
+              approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              approvedBy: auth.currentUser ? auth.currentUser.uid : null,
+              verifiedAt: shouldVerify ? firebase.firestore.FieldValue.serverTimestamp() : null,
+              verifiedBy: shouldVerify ? (auth.currentUser ? auth.currentUser.uid : null) : null,
+            });
+            await loadPendingBusinessProfiles();
+            await loadDashboardCounts();
+            await loadVerifiedBusinessesCount();
+            await loadBusinessSnapshot();
+          } catch (actionError) {
+            console.error('Error approving business profile:', actionError);
+            alert('Failed to approve business profile: ' + (actionError.message || 'Unknown error'));
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="reject-business-profile"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const profileId = btn.getAttribute('data-id');
+          if (!profileId) return;
+          const reason = prompt('Enter rejection reason (optional):');
+          if (reason === null) return;
+          if (!confirm('Reject and remove this business profile submission?')) return;
+          try {
+            await db.collection('businessLocal').doc(profileId).update({
+              isApproved: false,
+              approvalStatus: 'rejected',
+              isActive: false,
+              rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              rejectedBy: auth.currentUser ? auth.currentUser.uid : null,
+              rejectionReason: reason || 'No reason provided',
+            });
+            await loadPendingBusinessProfiles();
+            await loadDashboardCounts();
+            await loadVerifiedBusinessesCount();
+            await loadBusinessSnapshot();
+          } catch (actionError) {
+            console.error('Error rejecting business profile:', actionError);
+            alert('Failed to reject business profile: ' + (actionError.message || 'Unknown error'));
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="revoke-business-approval"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const profileId = btn.getAttribute('data-id');
+          if (!profileId) return;
+          if (!confirm('Revoke approval and move this business back to pending?')) return;
+          try {
+            await db.collection('businessLocal').doc(profileId).update({
+              isApproved: false,
+              approvalStatus: 'pending',
+              isActive: false,
+              isVerified: false,
+              verifiedAt: null,
+              verifiedBy: null,
+            });
+            businessProfilesViewState.filter = 'pending';
+            await loadPendingBusinessProfiles();
+            await loadDashboardCounts();
+            await loadVerifiedBusinessesCount();
+            await loadBusinessSnapshot();
+          } catch (actionError) {
+            console.error('Revoke business approval error:', actionError);
+            alert('Failed to revoke business approval.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="verify-approved-business"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const profileId = btn.getAttribute('data-id');
+          if (!profileId) return;
+          if (!confirm('Mark this business as verified and show the verified badge?')) return;
+          try {
+            await db.collection('businessLocal').doc(profileId).update({
+              isVerified: true,
+              verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              verifiedBy: auth.currentUser ? auth.currentUser.uid : null,
+            });
+            await loadPendingBusinessProfiles();
+            await loadVerifiedBusinessesCount();
+            await loadBusinessSnapshot();
+          } catch (actionError) {
+            console.error('Verify business error:', actionError);
+            alert('Failed to verify business.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="remove-verified-badge"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const profileId = btn.getAttribute('data-id');
+          if (!profileId) return;
+          if (!confirm('Remove the verified badge from this business?')) return;
+          try {
+            await db.collection('businessLocal').doc(profileId).update({
+              isVerified: false,
+              verifiedAt: null,
+              verifiedBy: null,
+              verificationRemovedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              verificationRemovedBy: auth.currentUser ? auth.currentUser.uid : null,
+            });
+            await loadPendingBusinessProfiles();
+            await loadVerifiedBusinessesCount();
+            await loadBusinessSnapshot();
+          } catch (actionError) {
+            console.error('Remove verified badge error:', actionError);
+            alert('Failed to remove verified badge.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="view-business-docs"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const serializedUrls = btn.getAttribute('data-file-urls') || '';
+          openUploadedFiles(serializedUrls);
+        });
+      });
+    }
+
+    function renderBusinessProfileCard(item) {
+      const location = [item.businessCity, item.businessState].filter(Boolean).join(', ') || 'No location provided';
+      const ownerEmail = item.linkedUserEmail || item.userEmail || 'Unknown';
+      const ownerName = item.linkedUserName || 'Unknown';
+      const plan = String(item.subscriptionPlan || item.businessTier || 'free').toUpperCase();
+      const status = String(item.subscriptionStatus || 'active');
+      const verifiedBadge = item.isVerified
+        ? '<span style="display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px;background:#dcfce7;color:#15803d;border:1px solid #86efac;">VERIFIED</span>'
+        : '';
+      const premiumBadge = item.isPremium
+        ? '<span style="display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px;background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;">PREMIUM</span>'
+        : '';
+      const approvalLabel = item.isPending ? 'PENDING' : 'ACTIVE';
+      const approvalColor = item.isPending ? '#d97706' : '#15803d';
+      const cardBackground = item.isPending ? '#fffbf0' : '#f0fdf4';
+      const borderColor = item.isPending ? '#ffc107' : '#22c55e';
+      const debugApproval = Object.prototype.hasOwnProperty.call(item, 'isApproved') ? String(item.isApproved) : 'unset';
+      const debugVerified = Object.prototype.hasOwnProperty.call(item, 'isVerified') ? String(item.isVerified) : 'unset';
+      const debugStatus = item.approvalStatus ? String(item.approvalStatus) : 'unset';
+      const debugOwner = item.userId || item.linkedUserId || 'unset';
+
+      return `
+        <div class="list-item" style="background: ${cardBackground}; border-left: 4px solid ${borderColor};">
+          <div class="list-row">
+            <div style="flex: 1;">
+              <div class="list-meta" style="color: ${approvalColor}; font-weight: 600; margin-bottom: 8px;">${approvalLabel}${item.isPremium ? ' | PREMIUM' : ''}${item.isVerified ? ' | VERIFIED' : ''}</div>
+              <div class="list-title">${escapeHtml(item.businessName || 'Unnamed Business')}${premiumBadge}${verifiedBadge}</div>
+              <div class="list-meta">Owner: ${escapeHtml(ownerName)} | Email: ${escapeHtml(ownerEmail)}</div>
+              <div class="list-meta">Location: ${escapeHtml(location)} | ZIP: ${escapeHtml(item.zipCode || item.linkedUserZip || 'N/A')}</div>
+              <div class="list-meta">Category: ${escapeHtml(item.businessCategory || 'N/A')} | Plan: ${escapeHtml(plan)} (${escapeHtml(status)})</div>
+              <div class="list-meta">${item.isPending ? 'Submitted' : 'Approved'}: ${escapeHtml(formatDate(item.isPending ? item.createdAt : (item.approvedAt || item.createdAt)))}</div>
+              ${item.isVerified ? `<div class="list-meta">Verified: ${escapeHtml(formatDate(item.verifiedAt))}</div>` : ''}
+              <div class="list-meta" style="font-size: 16px; color: #64748b; margin-top: 4px;">Debug: docId=${escapeHtml(item.id)} | userId=${escapeHtml(debugOwner)} | isApproved=${escapeHtml(debugApproval)} | approvalStatus=${escapeHtml(debugStatus)} | isVerified=${escapeHtml(debugVerified)}</div>
+              ${item.businessDescription ? `<div class="list-meta" style="margin-top: 6px;">Description: ${escapeHtml(item.businessDescription.substring(0, 120))}${item.businessDescription.length > 120 ? '...' : ''}</div>` : ''}
+              ${item.verificationDocs.length > 0
+                ? `<div class="list-meta" style="margin-top: 8px;">Verification Documents: ${item.verificationDocs.map((url, idx) => `<a href="${encodeURI(url)}" target="_blank" rel="noopener noreferrer">Document ${idx + 1}</a>`).join(' | ')}</div>`
+                : '<div class="list-meta" style="margin-top: 8px;">Verification Documents: None submitted</div>'}
+            </div>
+            <div class="list-actions" style="display: flex; flex-direction: column; gap: 8px;">
+              ${item.verificationDocs.length > 0 ? `<button class="btn secondary small" data-action="view-business-docs" data-file-urls="${item.verificationDocs.map((url) => encodeURIComponent(url)).join(',')}">View Files</button>` : ''}
+              ${item.isPending ? `<button class="btn small" data-action="approve-business-profile" data-id="${escapeHtml(item.id)}" style="background: #10b981; color: white; border: none;">Approve</button>` : ''}
+              ${item.isPending ? `<button class="btn danger small" data-action="reject-business-profile" data-id="${escapeHtml(item.id)}">Reject</button>` : ''}
+              ${!item.isPending ? `<button class="btn secondary small" data-action="revoke-business-approval" data-id="${escapeHtml(item.id)}">Revoke Approval</button>` : ''}
+              ${!item.isPending && !item.isVerified ? `<button class="btn small" data-action="verify-approved-business" data-id="${escapeHtml(item.id)}" style="background:#3b82f6;color:white;border:none;">Mark Verified</button>` : ''}
+              ${!item.isPending && item.isVerified ? `<button class="btn danger small" data-action="remove-verified-badge" data-id="${escapeHtml(item.id)}">Remove Badge</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
     }
   }
 
@@ -3471,11 +4431,16 @@
   function initRefreshButtons() {
     document.getElementById('refreshAnalytics').addEventListener('click', loadAnalytics);
     document.getElementById('refreshHubAnalytics')?.addEventListener('click', loadHubAnalytics);
+    document.getElementById('refreshBusinessSnapshot')?.addEventListener('click', loadBusinessSnapshot);
+    document.getElementById('refreshServiceSnapshot')?.addEventListener('click', loadServiceSnapshot);
+    document.getElementById('refreshUserSnapshot')?.addEventListener('click', loadUserSnapshot);
+    document.getElementById('refreshUserManagement')?.addEventListener('click', loadUserManagement);
     document.getElementById('refreshBusinessUsers')?.addEventListener('click', loadBusinessUsers);
     document.getElementById('refreshServiceProviders')?.addEventListener('click', loadServiceProviders);
     document.getElementById('refreshBlocked').addEventListener('click', loadBlockedUsers);
     document.getElementById('refreshFeaturePurchasesListings')?.addEventListener('click', loadFeaturePurchasesListings);
     document.getElementById('refreshFeaturePurchasesServices')?.addEventListener('click', loadFeaturePurchasesServices);
+    document.getElementById('refreshPremiumPurchases')?.addEventListener('click', loadPremiumPurchases);
     document.getElementById('refreshBusinessClaims')?.addEventListener('click', loadBusinessClaims);
     document.getElementById('refreshVerifiedBusinesses')?.addEventListener('click', loadVerifiedBusinesses);
     document.getElementById('refreshShopLocalSectionSettings')?.addEventListener('click', loadShopLocalSectionSettings);
@@ -3486,68 +4451,6 @@
     document.getElementById('refreshPendingBusinessProfiles')?.addEventListener('click', loadPendingBusinessProfiles);
     document.getElementById('refreshAutoApprovals')?.addEventListener('click', loadAutoApprovals);
     
-    // Featured listing purchase filter buttons
-    document.getElementById('filterPendingListings')?.addEventListener('click', () => {
-      currentListingPurchaseFilter = 'pending';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'listing'),
-        'pending',
-        'featurePurchasesListingsList',
-        loadFeaturePurchasesListings
-      );
-    });
-    
-    document.getElementById('filterCompletedListings')?.addEventListener('click', () => {
-      currentListingPurchaseFilter = 'completed';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'listing'),
-        'completed',
-        'featurePurchasesListingsList',
-        loadFeaturePurchasesListings
-      );
-    });
-    
-    document.getElementById('filterAllListings')?.addEventListener('click', () => {
-      currentListingPurchaseFilter = 'all';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'listing'),
-        'all',
-        'featurePurchasesListingsList',
-        loadFeaturePurchasesListings
-      );
-    });
-
-    // Featured service purchase filter buttons
-    document.getElementById('filterPendingServices')?.addEventListener('click', () => {
-      currentServicePurchaseFilter = 'pending';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'service'),
-        'pending',
-        'featurePurchasesServicesList',
-        loadFeaturePurchasesServices
-      );
-    });
-
-    document.getElementById('filterCompletedServices')?.addEventListener('click', () => {
-      currentServicePurchaseFilter = 'completed';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'service'),
-        'completed',
-        'featurePurchasesServicesList',
-        loadFeaturePurchasesServices
-      );
-    });
-
-    document.getElementById('filterAllServices')?.addEventListener('click', () => {
-      currentServicePurchaseFilter = 'all';
-      displayFeaturePurchases(
-        allFeaturePurchases.filter((p) => p.itemType === 'service'),
-        'all',
-        'featurePurchasesServicesList',
-        loadFeaturePurchasesServices
-      );
-    });
-
     document.getElementById('filterClaimsPending')?.addEventListener('click', () => {
       currentBusinessClaimsFilter = 'pending';
       displayBusinessClaims(allBusinessClaims, currentBusinessClaimsFilter);
@@ -3588,17 +4491,27 @@
     'reviews-management': 'Reviews Management',
     'business-users': 'Business Users',
     'service-providers': 'Service Providers',
-    'feature-purchases-listings': 'Featured Listing Purchases',
-    'feature-purchases-services': 'Featured Service Purchases',
-    'business-claims': 'Business Claims',
+    'feature-purchases-listings': 'Premium Purchases',
+    'feature-purchases-services': 'Premium Purchases',
+    'premium-purchases': 'Premium Purchases',
+    'business-claims': 'Business Claim Requests',
     'verified-businesses': 'Verified Businesses',
-    'pending-business-profiles': 'Pending Business Profiles',
-    'shop-local-section': 'Local Section Settings',
+    'user-management': 'User Management',
+    'pending-business-profiles': 'Business Profiles',
+    'shop-local-section': 'Browse: Business Local Section',
     'community-settings': 'Site Settings',
     'pending-approvals': 'Pending Approvals',
     'blocked': 'Blocked Users',
     'reports': 'Reports & Exports',
+    'auto-approvals': 'Auto-Approvals',
   };
+
+  function getSectionTitle(tabId) {
+    const section = document.getElementById(`tab-${tabId}`);
+    const sectionTitle = section?.querySelector('.section-title');
+    const text = sectionTitle?.textContent?.trim();
+    return text || SECTION_TITLES[tabId] || '';
+  }
 
   window.navigateToTab = function (tabId) {
     const hubEl = document.getElementById('adminHub');
@@ -3606,9 +4519,25 @@
     const titleEl = document.getElementById('adminSectionTitle');
     if (hubEl) hubEl.style.display = 'none';
     if (sectionsEl) sectionsEl.style.display = 'block';
-    if (titleEl) titleEl.textContent = SECTION_TITLES[tabId] || '';
+    if (titleEl) titleEl.textContent = getSectionTitle(tabId);
     setActiveTab(tabId);
     loadTab(tabId);
+  };
+
+  window.openBusinessProfilesView = function (filter = 'pending') {
+    businessProfilesViewState.filter = filter;
+    window.navigateToTab('pending-business-profiles');
+  };
+
+  window.openUserManagementView = function (filter = 'all') {
+    userManagementState.filter = filter;
+    window.navigateToTab('user-management');
+  };
+
+  window.openPremiumPurchasesView = function (scope = 'all') {
+    premiumPurchasesState.scope = scope;
+    premiumPurchasesState.status = 'all';
+    window.navigateToTab('premium-purchases');
   };
 
   window.showAdminHub = function () {
@@ -3626,6 +4555,9 @@
     initRefreshButtons();
     initModal();
     loadTopPriorityCounts();
+    loadBusinessSnapshot();
+    loadServiceSnapshot();
+    loadUserSnapshot();
     loadServiceProvidersCount();
     loadVerifiedBusinessesCount();
     loadDashboardCounts();
