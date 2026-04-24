@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Listing Reports - Local List</title>
+  <title>Marketplace Reports - Local List</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
 
@@ -45,7 +45,11 @@
       padding: 24px;
       margin-bottom: 18px;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .page-title {
@@ -54,8 +58,59 @@
       color: #1f2937;
     }
 
+    .page-subtitle {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 720px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-banner {
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status-loading {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .status-success {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #166534;
+    }
+
+    .status-error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .hidden {
+      display: none;
+    }
+
     .reports-layout {
       display: grid;
+      gap: 16px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
 
@@ -71,6 +126,13 @@
       font-size: 20px;
       font-weight: 800;
       color: #334155;
+    }
+
+    .report-section-copy {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .report-section-body {
@@ -112,12 +174,6 @@
       color: #334155;
     }
 
-    .performance-lists {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
     .report-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -130,6 +186,13 @@
       font-weight: 800;
       color: #334155;
       margin-bottom: 10px;
+    }
+
+    .report-card-copy {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
     }
 
     .mini-list {
@@ -174,6 +237,43 @@
       white-space: nowrap;
     }
 
+    .mini-list-actions {
+      margin-top: 6px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini-link,
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #334155;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+    }
+
+    .mini-link.primary,
+    .btn.primary {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+
+    .btn {
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 10px 14px;
+    }
+
     .empty-note {
       color: #94a3b8;
       font-size: 13px;
@@ -203,7 +303,7 @@
       }
 
       .performance-grid,
-      .performance-lists {
+      .dashboard-grid {
         grid-template-columns: 1fr;
       }
 
@@ -223,40 +323,60 @@
 
   <main class="page-shell">
     <section class="page-hero">
-      <h1 class="page-title">Listing Reports</h1>
+      <div>
+        <h1 class="page-title">Marketplace Reports</h1>
+        <p class="page-subtitle">Admin-only visibility into marketplace listings, including low-visibility opportunities, soon-to-expire posts, and the current top performers.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn" href="admin.html">Back to Admin</a>
+        <button class="btn primary" id="refreshMarketplaceReports" type="button">Refresh</button>
+      </div>
     </section>
 
-    <div class="reports-layout">
+    <div id="statusBanner" class="status-banner status-loading">Checking admin access and loading marketplace reports...</div>
+
+    <div id="reportsLayout" class="reports-layout hidden">
       <section class="report-section">
-        <h2 class="report-section-title">Admin Action Tasks</h2>
+        <h2 class="report-section-title">Marketplace Snapshot</h2>
+        <p class="report-section-copy">A quick pulse on the listings collection so you can spot urgency and opportunity at a glance.</p>
         <div class="report-section-body" id="listingPerformanceBody">
           <div class="report-status">Loading listing performance...</div>
         </div>
       </section>
-       <section class="report-section">
-        <h2 class="report-section-title">Marketplace</h2>
-        <div class="report-section-body" id="activeExpiredBody">
-          <div class="report-status">Loading listing status summary...</div>
-        </div>
-      </section>
-      <section class="report-section">
-        <h2 class="report-section-title">Users</h2>
-        <div class="report-section-body"></div>
-      </section>
-      <section class="report-section">
-        <h2 class="report-section-title">Business</h2>
-        <div class="report-section-body"></div>
-      </section>
 
-      <section class="report-section">
-        <h2 class="report-section-title">Services</h2>
-        <div class="report-section-body"></div>
-      </section>
+      <div class="dashboard-grid">
+        <section class="report-section">
+          <h2 class="report-section-title">Hidden Gems</h2>
+          <p class="report-section-copy">Approved marketplace listings with the fewest views. This is the best place to find posts that could benefit from featuring or homepage support.</p>
+          <div class="report-section-body" id="hiddenGemsBody">
+            <div class="report-status">Loading hidden gems...</div>
+          </div>
+        </section>
 
-      <section class="report-section">
-        <h2 class="report-section-title">Payments</h2>
-        <div class="report-section-body"></div>
-      </section>
+        <section class="report-section">
+          <h2 class="report-section-title">Soon To Expire</h2>
+          <p class="report-section-copy">Approved listings expiring within the next 7 days, sorted by the nearest expiration date first.</p>
+          <div class="report-section-body" id="expiringSoonBody">
+            <div class="report-status">Loading expiring listings...</div>
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-section-title">Most Popular</h2>
+          <p class="report-section-copy">Marketplace leaders ranked by a simple popularity score that favors favorites while still reflecting view volume.</p>
+          <div class="report-section-body" id="mostPopularBody">
+            <div class="report-status">Loading popular listings...</div>
+          </div>
+        </section>
+
+        <section class="report-section">
+          <h2 class="report-section-title">Action Needed</h2>
+          <p class="report-section-copy">Quick admin routing for listings that still need moderation or follow-up.</p>
+          <div class="report-section-body" id="actionNeededBody">
+            <div class="report-status">Loading moderation queues...</div>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 
@@ -268,7 +388,22 @@
   <script src="header.js"></script>
   <script>
     (function () {
+      const auth = window.firebaseAuth;
       const db = window.firebaseDb;
+      const statusBanner = document.getElementById('statusBanner');
+      const reportsLayout = document.getElementById('reportsLayout');
+      const refreshButton = document.getElementById('refreshMarketplaceReports');
+
+      function setStatus(type, message) {
+        if (!statusBanner) return;
+        statusBanner.className = `status-banner status-${type}`;
+        statusBanner.textContent = message;
+      }
+
+      function showReports(show) {
+        if (!reportsLayout) return;
+        reportsLayout.classList.toggle('hidden', !show);
+      }
 
       function getTimestampMs(value) {
         if (!value) return null;
@@ -310,6 +445,48 @@
         return new Date(ms).toLocaleDateString();
       }
 
+      function formatRelativeAge(value) {
+        const ms = getTimestampMs(value);
+        if (!ms) return 'Unknown age';
+        const diffMs = Date.now() - ms;
+        const diffDays = Math.max(0, Math.floor(diffMs / (24 * 60 * 60 * 1000)));
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return '1 day old';
+        return `${diffDays} days old`;
+      }
+
+      function formatDaysUntil(value) {
+        const ms = getTimestampMs(value);
+        if (!ms) return 'No expiration';
+        const diffMs = ms - Date.now();
+        const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+        if (diffDays <= 0) return 'Expires today';
+        if (diffDays === 1) return '1 day left';
+        return `${diffDays} days left`;
+      }
+
+      function getPopularityScore(item) {
+        const views = Number(item.viewCount || 0);
+        const favorites = Number(item.favoritesCount || 0);
+        return views + (favorites * 8);
+      }
+
+      function buildListingActions(item) {
+        const listingId = encodeURIComponent(String(item.id || ''));
+        const links = [];
+
+        if (listingId) {
+          links.push(`<a class="mini-link primary" href="single-listing.html?id=${listingId}" target="_blank" rel="noopener noreferrer">View Listing</a>`);
+        }
+
+        if (String(item.status || '').toLowerCase() === 'pending') {
+          links.push(`<a class="mini-link" href="admin.html" target="_blank" rel="noopener noreferrer">Open Admin Queue</a>`);
+        }
+
+        if (!links.length) return '';
+        return `<div class="mini-list-actions">${links.join('')}</div>`;
+      }
+
       function renderMiniList(items, valueFormatter, subFormatter) {
         if (!items.length) {
           return '<div class="empty-note">No listings to show yet.</div>';
@@ -322,6 +499,7 @@
                 <div>
                   <div class="mini-list-title">${escapeHtml(item.title || 'Untitled Listing')}</div>
                   <div class="mini-list-sub">${escapeHtml(subFormatter(item))}</div>
+                  ${buildListingActions(item)}
                 </div>
                 <div class="mini-list-value">${escapeHtml(valueFormatter(item))}</div>
               </div>
@@ -341,6 +519,18 @@
 
       function isApprovedListing(item) {
         return String(item.status || '').toLowerCase() === 'approved' && !isHiddenListing(item);
+      }
+
+      function isExpiredListing(item, nowMs) {
+        const expiresAtMs = getTimestampMs(item.expiresAt);
+        const status = String(item.status || '').toLowerCase();
+        return status === 'expired' || (!!expiresAtMs && expiresAtMs <= nowMs);
+      }
+
+      function isActiveListing(item, nowMs) {
+        if (!isApprovedListing(item)) return false;
+        if (item.isActive === false) return false;
+        return !isExpiredListing(item, nowMs);
       }
 
       function renderListingPerformance(metrics) {
@@ -365,71 +555,135 @@
               <div class="metric-value">${metrics.expiredListings}</div>
               <div class="metric-label">Expired Listings</div>
             </div>
-          </div>
-          <div class="performance-lists">
-            <div class="report-card">
-              <div class="report-card-title">Top Viewed Listings</div>
-              ${renderMiniList(
-                metrics.topViewed,
-                (item) => `${item.viewCount || 0} views`,
-                (item) => `Created ${formatDate(item.createdAt)}`
-              )}
+            <div class="metric-card">
+              <div class="metric-value">${metrics.pendingListings}</div>
+              <div class="metric-label">Pending Approval</div>
             </div>
-            <div class="report-card">
-              <div class="report-card-title">Lowest Views</div>
-              ${renderMiniList(
-                metrics.lowestViewed,
-                (item) => `${item.viewCount || 0} views`,
-                (item) => `Created ${formatDate(item.createdAt)}`
-              )}
+            <div class="metric-card">
+              <div class="metric-value">${metrics.pendingReports}</div>
+              <div class="metric-label">Pending Reports</div>
             </div>
-            <div class="report-card">
-              <div class="report-card-title">Expiring Soon</div>
-              ${renderMiniList(
-                metrics.expiringSoon,
-                (item) => formatDate(item.expiresAt),
-                (item) => `${item.viewCount || 0} views`
-              )}
+            <div class="metric-card">
+              <div class="metric-value">${metrics.expiringThisWeek}</div>
+              <div class="metric-label">Expiring In 7 Days</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">${metrics.averageViews}</div>
+              <div class="metric-label">Avg Views / Active Listing</div>
             </div>
           </div>
         `;
       }
 
-      function renderActiveExpired(activeListings, expiredListings) {
-        const body = document.getElementById('activeExpiredBody');
+      function renderHiddenGems(items) {
+        const body = document.getElementById('hiddenGemsBody');
+        if (!body) return;
+
+        body.innerHTML = `
+          <div class="report-card">
+            <div class="report-card-title">Lowest-Visibility Listings</div>
+            <div class="report-card-copy">Sorted by fewest views first, with favorites used as a tie-breaker so stronger candidates float up.</div>
+            ${renderMiniList(
+              items,
+              (item) => `${item.viewCount || 0} views`,
+              (item) => `${item.favoritesCount || 0} saves | ${formatRelativeAge(item.createdAt)}`
+            )}
+          </div>
+        `;
+      }
+
+      function renderExpiringSoon(items) {
+        const body = document.getElementById('expiringSoonBody');
+        if (!body) return;
+
+        body.innerHTML = `
+          <div class="report-card">
+            <div class="report-card-title">Next 7 Days</div>
+            <div class="report-card-copy">Useful for deciding whether to extend visibility, feature a listing, or reach out before it drops off.</div>
+            ${renderMiniList(
+              items,
+              (item) => formatDaysUntil(item.expiresAt),
+              (item) => `${item.viewCount || 0} views | expires ${formatDate(item.expiresAt)}`
+            )}
+          </div>
+        `;
+      }
+
+      function renderMostPopular(items) {
+        const body = document.getElementById('mostPopularBody');
+        if (!body) return;
+
+        body.innerHTML = `
+          <div class="report-card">
+            <div class="report-card-title">Popularity Leaders</div>
+            <div class="report-card-copy">Ranked by a lightweight popularity score: views + (favorites x 8).</div>
+            ${renderMiniList(
+              items,
+              (item) => `${getPopularityScore(item)} pts`,
+              (item) => `${item.viewCount || 0} views | ${item.favoritesCount || 0} saves`
+            )}
+          </div>
+        `;
+      }
+
+      function renderActionNeeded(metrics) {
+        const body = document.getElementById('actionNeededBody');
         if (!body) return;
 
         body.innerHTML = `
           <div class="performance-grid">
             <div class="metric-card">
-              <div class="metric-value">${activeListings}</div>
-              <div class="metric-label">Active</div>
+              <div class="metric-value">${metrics.pendingListings}</div>
+              <div class="metric-label">Pending Listings</div>
             </div>
             <div class="metric-card">
-              <div class="metric-value">${expiredListings}</div>
-              <div class="metric-label">Expired</div>
+              <div class="metric-value">${metrics.pendingReports}</div>
+              <div class="metric-label">Pending Reports</div>
             </div>
+            <div class="metric-card">
+              <div class="metric-value">${metrics.zeroViewListings}</div>
+              <div class="metric-label">Active With 0 Views</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">${metrics.featuredActive}</div>
+              <div class="metric-label">Featured Active Listings</div>
+            </div>
+          </div>
+          <div class="mini-list-actions" style="margin-top: 14px;">
+            <a class="mini-link primary" href="admin.html" target="_blank" rel="noopener noreferrer">Open Admin Panel</a>
+            <a class="mini-link" href="admin.html" target="_blank" rel="noopener noreferrer">Review Moderation</a>
           </div>
         `;
       }
 
       async function loadListingPerformance() {
         const performanceBody = document.getElementById('listingPerformanceBody');
-        const activeExpiredBody = document.getElementById('activeExpiredBody');
+        const hiddenGemsBody = document.getElementById('hiddenGemsBody');
+        const expiringSoonBody = document.getElementById('expiringSoonBody');
+        const mostPopularBody = document.getElementById('mostPopularBody');
+        const actionNeededBody = document.getElementById('actionNeededBody');
 
-        if (!performanceBody || !activeExpiredBody) return;
+        if (!performanceBody || !hiddenGemsBody || !expiringSoonBody || !mostPopularBody || !actionNeededBody) return false;
 
         if (!db) {
           performanceBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
-          activeExpiredBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
-          return;
+          hiddenGemsBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
+          expiringSoonBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
+          mostPopularBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
+          actionNeededBody.innerHTML = '<div class="report-status">Firestore is not available on this page.</div>';
+          return false;
         }
 
         try {
-          const snap = await db.collection('listings').get();
-          const listings = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const [listingsSnap, pendingReportsSnap] = await Promise.all([
+            db.collection('listings').get(),
+            db.collection('reportedListings').where('status', '==', 'pending').get(),
+          ]);
+
+          const listings = listingsSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
           const nowMs = Date.now();
           const sevenDaysAgoMs = nowMs - (7 * 24 * 60 * 60 * 1000);
+          const oneDayAgoMs = nowMs - (24 * 60 * 60 * 1000);
           const soonCutoffMs = nowMs + (7 * 24 * 60 * 60 * 1000);
 
           const totalListings = listings.length;
@@ -438,25 +692,25 @@
             return createdAtMs && createdAtMs >= sevenDaysAgoMs;
           }).length;
 
-          const activeListingsPool = listings.filter((item) => {
-            if (!isApprovedListing(item)) return false;
-            const expiresAtMs = getTimestampMs(item.expiresAt);
-            return !expiresAtMs || expiresAtMs > nowMs;
-          });
+          const activeListingsPool = listings.filter((item) => isActiveListing(item, nowMs));
+          const expiredListingsPool = listings.filter((item) => isExpiredListing(item, nowMs));
+          const pendingListings = listings.filter((item) => String(item.status || '').toLowerCase() === 'pending').length;
 
-          const expiredListingsPool = listings.filter((item) => {
-            const expiresAtMs = getTimestampMs(item.expiresAt);
-            const status = String(item.status || '').toLowerCase();
-            return status === 'expired' || (!!expiresAtMs && expiresAtMs <= nowMs);
-          });
+          const hiddenGems = [...activeListingsPool]
+            .filter((item) => {
+              const createdAtMs = getTimestampMs(item.createdAt);
+              return !!createdAtMs && createdAtMs <= oneDayAgoMs && item.isFeatured !== true;
+            })
+            .sort((a, b) => {
+              const viewDelta = (Number(a.viewCount) || 0) - (Number(b.viewCount) || 0);
+              if (viewDelta !== 0) return viewDelta;
 
-          const topViewed = [...activeListingsPool]
-            .sort((a, b) => (Number(b.viewCount) || 0) - (Number(a.viewCount) || 0))
-            .slice(0, 5);
+              const favoriteDelta = (Number(b.favoritesCount) || 0) - (Number(a.favoritesCount) || 0);
+              if (favoriteDelta !== 0) return favoriteDelta;
 
-          const lowestViewed = [...activeListingsPool]
-            .sort((a, b) => (Number(a.viewCount) || 0) - (Number(b.viewCount) || 0))
-            .slice(0, 5);
+              return (getTimestampMs(a.createdAt) || 0) - (getTimestampMs(b.createdAt) || 0);
+            })
+            .slice(0, 8);
 
           const expiringSoon = [...activeListingsPool]
             .filter((item) => {
@@ -464,30 +718,105 @@
               return !!expiresAtMs && expiresAtMs > nowMs && expiresAtMs <= soonCutoffMs;
             })
             .sort((a, b) => (getTimestampMs(a.expiresAt) || 0) - (getTimestampMs(b.expiresAt) || 0))
-            .slice(0, 5);
+            .slice(0, 8);
+
+          const mostPopular = [...activeListingsPool]
+            .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+            .slice(0, 8);
+
+          const zeroViewListings = activeListingsPool.filter((item) => Number(item.viewCount || 0) === 0).length;
+          const featuredActive = activeListingsPool.filter((item) => item.isFeatured === true).length;
+          const averageViews = activeListingsPool.length
+            ? Math.round(activeListingsPool.reduce((sum, item) => sum + Number(item.viewCount || 0), 0) / activeListingsPool.length)
+            : 0;
 
           renderListingPerformance({
             totalListings,
             newListings,
             activeListings: activeListingsPool.length,
             expiredListings: expiredListingsPool.length,
-            topViewed,
-            lowestViewed,
-            expiringSoon,
+            pendingListings,
+            pendingReports: pendingReportsSnap.size,
+            expiringThisWeek: expiringSoon.length,
+            averageViews,
           });
 
-          renderActiveExpired(activeListingsPool.length, expiredListingsPool.length);
+          renderHiddenGems(hiddenGems);
+          renderExpiringSoon(expiringSoon);
+          renderMostPopular(mostPopular);
+          renderActionNeeded({
+            pendingListings,
+            pendingReports: pendingReportsSnap.size,
+            zeroViewListings,
+            featuredActive,
+          });
+
+          return true;
         } catch (error) {
           console.error('Listing performance load error:', error);
           performanceBody.innerHTML = '<div class="report-status">Could not load listing performance right now.</div>';
-          activeExpiredBody.innerHTML = '<div class="report-status">Could not load listing status summary right now.</div>';
+          hiddenGemsBody.innerHTML = '<div class="report-status">Could not load hidden gems right now.</div>';
+          expiringSoonBody.innerHTML = '<div class="report-status">Could not load expiring listings right now.</div>';
+          mostPopularBody.innerHTML = '<div class="report-status">Could not load popular listings right now.</div>';
+          actionNeededBody.innerHTML = '<div class="report-status">Could not load moderation summary right now.</div>';
+          return false;
         }
       }
 
+      async function boot() {
+        if (!auth || !db) {
+          setStatus('error', 'Firebase is not initialized on this page.');
+          showReports(false);
+          return;
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) {
+            setStatus('error', 'Please sign in with an admin account to view marketplace reports.');
+            showReports(false);
+            return;
+          }
+
+          try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+
+            if (String(userData.role || '').toLowerCase() !== 'admin') {
+              setStatus('error', 'Access denied. This page is limited to admin accounts.');
+              showReports(false);
+              return;
+            }
+
+            showReports(true);
+            const loaded = await loadListingPerformance();
+            setStatus(
+              loaded ? 'success' : 'error',
+              loaded
+                ? 'Admin access granted. Marketplace reports loaded.'
+                : 'Admin access granted, but marketplace data could not be loaded.'
+            );
+          } catch (error) {
+            console.error('Marketplace report auth error:', error);
+            setStatus('error', 'Unable to verify admin access right now.');
+            showReports(false);
+          }
+        });
+      }
+
+      refreshButton?.addEventListener('click', () => {
+        setStatus('loading', 'Refreshing marketplace reports...');
+        loadListingPerformance()
+          .then((loaded) => setStatus(
+            loaded ? 'success' : 'error',
+            loaded ? 'Marketplace reports refreshed.' : 'Marketplace reports could not be refreshed.'
+          ))
+          .catch(() => setStatus('error', 'Could not refresh marketplace reports.'));
+      });
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadListingPerformance);
+        document.addEventListener('DOMContentLoaded', boot);
       } else {
-        loadListingPerformance();
+        boot();
       }
     })();
   </script>

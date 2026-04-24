@@ -586,8 +586,8 @@
 
   async function loadDashboardCounts() {
     try {
-      const [businessLocalSnap, allPurchasesSnap, businessUsersSnap, businessClaimsSnap,
-        pendingApprovalsSnap, disabledUsersSnap, bannedUsersSnap, allUsersSnap] = await Promise.all([
+      const [businessLocalSnap, pendingPurchasesSnap, businessUsersSnap, businessClaimsSnap,
+        pendingApprovalsSnap, disabledUsersSnap, bannedUsersSnap, allUsersSnap, listingsSnap, allPurchasesTotalSnap, emailLogSnap] = await Promise.all([
         db.collection('businessLocal').get(),
         db.collection('featurePurchases').where('status', '==', 'pending').get(),
         db.collection('users').where('accountType', '==', 'business').get(),
@@ -596,6 +596,9 @@
         db.collection('users').where('isDisabled', '==', true).get(),
         db.collection('users').where('isBanned', '==', true).get(),
         db.collection('users').get(),
+        db.collection('listings').get(),
+        db.collection('featurePurchases').get(),
+        db.collection('emailLog').get(),
       ]);
 
       // Pending business profiles (not approved and not rejected/deleted)
@@ -637,7 +640,7 @@
       // Featured purchases split by type
       let featuredListingCount = 0;
       let featuredServiceCount = 0;
-      allPurchasesSnap.forEach((d) => {
+      pendingPurchasesSnap.forEach((d) => {
         const data = d.data() || {};
         const itemType = String(data.itemType || (data.serviceId ? 'service' : 'listing')).toLowerCase();
         if (itemType === 'service') featuredServiceCount += 1;
@@ -685,6 +688,56 @@
       // Reports section counts
       const digestCount = allUsersSnap.docs.filter(d => d.data().digestNotification === true).length;
       setCountPill('digestSubscribersCount', digestCount);
+      setCountPill('emailDigestReportsCount', emailLogSnap.size);
+
+      let totalPurchasesCount = 0;
+      let pendingPurchaseCount = 0;
+      let completedPurchaseCount = 0;
+      let rejectedPurchaseCount = 0;
+      let listingPurchaseCount = 0;
+      let grossRevenue = 0;
+
+      allPurchasesTotalSnap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const status = String(data.status || 'pending').toLowerCase();
+        const itemType = String(data.itemType || (data.serviceId ? 'service' : 'listing')).toLowerCase();
+        const amount = Number(data.amount || 0);
+
+        totalPurchasesCount += 1;
+        if (status === 'completed') completedPurchaseCount += 1;
+        else if (status === 'rejected' || status === 'failed' || status === 'refunded') rejectedPurchaseCount += 1;
+        else pendingPurchaseCount += 1;
+
+        if (itemType === 'listing') listingPurchaseCount += 1;
+        if (Number.isFinite(amount)) grossRevenue += amount;
+      });
+
+      setCountPill('paymentsStatTotalPurchases', totalPurchasesCount);
+      setCountPill('paymentsStatPendingPurchases', pendingPurchaseCount);
+      setCountPill('paymentsStatCompletedPurchases', completedPurchaseCount);
+      setCountPill('paymentsStatRejectedPurchases', rejectedPurchaseCount);
+      setCountPill('paymentsStatListingPurchases', listingPurchaseCount);
+
+      const grossRevenueEl = document.getElementById('paymentsStatGrossRevenue');
+      if (grossRevenueEl) {
+        grossRevenueEl.textContent = `$${grossRevenue.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        })}`;
+      }
+
+      const activeMarketplaceCount = listingsSnap.docs.filter((docSnap) => {
+        const data = docSnap.data() || {};
+        const status = String(data.status || '').toLowerCase();
+        if (status !== 'approved') return false;
+        if (data.isActive === false || data.isDeleted === true || data.deleted === true) return false;
+        const expiresAt = data.expiresAt;
+        const expiresMs = typeof expiresAt?.toMillis === 'function'
+          ? expiresAt.toMillis()
+          : (typeof expiresAt === 'string' ? Date.parse(expiresAt) : null);
+        return !Number.isFinite(expiresMs) || expiresMs > Date.now();
+      }).length;
+      setCountPill('marketplaceReportsCount', activeMarketplaceCount);
 
       const upgradeTargetCount = businessLocalSnap.docs.filter(d => {
         const data = d.data() || {};
@@ -693,8 +746,7 @@
       setCountPill('upgradeTargetsCount', upgradeTargetCount);
 
       // Purchases report count (all time)
-      const allPurchasesTotal = await db.collection('featurePurchases').get();
-      setCountPill('purchasesReportCount', allPurchasesTotal.size);
+      setCountPill('purchasesReportCount', allPurchasesTotalSnap.size);
 
     } catch (err) {
       console.error('Dashboard counts load error:', err);

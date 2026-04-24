@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-533FSPH8JT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-533FSPH8JT');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Digest Reports - Local List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    #header-container {
+      min-height: 60px;
+    }
+
+    .page-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .page-hero {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 780px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #1f2937;
+      padding: 10px 14px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: inherit;
+    }
+
+    .btn.primary {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+
+    .status-banner {
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status-loading {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .status-success {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #166534;
+    }
+
+    .status-error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .report-section {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .report-section-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .report-section-copy {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1d4ed8;
+      line-height: 1.1;
+    }
+
+    .metric-label {
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .report-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .report-card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .report-card-copy {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .report-filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .report-filters label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .report-filters input,
+    .report-filters select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .preview-box {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 70px;
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-shell {
+        padding: 16px 12px 28px;
+      }
+
+      .page-hero,
+      .report-section,
+      .report-card {
+        padding: 16px;
+      }
+
+      .page-title {
+        font-size: 24px;
+      }
+
+      .cards-grid,
+      .report-filters,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="page-shell">
+    <section class="page-hero">
+      <div>
+        <h1 class="page-title">Email Digest Reports</h1>
+        <p class="page-subtitle">Admin-only exports for weekly and monthly digest operations, plus marketing audience lists. This page combines your new <code>emailLog</code> collection with user digest preferences and content collections already in the app.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn" href="admin.html">Back to Admin</a>
+        <button class="btn primary" id="refreshDigestReports" type="button">Refresh</button>
+      </div>
+    </section>
+
+    <div id="statusBanner" class="status-banner status-loading">Checking admin access and loading digest report data...</div>
+
+    <div id="reportsShell" class="section-grid hidden">
+      <section class="report-section">
+        <h2 class="report-section-title">Digest Snapshot</h2>
+        <p class="report-section-copy">This overview helps you sanity-check subscriber coverage before exporting weekly or monthly sends.</p>
+        <div class="stats-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatEmailLog">-</div>
+            <div class="metric-label">Email Log Contacts</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatUsersOptIn">-</div>
+            <div class="metric-label">Users Opted In</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatEventSubscribers">-</div>
+            <div class="metric-label">Event Subscribers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatUnifiedAudience">-</div>
+            <div class="metric-label">Unified Audience</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatBusinessAudience">-</div>
+            <div class="metric-label">Business Contacts</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="digestStatWeeklyMarketplace">-</div>
+            <div class="metric-label">Marketplace Weekly Opt-In</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <h2 class="report-section-title">Exports</h2>
+        <p class="report-section-copy">These CSVs are designed around the job you described: weekly/monthly digest sends and marketing campaign audience building.</p>
+
+        <div class="cards-grid">
+          <article class="report-card">
+            <div class="report-card-title">Digest Subscribers</div>
+            <div class="report-card-copy">Export your deduplicated send list, enriched with digest preferences, account type, business tier, and source.</div>
+            <div class="report-filters">
+              <label>Created from
+                <input type="date" id="digestSubscribersFrom">
+              </label>
+              <label>to
+                <input type="date" id="digestSubscribersTo">
+              </label>
+              <label>Source
+                <select id="digestSubscribersSource">
+                  <option value="all">All sources</option>
+                  <option value="emailLog">emailLog</option>
+                  <option value="users">Users</option>
+                  <option value="eventDigestSubscribers">Event digest subscribers</option>
+                </select>
+              </label>
+              <label>Account type
+                <select id="digestSubscribersAccountType">
+                  <option value="all">All account types</option>
+                  <option value="business">Business</option>
+                  <option value="regular">Regular</option>
+                </select>
+              </label>
+            </div>
+            <div class="card-actions">
+              <button class="btn primary" id="exportDigestSubscribers">Export CSV</button>
+            </div>
+            <div class="preview-box" id="digestSubscribersPreview">Builds a clean subscriber list for send operations and manual email tools.</div>
+          </article>
+
+          <article class="report-card">
+            <div class="report-card-title">Weekly Digest Content</div>
+            <div class="report-card-copy">Exports fresh content candidates for the next 7 days across marketplace, events, services, jobs, and deals.</div>
+            <div class="report-filters">
+              <label>Content scope
+                <select id="weeklyContentScope">
+                  <option value="all">All content</option>
+                  <option value="marketplace">Marketplace</option>
+                  <option value="events">Events</option>
+                  <option value="services">Services</option>
+                  <option value="jobs">Jobs</option>
+                  <option value="deals">Deals</option>
+                </select>
+              </label>
+              <label>Only featured
+                <select id="weeklyContentFeatured">
+                  <option value="all">All</option>
+                  <option value="yes">Featured only</option>
+                  <option value="no">Not featured</option>
+                </select>
+              </label>
+            </div>
+            <div class="card-actions">
+              <button class="btn primary" id="exportWeeklyContent">Export CSV</button>
+            </div>
+            <div class="preview-box" id="weeklyContentPreview">Great for building the weekly roundup and selecting headline items.</div>
+          </article>
+
+          <article class="report-card">
+            <div class="report-card-title">Monthly Digest Content</div>
+            <div class="report-card-copy">Exports a wider 30-day content pool so you can build broader monthly newsletters and featured roundups.</div>
+            <div class="report-filters">
+              <label>Content scope
+                <select id="monthlyContentScope">
+                  <option value="all">All content</option>
+                  <option value="marketplace">Marketplace</option>
+                  <option value="events">Events</option>
+                  <option value="services">Services</option>
+                  <option value="jobs">Jobs</option>
+                  <option value="deals">Deals</option>
+                </select>
+              </label>
+              <label>Sort by
+                <select id="monthlyContentSort">
+                  <option value="newest">Newest first</option>
+                  <option value="popular">Most popular</option>
+                </select>
+              </label>
+            </div>
+            <div class="card-actions">
+              <button class="btn primary" id="exportMonthlyContent">Export CSV</button>
+            </div>
+            <div class="preview-box" id="monthlyContentPreview">Useful for a broader editorial calendar and monthly “best of Local List” emails.</div>
+          </article>
+
+          <article class="report-card">
+            <div class="report-card-title">Marketing Audience</div>
+            <div class="report-card-copy">Build segmented campaign lists from `emailLog` plus user enrichment such as plan, digest opt-in, and last login.</div>
+            <div class="report-filters">
+              <label>Audience type
+                <select id="marketingAudienceType">
+                  <option value="all">All contacts</option>
+                  <option value="business">Business only</option>
+                  <option value="regular">Regular only</option>
+                </select>
+              </label>
+              <label>Digest opt-in
+                <select id="marketingAudienceDigest">
+                  <option value="all">All</option>
+                  <option value="yes">Opted in</option>
+                  <option value="no">Not opted in</option>
+                </select>
+              </label>
+              <label>Business tier
+                <select id="marketingAudienceTier">
+                  <option value="all">All tiers</option>
+                  <option value="free">Free</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </label>
+              <label>Last login
+                <select id="marketingAudienceLogin">
+                  <option value="all">Any time</option>
+                  <option value="30">No login in 30+ days</option>
+                  <option value="90">No login in 90+ days</option>
+                </select>
+              </label>
+            </div>
+            <div class="card-actions">
+              <button class="btn primary" id="exportMarketingAudience">Export CSV</button>
+            </div>
+            <div class="preview-box" id="marketingAudiencePreview">Use this for campaign audiences like free businesses, inactive users, or digest subscribers by topic.</div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="header.js"></script>
+  <script>
+    (function () {
+      const auth = window.firebaseAuth;
+      const db = window.firebaseDb;
+      const statusBanner = document.getElementById('statusBanner');
+      const reportsShell = document.getElementById('reportsShell');
+      const refreshButton = document.getElementById('refreshDigestReports');
+
+      const cache = {
+        users: [],
+        emailLog: [],
+        eventDigestSubscribers: [],
+        listings: [],
+        events: [],
+        services: [],
+        jobs: [],
+        deals: [],
+      };
+
+      function setStatus(type, message) {
+        if (!statusBanner) return;
+        statusBanner.className = `status-banner status-${type}`;
+        statusBanner.textContent = message;
+      }
+
+      function showReports(show) {
+        if (!reportsShell) return;
+        reportsShell.classList.toggle('hidden', !show);
+      }
+
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(value);
+      }
+
+      function getTimestampMs(value) {
+        if (!value) return null;
+        if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+        if (typeof value === 'string') {
+          const parsed = Date.parse(value);
+          return Number.isNaN(parsed) ? null : parsed;
+        }
+        if (value instanceof Date) {
+          const ms = value.getTime();
+          return Number.isNaN(ms) ? null : ms;
+        }
+        if (typeof value === 'object') {
+          if (typeof value.toMillis === 'function') {
+            const ms = value.toMillis();
+            return Number.isFinite(ms) ? ms : null;
+          }
+          if (typeof value.toDate === 'function') {
+            const date = value.toDate();
+            const ms = date && typeof date.getTime === 'function' ? date.getTime() : NaN;
+            return Number.isFinite(ms) ? ms : null;
+          }
+          if (typeof value.seconds === 'number') {
+            return value.seconds * 1000;
+          }
+        }
+        return null;
+      }
+
+      function formatDate(value) {
+        const ms = getTimestampMs(value);
+        if (!ms) return '';
+        return new Date(ms).toLocaleDateString('en-US');
+      }
+
+      function toInputDate(dateStr) {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+
+      function inDateRange(value, fromDate, toDate) {
+        const ms = getTimestampMs(value);
+        if (!ms) return !fromDate && !toDate;
+        const d = new Date(ms);
+        if (fromDate && d < fromDate) return false;
+        if (toDate) {
+          const endOfDay = new Date(toDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (d > endOfDay) return false;
+        }
+        return true;
+      }
+
+      function downloadCSV(filename, rows) {
+        if (!rows.length) {
+          alert('No records found for the selected filters.');
+          return;
+        }
+        const headers = Object.keys(rows[0]);
+        const escape = (v) => {
+          const s = v === null || v === undefined ? '' : String(v);
+          return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const csv = [headers.join(','), ...rows.map((row) => headers.map((header) => escape(row[header])).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function getUserDigestPreferences(userData) {
+        const prefs = userData?.digestPreferences || {};
+        return {
+          marketplaceWeeklyDigest: !!prefs.marketplaceWeeklyDigest || !!prefs.marketplace?.weekly,
+          eventsDigest: !!prefs.eventsDigest || !!prefs.events?.weekly || !!prefs.events?.monthly,
+          yardSalesDigest: !!prefs.yardSalesDigest || !!prefs.yardSale?.weekly || !!prefs.yardSale?.monthly,
+          whatsHappeningWeeklyDigest: !!prefs.whatsHappeningWeeklyDigest,
+          whatsHappeningMonthlyDigest: !!prefs.whatsHappeningMonthlyDigest,
+          jobsWeeklyDigest: !!prefs.jobsWeeklyDigest || !!prefs.jobs?.weekly,
+        };
+      }
+
+      function normalizeAccountType(value) {
+        const normalized = String(value || '').trim().toLowerCase();
+        return normalized === 'business' ? 'business' : 'regular';
+      }
+
+      function buildUserMap() {
+        return new Map(cache.users.map((item) => [item.id, item]));
+      }
+
+      function mergeAudienceRecords() {
+        const byEmail = new Map();
+        const userMap = buildUserMap();
+
+        cache.emailLog.forEach((item) => {
+          const email = String(item.email || '').trim().toLowerCase();
+          if (!email) return;
+          byEmail.set(email, {
+            email,
+            name: item.name || '',
+            userId: item.userId || '',
+            accountType: normalizeAccountType(item.accountType),
+            source: 'emailLog',
+            createdAt: item.createdAt || null,
+          });
+        });
+
+        cache.users.forEach((user) => {
+          const email = String(user.email || '').trim().toLowerCase();
+          if (!email) return;
+          const existing = byEmail.get(email) || {};
+          const digestPrefs = getUserDigestPreferences(user);
+          byEmail.set(email, {
+            ...existing,
+            email,
+            name: user.name || user.displayName || existing.name || '',
+            userId: user.id || existing.userId || '',
+            accountType: normalizeAccountType(user.accountType || existing.accountType),
+            source: existing.source ? `${existing.source},users` : 'users',
+            createdAt: existing.createdAt || user.createdAt || null,
+            digestNotification: user.digestNotification === true,
+            businessTier: user.businessTier || '',
+            subscriptionPlan: user.subscriptionPlan || '',
+            zipCode: user.zipCode || '',
+            lastLoginAt: user.lastLoginAt || null,
+            featurePurchases: Number(user.featurePurchases || 0),
+            ...digestPrefs,
+          });
+        });
+
+        cache.eventDigestSubscribers.forEach((entry) => {
+          const email = String(entry.email || '').trim().toLowerCase();
+          if (!email) return;
+          const existing = byEmail.get(email) || {};
+          const linkedUser = existing.userId ? userMap.get(existing.userId) : null;
+          byEmail.set(email, {
+            ...existing,
+            email,
+            name: existing.name || linkedUser?.name || linkedUser?.displayName || '',
+            userId: existing.userId || linkedUser?.id || '',
+            accountType: normalizeAccountType(existing.accountType || linkedUser?.accountType),
+            source: existing.source ? `${existing.source},eventDigestSubscribers` : 'eventDigestSubscribers',
+            createdAt: existing.createdAt || entry.subscribedAt || null,
+            eventDigestFrequency: existing.eventDigestFrequency
+              ? `${existing.eventDigestFrequency},${entry.frequency || ''}`.replace(/^,|,$/g, '')
+              : (entry.frequency || ''),
+          });
+        });
+
+        return Array.from(byEmail.values());
+      }
+
+      function updateOverview() {
+        const audience = mergeAudienceRecords();
+        setText('digestStatEmailLog', cache.emailLog.length);
+        setText('digestStatUsersOptIn', cache.users.filter((item) => item.digestNotification === true).length);
+        setText('digestStatEventSubscribers', cache.eventDigestSubscribers.length);
+        setText('digestStatUnifiedAudience', audience.length);
+        setText('digestStatBusinessAudience', audience.filter((item) => item.accountType === 'business').length);
+        setText('digestStatWeeklyMarketplace', audience.filter((item) => item.marketplaceWeeklyDigest === true).length);
+      }
+
+      function formatContentRow(item) {
+        return {
+          'Content Type': item.contentType,
+          'ID': item.id,
+          'Title': item.title,
+          'Category': item.category,
+          'City': item.city,
+          'Zip Code': item.zipCode,
+          'Created': formatDate(item.createdAt),
+          'Start / Expires': formatDate(item.dateValue),
+          'Views': item.viewCount,
+          'Favorites': item.favoritesCount,
+          'Featured': item.isFeatured ? 'Yes' : 'No',
+          'Status': item.status,
+          'URL': item.url,
+        };
+      }
+
+      function buildWeeklyContentPool() {
+        const nowMs = Date.now();
+        const cutoffMs = nowMs + (7 * 24 * 60 * 60 * 1000);
+        const rows = [];
+
+        cache.listings.forEach((item) => {
+          const createdAtMs = getTimestampMs(item.createdAt);
+          const expiresAtMs = getTimestampMs(item.expiresAt);
+          if (String(item.status || '').toLowerCase() !== 'approved') return;
+          if (item.isActive === false) return;
+          if (createdAtMs && createdAtMs >= nowMs - (7 * 24 * 60 * 60 * 1000) || (expiresAtMs && expiresAtMs <= cutoffMs && expiresAtMs > nowMs)) {
+            rows.push({
+              contentType: 'marketplace',
+              id: item.id,
+              title: item.title || 'Untitled Listing',
+              category: item.category || '',
+              city: item.city || '',
+              zipCode: item.zipCode || '',
+              createdAt: item.createdAt || null,
+              dateValue: item.expiresAt || item.createdAt || null,
+              viewCount: Number(item.viewCount || 0),
+              favoritesCount: Number(item.favoritesCount || 0),
+              isFeatured: item.isFeatured === true,
+              status: item.status || '',
+              url: `https://locallist.biz/single-listing.html?id=${encodeURIComponent(item.id)}`,
+            });
+          }
+        });
+
+        cache.events.forEach((item) => {
+          const eventMs = getTimestampMs(item.eventDate);
+          if (!eventMs || eventMs < nowMs || eventMs > cutoffMs) return;
+          rows.push({
+            contentType: 'events',
+            id: item.id,
+            title: item.eventTitle || 'Untitled Event',
+            category: item.eventCategory || '',
+            city: item.eventCity || '',
+            zipCode: item.eventZipCode || '',
+            createdAt: item.createdAt || null,
+            dateValue: item.eventDate || null,
+            viewCount: Number(item.viewCount || 0),
+            favoritesCount: 0,
+            isFeatured: item.isFeatured === true,
+            status: item.eventStatus || '',
+            url: `https://locallist.biz/events.html`,
+          });
+        });
+
+        cache.services.forEach((item) => {
+          const createdAtMs = getTimestampMs(item.createdAt);
+          if (item.isApproved !== true || item.isActive === false) return;
+          if (!createdAtMs || createdAtMs < nowMs - (7 * 24 * 60 * 60 * 1000)) return;
+          rows.push({
+            contentType: 'services',
+            id: item.id,
+            title: item.serviceName || 'Untitled Service',
+            category: item.category || item.serviceCategory || '',
+            city: item.city || item.serviceCity || '',
+            zipCode: item.zipCode || '',
+            createdAt: item.createdAt || null,
+            dateValue: item.createdAt || null,
+            viewCount: Number(item.viewCount || 0),
+            favoritesCount: 0,
+            isFeatured: item.isFeatured === true,
+            status: item.approvalStatus || '',
+            url: `https://locallist.biz/service-details.html?id=${encodeURIComponent(item.id)}`,
+          });
+        });
+
+        cache.jobs.forEach((item) => {
+          const createdAtMs = getTimestampMs(item.createdAt);
+          if (String(item.status || '').toLowerCase() !== 'approved') return;
+          if (!createdAtMs || createdAtMs < nowMs - (7 * 24 * 60 * 60 * 1000)) return;
+          rows.push({
+            contentType: 'jobs',
+            id: item.id,
+            title: item.jobTitle || 'Untitled Job',
+            category: item.jobCategory || '',
+            city: item.jobCity || item.city || '',
+            zipCode: item.zipCode || '',
+            createdAt: item.createdAt || null,
+            dateValue: item.expiresAt || item.createdAt || null,
+            viewCount: Number(item.viewCount || 0),
+            favoritesCount: 0,
+            isFeatured: item.isFeatured === true,
+            status: item.status || '',
+            url: `https://locallist.biz/job-details.html?id=${encodeURIComponent(item.id)}`,
+          });
+        });
+
+        cache.deals.forEach((item) => {
+          const createdAtMs = getTimestampMs(item.createdAt);
+          if (String(item.status || '').toLowerCase() !== 'approved') return;
+          if (!createdAtMs || createdAtMs < nowMs - (7 * 24 * 60 * 60 * 1000)) return;
+          rows.push({
+            contentType: 'deals',
+            id: item.id,
+            title: item.dealTitle || item.title || 'Untitled Deal',
+            category: item.dealCategory || '',
+            city: item.city || '',
+            zipCode: item.zipCode || '',
+            createdAt: item.createdAt || null,
+            dateValue: item.endsAt || item.createdAt || null,
+            viewCount: Number(item.viewCount || 0),
+            favoritesCount: 0,
+            isFeatured: item.isFeatured === true,
+            status: item.status || '',
+            url: `https://locallist.biz/deals.html`,
+          });
+        });
+
+        return rows;
+      }
+
+      function buildMonthlyContentPool() {
+        const nowMs = Date.now();
+        const cutoffMs = nowMs + (30 * 24 * 60 * 60 * 1000);
+        const rows = buildWeeklyContentPool().filter((item) => {
+          const dateMs = getTimestampMs(item.dateValue || item.createdAt);
+          return !dateMs || dateMs <= cutoffMs;
+        });
+
+        cache.listings.forEach((item) => {
+          const createdAtMs = getTimestampMs(item.createdAt);
+          if (String(item.status || '').toLowerCase() !== 'approved') return;
+          if (!createdAtMs || createdAtMs < nowMs - (30 * 24 * 60 * 60 * 1000)) return;
+          const exists = rows.some((row) => row.contentType === 'marketplace' && row.id === item.id);
+          if (exists) return;
+          rows.push({
+            contentType: 'marketplace',
+            id: item.id,
+            title: item.title || 'Untitled Listing',
+            category: item.category || '',
+            city: item.city || '',
+            zipCode: item.zipCode || '',
+            createdAt: item.createdAt || null,
+            dateValue: item.expiresAt || item.createdAt || null,
+            viewCount: Number(item.viewCount || 0),
+            favoritesCount: Number(item.favoritesCount || 0),
+            isFeatured: item.isFeatured === true,
+            status: item.status || '',
+            url: `https://locallist.biz/single-listing.html?id=${encodeURIComponent(item.id)}`,
+          });
+        });
+
+        return rows;
+      }
+
+      async function loadData() {
+        if (!db) return false;
+        try {
+          const [usersSnap, emailLogSnap, eventDigestSnap, listingsSnap, eventsSnap, servicesSnap, jobsSnap, dealsSnap] = await Promise.all([
+            db.collection('users').get(),
+            db.collection('emailLog').get(),
+            db.collection('eventDigestSubscribers').get().catch(() => ({ docs: [] })),
+            db.collection('listings').get().catch(() => ({ docs: [] })),
+            db.collection('events').get().catch(() => ({ docs: [] })),
+            db.collection('services').get().catch(() => ({ docs: [] })),
+            db.collection('jobBoard').get().catch(() => ({ docs: [] })),
+            db.collection('deals').get().catch(() => ({ docs: [] })),
+          ]);
+
+          cache.users = usersSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.emailLog = emailLogSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.eventDigestSubscribers = (eventDigestSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.listings = (listingsSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.events = (eventsSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.services = (servicesSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.jobs = (jobsSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+          cache.deals = (dealsSnap.docs || []).map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+
+          updateOverview();
+          updatePreviews();
+          return true;
+        } catch (error) {
+          console.error('Digest report load error:', error);
+          return false;
+        }
+      }
+
+      function updatePreviews() {
+        const unifiedAudience = mergeAudienceRecords();
+        const weeklyContent = buildWeeklyContentPool();
+        const monthlyContent = buildMonthlyContentPool();
+
+        setText('digestSubscribersPreview', `Ready to export ${unifiedAudience.length} deduplicated contacts across emailLog, users, and event digest subscribers.`);
+        setText('weeklyContentPreview', `Current weekly pool: ${weeklyContent.length} content items eligible for the next 7-day digest.`);
+        setText('monthlyContentPreview', `Current monthly pool: ${monthlyContent.length} content items eligible for the next 30-day digest.`);
+        setText('marketingAudiencePreview', `Campaign audience can currently be built from ${unifiedAudience.length} deduplicated contacts with user enrichment.`);
+      }
+
+      function exportDigestSubscribers() {
+        const from = toInputDate(document.getElementById('digestSubscribersFrom')?.value);
+        const to = toInputDate(document.getElementById('digestSubscribersTo')?.value);
+        const source = document.getElementById('digestSubscribersSource')?.value || 'all';
+        const accountType = document.getElementById('digestSubscribersAccountType')?.value || 'all';
+
+        let rows = mergeAudienceRecords().filter((item) => {
+          if (!inDateRange(item.createdAt, from, to)) return false;
+          if (source !== 'all' && !String(item.source || '').includes(source)) return false;
+          if (accountType !== 'all' && normalizeAccountType(item.accountType) !== accountType) return false;
+          return true;
+        });
+
+        rows = rows.map((item) => ({
+          'Email': item.email || '',
+          'Name': item.name || '',
+          'User ID': item.userId || '',
+          'Account Type': normalizeAccountType(item.accountType),
+          'Business Tier': item.businessTier || '',
+          'Subscription Plan': item.subscriptionPlan || '',
+          'Digest Opt-In': item.digestNotification === true ? 'Yes' : 'No',
+          'Marketplace Weekly': item.marketplaceWeeklyDigest === true ? 'Yes' : 'No',
+          'Events Digest': item.eventsDigest === true ? 'Yes' : 'No',
+          'Yard Sales Digest': item.yardSalesDigest === true ? 'Yes' : 'No',
+          'Whats Happening Weekly': item.whatsHappeningWeeklyDigest === true ? 'Yes' : 'No',
+          'Whats Happening Monthly': item.whatsHappeningMonthlyDigest === true ? 'Yes' : 'No',
+          'Jobs Weekly': item.jobsWeeklyDigest === true ? 'Yes' : 'No',
+          'Event Digest Frequency': item.eventDigestFrequency || '',
+          'Zip Code': item.zipCode || '',
+          'Last Login': formatDate(item.lastLoginAt),
+          'Created At': formatDate(item.createdAt),
+          'Source': item.source || '',
+        }));
+
+        downloadCSV(`digest-subscribers-${Date.now()}.csv`, rows);
+      }
+
+      function exportWeeklyContent() {
+        const scope = document.getElementById('weeklyContentScope')?.value || 'all';
+        const featured = document.getElementById('weeklyContentFeatured')?.value || 'all';
+
+        let rows = buildWeeklyContentPool().filter((item) => {
+          if (scope !== 'all' && item.contentType !== scope) return false;
+          if (featured === 'yes' && item.isFeatured !== true) return false;
+          if (featured === 'no' && item.isFeatured === true) return false;
+          return true;
+        });
+
+        rows.sort((a, b) => (getTimestampMs(b.createdAt) || 0) - (getTimestampMs(a.createdAt) || 0));
+        downloadCSV(`weekly-digest-content-${Date.now()}.csv`, rows.map(formatContentRow));
+      }
+
+      function exportMonthlyContent() {
+        const scope = document.getElementById('monthlyContentScope')?.value || 'all';
+        const sort = document.getElementById('monthlyContentSort')?.value || 'newest';
+
+        let rows = buildMonthlyContentPool().filter((item) => {
+          if (scope !== 'all' && item.contentType !== scope) return false;
+          return true;
+        });
+
+        if (sort === 'popular') {
+          rows.sort((a, b) => ((b.viewCount + b.favoritesCount * 8) - (a.viewCount + a.favoritesCount * 8)));
+        } else {
+          rows.sort((a, b) => (getTimestampMs(b.createdAt) || 0) - (getTimestampMs(a.createdAt) || 0));
+        }
+
+        downloadCSV(`monthly-digest-content-${Date.now()}.csv`, rows.map(formatContentRow));
+      }
+
+      function exportMarketingAudience() {
+        const audienceType = document.getElementById('marketingAudienceType')?.value || 'all';
+        const digestFilter = document.getElementById('marketingAudienceDigest')?.value || 'all';
+        const tier = document.getElementById('marketingAudienceTier')?.value || 'all';
+        const login = document.getElementById('marketingAudienceLogin')?.value || 'all';
+        const nowMs = Date.now();
+
+        let rows = mergeAudienceRecords().filter((item) => {
+          const normalizedType = normalizeAccountType(item.accountType);
+          if (audienceType !== 'all' && normalizedType !== audienceType) return false;
+          if (digestFilter === 'yes' && item.digestNotification !== true) return false;
+          if (digestFilter === 'no' && item.digestNotification === true) return false;
+          if (tier !== 'all' && String(item.businessTier || item.subscriptionPlan || '').toLowerCase() !== tier) return false;
+          if (login !== 'all') {
+            const lastLoginMs = getTimestampMs(item.lastLoginAt);
+            const thresholdMs = nowMs - (Number(login) * 24 * 60 * 60 * 1000);
+            if (lastLoginMs && lastLoginMs > thresholdMs) return false;
+          }
+          return true;
+        });
+
+        rows = rows.map((item) => ({
+          'Email': item.email || '',
+          'Name': item.name || '',
+          'User ID': item.userId || '',
+          'Account Type': normalizeAccountType(item.accountType),
+          'Business Tier': item.businessTier || '',
+          'Subscription Plan': item.subscriptionPlan || '',
+          'Digest Opt-In': item.digestNotification === true ? 'Yes' : 'No',
+          'Marketplace Weekly': item.marketplaceWeeklyDigest === true ? 'Yes' : 'No',
+          'Events Digest': item.eventsDigest === true ? 'Yes' : 'No',
+          'Feature Purchases': Number(item.featurePurchases || 0),
+          'Zip Code': item.zipCode || '',
+          'Last Login': formatDate(item.lastLoginAt),
+          'Created At': formatDate(item.createdAt),
+          'Source': item.source || '',
+        }));
+
+        downloadCSV(`marketing-audience-${Date.now()}.csv`, rows);
+      }
+
+      function bindActions() {
+        document.getElementById('exportDigestSubscribers')?.addEventListener('click', exportDigestSubscribers);
+        document.getElementById('exportWeeklyContent')?.addEventListener('click', exportWeeklyContent);
+        document.getElementById('exportMonthlyContent')?.addEventListener('click', exportMonthlyContent);
+        document.getElementById('exportMarketingAudience')?.addEventListener('click', exportMarketingAudience);
+      }
+
+      async function boot() {
+        if (!auth || !db) {
+          setStatus('error', 'Firebase is not initialized on this page.');
+          showReports(false);
+          return;
+        }
+
+        bindActions();
+
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) {
+            setStatus('error', 'Please sign in with an admin account to view digest reports.');
+            showReports(false);
+            return;
+          }
+
+          try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+
+            if (String(userData.role || '').toLowerCase() !== 'admin') {
+              setStatus('error', 'Access denied. This page is limited to admin accounts.');
+              showReports(false);
+              return;
+            }
+
+            showReports(true);
+            const loaded = await loadData();
+            setStatus(
+              loaded ? 'success' : 'error',
+              loaded
+                ? 'Admin access granted. Email digest reports loaded.'
+                : 'Admin access granted, but digest report data could not be loaded.'
+            );
+          } catch (error) {
+            console.error('Digest report auth error:', error);
+            setStatus('error', 'Unable to verify admin access right now.');
+            showReports(false);
+          }
+        });
+      }
+
+      refreshButton?.addEventListener('click', () => {
+        setStatus('loading', 'Refreshing email digest reports...');
+        loadData()
+          .then((loaded) => setStatus(
+            loaded ? 'success' : 'error',
+            loaded ? 'Email digest reports refreshed.' : 'Email digest reports could not be refreshed.'
+          ))
+          .catch(() => setStatus('error', 'Could not refresh email digest reports.'));
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+</body>
+</html>

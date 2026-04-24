@@ -58,24 +58,28 @@
 
     .events-benefits-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
       gap: 12px;
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      padding: 8px;
-      margin-bottom: 18px;
+      padding: 10px;
+      margin-bottom: 16px;
       overflow: hidden;
     }
 
     .events-benefits-image {
       width: 100%;
-      max-height: 300px;
-      object-fit: cover;
+      min-height: 180px;
+      max-height: 220px;
+      object-fit: contain;
+      object-position: center;
       border-radius: 10px;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
       display: block;
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      padding: 6px;
     }
 
     .events-benefits-content {
@@ -84,34 +88,39 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      gap: 8px;
-      padding: 8px;
+      gap: 6px;
+      padding: 8px 10px;
     }
 
     .events-benefits-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       color: #334155;
       line-height: 1.25;
     }
 
     .events-benefits-text {
-      font-size: 16px;
+      font-size: 14px;
       color: #475569;
-      line-height: 1.5;
+      line-height: 1.55;
       max-width: 540px;
     }
 
     .events-benefits-cta {
       margin-top: 4px;
-      padding: 8px 14px;
+      padding: 10px 16px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       text-decoration: none;
-      background: #475569;
-      color: #fff;
-      transition: background 0.2s;
+      background: transparent;
+      color: #475569;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      width: 100%;
+      border: 1px solid #475569;
     }
 
     .events-benefits-cta:hover {
@@ -119,18 +128,19 @@
     }
 
     .filters-panel {
-      background: #ffffff;
+      background: transparent;
+      padding: 12px;
+      margin-bottom: 12px;
       border: 1px solid #e5e7eb;
       border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      padding: 14px;
-      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .filters-grid {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr;
       gap: 10px;
+      align-items: end;
     }
 
     .filter-group {
@@ -143,6 +153,11 @@
       font-size: 16px;
       font-weight: 700;
       color: #334155;
+    }
+
+    .filter-label-spacer {
+      visibility: hidden;
+      user-select: none;
     }
 
     .filter-input,
@@ -165,14 +180,18 @@
     }
 
     .section-block {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
+    }
+
+    .filters-panel + .section-block {
+      margin-top: 8px;
     }
 
     .section-title {
       font-size: 23px;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-align: center;
     }
 
@@ -296,8 +315,32 @@
       border: 1px dashed #cbd5e1;
       color: #64748b;
       border-radius: 12px;
-      padding: 14px;
-      font-size: 16px;
+      padding: 24px 18px;
+      font-size: 15px;
+      line-height: 1.5;
+      text-align: center;
+      grid-column: 1 / -1;
+      min-height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state-content {
+      max-width: 420px;
+    }
+
+    .empty-state h3 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
     }
 
     .section-view-all-wrap {
@@ -473,6 +516,19 @@
         grid-template-columns: 1fr;
       }
 
+      .events-benefits-image {
+        min-height: 150px;
+        max-height: 180px;
+      }
+
+      .events-benefits-text {
+        display: none;
+      }
+
+      .events-benefits-title {
+        margin-bottom: 0;
+      }
+
       .events-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -489,6 +545,10 @@
 
       .filters-grid {
         grid-template-columns: 1fr;
+      }
+
+      .filter-label-spacer {
+        display: none;
       }
 
       .digest-banner {
@@ -523,22 +583,12 @@
   </section>
 
   <main class="container">
-    <section class="events-benefits-row" aria-label="Benefits of posting an event">
-      <img class="events-benefits-image" src="eventshub.png" alt="Promote your next event on Local List">
-      <div class="events-benefits-content">
-        <h2 class="events-benefits-title">Promote Your Next Event Locally</h2>
-        <p class="events-benefits-text">Hosting something in the community? Post your event on Local List to reach local attendees, share key details in one place, and help more people discover what is happening. From fundraisers and family events to workshops and live music, your listing makes it easier for neighbors to find and attend.</p>
-        <a href="create-event-listing.html" class="events-benefits-cta">+ Post Your Event</a>
-      </div>
-    </section>
-
     <section class="filters-panel" aria-label="Event filters">
       <div class="filters-grid">
         <div class="filter-group">
           <label class="filter-label" for="searchEventsInput">Search Events</label>
           <input id="searchEventsInput" class="filter-input" type="text" placeholder="Search by title, city, or keyword">
         </div>
-
         <div class="filter-group">
           <label class="filter-label" for="categoryFilter">Filter by Category</label>
           <select id="categoryFilter" class="filter-select">
@@ -552,10 +602,9 @@
             <option value="Charity">Charity</option>
           </select>
         </div>
-
-        <div class="filter-group">
-          <label class="filter-label" for="dateFilter">Filter by Date</label>
-          <input id="dateFilter" class="filter-input" type="date">
+        <div class="filter-group filter-action">
+          <label class="filter-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
+           <a href="create-event-listing.html" class="events-benefits-cta">Post Your Event</a>
         </div>
       </div>
     </section>
@@ -595,10 +644,6 @@
       </div>
     </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
-  </footer>
 
   <script src="header.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
@@ -650,9 +695,9 @@
       }
       wrap.hidden = false;
       if (expanded) {
-        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="false">Show fewer</button>`;
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="false">Show Fewer</button>`;
       } else {
-        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="true">View all events (${items.length})</button>`;
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="true">View More</button>`;
       }
     }
 
@@ -764,8 +809,15 @@
       `;
     }
 
-    function showEmpty(gridId, message) {
-      document.getElementById(gridId).innerHTML = `<div class="empty-state">${message}</div>`;
+    function showEmpty(gridId, title, message) {
+      document.getElementById(gridId).innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-content">
+            <h3>${title}</h3>
+            <p>${message}</p>
+          </div>
+        </div>
+      `;
     }
 
     function applyFilters(events) {
@@ -858,7 +910,7 @@
       const twoRowCap = maxEventsForTwoRows();
 
       if (!buckets.week.length) {
-        showEmpty('thisWeekGrid', 'No events found for this week.');
+        showEmpty('thisWeekGrid', 'Happening This Week', 'No events at the moment.');
         hidePreviewFooter('thisWeekViewAll');
       } else {
         const weekShown = expandedThisWeek ? buckets.week : buckets.week.slice(0, twoRowCap);
@@ -867,7 +919,7 @@
       }
 
       if (!buckets.month.length) {
-        showEmpty('thisMonthGrid', 'No upcoming events found.');
+        showEmpty('thisMonthGrid', 'Upcoming Events', 'No upcoming events at the moment.');
         hidePreviewFooter('thisMonthViewAll');
       } else {
         const monthShown = expandedThisMonth ? buckets.month : buckets.month.slice(0, twoRowCap);
@@ -915,7 +967,7 @@
       if (!db) {
         console.error('Firestore not initialized');
         ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
-          showEmpty(id, 'Unable to load events.');
+          showEmpty(id, 'Events', 'Unable to load events.');
         });
         hideAllPreviewFooters();
         return;
@@ -941,7 +993,7 @@
         console.error('Error loading events:', err);
         allEvents = [];
         ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
-          showEmpty(id, 'Error loading events. Please refresh.');
+          showEmpty(id, 'Events', 'Error loading events. Please refresh.');
         });
         hideAllPreviewFooters();
         return;

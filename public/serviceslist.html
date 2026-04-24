@@ -56,7 +56,7 @@
 
     /* Search panel */
     .search-panel {
-      background: #ffffff;
+      background: transparent;
       border: 1px solid #e5e7eb;
       border-radius: 14px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -66,7 +66,7 @@
 
     .search-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1.4fr 1fr 1fr;
       gap: 10px;
       align-items: end;
     }
@@ -77,10 +77,19 @@
       gap: 6px;
     }
 
+    .search-field-action {
+      justify-content: flex-end;
+    }
+
     .search-label {
       font-size: 13px;
       font-weight: 700;
       color: #334155;
+    }
+
+    .search-label-spacer {
+      visibility: hidden;
+      user-select: none;
     }
 
     .search-input {
@@ -122,28 +131,35 @@
       box-shadow: 0 0 0 3px rgba(30,58,95,0.12);
     }
 
+    .search-field-action .btn {
+      width: 100%;
+      text-align: center;
+    }
+
     /* Benefits hero row */
     .benefits-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
       gap: 12px;
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      padding: 8px;
-      margin-bottom: 12px;
-      max-height: 300px;
+      padding: 10px;
+      margin-bottom: 16px;
       overflow: hidden;
     }
 
     .benefits-image {
       width: 100%;
-      max-height: 300px;
-      min-height: 0;
-      object-fit: cover;
+      min-height: 180px;
+      max-height: 220px;
+      object-fit: contain;
+      object-position: center;
       border-radius: 10px;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      padding: 6px;
       display: block;
     }
 
@@ -154,10 +170,11 @@
       align-items: center;
       text-align: center;
       gap: 6px;
+      padding: 8px 10px;
     }
 
     .benefits-title {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 800;
       color: #334155;
       line-height: 1.25;
@@ -171,9 +188,9 @@
 
     .benefits-cta {
       align-self: center;
-      padding: 7px 14px;
+      padding: 10px 16px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 14px;
       margin-top: 4px;
     }
 
@@ -257,6 +274,34 @@
       color: #64748b;
       font-size: 14px;
       margin: 0;
+    }
+
+    .results-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .results-more-wrap[hidden] {
+      display: none !important;
+    }
+
+    .results-more-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 2px solid #475569;
+      background: #fff;
+      color: #475569;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .results-more-btn:hover {
+      background: #475569;
+      color: #fff;
     }
 
     .btn {
@@ -459,11 +504,24 @@
       }
 
       .benefits-image {
-        max-height: 160px;
+        min-height: 150px;
+        max-height: 180px;
+      }
+
+      .benefits-text {
+        display: none;
+      }
+
+      .benefits-title {
+        margin-bottom: 0;
       }
 
       .search-grid {
         grid-template-columns: 1fr;
+      }
+
+      .search-label-spacer {
+        display: none;
       }
     }
   </style>
@@ -471,25 +529,12 @@
 </head>
 <body>
   <div id="header-container"></div>
-
   <div class="page-header-wrapper">
     <div class="page-header">
       <h1 class="page-title">Local Services</h1>
     </div>
   </div>
-
   <div class="container">
-
-    <!-- Benefits / hero row -->
-    <section class="benefits-row" aria-label="Post your service on Local List">
-      <img class="benefits-image" src="serviceshub.png" alt="List your service on Local List">
-      <div class="benefits-content">
-        <h2 class="benefits-title">Offer Your Services to the Community</h2>
-        <p class="benefits-text">Do you offer a service in the community? Add it to the Local List services directory so people nearby can easily find and connect with you. Whether you provide home repairs, lawn care, cleaning, tutoring, tech help, or another type of service, this is a great way to let locals know what you offer. Your listing gives you a place to describe your services, share contact information, and help people understand how you can help them. It only takes a few minutes to set up, and once it’s live, your service becomes part of a growing directory designed to help neighbors support local talent and connect with trusted services right here in the community.</p>
-        <a href="create-service-listing.html" class="btn btn-primary benefits-cta">+ Post a Service</a>
-      </div>
-    </section>
-
     <!-- Search panel -->
     <div class="search-panel">
       <div class="search-grid">
@@ -503,9 +548,12 @@
             <option value="all">All Services</option>
           </select>
         </div>
+        <div class="search-field search-field-action">
+          <label class="search-label search-label-spacer" aria-hidden="true">&nbsp;</label>
+          <a href="create-service-listing.html" class="btn btn-primary">+ Post a Service</a>
+        </div>
       </div>
     </div>
-
     <section id="featuredSection" class="featured-section">
       <h2 class="featured-title">Featured Services</h2>
       <p class="featured-subtitle">Highlighted local services you may want to explore first.</p>
@@ -522,6 +570,7 @@
       <div id="profilesContainer" class="profiles-grid">
         <div class="loading">Loading services...</div>
       </div>
+      <div id="profilesMoreWrap" class="results-more-wrap" hidden></div>
     </section>
 
   </div>
@@ -565,6 +614,7 @@
     let filteredProfiles = [];
     let activeCategory = 'all';
     let activeServicePromotion = null;
+    let visibleProfilesCount = 0;
 
     function getTodayDateKey() {
       const now = new Date();
@@ -718,6 +768,7 @@
     function displayProfiles() {
       const container = document.getElementById('profilesContainer');
       const featuredContainer = document.getElementById('featuredContainer');
+      const moreWrap = document.getElementById('profilesMoreWrap');
 
       let profilesForDisplay = [...filteredProfiles];
       if (activeServicePromotion && activeServicePromotion.targetId) {
@@ -760,6 +811,10 @@
       }
 
       if (profilesForDisplay.length === 0) {
+        if (moreWrap) {
+          moreWrap.hidden = true;
+          moreWrap.innerHTML = '';
+        }
         const msg = activeCategory !== 'all'
           ? `No services found in this category. <a href="create-service-listing.html" style="color:#475569;">Be the first to post one!</a>`
           : 'No services found. Check back soon or <a href="create-service-listing.html" style="color:#475569;">post your service</a>!';
@@ -772,11 +827,42 @@
         return;
       }
 
-      container.innerHTML = profilesForDisplay.map(profile => {
+      const previewStep = getProfilesPreviewStep();
+      if (visibleProfilesCount < previewStep) {
+        visibleProfilesCount = previewStep;
+      }
+      const visibleProfiles = profilesForDisplay.slice(0, Math.min(visibleProfilesCount, profilesForDisplay.length));
+
+      container.innerHTML = visibleProfiles.map(profile => {
         if (profile.__promoHtml) return profile.__promoHtml;
         return createProfileCard(profile);
       }).join('');
       attachCardEventListeners();
+
+      if (moreWrap) {
+        if (profilesForDisplay.length <= previewStep) {
+          moreWrap.hidden = true;
+          moreWrap.innerHTML = '';
+        } else {
+          moreWrap.hidden = false;
+          moreWrap.innerHTML = `
+            <button type="button" class="results-more-btn" data-results-action="${visibleProfilesCount < profilesForDisplay.length ? 'more' : 'less'}">
+              ${visibleProfilesCount < profilesForDisplay.length ? 'View More' : 'Show Fewer'}
+            </button>
+          `;
+        }
+      }
+    }
+
+    function getProfilesPreviewStep() {
+      const container = document.getElementById('profilesContainer');
+      const availableWidth = container ? container.clientWidth : window.innerWidth;
+      const approxColumns = Math.max(1, Math.floor((availableWidth + 16) / 236));
+      return approxColumns * 2;
+    }
+
+    function resetProfilesPreview() {
+      visibleProfilesCount = 0;
     }
 
     function createProfileCard(profile, isPromoted, promotion) {
@@ -864,6 +950,7 @@
     }
 
     function applyFilters() {
+      resetProfilesPreview();
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
       filteredProfiles = allProfiles.filter(profile => {
@@ -906,6 +993,31 @@
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('categorySelect').addEventListener('change', (event) => {
       filterByCategory(event.target.value || 'all');
+    });
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('.results-more-btn[data-results-action]');
+      if (!(button instanceof HTMLElement)) return;
+      const action = button.getAttribute('data-results-action');
+      const step = getProfilesPreviewStep();
+      if (action === 'more') {
+        visibleProfilesCount += step;
+      } else {
+        visibleProfilesCount = step;
+      }
+      displayProfiles();
+    });
+
+    let profilesResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(profilesResizeTimer);
+      profilesResizeTimer = setTimeout(() => {
+        const previewStep = getProfilesPreviewStep();
+        if (visibleProfilesCount > 0 && visibleProfilesCount < previewStep) {
+          visibleProfilesCount = previewStep;
+        }
+        displayProfiles();
+      }, 150);
     });
 
     // Check for userId parameter and auto-open profile

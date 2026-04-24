@@ -57,7 +57,7 @@
     }
 
     .search-panel {
-      background: #ffffff;
+      background: transparent;
       border: 1px solid #e5e7eb;
       border-radius: 14px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -66,34 +66,31 @@
     }
 
     .search-grid {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
       gap: 10px;
       align-items: flex-end;
     }
 
     .search-field {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .search-field-query {
-      flex: 1 1 auto;
       min-width: 0;
     }
 
     .search-field-category {
-      flex: 0 0 240px;
-      max-width: 240px;
+      min-width: 0;
     }
 
-    .search-field-query .search-label {
-      width: 130px;
-    }
-
-    .search-field-category .search-label {
-      width: 72px;
-      text-align: right;
+    .search-field-action {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 6px;
     }
 
     .search-label {
@@ -102,6 +99,11 @@
       color: #334155;
       margin: 0;
       white-space: nowrap;
+    }
+
+    .search-label-spacer {
+      visibility: hidden;
+      user-select: none;
     }
 
     .category-select {
@@ -189,31 +191,37 @@
     .btn-list-business {
       width: 100%;
       text-align: center;
-      padding: 11px 14px;
+      padding: 8px 10px;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 10px;
     }
 
     .benefits-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
       gap: 12px;
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      padding: 8px;
-      margin-bottom: 12px;
-      max-height: 300px;
+      padding: 10px;
+      margin-bottom: 16px;
       overflow: hidden;
     }
 
     .benefits-image {
       width: 100%;
-      max-height: 300px;
-      min-height: 0;
-      object-fit: cover;
+      min-height: 180px;
+      max-height: 220px;
+      object-fit: contain;
+      object-position: center;
       border-radius: 10px;
-      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      padding: 6px;
       display: block;
     }
 
@@ -224,19 +232,20 @@
       align-items: center;
       text-align: center;
       gap: 6px;
+      padding: 8px 10px;
     }
 
     .benefits-title {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 800;
       color: #334155;
       line-height: 1.25;
     }
 
     .benefits-text {
-      font-size: 20px;
+      font-size: 14px;
       color: #475569;
-      line-height: 1.4;
+      line-height: 1.55;
     }
 
     .benefits-list {
@@ -249,9 +258,9 @@
 
     .benefits-cta {
       align-self: center;
-      padding: 7px 11px;
+      padding: 10px 16px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 14px;
     }
 
     .btn {
@@ -354,6 +363,34 @@
       color: #64748b;
       font-size: 14px;
       margin: 0;
+    }
+
+    .results-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .results-more-wrap[hidden] {
+      display: none !important;
+    }
+
+    .results-more-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 2px solid #475569;
+      background: #fff;
+      color: #475569;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .results-more-btn:hover {
+      background: #475569;
+      color: #fff;
     }
 
     .featured-grid {
@@ -852,6 +889,7 @@
 
     @media (max-width: 768px) {
       .search-grid {
+        grid-template-columns: 1fr;
         gap: 8px;
       }
 
@@ -859,19 +897,8 @@
         gap: 6px;
       }
 
-      .search-field-query .search-label {
-        width: 92px;
-        font-size: 16px;
-      }
-
-      .search-field-category .search-label {
-        width: 62px;
-        font-size: 16px;
-      }
-
-      .search-field-category {
-        flex: 0 0 42%;
-        max-width: 42%;
+      .search-label-spacer {
+        display: none;
       }
 
       .profiles-grid {
@@ -884,7 +911,8 @@
       }
 
       .benefits-row { grid-template-columns: 1fr; }
-      .benefits-image { min-height: 150px; }
+      .benefits-image { min-height: 150px; max-height: 180px; }
+      .benefits-text { display: none; }
       .benefits-cta { width: 100%; text-align: center; }
 
       .filters {
@@ -905,16 +933,6 @@
   </div>
 
   <div class="container">
-      <section class="benefits-row" aria-label="Benefits of creating a business profile">
-        <img class="benefits-image" src="businsshub.png" alt="List your business on Local List">
-        <div class="benefits-content">
-          <h2 class="benefits-title">Show Your Business Some Local Love</h2>
-          <p class="benefits-text">Local List gives you the opportunity to add your local business to our directory. Your profile lets you share what you do, how to contact you, and what makes your business special. It only takes a minute to set up and it helps provide even more exposure locally, giving your business more visibility within our community.</p>
-          <p class="benefits-text"></p>
-          <a href="businesslocal.html" class="btn btn-primary benefits-cta">+ Add A Business</a>
-        </div>
-      </section>
-
       <div class="search-panel">
         <div class="search-grid">
           <div class="search-field search-field-query">
@@ -926,6 +944,10 @@
             <select id="categorySelect" class="category-select">
               <option value="All">All</option>
             </select>
+          </div>
+          <div class="search-field search-field-action">
+            <label class="search-label search-label-spacer" aria-hidden="true">&nbsp;</label>
+            <a href="businesslocal.html" class="btn btn-primary btn-list-business">+ Add A Business</a>
           </div>
         </div>
       </div>
@@ -945,6 +967,7 @@
       <div id="profilesContainer" class="profiles-grid">
         <div class="loading">Loading Business Local businesses...</div>
       </div>
+      <div id="profilesMoreWrap" class="results-more-wrap" hidden></div>
     </section>
 
     <!-- Modal removed - now using dedicated business-profile.html page -->
@@ -1007,6 +1030,7 @@
     let selectedCategory = 'All';
     let selectedClaimProfile = null;
     let currentUser = null;
+    let visibleProfilesCount = 0;
     let currentUserProfile = null;
 
     auth.onAuthStateChanged(async (user) => {
@@ -1154,6 +1178,7 @@
       const container = document.getElementById('profilesContainer');
       const featuredSection = document.getElementById('featuredSection');
       const featuredContainer = document.getElementById('featuredContainer');
+      const moreWrap = document.getElementById('profilesMoreWrap');
 
       updateResultsSectionTitle();
 
@@ -1173,6 +1198,10 @@
       }
 
       if (filteredProfiles.length === 0) {
+        if (moreWrap) {
+          moreWrap.hidden = true;
+          moreWrap.innerHTML = '';
+        }
         const hasFilters = document.getElementById('searchInput').value.trim().length > 0 || selectedCategory !== 'All';
         container.innerHTML = `
           <div class="empty-state" style="grid-column: 1 / -1;">
@@ -1183,8 +1212,39 @@
         return;
       }
 
-      container.innerHTML = filteredProfiles.map(profile => createProfileCard(profile)).join('');
+      const previewStep = getProfilesPreviewStep();
+      if (visibleProfilesCount < previewStep) {
+        visibleProfilesCount = previewStep;
+      }
+      const visibleProfiles = filteredProfiles.slice(0, Math.min(visibleProfilesCount, filteredProfiles.length));
+
+      container.innerHTML = visibleProfiles.map(profile => createProfileCard(profile)).join('');
       attachCardEventListeners();
+
+      if (moreWrap) {
+        if (filteredProfiles.length <= previewStep) {
+          moreWrap.hidden = true;
+          moreWrap.innerHTML = '';
+        } else {
+          moreWrap.hidden = false;
+          moreWrap.innerHTML = `
+            <button type="button" class="results-more-btn" data-results-action="${visibleProfilesCount < filteredProfiles.length ? 'more' : 'less'}">
+              ${visibleProfilesCount < filteredProfiles.length ? 'View More' : 'Show Fewer'}
+            </button>
+          `;
+        }
+      }
+    }
+
+    function getProfilesPreviewStep() {
+      const container = document.getElementById('profilesContainer');
+      const availableWidth = container ? container.clientWidth : window.innerWidth;
+      const approxColumns = Math.max(1, Math.floor((availableWidth + 16) / 236));
+      return approxColumns * 2;
+    }
+
+    function resetProfilesPreview() {
+      visibleProfilesCount = 0;
     }
 
     function isBusinessClaimed(profile) {
@@ -1445,6 +1505,7 @@
     }
 
     function applyFilters() {
+      resetProfilesPreview();
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const activeCategory = normalizeValue(selectedCategory);
 
@@ -1470,6 +1531,31 @@
     document.getElementById('categorySelect').addEventListener('change', (event) => {
       selectedCategory = event.target.value || 'All';
       applyFilters();
+    });
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('.results-more-btn[data-results-action]');
+      if (!(button instanceof HTMLElement)) return;
+      const action = button.getAttribute('data-results-action');
+      const step = getProfilesPreviewStep();
+      if (action === 'more') {
+        visibleProfilesCount += step;
+      } else {
+        visibleProfilesCount = step;
+      }
+      displayProfiles();
+    });
+
+    let profilesResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(profilesResizeTimer);
+      profilesResizeTimer = setTimeout(() => {
+        const previewStep = getProfilesPreviewStep();
+        if (visibleProfilesCount > 0 && visibleProfilesCount < previewStep) {
+          visibleProfilesCount = previewStep;
+        }
+        displayProfiles();
+      }, 150);
     });
     document.getElementById('claimBusinessForm').addEventListener('submit', submitClaimRequest);
     document.getElementById('claimModalBackdrop').addEventListener('click', (event) => {

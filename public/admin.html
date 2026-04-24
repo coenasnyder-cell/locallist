@@ -1159,7 +1159,7 @@
                 <td><span class="count-pill" id="priorityPendingListings">0</span></td>
                 <td>
                   <div class="row-actions">
-                    <button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button>
+                    <button class="btn small" onclick="window.navigateToTab('pending-listings')">Manage</button>
                   </div>
                 </td>
               </tr>
@@ -1204,19 +1204,19 @@
               <tr>
                 <td><span class="admin-item-title">Pending Listings</span></td>
                 <td><span class="count-pill" id="modPendingListings">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Open Queue</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Manage</button></div></td>
               </tr>
               <tr id="rowServiceQueue">
                 <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
                 <td><span class="count-pill" id="priorityServiceApprovalQueue">0</span></td>
                 <td>
-                <div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-services')">Open Queue</button></div>
+                <div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-services')">Manage</button></div>
                 </td>
               </tr>
               <tr>
                 <td><span class="admin-item-title">Pending Business Profiles</span></td>
                 <td><span class="count-pill" id="modPendingBusinessProfiles">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.openBusinessProfilesView('pending')">Open</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.openBusinessProfilesView('pending')">Manage</button></div></td>
               </tr>
               <tr>
                 <td><span class="admin-item-title">Reported Listings</span></td>
@@ -1231,7 +1231,7 @@
               <tr>
                 <td><span class="admin-item-title">Reviews Management</span></td>
                 <td><span class="count-pill" id="modPendingReviewsManagement">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reviews-management')">Open Queue</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reviews-management')">Manage</button></div></td>
               </tr>
               </tbody>
           </table>
@@ -1254,8 +1254,8 @@
               </tr>
               <tr>
                 <td><span class="admin-item-title">Marketplace Reports</span></td>
-                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+                <td><span class="count-pill" id="marketplaceReportsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.location.href='listing-reports.html'">Open Reports</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -1389,7 +1389,7 @@
               <tr>
                 <td><span class="admin-item-title">Quote of the Day</span></td>
                 <td><span class="count-pill">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('community-settings')">Open</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('community-settings')">Manage</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -1408,12 +1408,12 @@
               <tr>
                 <td><span class="admin-item-title">Reported Messages</span></td>
                 <td><span class="count-pill">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Open</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reported-messages')">Manage</button></div></td>
               </tr>
               <tr>
                 <td><span class="admin-item-title">Email Digest Report</span></td>
-                <td><span class="count-pill" data-count-key="upgradeTargetsCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('reports')">Open Reports</button></div></td>
+                <td><span class="count-pill" id="emailDigestReportsCount">-</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.location.href='email-digest-reports.html'">Open Dashboard</button></div></td>
               </tr>
             </tbody>
           </table>
@@ -1468,7 +1468,7 @@
               <tr>
                 <td><span class="admin-item-title">User Management</span></td>
                 <td><span class="count-pill" id="totalUsersCount">-</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('user-management')">Open</button></div></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('user-management')">Manage</button></div></td>
               </tr>
               <tr>
                 <td><span class="admin-item-title">User Reports</span></td>
@@ -1478,8 +1478,41 @@
             </tbody>
           </table>
         </div>
-          <div class="table-section">
+        <div class="table-section">
           <p class="hub-section-label">Payments Management</p>
+                    <div class="card-grid" style="margin-top: 12px;">
+            <div class="stat-card blue">
+              <div class="stat-card-icon">💳</div>
+              <div class="stat-value" id="paymentsStatTotalPurchases">-</div>
+              <div class="stat-label">Total Purchases</div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-icon">⏳</div>
+              <div class="stat-value" id="paymentsStatPendingPurchases">-</div>
+              <div class="stat-label">Pending Approval</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-card-icon">✅</div>
+              <div class="stat-value" id="paymentsStatCompletedPurchases">-</div>
+              <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-icon">✖</div>
+              <div class="stat-value" id="paymentsStatRejectedPurchases">-</div>
+              <div class="stat-label">Rejected</div>
+            </div>
+            <div class="stat-card purple">
+              <div class="stat-card-icon">🛍️</div>
+              <div class="stat-value" id="paymentsStatListingPurchases">-</div>
+              <div class="stat-label">Listing Purchases</div>
+            </div>
+            <div class="stat-card teal">
+              <div class="stat-card-icon">💵</div>
+              <div class="stat-value" id="paymentsStatGrossRevenue">-</div>
+              <div class="stat-label">Gross Revenue</div>
+            </div>
+          </div>
+        </div>
           <table class="admin-table">
             <thead>
               <tr>
@@ -1506,8 +1539,7 @@
               </tr>
             </tbody>
           </table>
-        </div>
-               <div class="table-section">
+          <div class="table-section">
           <p class="hub-section-label">📊 Reports &amp; Exports</p>
           <table class="admin-table">
             <thead>

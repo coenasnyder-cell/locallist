@@ -58,7 +58,7 @@
 
     /* Filters */
     .filters-panel {
-      background: #fff;
+      background: transparent;
       border: 1px solid #e5e7eb;
       border-radius: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -70,6 +70,7 @@
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr;
       gap: 10px;
+      align-items: end;
     }
 
     .filter-group {
@@ -78,10 +79,24 @@
       gap: 6px;
     }
 
+    .filter-action {
+      justify-content: flex-end;
+    }
+
+    .filter-action .promo-btn {
+      width: 100%;
+      text-align: center;
+    }
+
     .filter-label {
       font-size: 16px;
       font-weight: 700;
       color: #334155;
+    }
+
+    .filter-label-spacer {
+      visibility: hidden;
+      user-select: none;
     }
 
     .filter-input {
@@ -104,31 +119,36 @@
     /* Promo row */
     .promo-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 18px;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 18px;
-      padding: 18px;
+     align-items: center;
+      justify-content: center;
+      justify-items: center;
+      gap: 5px;
+      background: transparent;
+      margin-bottom: 16px;
+      padding: 10px;
     }
 
     .promo-image-link {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
+      max-width: 340px;
       text-decoration: none;
+      margin: 0 auto;
     }
 
     .promo-image {
       width: 100%;
-      min-height: 220px;
+      min-height: 180px;
+      max-height: 220px;
+      object-fit: contain;
+      object-position: center;
       border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      object-fit: cover;
       display: block;
-      background: #dc262615;
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      padding: 6px;
     }
 
     .promo-image-placeholder {
@@ -145,40 +165,43 @@
     .promo-text {
       padding: 0;
       text-align: center;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
     }
 
     .promo-text h3 {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 800;
-      color: #0f172a;
+      color: #334155;
       margin-bottom: 8px;
-      line-height: 1.2;
+      line-height: 1.25;
       text-align: center;
     }
 
     .promo-text p {
-      font-size: 16px;
+      font-size: 14px;
       color: #475569;
       line-height: 1.55;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .promo-btn {
       display: inline-block;
-      background: #dc2626;
+      background: #475569;
       color: #fff;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 14px;
       border: none;
-      border-radius: 10px;
-      padding: 10px 18px;
+      border-radius: 8px;
+      padding: 10px 16px;
       cursor: pointer;
       text-decoration: none;
       font-family: inherit;
       transition: background 0.2s;
     }
 
-    .promo-btn:hover { background: #b91c1c; }
+    .promo-btn:hover { background: #3b4a5a; }
 
     /* Sections */
     .section-block {
@@ -433,18 +456,37 @@
 
     @media (max-width: 960px) {
       .sales-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .filters-grid { grid-template-columns: 1fr 1fr; }
+      .filters-grid { grid-template-columns: 1.4fr 1fr 1fr; }
       .promo-image { min-height: 180px; }
       .promo-image-placeholder { width: 100%; min-height: 180px; font-size: 44px; }
+    }
+
+    @media (max-width: 760px) {
+      .filters-grid { grid-template-columns: 1fr 1fr; }
+      .filter-action {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
     }
 
     @media (max-width: 620px) {
       .sales-grid { grid-template-columns: 1fr; }
       .filters-grid { grid-template-columns: 1fr; }
+      .filter-group { gap: 4px; }
+      .filter-label { font-size: 14px; }
+      .filter-label-spacer { display: none; }
+      .filter-input {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      .filter-action { justify-content: flex-start; }
+      .filter-action .promo-btn { width: 100%; text-align: center; }
       .promo-row { grid-template-columns: 1fr; gap: 14px; }
-      .promo-image { min-height: 170px; }
+      .promo-image { min-height: 150px; max-height: 180px; }
       .promo-image-placeholder { width: 100%; min-height: 170px; font-size: 48px; }
       .promo-text { padding: 0; }
+      .promo-text p { display: none; }
+      .promo-text h3 { margin-bottom: 0; }
     }
 
     @media (max-width: 480px) {
@@ -464,20 +506,7 @@
       <p>Find local garage and yard sales happening right here in our community</p>
     </div>
   </section>
-
   <main class="container">
-
-    <div class="promo-row" aria-label="List your yard sale">
-      <a class="promo-image-link" href="create-yard-sale.html" aria-label="Create a yard sale listing">
-        <img class="promo-image" src="yardsale.png" alt="Yard sale preview image">
-      </a>
-      <div class="promo-text">
-        <h3>Hosting a Yard Sale?</h3>
-        <p>Let your neighbors know! Post your yard sale for free and reach shoppers in your area. It only takes a minute to get listed.</p>
-        <a class="promo-btn" href="create-yard-sale.html">Post Your Yard Sale →</a>
-      </div>
-    </div>
-
     <section class="filters-panel" aria-label="Yard sale filters">
       <div class="filters-grid">
         <div class="filter-group">
@@ -488,19 +517,16 @@
           <label class="filter-label" for="dateFromFilter">From Date</label>
           <input id="dateFromFilter" class="filter-input" type="date">
         </div>
-        <div class="filter-group">
-          <label class="filter-label" for="dateToFilter">To Date</label>
-          <input id="dateToFilter" class="filter-input" type="date">
+        <div class="filter-group filter-action">
+          <label class="filter-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
+          <a class="promo-btn" href="create-yard-sale.html">Post Your Yard Sale &rarr;</a>
         </div>
       </div>
     </section>
-
     <div class="map-block" aria-label="Yard sales map">
       <h2 class="section-title">📍 Upcoming Yard Sales on the Map</h2>
       <div id="salesMap"></div>
-      <p class="map-note">Showing upcoming yard sales (today and later). Pins are geocoded from each listing's address.</p>
     </div>
-
     <section class="section-block" aria-label="Upcoming yard sales">
       <h2 class="section-title">Upcoming Yard Sales</h2>
       <div id="upcomingGrid" class="sales-grid"></div>
@@ -528,10 +554,6 @@
 
   </main>
 
-  <footer>
-    <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
-  </footer>
-
   <script src="header.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
@@ -541,7 +563,6 @@
   <script>
     const searchInput = document.getElementById('searchInput');
     const dateFromFilter = document.getElementById('dateFromFilter');
-    const dateToFilter = document.getElementById('dateToFilter');
 
     let allSales = [];
     let expandedUpcoming = false;
@@ -625,9 +646,9 @@
       }
       wrap.hidden = false;
       if (expanded) {
-        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="false">Show fewer</button>`;
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="false">Show Fewer</button>`;
       } else {
-        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="true">View all (${items.length})</button>`;
+        wrap.innerHTML = `<button type="button" class="section-view-all-btn" data-preview-section="${sectionKey}" data-preview-expand="true">View More</button>`;
       }
     }
 
@@ -778,7 +799,6 @@
     function applyFilters(sales) {
       const term = searchInput.value.trim().toLowerCase();
       const from = dateFromFilter.value;
-      const to = dateToFilter.value;
 
       return sales.filter((sale) => {
         const title = (sale.yardsaleTitle || '').toLowerCase();
@@ -788,9 +808,8 @@
         const matchesSearch = !term || title.includes(term) || location.includes(term);
 
         const matchesFrom = !from || (saleDate && saleDate.toISOString().slice(0, 10) >= from);
-        const matchesTo = !to || (saleDate && saleDate.toISOString().slice(0, 10) <= to);
 
-        return matchesSearch && matchesFrom && matchesTo;
+        return matchesSearch && matchesFrom;
       });
     }
 
@@ -872,10 +891,6 @@
       renderSales();
     });
     dateFromFilter.addEventListener('change', () => {
-      resetPreviewExpansion();
-      renderSales();
-    });
-    dateToFilter.addEventListener('change', () => {
       resetPreviewExpansion();
       renderSales();
     });

@@ -74,6 +74,34 @@
       color: #475569;
       margin-bottom: 4px;
     }
+
+    .conversation-filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .conversation-filter-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .conversation-filter-btn:hover {
+      background: #eef2f7;
+    }
+
+    .conversation-filter-btn.active {
+      background: #475569;
+      border-color: #475569;
+      color: white;
+    }
     
     .conversations-list {
       flex: 1;
@@ -108,12 +136,14 @@
       cursor: pointer;
       font-size: 12px;
       opacity: 0;
+      pointer-events: none;
       transition: opacity 0.2s;
       z-index: 10;
     }
 
     .conversation-item:hover .conversation-delete-btn {
       opacity: 1;
+      pointer-events: auto;
     }
 
     .conversation-delete-btn:hover {
@@ -170,6 +200,7 @@
       border-radius: 12px;
       min-width: 20px;
       text-align: center;
+      pointer-events: none;
     }
     
     .conversation-item.unread .conversation-title {
@@ -250,6 +281,7 @@
 
     .listing-context-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
@@ -413,18 +445,38 @@
       flex-shrink: 0;
       object-fit: cover;
     }
+
+    .message-avatar-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .message-avatar-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.18);
+    }
     
     .message-actions {
       display: flex;
       gap: 4px;
       align-items: center;
       opacity: 0;
+      pointer-events: none;
       transition: opacity 0.2s ease-in-out;
       margin-left: 8px;
     }
     
     .message-row.sender:hover .message-actions {
       opacity: 1;
+      pointer-events: auto;
     }
     
     .delete-message-btn {
@@ -432,13 +484,15 @@
       border: none;
       color: #d9534f;
       cursor: pointer;
-      font-size: 14px;
-      padding: 2px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 8px;
       border-radius: 4px;
       transition: background 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
+      line-height: 1;
     }
     
     .delete-message-btn:hover {
@@ -1020,6 +1074,10 @@
         <button class="history-back-btn" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='profile.html'; }">&lt; Back</button>
         <h2>Messages</h2>
         <p style="color: #475569; font-size: 15px;">Your conversations</p>
+        <div class="conversation-filters">
+          <button class="conversation-filter-btn active" id="inboxFilterBtn" onclick="setConversationView('inbox')">Inbox</button>
+          <button class="conversation-filter-btn" id="archivedFilterBtn" onclick="setConversationView('archived')">Archived</button>
+        </div>
       </div>
       <div class="conversations-list" id="conversationsList">
         <div class="loading">Loading conversations...</div>
@@ -1172,9 +1230,12 @@
     let activeThreadId = null;
     let activeThreadData = null;
     let activeOtherParticipantId = null;
+    let currentConversationView = 'inbox';
+    let conversationsUnsubscribe = null;
     let messagesUnsubscribe = null;
     let isCurrentThreadUserBlocked = false;
     const userPhotoCache = {};
+    const userProfileHrefCache = {};
     
     // Get URL parameters
     function getUrlParameter(name) {
@@ -1201,6 +1262,50 @@
       setMobileThreadView(false);
     }
 
+    function setConversationView(view) {
+      if (view !== 'inbox' && view !== 'archived') return;
+      currentConversationView = view;
+      updateConversationViewButtons();
+      loadConversations();
+      resetChatPane();
+    }
+
+    function updateConversationViewButtons() {
+      const inboxBtn = document.getElementById('inboxFilterBtn');
+      const archivedBtn = document.getElementById('archivedFilterBtn');
+      if (inboxBtn) inboxBtn.classList.toggle('active', currentConversationView === 'inbox');
+      if (archivedBtn) archivedBtn.classList.toggle('active', currentConversationView === 'archived');
+    }
+
+    function resetChatPane(message) {
+      activeThreadId = null;
+      activeThreadData = null;
+      activeOtherParticipantId = null;
+      isCurrentThreadUserBlocked = false;
+
+      if (messagesUnsubscribe) {
+        messagesUnsubscribe();
+        messagesUnsubscribe = null;
+      }
+
+      const chatPane = document.getElementById('chatPane');
+      if (chatPane) {
+        const emptyMessage = message || (currentConversationView === 'archived'
+          ? 'Select an archived conversation to review'
+          : 'Select a conversation to start messaging');
+        chatPane.innerHTML = `
+          <div class="empty-chat">
+            <div style="text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">💬</div>
+              <p>${escapeHtml(emptyMessage)}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      setMobileThreadView(false);
+    }
+
     function getUserPhotoFromData(userData) {
       if (!userData) return '';
       return userData.profileimage || userData.profileImage || userData.photoURL || userData.photoUrl || '';
@@ -1211,7 +1316,52 @@
       if (Object.prototype.hasOwnProperty.call(userPhotoCache, userId)) {
         return userPhotoCache[userId];
       }
+      try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        const photoUrl = userDoc.exists ? getUserPhotoFromData(userDoc.data()) : '';
+        userPhotoCache[userId] = photoUrl || '';
+        return userPhotoCache[userId];
+      } catch (error) {
+        console.error('Error loading user photo:', error);
+        userPhotoCache[userId] = '';
+        return '';
+      }
+    }
 
+    async function getUserProfileHref(userId) {
+      if (!userId) return '';
+      if (Object.prototype.hasOwnProperty.call(userProfileHrefCache, userId)) {
+        return userProfileHrefCache[userId];
+      }
+
+      try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (!userDoc.exists) {
+          userProfileHrefCache[userId] = '';
+          return '';
+        }
+
+        const userData = userDoc.data() || {};
+        const accountType = String(userData.accountType || '').trim().toLowerCase();
+
+        if (accountType === 'business') {
+          userProfileHrefCache[userId] = `business-profile.html?id=${encodeURIComponent(userId)}`;
+          return userProfileHrefCache[userId];
+        }
+
+        if (userData.publicProfileEnabled === false) {
+          userProfileHrefCache[userId] = userId === currentUser?.uid ? 'profile.html' : '';
+          return userProfileHrefCache[userId];
+        }
+
+        userProfileHrefCache[userId] = `user-profile.html?id=${encodeURIComponent(userId)}`;
+        return userProfileHrefCache[userId];
+      } catch (error) {
+        console.warn('Could not determine profile link:', error);
+        userProfileHrefCache[userId] = userId === currentUser?.uid ? 'profile.html' : '';
+        return userProfileHrefCache[userId];
+      }
+    }
 
     async function markThreadAsRead(threadId) {
       if (!threadId || !currentUser?.uid) return;
@@ -1228,17 +1378,6 @@
         }
       } catch (error) {
         console.log('Error marking thread as read:', error);
-      }
-    }
-      try {
-        const userDoc = await db.collection('users').doc(userId).get();
-        const photoUrl = userDoc.exists ? getUserPhotoFromData(userDoc.data()) : '';
-        userPhotoCache[userId] = photoUrl || '';
-        return userPhotoCache[userId];
-      } catch (error) {
-        console.error('Error loading user photo:', error);
-        userPhotoCache[userId] = '';
-        return '';
       }
     }
     
@@ -1271,12 +1410,20 @@
     // Load conversations list
     function loadConversations() {
       const conversationsList = document.getElementById('conversationsList');
+      const emptyStateMessage = currentConversationView === 'archived'
+        ? 'No archived conversations yet'
+        : 'No conversations yet';
+
+      if (conversationsUnsubscribe) {
+        conversationsUnsubscribe();
+        conversationsUnsubscribe = null;
+      }
       
-      db.collection('threads')
+      conversationsUnsubscribe = db.collection('threads')
         .where('participantIds', 'array-contains', currentUser.uid)
         .onSnapshot(async (snapshot) => {
           if (snapshot.empty) {
-            conversationsList.innerHTML = '<div class="empty-conversations"><div style="font-size: 36px; margin-bottom: 12px;">📭</div><p>No conversations yet</p></div>';
+            conversationsList.innerHTML = `<div class="empty-conversations"><div style="font-size: 36px; margin-bottom: 12px;">📭</div><p>${emptyStateMessage}</p></div>`;
             return;
           }
           
@@ -1300,11 +1447,16 @@
           // Filter out blocked users' threads
           const filteredThreads = threads.filter(thread => {
             const otherUserId = thread.participantIds.find(id => id !== currentUser.uid);
-            return !blockedUsers.includes(otherUserId);
+            const isArchived = Array.isArray(thread.archivedBy) && thread.archivedBy.includes(currentUser.uid);
+            if (blockedUsers.includes(otherUserId)) {
+              return false;
+            }
+
+            return currentConversationView === 'archived' ? isArchived : !isArchived;
           });
           
           if (filteredThreads.length === 0) {
-            conversationsList.innerHTML = '<div class="empty-conversations"><div style="font-size: 36px; margin-bottom: 12px;">📭</div><p>No conversations yet</p></div>';
+            conversationsList.innerHTML = `<div class="empty-conversations"><div style="font-size: 36px; margin-bottom: 12px;">📭</div><p>${emptyStateMessage}</p></div>`;
             return;
           }
           
@@ -1314,21 +1466,28 @@
             const otherUserId = (thread.participantIds || []).find(id => id !== currentUser.uid) || '';
             const otherUserPhoto = await getUserPhotoUrl(otherUserId);
             const conversationImage = otherUserPhoto || thread.listingImage || '';
+            const conversationTitle = thread.listingTitle || 'Conversation';
+            const safeConversationTitle = escapeHtml(conversationTitle);
+            const safeThreadIdForJs = escapeInlineJs(thread.id);
+            const safeTitleForJs = escapeInlineJs(conversationTitle);
+            const safeImageForJs = escapeInlineJs(thread.listingImage || '');
+            const safeListingIdForJs = escapeInlineJs(thread.listingId || '');
+            const safeOtherUserIdForJs = escapeInlineJs(otherUserId);
             
             return `
             <div class="conversation-item ${unreadClass} ${activeThreadId === thread.id ? 'active' : ''}" 
                  data-thread-id="${thread.id}"
-               onclick="openThread('${thread.id}', '${escapeHtml(thread.listingTitle || 'Conversation')}', '${thread.listingImage || ''}', '${thread.listingId || ''}', '${otherUserId}', event)">
+               onclick="openThread('${safeThreadIdForJs}', '${safeTitleForJs}', '${safeImageForJs}', '${safeListingIdForJs}', '${safeOtherUserIdForJs}', event)">
 
               ${conversationImage ? 
                 `<img src="${conversationImage}" class="conversation-image" onerror="this.style.display='none'">` : 
                 '<div class="conversation-image"></div>'}
               <div class="conversation-info">
-                <div class="conversation-title">${escapeHtml(thread.listingTitle || 'Conversation')}</div>
+                <div class="conversation-title">${safeConversationTitle}</div>
                 <div class="conversation-last-message">${escapeHtml(thread.lastMessage || 'No messages yet')}</div>
               </div>
-              ${isUnread ? '<div class="unread-badge">●</div>' : ''}
-              <button class="conversation-delete-btn" onclick="deleteThread('${thread.id}', event)" title="Delete conversation">Delete</button>
+              ${isUnread ? '<div class="unread-badge">New</div>' : ''}
+              <button class="conversation-delete-btn" onclick="deleteThread('${safeThreadIdForJs}', event)" title="Delete conversation">Delete</button>
             </div>
           `;
           }));
@@ -1365,6 +1524,8 @@
             // Update the dropdown button to show Unblock instead
             updateBlockUserButton();
           }
+
+          updateArchiveThreadButton();
         }
       });
       
@@ -1394,14 +1555,15 @@
             <div class="listing-context-price" id="listingContextPrice">${listingId ? 'Loading price...' : 'Price unavailable'}</div>
           </div>
           <div class="listing-context-actions">
-            <button class="listing-context-btn mobile-chat-back" onclick="backToConversationList()">← Back</button>
+            <button class="listing-context-btn mobile-chat-back" onclick="backToConversationList()">Back</button>
             <button class="listing-context-btn" id="viewListingBtn" ${listingId ? '' : 'disabled'} onclick="viewListing('${listingId || ''}')">View Listing</button>
+            <button class="listing-context-btn" id="archiveThreadBtn" onclick="toggleArchiveCurrentThread(event)">Archive</button>
             <div style="position: relative;">
               <button class="listing-context-btn" onclick="toggleListingReportMenu(event)" style="background: white; border-color: #d9534f; color: #d9534f;">Report</button>
               <div class="listing-report-dropdown" id="listingReportMenu">
                 <button class="listing-report-item" onclick="openReportMessageSelectModal(event)" id="reportMessageBtn">Report Message</button>
                 <button class="listing-report-item" onclick="reportThreadUser(event)" id="reportUserBtn">Report User</button>
-                <button class="listing-report-item" style="color: #d9534f;" onclick="handleBlockUserClick(event)" id="blockUserBtn">🚫 Block User</button>
+                <button class="listing-report-item" style="color: #d9534f;" onclick="handleBlockUserClick(event)" id="blockUserBtn">Block User</button>
               </div>
             </div>
           </div>
@@ -1447,12 +1609,8 @@
 
           const currentUserPhoto = await getUserPhotoUrl(currentUser.uid);
           const otherUserPhoto = await getUserPhotoUrl(activeOtherParticipantId);
-          const currentUserAvatar = currentUserPhoto
-            ? `<img src="${currentUserPhoto}" class="message-avatar" alt="You">`
-            : '<div class="message-avatar"></div>';
-          const otherUserAvatar = otherUserPhoto
-            ? `<img src="${otherUserPhoto}" class="message-avatar" alt="User">`
-            : '<div class="message-avatar"></div>';
+          const currentUserAvatar = renderMessageAvatar(currentUser.uid, currentUserPhoto, 'You');
+          const otherUserAvatar = renderMessageAvatar(activeOtherParticipantId, otherUserPhoto, 'User');
           
           const messages = [];
           snapshot.forEach(doc => {
@@ -1475,7 +1633,7 @@
                   </div>
                   ${isSender && !msg.deleted ? `
                     <div class="message-actions">
-                      <button class="delete-message-btn" title="Delete message" onclick="deleteMessage('${msg.id}', event)">🗑️</button>
+                      <button class="delete-message-btn" title="Delete message" onclick="deleteMessage('${msg.id}', event)">Delete</button>
                     </div>
                   ` : ''}
                 </div>
@@ -1536,8 +1694,7 @@
           
           // If the deleted thread was active, clear it
           if (activeThreadId === threadId) {
-            activeThreadId = null;
-            document.getElementById('messagesArea').innerHTML = '<div class="empty-message-state"><div style="font-size: 48px; margin-bottom: 12px;">👋</div><p>Select a conversation to start messaging</p></div>';
+            resetChatPane('Select a conversation to start messaging');
           }
           
           // Reload the conversations list
@@ -1546,6 +1703,60 @@
           console.error('Error deleting thread:', error);
           alert('Error deleting conversation. Please try again.');
         }
+      }
+    }
+
+    function isActiveThreadArchived() {
+      return Array.isArray(activeThreadData?.archivedBy) && activeThreadData.archivedBy.includes(currentUser?.uid);
+    }
+
+    function updateArchiveThreadButton() {
+      const archiveBtn = document.getElementById('archiveThreadBtn');
+      if (!archiveBtn) return;
+
+      const isArchived = isActiveThreadArchived();
+      archiveBtn.textContent = isArchived ? 'Unarchive' : 'Archive';
+      archiveBtn.style.borderColor = isArchived ? '#0f766e' : '#475569';
+      archiveBtn.style.color = isArchived ? '#0f766e' : '#475569';
+      archiveBtn.style.background = 'white';
+    }
+
+    async function toggleArchiveCurrentThread(event) {
+      event.stopPropagation();
+
+      if (!activeThreadId || !currentUser?.uid) return;
+
+      const isArchived = isActiveThreadArchived();
+      const nextAction = isArchived ? 'unarchive' : 'archive';
+
+      try {
+        await db.collection('threads').doc(activeThreadId).update({
+          archivedBy: isArchived
+            ? firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+            : firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+        });
+
+        if (!activeThreadData) {
+          activeThreadData = {};
+        }
+
+        const archivedBy = Array.isArray(activeThreadData.archivedBy) ? [...activeThreadData.archivedBy] : [];
+        activeThreadData.archivedBy = isArchived
+          ? archivedBy.filter(userId => userId !== currentUser.uid)
+          : Array.from(new Set([...archivedBy, currentUser.uid]));
+
+        updateArchiveThreadButton();
+
+        const leavesCurrentView =
+          (currentConversationView === 'inbox' && !isArchived) ||
+          (currentConversationView === 'archived' && isArchived);
+
+        if (leavesCurrentView) {
+          resetChatPane(`Conversation ${nextAction}d`);
+        }
+      } catch (error) {
+        console.error(`Error trying to ${nextAction} conversation:`, error);
+        alert(`Unable to ${nextAction} this conversation right now.`);
       }
     }
     
@@ -1597,7 +1808,8 @@
           .update({
             lastMessage: text,
             lastTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            unreadBy: firebase.firestore.FieldValue.arrayUnion(otherUserId) // Mark as unread for recipient
+            unreadBy: firebase.firestore.FieldValue.arrayUnion(otherUserId), // Mark as unread for recipient
+            archivedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid, otherUserId)
           });
         
         input.value = '';
@@ -1662,6 +1874,44 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function escapeInlineJs(value) {
+      return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r?\n/g, ' ');
+    }
+
+    function renderMessageAvatar(userId, photoUrl, altText) {
+      const avatarMarkup = photoUrl
+        ? `<img src="${photoUrl}" class="message-avatar" alt="${escapeHtml(altText)}">`
+        : `<div class="message-avatar" aria-label="${escapeHtml(altText)}"></div>`;
+
+      if (!userId) {
+        return avatarMarkup;
+      }
+
+      const safeUserId = escapeInlineJs(userId);
+      const avatarTitle = userId === currentUser?.uid ? 'Open your profile' : 'Open profile';
+
+      return `
+        <button type="button" class="message-avatar-link" onclick="openUserProfile('${safeUserId}', event)" title="${escapeHtml(avatarTitle)}" aria-label="${escapeHtml(avatarTitle)}">
+          ${avatarMarkup}
+        </button>
+      `;
+    }
+
+    async function openUserProfile(userId, event) {
+      event?.stopPropagation();
+
+      const href = await getUserProfileHref(userId);
+      if (!href) {
+        alert('This profile is not available right now.');
+        return;
+      }
+
+      window.location.href = href;
     }
     
     // Message report functionality
@@ -1740,7 +1990,7 @@
       const blockBtn = document.getElementById('blockUserBtn');
       if (blockBtn) {
         if (isCurrentThreadUserBlocked) {
-          blockBtn.textContent = '✅ Unblock User';
+          blockBtn.textContent = 'Unblock User';
           blockBtn.style.color = '#5cb85c';
           // Show report buttons only if not blocked
           const reportMessageBtn = document.getElementById('reportMessageBtn');
@@ -1748,7 +1998,7 @@
           if (reportMessageBtn) reportMessageBtn.style.display = 'none';
           if (reportUserBtn) reportUserBtn.style.display = 'none';
         } else {
-          blockBtn.textContent = '🚫 Block User';
+          blockBtn.textContent = 'Block User';
           blockBtn.style.color = '#d9534f';
           // Show report buttons
           const reportMessageBtn = document.getElementById('reportMessageBtn');
