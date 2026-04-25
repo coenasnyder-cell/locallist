@@ -43,6 +43,18 @@ service firebase.storage {
       allow read: if true;
     }
 
+    // Event listing images - allow users to upload their own
+    match /eventImages/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+    }
+
+    // Yard sale images - allow users to upload their own
+    match /yardSaleImages/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+    }
+
     // Service listing images - allow users to upload their own
     match /services/{userId}/{fileName} {
       allow write: if request.auth != null && request.auth.uid == userId;

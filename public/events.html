@@ -187,11 +187,19 @@
       margin-top: 8px;
     }
 
+    .section-shell {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 14px;
+    }
+
     .section-title {
       font-size: 23px;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       text-align: center;
     }
 
@@ -611,14 +619,18 @@
 
     <section class="section-block" aria-label="Happening this week">
       <h2 class="section-title">Happening This Week</h2>
-      <div id="thisWeekGrid" class="events-grid"></div>
-      <div id="thisWeekViewAll" class="section-view-all-wrap" hidden></div>
+      <div class="section-shell">
+        <div id="thisWeekGrid" class="events-grid"></div>
+        <div id="thisWeekViewAll" class="section-view-all-wrap" hidden></div>
+      </div>
     </section>
 
     <section class="section-block" aria-label="Upcoming events">
       <h2 class="section-title">Upcoming Events</h2>
-      <div id="thisMonthGrid" class="events-grid"></div>
-      <div id="thisMonthViewAll" class="section-view-all-wrap" hidden></div>
+      <div class="section-shell">
+        <div id="thisMonthGrid" class="events-grid"></div>
+        <div id="thisMonthViewAll" class="section-view-all-wrap" hidden></div>
+      </div>
     </section>
 
     <div class="digest-banner" aria-label="Subscribe to events digest">
@@ -653,7 +665,7 @@
   <script>
     const searchInput = document.getElementById('searchEventsInput');
     const categoryFilter = document.getElementById('categoryFilter');
-    const dateFilter = document.getElementById('dateFilter');
+    const eventsAuth = window.firebaseAuth;
 
     let allEvents = [];
     let expandedThisWeek = false;
@@ -771,11 +783,11 @@
     function getEventDetailsUrl(eventItem) {
       const eventId = eventItem.eventId || eventItem.id || '';
       if (eventId) {
-        return `event-details.html?eventId=${encodeURIComponent(eventId)}`;
+        return `./event-details.html?eventId=${encodeURIComponent(eventId)}`;
       }
 
       const fallbackPayload = encodeURIComponent(JSON.stringify(eventItem || {}));
-      return `event-details.html?payload=${fallbackPayload}`;
+      return `./event-details.html?payload=${fallbackPayload}`;
     }
 
     function createEventCard(eventItem) {
@@ -823,15 +835,12 @@
     function applyFilters(events) {
       const searchTerm = searchInput.value.trim().toLowerCase();
       const selectedCategory = categoryFilter.value;
-      const selectedDate = dateFilter.value;
-
       return events.filter((eventItem) => {
         const title = (eventItem.eventTitle || '').toLowerCase();
         const city = (eventItem.eventCity || '').toLowerCase();
         const address = (eventItem.eventAdress || '').toLowerCase();
         const description = (eventItem.eventDescription || '').toLowerCase();
         const eventCategory = eventItem.eventCategory || '';
-        const eventDate = normalizeDate(getListingDateRaw(eventItem));
 
         const matchesSearch = !searchTerm
           || title.includes(searchTerm)
@@ -841,10 +850,7 @@
 
         const matchesCategory = !selectedCategory || eventCategory === selectedCategory;
 
-        const matchesDate = !selectedDate
-          || (eventDate && eventDate.toISOString().slice(0, 10) === selectedDate);
-
-        return matchesSearch && matchesCategory && matchesDate;
+        return matchesSearch && matchesCategory;
       });
     }
 
@@ -905,9 +911,16 @@
     }
 
     function renderEvents() {
+      if (!allEvents.length) {
+        showEmpty('thisWeekGrid', 'Happening This Week', 'No events at the moment.');
+        showEmpty('thisMonthGrid', 'Upcoming Events', 'No upcoming events at the moment.');
+        hideAllPreviewFooters();
+        return;
+      }
       const filtered = applyFilters(allEvents);
       const buckets = getDateBuckets(filtered);
       const twoRowCap = maxEventsForTwoRows();
+
 
       if (!buckets.week.length) {
         showEmpty('thisWeekGrid', 'Happening This Week', 'No events at the moment.');
@@ -938,10 +951,6 @@
       renderEvents();
     });
     categoryFilter.addEventListener('change', () => {
-      resetPreviewExpansion();
-      renderEvents();
-    });
-    dateFilter.addEventListener('change', () => {
       resetPreviewExpansion();
       renderEvents();
     });
@@ -992,6 +1001,13 @@
       } catch (err) {
         console.error('Error loading events:', err);
         allEvents = [];
+        if (err && err.code === 'permission-denied') {
+          ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
+            showEmpty(id, 'Events', 'Please sign in to view events.');
+          });
+          hideAllPreviewFooters();
+          return;
+        }
         ['thisWeekGrid', 'thisMonthGrid'].forEach((id) => {
           showEmpty(id, 'Events', 'Error loading events. Please refresh.');
         });
@@ -1096,7 +1112,18 @@
       }
     });
 
-    loadEvents();
+    function initEventsPage() {
+      if (!eventsAuth || typeof eventsAuth.onAuthStateChanged !== 'function') {
+        loadEvents();
+        return;
+      }
+
+      eventsAuth.onAuthStateChanged(() => {
+        loadEvents();
+      });
+    }
+
+    initEventsPage();
   </script>
 </body>
 </html>
