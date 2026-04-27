@@ -19,117 +19,155 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background:
+  radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 40%),
+  radial-gradient(circle at top right, rgba(250, 204, 21, 0.06), transparent 35%),
+  linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%);
+    color: #0F172A;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 22px 20px 28px;
     }
 
     .search-container {
-      margin-bottom: 0;
-      flex: 0 1 420px;
+      flex: 1 1 500px;
       width: 100%;
-      max-width: 420px;
+      max-width: 520px;
+      min-width: 0;
+      margin: 0;
     }
 
     .search-bar {
       width: 100%;
-      max-width: 420px;
-      padding: 14px 20px;
-      font-size: 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fff;
-      transition: border-color 0.3s;
+      height: 52px;
+      padding: 0 18px;
+      font-size: 15px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      transition: color 0.2s ease;
     }
 
     .search-bar:focus {
       outline: none;
-      border-color: #475569;
+      box-shadow: none;
     }
+.search-wrapper {
+  width: 100%;
+  max-width: 900px;
+   margin: 20px auto 28px;
+}
+
+.search-wrapper::before {
+  content: "🔍";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #94A3B8;
+}
 
     .featured-container {
-      background: #fafafa;
-      padding: 24px;
-      margin-bottom: 30px;
-      border-radius: 8px;
-      border: 1px solid #e6e6e6;
+     margin: 28px 0;
     }
 
     .featured-section h2 {
-      color: #475569;
+      color: #0F172A;
       font-size: 20px;
-      margin-bottom: 8px;
+      font-weight: 600;
+      margin-bottom: 6px;
     }
 
     .featured-section p {
-      color: #666;
+      color: #475569;
       font-size: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .list-hub-highlight {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      align-items: center;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 18px;
+ background: transparent;
+  padding: 20px 14px;
+  margin-bottom: 18px;
+   position: relative;
+  overflow: hidden;
     }
 
-    .list-hub-highlight-image {
-      min-height: 160px;
-      aspect-ratio: 16 / 10;
-      border-radius: 8px;
-      border: 1px dashed #cbd5e1;
-      background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
-      display: flex;
+    .list-hub-highlight::before {
+      content: "";
+  position: absolute;
+  inset: -42% auto auto -10%;
+  width: 240px;
+  height: 240px;
+  filter: blur(18px);
+  pointer-events: none;
+    }
+
+    .list-hub-highlight-text {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .list-hub-tag {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      color: #475569;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 12px;
-      overflow: hidden;
-    }
-
-    .list-hub-highlight-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      display: block;
-    }
-
-    .list-hub-highlight-text h3 {
-      color: #334155;
-      font-size: 20px;
-      margin-bottom: 8px;
+      min-height: 34px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.94);
+      color: #fff;
+      font-size: 12px;
       font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .list-hub-highlight-text h1 {
+      color: #0f172a;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.08;
+      margin-bottom: 14px;
+      font-weight: 800;
+      text-wrap: balance;
     }
 
     .list-hub-highlight-text p {
       color: #64748b;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 10px;
+      font-size: 17px;
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .list-hub-actions {
+      display: none;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 6px;
     }
 
     .btn {
       padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
+      border: 1px solid transparent;
+      border-radius: 999px;
       cursor: pointer;
       font-weight: 600;
       font-size: 14px;
@@ -139,13 +177,14 @@
     }
 
     .btn-primary {
-      background: #475569;
+      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
       color: white;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(71, 85, 105, 0.25);
+      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.22);
     }
 
     .category-listings-container {
@@ -155,24 +194,29 @@
     .filters-row {
       display: flex;
       justify-content: center;
-      align-items: flex-end;
+      align-items: center;
       gap: 14px;
       margin-bottom: 18px;
+      width: 100%;
     }
 
     .category-filter {
-      flex: 0 1 320px;
+      flex: 0 0 230px;
       width: 100%;
-      max-width: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      max-width: 230px;
+      display: block;
     }
 
     .category-label {
-      color: #475569;
-      font-size: 16px;
-      font-weight: 700;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .category-dropdown {
@@ -180,34 +224,44 @@
     }
 
     .category-dropdown select {
-      padding: 10px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      background: #fff;
-      color: #334155;
-      font-size: 14px;
-      min-width: 0;
       width: 100%;
-    }
-
-    .listings-section {
+      height: 52px;
+      padding: 0 38px 0 16px;
+      border: none;
+      border-radius: 0;
       background: transparent;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 30px;
+      color: #334155;
+      font-size: 15px;
+      min-width: 0;
       box-shadow: none;
     }
 
+    .category-dropdown select:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .listings-section {
+      padding: 8px 0;
+     margin: 32px 0;
+    }
+
     .listings-section h2 {
-      color: #475569;
+      color: #0F172A;
       font-size: 20px;
-      margin-bottom: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
 
     .listings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    }
+      
+
+    #listingsContainer.listings-grid > .listing-card {
+      width: 100%;
     }
 
     .listing-card {
@@ -233,6 +287,24 @@
       height: 120px;
       background: #f8fafc;
       object-fit: cover;
+      display: block;
+    }
+    
+    .listing-media {
+      width: 100%;
+      height: 120px;
+      min-height: 120px;
+      max-height: 120px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .listing-media .listing-image {
+      width: 100%;
+      height: 100% !important;
+      min-height: 100%;
+      max-height: 100%;
+      object-fit: cover !important;
       display: block;
     }
 
@@ -359,7 +431,149 @@
       z-index: 2;
     }
 
-  footer {
+    .featured-section {
+      background: rgba(255, 255, 255, 0.92);
+      padding: 24px 26px;
+      border-radius: 22px;
+      border: 1px solid rgba(203, 213, 225, 0.95);
+      box-shadow: 0 16px 32px rgba(148, 163, 184, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .featured-section p {
+      margin-bottom: 0;
+    }
+
+    .featured-search-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+      margin-bottom: 18px;
+    }
+
+    .featured-search-row .filters-row {
+      margin-bottom: 0;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      gap: 0;
+      padding: 0 10px 0 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .featured-search-row .search-container {
+      max-width: none;
+    }
+
+    .featured-search-row .category-filter {
+      position: relative;
+      margin-left: 12px;
+      padding-left: 12px;
+      border-left: 1px solid #e2e8f0;
+    }
+
+    .featured-search-row .filters-row > * {
+      min-width: 0;
+    }
+
+    .toolbar-action {
+      flex: 0 0 auto;
+      margin-left: 12px;
+      padding-left: 12px;
+      border-left: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+    }
+
+    .toolbar-action .btn {
+      min-width: 0;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    .hidden-gems-section {
+margin-top: 18px;
+background:
+  radial-gradient(circle at top right, rgba(250, 204, 21, 0.08), transparent 35%),
+  radial-gradient(circle at top left, rgba(255, 255, 255, 0.4), transparent 45%),
+  linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+padding: 24px 26px;
+border-radius: 20px;
+box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .hidden-gems-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .hidden-gems-top h2 {
+      color: #0f172a;
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .hidden-gems-top p {
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    .listings-grid.hidden-gems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 220px));
+      gap: 14px;
+      justify-content: flex-start;
+    }
+
+    .listings-grid.hidden-gems-grid > .listing-card {
+      width: 100%;
+      max-width: 220px;
+    }
+
+    .listings-grid.hidden-gems-grid > .listing-card .listing-image {
+      height: 120px !important;
+    }
+
+    .listings-grid.hidden-gems-grid > .listing-card .listing-content {
+      padding: 9px;
+    }
+
+    .listings-grid.hidden-gems-grid > .listing-card .listing-title {
+      font-size: 13px;
+    }
+
+    .listings-grid.hidden-gems-grid > .listing-card .listing-price {
+      font-size: 15px;
+    }
+
+    .listing-compact-meta {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.45;
+      margin-top: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .listing-compact-meta-row + .listing-compact-meta-row {
+      margin-top: 3px;
+    }
+
+    footer {
       background: #f8fafc;
       color: #475569;
       text-align: center;
@@ -386,6 +600,10 @@
       text-decoration: underline;
     }
     @media (max-width: 768px) {
+      .container {
+        padding: 16px 12px 24px;
+      }
+
       .filters-row {
         display: block;
         margin-bottom: 12px;
@@ -418,30 +636,104 @@
       }
 
       .list-hub-highlight {
-        grid-template-columns: 1fr;
+        border-radius: 22px;
+        padding: 24px 18px;
       }
 
-      .list-hub-highlight-image {
-        min-height: 140px;
-        aspect-ratio: 16 / 11;
+      .list-hub-highlight-text h1 {
+        font-size: 30px;
       }
 
       .list-hub-highlight-text p {
+        font-size: 15px;
+      }
+
+      .featured-section {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+      }
+
+      .list-hub-actions {
+        display: flex;
+      }
+
+      .featured-search-row {
         display: none;
       }
 
-      .list-hub-highlight-text h3 {
-        margin-bottom: 0;
-        text-align: center;
+      .featured-search-row .filters-row {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+      }
+
+      .featured-search-row .category-filter {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+      }
+
+      .toolbar-action {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+      }
+
+      .toolbar-action .btn {
+        width: 100%;
+      }
+
+      .hidden-gems-section {
+        padding: 20px;
+      }
+
+      .hidden-gems-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .listings-grid.hidden-gems-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+      }
+
+      .listings-grid.hidden-gems-grid > .listing-card {
+        max-width: none;
       }
 
       .listings-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
+      
+      #listingsContainer.listings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+      }
+
+      #listingsContainer.listings-grid > .listing-card {
+        max-width: none;
+      }
     }
 
     @media (max-width: 520px) {
+      .list-hub-actions .btn {
+        width: 100%;
+      }
+
+      .list-hub-tag {
+        margin-bottom: 14px;
+      }
+
+      .list-hub-highlight-text h1 {
+        font-size: 28px;
+      }
+
       .listings-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -458,51 +750,76 @@
   <div class="container">
     <div class="featured-container">
       <div class="list-hub-highlight">
-        <div class="list-hub-highlight-image"><img src="listhub.png" alt="List Hub preview image" loading="lazy" onerror="this.onerror=null;this.src='listhub.png';"></div>
         <div class="list-hub-highlight-text">
-        <button class="btn btn-primary" onclick="window.location.href='create-listing.html'">List an Item</button>
-        </div>
-      </div>
-
-      <div class="featured-section" id="editorsPicksSection">
-        <h2>Editor's Picks</h2>
-        <p>Hand-selected listings from your community</p>
-        <button class="btn btn-primary" onclick="window.location.href='featured-listings.html'">View Featured Listings</button>
-      </div>
-    </div>
-
-    <div class="category-listings-container">
-      <div class="filters-row">
-        <div class="search-container">
-          <input
-            type="text"
-            class="search-bar"
-            id="searchInput"
-            placeholder="Search listings..."
-            onkeypress="if(event.key === 'Enter') searchListings()"
-          >
-        </div>
-
-        <div class="category-filter">
-          <label class="category-label" for="categorySelect">Shop by Category</label>
-          <div class="category-dropdown">
-            <select id="categorySelect" onchange="navigateToCategory(this.value)">
-              <option value="All">All</option>
-              <option value="Yard Sales">Yard Sales</option>
-              <option value="Home Goods">Home Goods</option>
-              <option value="Handmade Gifts">Handmade Gifts</option>
-              <option value="Furniture">Furniture</option>
-              <option value="Baby & Kids">Baby & Kids</option>
-              <option value="Outdoors">Outdoors</option>
-              <option value="Autos">Autos</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Tools">Tools</option>
-              <option value="Jobs">Jobs</option>
-            </select>
+          <h1>Browse Local Deals In Your Area</h1>
+          <p>Shop recent listings, discover yard sales, and post something of your own in minutes.</p>
+          <div class="list-hub-actions">
+            <button class="btn btn-primary" type="button" onclick="window.location.href='create-listing.html'">List an Item</button>
           </div>
         </div>
       </div>
 
+      <div class="featured-section" id="editorsPicksSection">
+        <div>
+          <h2>Editor's Picks</h2>
+          <p>Hand-selected listings from your community</p>
+        </div>
+        <button class="btn btn-primary" onclick="window.location.href='featured-listings.html'">View Featured Listings</button>
+      </div>
+
+      <div class="featured-search-row">
+        <div class="filters-row">
+          <div class="search-container">
+            <input
+              type="text"
+              class="search-bar"
+              id="searchInput"
+              placeholder="Search listings..."
+              onkeypress="if(event.key === 'Enter') searchListings()"
+            >
+          </div>
+
+          <div class="category-filter">
+            <label class="category-label" for="categorySelect">Shop by Category</label>
+            <div class="category-dropdown">
+              <select id="categorySelect" onchange="navigateToCategory(this.value)">
+                <option value="All">All Categories</option>
+                <option value="Yard Sales">Yard Sales</option>
+                <option value="Home Goods">Home Goods</option>
+                <option value="Handmade Gifts">Handmade Gifts</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Baby & Kids">Baby & Kids</option>
+                <option value="Outdoors">Outdoors</option>
+                <option value="Autos">Autos</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Tools">Tools</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toolbar-action">
+            <button class="btn btn-primary" type="button" onclick="window.location.href='create-listing.html'">List an Item</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="hidden-gems-section" aria-label="Hidden gems">
+        <div class="hidden-gems-top">
+          <div>
+            <h2>Hidden Gems</h2>
+            <p>Listings ending soon that still deserve a second look.</p>
+          </div>
+          <a class="btn btn-primary" href="browse.html">Browse All Listings</a>
+        </div>
+        <div id="hiddenGemsContainer" class="listings-grid hidden-gems-grid">
+          <div class="loading">Finding hidden gems...</div>
+        </div>
+      </section>
+    </div>
+    
+
+    <div class="category-listings-container">
       <div class="listings-section">
         <h2 id="listingsTitle">All Listings</h2>
         <div id="listingsContainer" class="listings-grid">
@@ -594,6 +911,27 @@
       return expiresAt < new Date();
     }
 
+    function normalizeDateValue(value) {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (value.toDate && typeof value.toDate === 'function') return value.toDate();
+      if (typeof value.seconds === 'number') {
+        return new Date(value.seconds * 1000 + (value.nanoseconds || 0) / 1e6);
+      }
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatDaysUntil(value) {
+      const date = normalizeDateValue(value);
+      if (!date) return 'Ending soon';
+      const diffMs = date.getTime() - Date.now();
+      const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+      if (diffDays <= 0) return 'Ends today';
+      if (diffDays === 1) return '1 day left';
+      return `${diffDays} days left`;
+    }
+
     function formatViewCount(value) {
       const count = Number(value || 0);
       if (!Number.isFinite(count) || count < 0) return '0 views';
@@ -618,6 +956,19 @@
       return `${months}mo ago`;
     }
 
+    function formatShortLocation(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return 'Location TBD';
+      const beforeComma = raw.split(',')[0].trim();
+      return beforeComma || raw;
+    }
+
+    function formatCompactMetaLine(locationValue, timingValue) {
+      const shortLocation = formatShortLocation(locationValue);
+      const timing = String(timingValue || '').trim();
+      return timing ? `${shortLocation} • ${timing}` : shortLocation;
+    }
+
     function updateCategoryHighlight(selectedCategory) {
       const titleEl = document.getElementById('listingsTitle');
       if (selectedCategory && selectedCategory !== 'All') {
@@ -629,6 +980,100 @@
       const select = document.getElementById('categorySelect');
       if (select) {
         select.value = selectedCategory && selectedCategory !== '' ? selectedCategory : 'All';
+      }
+    }
+
+    async function loadHiddenGems() {
+      const container = document.getElementById('hiddenGemsContainer');
+      if (!container) return;
+
+      try {
+        const snapshot = await db.collection('listings')
+          .where('status', '==', 'approved')
+          .orderBy('createdAt', 'desc')
+          .limit(48)
+          .get();
+
+        const now = new Date();
+        const soonCutoffMs = now.getTime() + (7 * 24 * 60 * 60 * 1000);
+        const gems = [];
+
+        for (const doc of snapshot.docs) {
+          const listing = doc.data();
+          if (isExpiredListing(listing) || listing.isFeatured === true) {
+            continue;
+          }
+
+          const expiresAt = normalizeDateValue(listing.expiresAt);
+          if (!expiresAt) {
+            continue;
+          }
+
+          const expiresMs = expiresAt.getTime();
+          if (expiresMs <= now.getTime() || expiresMs > soonCutoffMs) {
+            continue;
+          }
+
+          gems.push({
+            id: doc.id,
+            data: listing,
+            expiresAt
+          });
+        }
+
+        gems.sort((a, b) => {
+          const expiresDelta = a.expiresAt.getTime() - b.expiresAt.getTime();
+          if (expiresDelta !== 0) return expiresDelta;
+
+          const viewDelta = (Number(a.data.viewCount) || 0) - (Number(b.data.viewCount) || 0);
+          if (viewDelta !== 0) return viewDelta;
+
+          const createdA = normalizeDateValue(a.data.createdAt);
+          const createdB = normalizeDateValue(b.data.createdAt);
+          return (createdA ? createdA.getTime() : 0) - (createdB ? createdB.getTime() : 0);
+        });
+
+        const selected = gems.slice(0, 4);
+
+        if (!selected.length) {
+          container.innerHTML = '<div class="no-listings">No hidden gems right now. Check back for listings ending soon.</div>';
+          return;
+        }
+
+        let html = '';
+
+        for (const item of selected) {
+          const listing = item.data;
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0
+            ? listing.images[0]
+            : 'logo.png';
+          const location = listing.city || listing.location || 'Location TBD';
+          const urgency = formatDaysUntil(item.expiresAt);
+          const postedLabel = formatRelativeTime(listing.createdAt);
+          const timingLabel = urgency || postedLabel;
+          const metaLine = formatCompactMetaLine(location, timingLabel);
+
+          html += `
+            <div class="listing-card" onclick="goToListing('${item.id}')" style="position: relative;">
+               <div class="listing-media">
+                <img src="${image}" alt="${listing.title || 'Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
+              </div>
+              <div class="listing-content">
+                <div class="listing-title">${listing.title || 'Untitled'}</div>
+                <div class="listing-price">${price}</div>
+                <div class="listing-compact-meta">
+                  <div class="listing-compact-meta-row">${metaLine}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading hidden gems:', error);
+        container.innerHTML = '<div class="no-listings">Error loading hidden gems. Please try again.</div>';
       }
     }
 
@@ -675,36 +1120,28 @@
         }
 
         let html = '';
+
         if (promoListing && promo) {
           const promoPrice = promoListing.price ? `$${promoListing.price}` : 'Contact';
           const promoImage = promoListing.images && promoListing.images.length > 0
             ? promoListing.images[0]
             : 'logo.png';
-          const promoViews = formatViewCount(promoListing.viewCount);
           const promoPosted = formatRelativeTime(promoListing.createdAt);
           const promoLocation = promoListing.city || promoListing.location || 'Location TBD';
-          const promoCategory = promoListing.category || 'General';
-          const promoCondition = promoListing.condition || '';
-          const promoSeller = promoListing.sellerName || 'Local Seller';
-          const promoPillsHtml = [promoCategory, promoCondition, promoLocation, promoPosted]
-            .filter(Boolean).map(p => `<span class="listing-pill">${p}</span>`).join('');
           const promoHeadline = String(promo.headline || 'Featured Promotion').trim();
+          const promoMetaLine = formatCompactMetaLine(promoLocation, promoPosted);
 
           html += `<div class="promo-banner">Promoted: ${promoHeadline}</div>`;
           html += `
             <div class="listing-card" onclick="goToListing('${promoListing.id}', '${promo.id}', '${promo.businessId || ''}')" style="position: relative;">
-              <span class="listing-featured-overlay">⭐ Featured</span>
-              <div style="position: relative;">
+              <div class="listing-media">
                 <img src="${promoImage}" alt="${promoListing.title || 'Promoted Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
               </div>
               <div class="listing-content">
                 <div class="listing-title">${promoListing.title || 'Untitled'}</div>
                 <div class="listing-price">${promoPrice}</div>
-                <div class="listing-pills">${promoPillsHtml}</div>
-                <div class="listing-views">👀 ${promoViews}</div>
-                <div class="listing-footer">
-                  <div>👤 ${promoSeller}</div>
-                  <div>📍 ${promoListing.city || 'Harrison, AR'}</div>
+                <div class="listing-compact-meta">
+                  <div class="listing-compact-meta-row">${promoMetaLine}</div>
                 </div>
               </div>
             </div>
@@ -727,54 +1164,24 @@
             continue;
           }
 
-          let isBusiness = false;
-          const auth = window.firebaseAuth;
-          if (listing.userId && auth && auth.currentUser) {
-            try {
-              const userDoc = await db.collection('users').doc(listing.userId).get();
-              if (userDoc.exists) {
-                isBusiness = userDoc.data().accountType === 'business';
-              }
-            } catch (err) {
-              // Not critical — BIZ badge simply won't show
-            }
-          }
-
           const price = listing.price ? `$${listing.price}` : 'Contact';
           const image = listing.images && listing.images.length > 0
             ? listing.images[0]
             : 'logo.png';
-          const listingViews = formatViewCount(listing.viewCount);
           const postedLabel = formatRelativeTime(listing.createdAt);
           const location = listing.city || listing.location || 'Location TBD';
-          const category = listing.category || 'General';
-          const condition = listing.condition || '';
-          const sellerName = listing.sellerName || 'Local Seller';
-          const pillsHtml = [category, condition, location, postedLabel]
-            .filter(Boolean).map(p => `<span class="listing-pill">${p}</span>`).join('');
-          const featuredOverlay = listing.isFeatured
-            ? '<span class="listing-featured-overlay">⭐ Featured</span>'
-            : '';
-
-          const businessBadge = isBusiness
-            ? '<div style="position: absolute; top: 8px; right: 8px; background: #1565C0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
-            : '';
+          const metaLine = formatCompactMetaLine(location, postedLabel);
 
           html += `
             <div class="listing-card" onclick="goToListing('${doc.id}')" style="position: relative;">
-              <div style="position: relative;">
+              <div class="listing-media">
                 <img src="${image}" alt="${listing.title || 'Listing'}" class="listing-image" onerror="this.onerror=null;this.src='logo.png'">
-                ${featuredOverlay}
-                ${businessBadge}
               </div>
               <div class="listing-content">
                 <div class="listing-title">${listing.title || 'Untitled'}</div>
                 <div class="listing-price">${price}</div>
-                <div class="listing-pills">${pillsHtml}</div>
-                <div class="listing-views">👀 ${listingViews}</div>
-                <div class="listing-footer">
-                  <div>${isBusiness ? '💼' : '👤'} ${sellerName}</div>
-                  <div>📍 ${listing.city || 'Harrison, AR'}</div>
+                <div class="listing-compact-meta">
+                  <div class="listing-compact-meta-row">${metaLine}</div>
                 </div>
               </div>
             </div>
@@ -852,6 +1259,7 @@
         editorsPicksSection.style.display = displaySettings.showEditorsPicks ? 'block' : 'none';
       }
 
+      await loadHiddenGems();
       loadListings();
     });
   </script>

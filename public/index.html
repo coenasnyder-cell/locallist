@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title></title>
+  <title>Local List - Harrison Home</title>
   <style>
     * {
       margin: 0;
@@ -188,16 +188,20 @@
 
     .card-featured-overlay {
       position: absolute;
-      top: 6px;
-      left: 6px;
-      background: #475569;
+      top: 10px;
+      left: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.8);
       color: #fff;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
-      padding: 3px 9px;
+      padding: 6px 10px;
       border-radius: 999px;
-      letter-spacing: 0.3px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
       pointer-events: none;
     }
 
@@ -215,6 +219,18 @@
       font-size: 11px;
       color: #64748b;
       line-height: 1.7;
+    }
+
+    .card-compact-meta {
+      width: 100%;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.45;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     #communitySpotlightSection h2 {
@@ -638,6 +654,555 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
+
+    /* Home Refresh */
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 28%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+      color: #0f172a;
+    }
+
+    .home-shell {
+      padding-bottom: 24px;
+    }
+
+    .container.home-layout {
+      max-width: 1240px;
+      padding: 18px 14px 36px;
+    }
+
+    .marketplace-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+      color: #f8fafc;
+      padding: 15px 18px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn {
+      border-radius: 14px;
+      min-width: 0;
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #1e293b;
+    }
+
+    .btn-primary:hover {
+      background: #334155;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(15, 23, 42, 0.14);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #94a3b8;
+      transform: translateY(-2px);
+    }
+
+    .home-section {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid #dbe3ec;
+      border-radius: 24px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(8px);
+    }
+
+    .home-section h2 {
+      font-size: 28px;
+      color: #0f172a;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    .home-section > p,
+    .section-subcopy {
+      color: #64748b;
+      font-size: 15px;
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    .home-section--quote {
+      padding: 18px 22px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .home-section--hidden-gems {
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.12), transparent 28%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 251, 235, 0.92) 100%);
+      border-color: #f1d7a5;
+    }
+
+    .quote-of-day {
+      padding: 0;
+    }
+
+    .quote-of-day-label {
+      color: #475569;
+      margin-bottom: 10px;
+    }
+
+    .quote-of-day-text {
+      font-size: 22px;
+      color: #0f172a;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .home-hero {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .home-hero-main,
+    .home-hero-side {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid #dbe3ec;
+      border-radius: 24px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(8px);
+    }
+
+    .home-hero-main {
+      padding: 28px;
+      background:
+        radial-gradient(circle at top right, rgba(148, 163, 184, 0.18), transparent 30%),
+        linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(241,245,249,0.98) 100%);
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #dbe3ec;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #475569;
+      background: rgba(255,255,255,0.85);
+      margin-bottom: 14px;
+    }
+
+    .hero-title {
+      font-size: 42px;
+      line-height: 1.05;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #475569;
+      max-width: 58ch;
+      margin-bottom: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .hero-actions .btn {
+      min-width: 0;
+      width: auto;
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-size: 15px;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hero-badge {
+      border-radius: 999px;
+      border: 1px solid #dbe3ec;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      background: rgba(255,255,255,0.86);
+    }
+
+    .home-hero-side {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-content: start;
+      background: linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(255,255,255,0.98) 100%);
+    }
+
+    .hero-mini-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+      min-height: 132px;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .hero-mini-kicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .hero-mini-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .hero-mini-text {
+      font-size: 14px;
+      line-height: 1.55;
+      color: #475569;
+    }
+
+    .hub-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .hub-panel {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 14px;
+      align-items: center;
+      text-decoration: none;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid #dbe3ec;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .hub-panel:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+    }
+
+    .hub-panel-media {
+      min-height: 180px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid #dbe3ec;
+      background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+    }
+
+    .hub-panel-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hub-panel-copy h3 {
+      font-size: 26px;
+      line-height: 1.12;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .hub-panel-copy p {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #475569;
+      margin-bottom: 14px;
+    }
+
+    .hub-panel-tag {
+      display: inline-flex;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .section-top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .section-top .btn {
+      min-width: 0;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+
+    .card-grid {
+      gap: 18px;
+      margin-top: 0;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 14px 24px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.09);
+    }
+
+    .card img,
+    .card-image {
+      width: 100%;
+      height: 188px !important;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-image {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #cbd5e1 0%, #f8fafc 100%);
+      color: #475569;
+    }
+
+    .card-content {
+      padding: 14px 14px 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .card-price {
+      font-size: 18px;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .card-pills {
+      gap: 6px;
+    }
+
+    .card-pill {
+      background: #f8fafc;
+      border-color: #dbe3ec;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 9px;
+    }
+
+    .card-views-row,
+    .card-footer {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .card-footer {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 10px;
+      padding-top: 10px;
+      line-height: 1.7;
+    }
+
+    .card-business-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.86);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+    }
+
+    .card-featured-overlay,
+    .pet-type-badge,
+    .featured-badge {
+      background: rgba(15, 23, 42, 0.86);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+    }
+
+    #communitySpotlightSection.home-section {
+      display: none;
+    }
+
+    .spotlight-content {
+      gap: 18px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    .spotlight-image {
+      width: 240px;
+      height: 190px;
+      border-radius: 20px;
+      border: 1px solid #dbe3ec;
+      background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+    }
+
+    .spotlight-text h3 {
+      font-size: 28px;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .spotlight-text p {
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .recent-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 980px) {
+      .home-hero,
+      .hub-row,
+      .recent-columns {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container.home-layout {
+        padding: 10px 10px 30px;
+      }
+
+      .marketplace-banner {
+        font-size: 18px;
+        padding: 14px 12px;
+      }
+
+      .home-section,
+      .home-hero-main,
+      .home-hero-side,
+      .hub-panel {
+        border-radius: 20px;
+      }
+
+      .home-hero-main {
+        padding: 22px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .home-hero-side {
+        grid-template-columns: 1fr;
+      }
+
+      .spotlight-content {
+        flex-direction: column;
+      }
+
+      .spotlight-image {
+        width: 100%;
+        height: 180px;
+      }
+
+      .section-top {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .section-top .btn {
+        width: 100%;
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card img,
+      .card-image {
+        height: 160px !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero-title,
+      .home-section h2,
+      .spotlight-text h3,
+      .hub-panel-copy h3 {
+        font-size: 28px;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+      }
+
+      .hero-badges {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
   
   <!-- Firebase SDK (Compat for HTML/JS) -->
@@ -653,16 +1218,47 @@
     Harrison's Local Marketplace & Your One Stop for Buying and Selling Local
   </div>
   
-  <div class="container">
-    <section id="quoteOfDaySection" style="display: none;">
+  <main class="home-shell">
+  <div class="container home-layout">
+    <section id="quoteOfDaySection" class="home-section home-section--quote" style="display: none;">
       <div class="quote-of-day" aria-label="Quote of the day">
         <div class="quote-of-day-label">Quote of the Day</div>
         <p class="quote-of-day-text" id="quoteOfDayTextDisplay"></p>
       </div>
     </section>
 
+    <section class="home-hero">
+      <div class="home-hero-main">
+        <div class="hero-kicker">Shop Local &bull; Stay Connected</div>
+        <h1 class="hero-title">Find local deals, pets, and yard sales in one place</h1>
+        <p class="hero-subtitle">Browse listings, discover pets, and never miss what’s happening around Harrison.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="buy-sell-hub.html">Explore Buy &amp; Sell</a>
+          <a class="btn btn-secondary" href="community-hub.html">Find Local Businesses & Services</a>
+        </div>
+       </div>
+
+      <div class="home-hero-side">
+        <div class="hero-mini-card">
+          <div class="hero-mini-kicker">Discover</div>
+          <div class="hero-mini-title">Recent Listings</div>
+          <div class="hero-mini-text">Catch newly posted items before they disappear.</div>
+        </div>
+        <div class="hero-mini-card">
+          <div class="hero-mini-kicker">Care</div>
+          <div class="hero-mini-title">Pet Corner</div>
+          <div class="hero-mini-text">See lost, found, and adoption updates in one glance.</div>
+        </div>
+        <div class="hero-mini-card">
+          <div class="hero-mini-kicker">Explore</div>
+          <div class="hero-mini-title">Yard Sales</div>
+          <div class="hero-mini-text">Find yard sales happening this weekend.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- Community Spotlight Section -->
-    <section id="communitySpotlightSection" style="display: none;">
+    <section id="communitySpotlightSection" class="home-section" style="display: none;">
       <h2>Community Spotlight</h2>
       <div class="spotlight-content">
         <div class="spotlight-image" id="communitySpotlightImage"></div>
@@ -674,80 +1270,108 @@
         </div>
       </div>
     </section>
-
-    <!-- Community Hub Explainer Placeholder -->
-    <section>
-      <div class="hub-explainer">
-        <div class="hub-explainer-content">
-          <div class="hub-explainer-image">
-            <img src="communityhub.png" alt="Community hub preview image" loading="lazy" onerror="this.onerror=null;this.src='communityhub.png';">
-          </div>
-          <div class="hub-explainer-text">
-            <h3>Your Community, All in One Place</h3>
-            <p>Browse local events, plan your next yard sale, and explore job opportunities in the community. Discover amazing deals, connect with trusted local businesses and services, and explore our Pet Corner for pet resources and listings. From everyday needs to community happenings, everything is organized to help you stay informed, get involved, and feel more connected to the community.
-            </p>
-          </div>
-          <div class="hub-explainer-cta">
-            <button class="btn btn-primary" onclick="window.location.href='community-hub.html'">Open community Hub</button>
-          </div>
-        </div>
-      </div>
-    </section>
     
     <!-- Featured Listings Section -->
-    <section id="featuredSection">
-      <h2>Featured Listings</h2>
-      <p></p>
+    <section id="featuredSection" class="home-section">
+      <div class="section-top">
+        <div>
+          <h2>Featured Listings</h2>
+          <p class="section-subcopy">Highlighted posts getting extra attention across the marketplace.</p>
+        </div>
+        <a class="btn btn-primary" href="featured-listings.html">View All Featured</a>
+      </div>
       <div class="card-grid" id="featuredListingsGrid">
         <div class="card">
-          <div class="card-image">⏳</div>
+          <div class="card-image">Loading</div>
           <div class="card-content">
             <div class="card-title">Loading featured listings...</div>
             <div class="card-price">Please wait</div>
           </div>
         </div>
       </div>
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="btn btn-primary" onclick="window.location.href='featured-listings.html'">View All Featured</button>
-      </div>
     </section>
  
+    <div class="recent-columns">
     <!-- Recent Listings Section -->
-    <section>
-      <h2>Marketplace Recent Listings</h2>
-      <p>Check out what's new in your community</p>
+    <section class="home-section">
+      <div class="section-top">
+        <div>
+          <h2>Marketplace Recent Listings</h2>
+          <p class="section-subcopy">The newest items posted in your community.</p>
+        </div>
+        <a class="btn btn-primary" href="browse.html">Browse More</a>
+      </div>
       <div class="card-grid" id="recentListingsGrid">
         <div class="card">
-          <div class="card-image">⏳</div>
+          <div class="card-image">Loading</div>
           <div class="card-content">
             <div class="card-title">Loading listings...</div>
             <div class="card-price">Please wait</div>
           </div>
         </div>
       </div>
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="btn btn-primary" onclick="window.location.href='browse.html'">Browse More</button>
-      </div>
     </section>
 
     <!-- Pet Corner Recent Listings Section -->
-    <section>
-      <h2>The Pet Corner Recent Listings</h2>
-      <p>Newest lost, found, and adoption posts from The Pet Corner</p>
+    <section class="home-section">
+      <div class="section-top">
+        <div>
+          <h2>Pets Near You</h2>
+          <p class="section-subcopy">Newest lost, found, and adoption posts from The Pet Corner.</p>
+        </div>
+        <a class="btn btn-primary" href="pet-hub.html">View The Pet Corner</a>
+      </div>
       <div class="card-grid" id="recentPetListingsGrid">
         <div class="card">
-          <div class="card-image">⏳</div>
+          <div class="card-image">Loading</div>
           <div class="card-content">
             <div class="card-title">Loading pet listings...</div>
             <div class="card-price">Please wait</div>
           </div>
         </div>
       </div>
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="btn btn-primary" onclick="window.location.href='pet-hub.html'">View The Pet Corner</button>
+    </section>
+    </div>
+
+    <section class="home-section home-section--hidden-gems">
+      <div class="section-top">
+        <div>
+          <h2>Hidden Gems</h2>
+          <p class="section-subcopy">Listings ending soon that still deserve a second look.</p>
+        </div>
+        <a class="btn btn-primary" href="browse.html">Browse All Listings</a>
+      </div>
+      <div class="card-grid" id="hiddenGemsGrid">
+        <div class="card">
+          <div class="card-image">Loading</div>
+          <div class="card-content">
+            <div class="card-title">Finding hidden gems...</div>
+            <div class="card-price">Please wait</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-section">
+      <div class="section-top">
+        <div>
+          <h2>Upcoming Yard Sales</h2>
+          <p class="section-subcopy">See the next yard sales coming up around your community.</p>
+        </div>
+        <a class="btn btn-primary" href="yard-sales.html">View All Yard Sales</a>
+      </div>
+      <div class="card-grid" id="upcomingYardSalesGrid">
+        <div class="card">
+          <div class="card-image">Loading</div>
+          <div class="card-content">
+            <div class="card-title">Loading yard sales...</div>
+            <div class="card-price">Please wait</div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
+  </main>
   
   <footer>
     <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
@@ -820,6 +1444,84 @@
       return `${count.toLocaleString()} views`;
     }
 
+    function formatShortLocation(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return 'Location TBD';
+      const beforeComma = raw.split(',')[0].trim();
+      return beforeComma || raw;
+    }
+
+    function formatCompactMetaLine(locationValue, timingValue) {
+      const shortLocation = formatShortLocation(locationValue);
+      const timing = String(timingValue || '').trim();
+      return timing ? `${shortLocation} • ${timing}` : shortLocation;
+    }
+
+    function polishHomeCardGrid(root = document) {
+      const imageLabelMap = {
+        '⏳': 'Loading',
+        '⚠': 'Error',
+        '⚠️': 'Error',
+        '✨': 'No Image',
+        '📦': 'No Image',
+        '🌟': 'Featured',
+        '📭': 'No Posts',
+        '🐾': 'Pets'
+      };
+
+      root.querySelectorAll('.card-image').forEach((imageEl) => {
+        const raw = (imageEl.textContent || '').trim();
+        const normalized = raw.replace(/\uFE0F/g, '');
+        if (imageLabelMap[raw]) {
+          imageEl.textContent = imageLabelMap[raw];
+        } else if (imageLabelMap[normalized]) {
+          imageEl.textContent = imageLabelMap[normalized];
+        }
+      });
+
+      root.querySelectorAll('#featuredListingsGrid .card, #recentListingsGrid .card, #hiddenGemsGrid .card').forEach((card) => {
+        const viewsRow = card.querySelector('.card-views-row');
+        if (viewsRow) {
+          viewsRow.textContent = (viewsRow.textContent || '').replace(/^[^A-Za-z0-9]+/u, '').trim();
+        }
+
+        const footerRows = card.querySelectorAll('.card-footer div');
+        if (footerRows[0]) {
+          const raw = (footerRows[0].textContent || '').trim();
+          const cleaned = raw.replace(/^[^A-Za-z0-9]+/u, '').trim();
+          const label = raw.includes('💼') ? 'Business' : 'Seller';
+          footerRows[0].textContent = `${label}: ${cleaned}`;
+
+          const mediaWrapper = card.querySelector('div[style*="position: relative"]');
+          if (label === 'Business' && mediaWrapper && !mediaWrapper.querySelector('.card-business-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'card-business-badge';
+            badge.textContent = 'Business';
+            mediaWrapper.appendChild(badge);
+          }
+        }
+
+        if (footerRows[1]) {
+          const cleanedLocation = (footerRows[1].textContent || '').replace(/^[^A-Za-z0-9]+/u, '').trim();
+          footerRows[1].textContent = `Location: ${cleanedLocation}`;
+        }
+      });
+
+      root.querySelectorAll('#recentPetListingsGrid .card').forEach((card) => {
+        const contentRows = card.querySelectorAll('.card-content > div');
+        if (contentRows[2]) {
+          contentRows[2].textContent = (contentRows[2].textContent || '')
+            .replace(/\s*•\s*/g, ' • ')
+            .trim();
+        }
+
+        if (contentRows[3]) {
+          const cleanedLocation = (contentRows[3].textContent || '').replace(/^[^A-Za-z0-9]+/u, '').trim();
+          contentRows[3].textContent = `Location: ${cleanedLocation}`;
+        }
+      });
+    }
+
     function isExpiredRecord(record) {
       if (!record || !record.expiresAt) return false;
       const expiresDate = record.expiresAt.toDate
@@ -831,6 +1533,130 @@
       return expiresDate < new Date();
     }
 
+    function normalizeDateValue(value) {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (value.toDate && typeof value.toDate === 'function') return value.toDate();
+      if (typeof value.seconds === 'number') {
+        return new Date(value.seconds * 1000 + (value.nanoseconds || 0) / 1e6);
+      }
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatDaysUntil(value) {
+      const date = normalizeDateValue(value);
+      if (!date) return 'Ending soon';
+      const diffMs = date.getTime() - Date.now();
+      const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+      if (diffDays <= 0) return 'Ends today';
+      if (diffDays === 1) return '1 day left';
+      return `${diffDays} days left`;
+    }
+
+    function formatCalendarDate(value) {
+      const date = normalizeDateValue(value);
+      if (!date) return 'Date TBD';
+      return date.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function getYardSaleDateRaw(sale) {
+      return sale.yardsaleDate ?? sale.yardsaleStartDate ?? null;
+    }
+
+    function getYardSaleCreatedRaw(sale) {
+      return sale.yardsaleCreatedat ?? sale.yardsaleCreatedAt ?? sale.createdAt ?? null;
+    }
+
+    async function loadUpcomingYardSales() {
+      const grid = document.getElementById('upcomingYardSalesGrid');
+      if (!grid) return;
+      const maxCards = getMaxCardsForTwoRows();
+
+      if (!db) {
+        console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
+        grid.innerHTML = '<div class="card"><div class="card-image">Unavailable</div><div class="card-content"><div class="card-title">Yard sales unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection('yardSales').get();
+        const today = new Date();
+        const startToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        const upcomingSales = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((sale) => {
+            if (sale.yardsalestatus && sale.yardsalestatus !== 'active') return false;
+
+            const expiresAt = normalizeDateValue(sale.yardsaleExpires);
+            if (expiresAt && expiresAt < today) return false;
+
+            const saleDate = normalizeDateValue(getYardSaleDateRaw(sale));
+            if (!saleDate) return false;
+
+            const saleDay = new Date(saleDate.getFullYear(), saleDate.getMonth(), saleDate.getDate());
+            return saleDay >= startToday;
+          })
+          .sort((a, b) => {
+            const aDate = normalizeDateValue(getYardSaleDateRaw(a));
+            const bDate = normalizeDateValue(getYardSaleDateRaw(b));
+            if (!aDate || !bDate) return 0;
+            return aDate.getTime() - bDate.getTime();
+          })
+          .slice(0, maxCards);
+
+        if (!upcomingSales.length) {
+          grid.innerHTML = '<div class="card"><div class="card-image"></div><div class="card-content"><div class="card-title">No upcoming yard sales</div><div class="card-price">Check back soon</div></div></div>';
+          return;
+        }
+
+        const cards = upcomingSales.map((sale) => {
+          const image = sale.yardsaleImage || '';
+          const dateLabel = formatCalendarDate(getYardSaleDateRaw(sale));
+          const createdLabel = formatRelativeTime(getYardSaleCreatedRaw(sale));
+          const timeLabel = sale.yardsaleStart
+            ? `${sale.yardsaleStart}${sale.yardsaleEndtime ? ` - ${sale.yardsaleEndtime}` : ''}`
+            : 'Time TBD';
+          const location = sale.yardsalelocation || 'Location TBD';
+          const imageHtml = image
+            ? `<img src="${image}" alt="${sale.yardsaleTitle || 'Yard Sale'}" style="width: 100%; height: 120px; object-fit: cover;" onerror="this.outerHTML='<div class=\\'card-image\\'></div>'">`
+            : '<div class="card-image"></div>';
+          const pillsHtml = [location, createdLabel]
+            .filter(Boolean)
+            .map((pill) => `<span class="card-pill">${pill}</span>`)
+            .join('');
+
+          return `
+            <div class="card" onclick="window.location.href='yard-sales.html'" style="cursor: pointer; position: relative;">
+              <div style="position: relative;">
+                ${imageHtml}
+              </div>
+              <div class="card-content">
+                <div class="card-title">${sale.yardsaleTitle || 'Yard Sale'}</div>
+                <div class="card-price">${dateLabel}</div>
+                <div class="card-pills">${pillsHtml}</div>
+                <div class="card-footer">
+                  <div>Time: ${timeLabel}</div>
+                  <div>Location: ${location}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        grid.innerHTML = cards.join('');
+      } catch (error) {
+        console.error('Error loading yard sales:', error);
+        grid.innerHTML = '<div class="card"><div class="card-image">Error</div><div class="card-content"><div class="card-title">Error loading yard sales</div><div class="card-price">Please try again</div></div></div>';
+      }
+    }
+
     async function loadFeaturedListings() {
       const grid = document.getElementById('featuredListingsGrid');
       if (!grid) return;
@@ -838,7 +1664,7 @@
 
       if (!db) {
         console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Unavailable</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
         return;
       }
 
@@ -852,7 +1678,7 @@
           .get();
 
         if (snapshot.empty) {
-          grid.innerHTML = '<div class="card"><div class="card-image">🌟</div><div class="card-content"><div class="card-title">No featured listings yet</div><div class="card-price">Be the first!</div></div></div>';
+          grid.innerHTML = '<div class="card"><div style="position: relative;"><div class="card-image"></div><span class="card-featured-overlay">Featured</span></div><div class="card-content"><div class="card-title">Promote your listing</div><div class="card-price">to appear here</div></div></div>';
           return;
         }
 
@@ -890,21 +1716,15 @@
             ? listing.images[0]
             : '';
           const location = listing.city || listing.location || 'Location TBD';
-          const category = listing.category || 'General';
-          const condition = listing.condition || '';
-          const sellerName = listing.sellerName || 'Local Seller';
-          const views = formatViews(listing.viewCount);
           const postedLabel = formatRelativeTime(listing.createdAt);
-
-          const pillsHtml = [category, condition, location, postedLabel]
-            .filter(Boolean).map(p => `<span class="card-pill">${p}</span>`).join('');
+          const metaLine = formatCompactMetaLine(location, postedLabel);
 
           const imageHtml = image
             ? `<img src="${image}" alt="${listing.title || 'Listing'}" style="width: 100%; height: 120px; object-fit: cover;">`
-            : '<div class="card-image">✨</div>';
+            : '<div class="card-image">No Image</div>';
 
           const businessBadge = isBusiness
-            ? '<div style="position: absolute; top: 4px; right: 4px; background: #1565C0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
+            ? '<div class="card-business-badge">Business</div>'
             : '';
 
           cards.push(`
@@ -912,16 +1732,12 @@
               <div style="position: relative;">
                 ${imageHtml}
                 <span class="card-featured-overlay">Featured</span>
+                ${businessBadge}
               </div>
               <div class="card-content">
                 <div class="card-title">${listing.title || 'Untitled'}</div>
                 <div class="card-price">${price}</div>
-                <div class="card-pills">${pillsHtml}</div>
-                <div class="card-views-row">👀 ${views}</div>
-                <div class="card-footer">
-                  <div>${isBusiness ? '💼' : '👤'} ${sellerName}</div>
-                  <div>📍 ${listing.city || 'Harrison, AR'}</div>
-                </div>
+                <div class="card-compact-meta">${metaLine}</div>
               </div>
             </div>
           `);
@@ -932,13 +1748,13 @@
         }
 
         if (cards.length === 0) {
-          grid.innerHTML = '<div class="card"><div class="card-image">🌟</div><div class="card-content"><div class="card-title">No featured listings yet</div><div class="card-price">Be the first!</div></div></div>';
+          grid.innerHTML = '<div class="card"><div style="position: relative;"><div class="card-image"></div><span class="card-featured-overlay">Featured</span></div><div class="card-content"><div class="card-title">No featured listings yet</div><div class="card-price">Be the first!</div></div></div>';
         } else {
           grid.innerHTML = cards.join('');
         }
       } catch (error) {
         console.error('Error loading featured listings:', error);
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Error</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
       }
     }
 
@@ -949,7 +1765,7 @@
 
       if (!db) {
         console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Unavailable</div><div class="card-content"><div class="card-title">Listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
         return;
       }
 
@@ -961,7 +1777,7 @@
           .get();
 
         if (snapshot.empty) {
-          grid.innerHTML = '<div class="card"><div class="card-image">📭</div><div class="card-content"><div class="card-title">No listings yet</div><div class="card-price">Check back soon</div></div></div>';
+          grid.innerHTML = '<div class="card"><div class="card-image">No Posts</div><div class="card-content"><div class="card-title">No listings yet</div><div class="card-price">Check back soon</div></div></div>';
           return;
         }
 
@@ -979,17 +1795,8 @@
             ? listing.images[0]
             : '';
           const location = listing.city || listing.location || 'Location TBD';
-          const category = listing.category || 'General';
-          const condition = listing.condition || '';
-          const views = formatViews(listing.viewCount);
           const postedLabel = formatRelativeTime(listing.createdAt);
-
-          const pillsHtml = [
-            category,
-            condition,
-            location,
-            postedLabel
-          ].filter(Boolean).map(p => `<span class="card-pill">${p}</span>`).join('');
+          const metaLine = formatCompactMetaLine(location, postedLabel);
 
           // Check if user is a business user
           let isBusiness = false;
@@ -1006,15 +1813,14 @@
 
           const imageHtml = image
             ? `<img src="${image}" alt="${listing.title || 'Listing'}" style="width: 100%; height: 120px; object-fit: cover;">`
-            : '<div class="card-image">📦</div>';
+            : '<div class="card-image">No Image</div>';
 
           const businessBadge = isBusiness
-            ? '<div style="position: absolute; top: 4px; right: 4px; background: #1565C0; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">💼</div>'
+            ? '<div class="card-business-badge">Business</div>'
             : '';
 
-          const sellerName = listing.sellerName || 'Local Seller';
           const featuredOverlay = listing.isFeatured
-            ? '<span class="card-featured-overlay">⭐ Featured</span>'
+            ? '<span class="card-featured-overlay">Featured</span>'
             : '';
 
           cards.push(`
@@ -1022,16 +1828,12 @@
               <div style="position: relative;">
                 ${imageHtml}
                 ${featuredOverlay}
+                ${businessBadge}
               </div>
               <div class="card-content">
                 <div class="card-title">${listing.title || 'Untitled'}</div>
                 <div class="card-price">${price}</div>
-                <div class="card-pills">${pillsHtml}</div>
-                <div class="card-views-row">👀 ${views}</div>
-                <div class="card-footer">
-                  <div>${isBusiness ? '💼' : '👤'} ${sellerName}</div>
-                  <div>📍 ${listing.city || 'Harrison, AR'}</div>
-                </div>
+                <div class="card-compact-meta">${metaLine}</div>
               </div>
             </div>
           `);
@@ -1040,7 +1842,7 @@
         grid.innerHTML = cards.join('');
       } catch (error) {
         console.error('Error loading recent listings:', error);
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Error</div><div class="card-content"><div class="card-title">Error loading listings</div><div class="card-price">Please try again</div></div></div>';
       }
     }
 
@@ -1065,7 +1867,7 @@
 
       if (!db) {
         console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Pet listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Unavailable</div><div class="card-content"><div class="card-title">Pet listings unavailable</div><div class="card-price">Please refresh</div></div></div>';
         return;
       }
 
@@ -1076,7 +1878,7 @@
           .get();
 
         if (snapshot.empty) {
-          grid.innerHTML = '<div class="card"><div class="card-image">🐾</div><div class="card-content"><div class="card-title">No pet listings yet</div><div class="card-price">Check back soon</div></div></div>';
+          grid.innerHTML = '<div class="card"><div class="card-image"></div><div class="card-content"><div class="card-title">No pet listings yet</div><div class="card-price">Check back soon</div></div></div>';
           return;
         }
 
@@ -1092,28 +1894,25 @@
           const petName = pet.petName || 'Unnamed Pet';
           const petType = pet.petType || 'Pet';
           const petBreed = pet.petBreed || '';
-          const petLabel = getPetPostLabel(pet.postType);
-          const petBadgeClass = getPetPostBadgeClass(pet.postType);
           const location = pet.petSeenLocation || 'Location TBD';
           const image = (pet.petImages && pet.petImages.length > 0)
             ? pet.petImages[0]
             : pet.petPhoto;
 
           const imageHtml = image
-            ? `<img src="${image}" alt="${petName}" style="width: 100%; height: 120px; object-fit: cover;" onerror="this.outerHTML='<div class=\\'card-image\\'>🐾</div>'">`
-            : '<div class="card-image">🐾</div>';
+            ? `<img src="${image}" alt="${petName}" style="width: 100%; height: 120px; object-fit: cover;" onerror="this.outerHTML='<div class=\\'card-image\\'></div>'">`
+            : '<div class="card-image"></div>';
 
           cards.push(`
             <div class="card" onclick="window.location.href='pet-details.html?id=${doc.id}'" style="cursor: pointer; position: relative;">
               <div style="position: relative;">
                 ${imageHtml}
-                <div class="pet-type-badge ${petBadgeClass}">${petLabel}</div>
               </div>
               <div class="card-content">
                 <div class="card-title">${petName}</div>
                 <div class="card-price">The Pet Corner</div>
-                <div style="font-size: 16px; color: #6b7280; margin-top: 6px;">${petType}${petBreed ? ` • ${petBreed}` : ''}</div>
-                <div style="font-size: 16px; color: #6b7280; margin-top: 4px;">📍 ${location}</div>
+                <div style="font-size: 16px; color: #6b7280; margin-top: 6px;">${petType}${petBreed ? ` \u2022 ${petBreed}` : ''}</div>
+                <div style="font-size: 16px; color: #6b7280; margin-top: 4px;">Location: ${location}</div>
               </div>
             </div>
           `);
@@ -1122,7 +1921,126 @@
         grid.innerHTML = cards.join('');
       } catch (error) {
         console.error('Error loading pet listings:', error);
-        grid.innerHTML = '<div class="card"><div class="card-image">⚠️</div><div class="card-content"><div class="card-title">Error loading pet listings</div><div class="card-price">Please try again</div></div></div>';
+        grid.innerHTML = '<div class="card"><div class="card-image">Error</div><div class="card-content"><div class="card-title">Error loading pet listings</div><div class="card-price">Please try again</div></div></div>';
+      }
+    }
+
+    async function loadHiddenGemsListings() {
+      const grid = document.getElementById('hiddenGemsGrid');
+      if (!grid) return;
+      const maxCards = getMaxCardsForTwoRows();
+
+      if (!db) {
+        console.error('Firestore is not initialized. Check firebase-config.js and SDK script tags.');
+        grid.innerHTML = '<div class="card"><div class="card-image">Unavailable</div><div class="card-content"><div class="card-title">Hidden gems unavailable</div><div class="card-price">Please refresh</div></div></div>';
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection('listings')
+          .where('status', '==', 'approved')
+          .orderBy('createdAt', 'desc')
+          .limit(maxCards * 12)
+          .get();
+
+        const now = new Date();
+        const soonCutoffMs = now.getTime() + (7 * 24 * 60 * 60 * 1000);
+        const candidates = [];
+
+        for (const doc of snapshot.docs) {
+          const listing = doc.data();
+
+          if (isExpiredRecord(listing) || listing.isFeatured === true) {
+            continue;
+          }
+
+          const expiresAt = normalizeDateValue(listing.expiresAt);
+          if (!expiresAt) {
+            continue;
+          }
+
+          const expiresMs = expiresAt.getTime();
+          if (expiresMs <= now.getTime() || expiresMs > soonCutoffMs) {
+            continue;
+          }
+
+          candidates.push({
+            id: doc.id,
+            data: listing,
+            expiresAt
+          });
+        }
+
+        candidates.sort((a, b) => {
+          const expiresDelta = a.expiresAt.getTime() - b.expiresAt.getTime();
+          if (expiresDelta !== 0) return expiresDelta;
+
+          const viewDelta = (Number(a.data.viewCount) || 0) - (Number(b.data.viewCount) || 0);
+          if (viewDelta !== 0) return viewDelta;
+
+          const createdA = normalizeDateValue(a.data.createdAt);
+          const createdB = normalizeDateValue(b.data.createdAt);
+          return (createdA ? createdA.getTime() : 0) - (createdB ? createdB.getTime() : 0);
+        });
+
+        const selected = candidates.slice(0, maxCards);
+
+        if (!selected.length) {
+          grid.innerHTML = '<div class="card"><div class="card-image"></div><div class="card-content"><div class="card-title">No hidden gems right now</div><div class="card-price">Check back for listings ending soon</div></div></div>';
+          return;
+        }
+
+        const cards = [];
+
+        for (const item of selected) {
+          const listing = item.data;
+          const price = listing.price ? `$${listing.price}` : 'Contact';
+          const image = listing.images && listing.images.length > 0
+            ? listing.images[0]
+            : '';
+          const urgency = formatDaysUntil(item.expiresAt);
+          const location = listing.city || listing.location || 'Harrison, AR';
+          const metaLine = formatCompactMetaLine(location, urgency);
+
+          let isBusiness = false;
+          if (listing.userId) {
+            try {
+              const userDoc = await db.collection('users').doc(listing.userId).get();
+              if (userDoc.exists) {
+                isBusiness = userDoc.data().accountType === 'business';
+              }
+            } catch (err) {
+              console.error('Error fetching user:', err);
+            }
+          }
+
+          const imageHtml = image
+            ? `<img src="${image}" alt="${listing.title || 'Listing'}" style="width: 100%; height: 120px; object-fit: cover;" onerror="this.outerHTML='<div class=\\'card-image\\'>No Image</div>'">`
+            : '<div class="card-image">No Image</div>';
+
+          const businessBadge = isBusiness
+            ? '<div class="card-business-badge">Business</div>'
+            : '';
+
+          cards.push(`
+            <div class="card" onclick="window.location.href='single-listing.html?id=${item.id}'" style="cursor: pointer; position: relative;">
+              <div style="position: relative;">
+                ${imageHtml}
+                ${businessBadge}
+              </div>
+              <div class="card-content">
+                <div class="card-title">${listing.title || 'Untitled'}</div>
+                <div class="card-price">${price}</div>
+                <div class="card-compact-meta">${metaLine}</div>
+              </div>
+            </div>
+          `);
+        }
+
+        grid.innerHTML = cards.join('');
+      } catch (error) {
+        console.error('Error loading hidden gems:', error);
+        grid.innerHTML = '<div class="card"><div class="card-image">Error</div><div class="card-content"><div class="card-title">Error loading hidden gems</div><div class="card-price">Please try again</div></div></div>';
       }
     }
 
@@ -1267,10 +2185,13 @@
       }
 
       if (displaySettings.showFeaturedListings) {
-        loadFeaturedListings();
+        await loadFeaturedListings();
       }
-      loadRecentListings();
-      loadRecentPetListings();
+      await loadRecentListings();
+      await loadHiddenGemsListings();
+      await loadRecentPetListings();
+      await loadUpcomingYardSales();
+      polishHomeCardGrid();
     });
   </script>
 </body>
