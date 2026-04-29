@@ -284,13 +284,17 @@
           <button type="button" class="btn-small btn-verify-secondary" onclick="dismissVerificationWarning()">Dismiss</button>
         </div>
       </div>
+      <div id="resubmitNotice" class="verification-warning" style="display: none; background: #eff6ff; color: #1d4ed8; border-left-color: #3b82f6;">
+        <div class="verification-warning-title" style="color: #1e3a8a;">Editing a rejected listing</div>
+        <p id="resubmitNoticeText">We filled this form with your previous listing so you can update it and resubmit.</p>
+      </div>
       <div id="errorMessage" class="error-message"></div>
       <div id="successMessage" class="success-message"></div>
 
       <form id="listingForm">
         <div class="form-group">
           <label class="form-label" for="images">Images (required)</label>
-          <input type="file" id="images" class="form-input" accept="image/*" multiple required>
+          <input type="file" id="images" class="form-input" accept="image/*" multiple>
           <div class="hint">Upload at least one image. You can select multiple files.</div>
           <div id="imagePreview" class="image-preview"></div>
         </div>
@@ -398,10 +402,14 @@
     const successMessage = document.getElementById('successMessage');
     const categorySelect = document.getElementById('category');
     const imagePreview = document.getElementById('imagePreview');
+    const resubmitNotice = document.getElementById('resubmitNotice');
+    const resubmitNoticeText = document.getElementById('resubmitNoticeText');
     let currentUser = null;
     let uploadedImageUrls = [];
     let isUploadingImages = false;
     let verificationPollIntervalId = null;
+    let resubmittedFromListingId = '';
+    const LISTINGS_API_URL = `${window.location.origin}/api/listings`;
 
     function applyCategoryFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -438,6 +446,37 @@
         categorySelect.value = normalizedCategory;
         categorySelect.dispatchEvent(new Event('change'));
       }
+    }
+
+    function getResubmitListingIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get('resubmitListingId') || '').trim();
+    }
+
+    function getListingRejectionReasonLabel(reason) {
+      switch (String(reason || '').toLowerCase()) {
+        case 'spam':
+          return 'Spam';
+        case 'prohibited':
+          return 'Prohibited item or content';
+        case 'low_quality':
+          return 'Low quality listing';
+        case 'duplicate':
+          return 'Duplicate listing';
+        case 'misleading':
+          return 'Misleading information';
+        default:
+          return 'This listing did not meet our marketplace guidelines.';
+      }
+    }
+
+    function renderImagePreview(urls) {
+      imagePreview.innerHTML = '';
+      urls.forEach((url) => {
+        const img = document.createElement('img');
+        img.src = url;
+        imagePreview.appendChild(img);
+      });
     }
 
     function redirectToLogin() {
@@ -584,11 +623,8 @@
           await fileRef.put(file);
           const downloadUrl = await fileRef.getDownloadURL();
           uploadedImageUrls.push(downloadUrl);
-
-          const img = document.createElement('img');
-          img.src = downloadUrl;
-          imagePreview.appendChild(img);
         }
+        renderImagePreview(uploadedImageUrls);
       } catch (error) {
         console.error('Image upload error:', error);
         showError('Image upload failed. Please try again.');
@@ -620,8 +656,61 @@
         } else {
           stopEmailVerificationPolling();
         }
+
+        await preloadRejectedListingForResubmission();
       } catch (error) {
         console.error('Error loading user profile:', error);
+      }
+    }
+
+    async function preloadRejectedListingForResubmission() {
+      const listingId = getResubmitListingIdFromUrl();
+      if (!listingId || !currentUser) {
+        return;
+      }
+
+      try {
+        const listingDoc = await db.collection('listings').doc(listingId).get();
+        if (!listingDoc.exists) {
+          showError('We could not find that listing to resubmit.');
+          return;
+        }
+
+        const listingData = listingDoc.data() || {};
+        if (String(listingData.userId || '') !== currentUser.uid) {
+          showError('You can only edit your own rejected listings.');
+          return;
+        }
+
+        document.querySelector('h1').textContent = 'Edit & Resubmit Listing';
+        document.getElementById('title').value = listingData.title || '';
+        document.getElementById('description').value = listingData.description || '';
+        document.getElementById('price').value = listingData.price != null ? String(listingData.price) : '';
+        document.getElementById('category').value = listingData.category || '';
+        document.getElementById('condition').value = listingData.condition || '';
+        document.getElementById('zipCode').value = listingData.zipCode || '';
+        document.getElementById('city').value = listingData.city || '';
+        document.getElementById('wantsFeatured').checked = false;
+        document.getElementById('paymentInfo').style.display = 'none';
+
+        uploadedImageUrls = Array.isArray(listingData.images)
+          ? listingData.images.filter((url) => isValidImageUrl(url))
+          : [];
+        renderImagePreview(uploadedImageUrls);
+
+        resubmittedFromListingId = listingId;
+
+        const rejectionReasonCode = typeof listingData.rejectionReason === 'string' ? listingData.rejectionReason.trim() : '';
+        const rejectionNotes = typeof listingData.rejectionNotes === 'string' ? listingData.rejectionNotes.trim() : '';
+        const rejectionReason = rejectionReasonCode
+          ? `${getListingRejectionReasonLabel(rejectionReasonCode)}${rejectionNotes ? `. ${rejectionNotes}` : ''}`
+          : 'Please review the listing details and make any needed changes before resubmitting.';
+
+        resubmitNoticeText.textContent = `Your listing was removed because: ${rejectionReason}`;
+        resubmitNotice.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading rejected listing for resubmission:', error);
+        showError('We could not preload the rejected listing right now. Please try again.');
       }
     }
 
@@ -670,6 +759,31 @@
 
     function isValidImageUrl(url) {
       return typeof url === 'string' && url.startsWith('https://');
+    }
+
+    async function createModeratedListing(listingData) {
+      const token = currentUser ? await currentUser.getIdToken() : '';
+      const response = await fetch(LISTINGS_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(listingData),
+      });
+
+      let responseBody = null;
+      try {
+        responseBody = await response.json();
+      } catch (error) {
+        responseBody = null;
+      }
+
+      if (!response.ok || !responseBody?.listingId) {
+        throw new Error(responseBody?.error || `Listing creation failed with status ${response.status}`);
+      }
+
+      return responseBody;
     }
 
     form.addEventListener('submit', async (event) => {
@@ -741,8 +855,6 @@
           zipCode,
           city,
           pickupLocation,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          status: wantsFeatured ? 'pending' : 'approved',  // Featured listings need admin approval
           viewCount: 0,
           isActive: true,
           isFeatured: false,
@@ -755,7 +867,8 @@
           sellerEmail: currentUser.email,
           sellerBusinessName: userProfileData?.accountType === 'business' ? userProfileData?.businessName || null : null,
           sellerBusinessTier: userProfileData?.accountType === 'business' ? userProfileData?.businessTier || 'free' : null,
-          sellerAccountType: userProfileData?.accountType || null
+          sellerAccountType: userProfileData?.accountType || null,
+          resubmittedFromListingId: resubmittedFromListingId || null
         };
 
         // Marketplace listings auto-expire after 30 days.
@@ -763,7 +876,7 @@
         if (category !== 'Services' && category !== 'Shop Local') {
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 30);
-          listingData.expiresAt = firebase.firestore.Timestamp.fromDate(expiresAt);
+          listingData.expiresAt = expiresAt.toISOString();
         }
 
         // If featured, add payment tracking fields
@@ -772,16 +885,22 @@
           listingData.featurePaymentStatus = 'pending';
         }
 
-        const listingRef = await db.collection('listings').add(listingData);
+        const { listingId, status } = await createModeratedListing(listingData);
 
         if (wantsFeatured) {
           // Redirect to Stripe Checkout
-          await initiateStripeCheckout(listingRef.id, title);
+          await initiateStripeCheckout(listingId, title);
         } else {
-          showSuccess('Listing created successfully! Redirecting to your profile...');
+          showSuccess(
+            status === 'pending_review'
+              ? 'Listing submitted for safety review. Redirecting to your profile...'
+              : 'Listing created successfully! Redirecting to your profile...'
+          );
           form.reset();
           imagePreview.innerHTML = '';
           uploadedImageUrls = [];
+          resubmittedFromListingId = '';
+          resubmitNotice.style.display = 'none';
           submitBtn.textContent = 'Submit Listing';
           submitBtn.disabled = false;
 
@@ -793,6 +912,8 @@
         form.reset();
         imagePreview.innerHTML = '';
         uploadedImageUrls = [];
+        resubmittedFromListingId = '';
+        resubmitNotice.style.display = 'none';
         submitBtn.textContent = 'Submit Listing';
         submitBtn.disabled = false;
 

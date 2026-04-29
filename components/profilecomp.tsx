@@ -94,6 +94,23 @@ function normalizeSavedSection(item: AnyItem): SectionKey {
   return 'marketplace';
 }
 
+function getListingRejectionReasonLabel(reason: string): string {
+  switch (reason.trim().toLowerCase()) {
+    case 'spam':
+      return 'Spam';
+    case 'prohibited':
+      return 'Prohibited item or content';
+    case 'low_quality':
+      return 'Low quality listing';
+    case 'duplicate':
+      return 'Duplicate listing';
+    case 'misleading':
+      return 'Misleading information';
+    default:
+      return 'This listing did not meet our marketplace guidelines.';
+  }
+}
+
 export default function Profile() {
   const router = useRouter();
   const { user, profile, isAdmin, isBusinessAccount } = useAccountStatus();
@@ -211,7 +228,7 @@ export default function Profile() {
   }, [isBusinessAccount, showEditBusiness]);
 
   const activeMarketplaceCount = useMemo(
-    () => listings.filter((item) => !['sold', 'archived', 'deleted'].includes(String(item.status || '').toLowerCase())).length,
+    () => listings.filter((item) => !['sold', 'archived', 'deleted', 'rejected'].includes(String(item.status || '').toLowerCase())).length,
     [listings]
   );
 
@@ -289,13 +306,13 @@ export default function Profile() {
       if (tab === 'archived') {
         return listings.filter((item) => {
           const status = String(item.status || '').toLowerCase();
-          return status === 'archived' || status === 'expired' || status === 'deleted';
+          return status === 'archived' || status === 'expired' || status === 'deleted' || status === 'rejected';
         });
       }
 
       return listings.filter((item) => {
         const status = String(item.status || '').toLowerCase();
-        return status !== 'sold' && status !== 'archived' && status !== 'deleted';
+        return status !== 'sold' && status !== 'archived' && status !== 'deleted' && status !== 'rejected';
       });
     }
 
@@ -422,6 +439,13 @@ export default function Profile() {
     return item.images?.[0] || item.image || null;
   };
 
+  const getListingRejectionReason = (item: AnyItem): string => {
+    const reason = typeof item?.rejectionReason === 'string' ? item.rejectionReason.trim() : '';
+    const notes = typeof item?.rejectionNotes === 'string' ? item.rejectionNotes.trim() : '';
+    const label = getListingRejectionReasonLabel(reason);
+    return notes ? `${label}. ${notes}` : label;
+  };
+
   const openCreateHub = () => {
     router.push('./browsebutton');
   };
@@ -496,6 +520,15 @@ export default function Profile() {
     } catch (error) {
       Alert.alert('Error', 'Failed to relist. Please try again.');
     }
+  };
+
+  const handleResubmitListing = (item: AnyItem) => {
+    router.push({
+      pathname: '../(app)/create-listing',
+      params: {
+        resubmitListingId: item.id,
+      },
+    });
   };
 
   const toggleSectionCollapsed = (section: SectionKey) => {
@@ -957,6 +990,19 @@ export default function Profile() {
                           ) : null}
                         </TouchableOpacity>
 
+                        {currentTab === 'archived' && section === 'marketplace' && String(item.status || '').toLowerCase() === 'rejected' ? (
+                          <View style={styles.rejectionNotice}>
+                            <Text style={styles.rejectionNoticeLabel}>Your listing was removed because</Text>
+                            <Text style={styles.rejectionNoticeText}>{getListingRejectionReason(item)}</Text>
+                            <TouchableOpacity
+                              style={styles.resubmitButton}
+                              onPress={() => handleResubmitListing(item)}
+                            >
+                              <Text style={styles.resubmitButtonText}>Edit & Resubmit</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : null}
+
                         {currentTab === 'active' ? (
                           <View style={styles.listingActions}>
                             <TouchableOpacity
@@ -1317,6 +1363,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#9a3412',
+  },
+  rejectionNotice: {
+    marginTop: -2,
+    marginBottom: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    backgroundColor: '#fef2f2',
+    padding: 12,
+  },
+  rejectionNoticeLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#b91c1c',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  rejectionNoticeText: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#7f1d1d',
+  },
+  resubmitButton: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#fca5a5',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  resubmitButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#b91c1c',
   },
   showAllButton: {
     alignItems: 'center',

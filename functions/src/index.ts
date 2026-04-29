@@ -17,7 +17,8 @@ import { onCall, onRequest } from "firebase-functions/v2/https";
 import Stripe from "stripe";
 
 // Email triggers (Resend)
-export { onFeaturePurchaseCreated, onMessageCreated, onPremiumPurchaseCreated, onPublicMessageCreated, onUserCreated } from "./emailTriggers.js";
+export { onFeaturePurchaseCreated, onListingRejected, onMessageCreated, onPremiumPurchaseCreated, onPublicMessageCreated, onUserCreated, onUserDisabled } from "./emailTriggers.js";
+export { listingsApi } from "./listingsApi.js";
 
 export const unsubscribe = onRequest(async (req, res) => {
   const uid = String(req.query.uid || "").trim();

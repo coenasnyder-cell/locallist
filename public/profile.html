@@ -1020,6 +1020,29 @@
       cursor: pointer;
       transition: all 0.3s;
     }
+
+    .rejection-notice {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .rejection-notice-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #b91c1c;
+      margin-bottom: 6px;
+    }
+
+    .rejection-notice-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #7f1d1d;
+    }
     
     .empty-state {
       text-align: center;
@@ -1460,7 +1483,7 @@
         <!-- Pending Tab -->
         <div id="pendingTab" class="listings-section listing-browser-panel" style="display: none;">
           <div id="pendingDisclaimer" class="pending-disclaimer">
-            <strong>Pending Review Notice:</strong> Service posts require admin approval to help prevent fraud and protect our community. If you opted in for a featured listing and your listing is rejected, we will process a refund for the transaction. We will also email you with more information and details on the decision.
+            <strong>Pending Review Notice:</strong> Service posts require admin approval to help prevent fraud and protect our community. If you opted in for featured placement and your listing is rejected, our team will review the purchase separately and email you with any next steps.
           </div>
           <div id="pendingListingsContainer" class="listings-grid">
             <div class="loading">Loading pending items...</div>
@@ -2120,8 +2143,10 @@
           const listing = { id: doc.id, ...doc.data() };
           if (listing.status === 'sold') {
             soldListings.push(listing);
-          } else if (listing.status === 'pending') {
+          } else if (listing.status === 'pending' || listing.status === 'pending_review') {
             pendingListings.push(listing);
+          } else if (String(listing.status || '').toLowerCase() === 'rejected') {
+            expiredListings.push(listing);
           } else if (isExpiredListing(listing)) {
             expiredListings.push(listing);
           } else {
@@ -2753,13 +2778,38 @@
       `;
     }
 
+    function getListingRejectionReasonLabel(reason) {
+      switch (String(reason || '').toLowerCase()) {
+        case 'spam':
+          return 'Spam';
+        case 'prohibited':
+          return 'Prohibited item or content';
+        case 'low_quality':
+          return 'Low quality listing';
+        case 'duplicate':
+          return 'Duplicate listing';
+        case 'misleading':
+          return 'Misleading information';
+        default:
+          return 'This listing did not meet our marketplace guidelines.';
+      }
+    }
+
+    function getListingRejectionReason(listing) {
+      const reasonCode = typeof listing?.rejectionReason === 'string' ? listing.rejectionReason.trim() : '';
+      const rejectionNotes = typeof listing?.rejectionNotes === 'string' ? listing.rejectionNotes.trim() : '';
+      const label = getListingRejectionReasonLabel(reasonCode);
+      return rejectionNotes ? `${label} ${rejectionNotes}` : label;
+    }
+
     function createListingCard(listing, type) {
       const price = listing.price ? `$${listing.price}` : 'Contact';
       const image = listing.images && listing.images.length > 0 
         ? listing.images[0] 
         : 'logo.png';
+      const isRejectedListing = String(listing?.status || '').toLowerCase() === 'rejected';
 
-      const expiredOnText = type === 'expired' && listing.expiresAt
+      const expiredOnText = type === 'expired' && !isRejectedListing && listing.expiresAt
         ? `Expired On: ${formatDisplayDate(listing.expiresAt)}`
         : '';
 
@@ -2776,12 +2826,26 @@
           <button class="btn btn-secondary" onclick="markAsSold('${listing.id}', event)">✓ Mark Sold</button>
           <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
         `;
+      } else if (isRejectedListing) {
+        actionsHtml = `
+          <button class="btn btn-secondary" onclick="editAndResubmitListing('${listing.id}', event)">Edit &amp; Resubmit</button>
+          <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
+        `;
       } else if (type === 'expired') {
         actionsHtml = `
           <button class="btn btn-success" onclick="repostListing('${listing.id}', event)">↻ Repost</button>
           <button class="btn btn-danger" onclick="deleteListing('${listing.id}', event)">🗑️ Delete</button>
         `;
       }
+
+      const rejectionHtml = isRejectedListing
+        ? `
+          <div class="rejection-notice">
+            <div class="rejection-notice-label">Your listing was removed because</div>
+            <div class="rejection-notice-text">${escapeHtml(getListingRejectionReason(listing))}</div>
+          </div>
+        `
+        : '';
 
       return `
         <div class="listing-card" onclick="viewListing('${listing.id}')">
@@ -2790,6 +2854,7 @@
             <div class="listing-title">${listing.title || 'Untitled'}</div>
             <div class="listing-price">${price}</div>
             ${metaHtml}
+            ${rejectionHtml}
             <div class="listing-actions">
               ${actionsHtml}
             </div>
@@ -3090,6 +3155,11 @@
       } catch (error) {
         alert('Error reposting listing: ' + error.message);
       }
+    }
+
+    function editAndResubmitListing(listingId, event) {
+      if (event) event.stopPropagation();
+      window.location.href = `create-listing.html?resubmitListingId=${encodeURIComponent(listingId)}`;
     }
 
     async function markAsSold(listingId, event) {

@@ -1,7 +1,24 @@
 import { getFirestore } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
-import { featuredListingEmail, messageEmail, premiumSubscriptionEmail, sendEmail, welcomeEmail } from "./email/index.js";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { accountDisabledEmail, featuredListingEmail, listingRejectedEmail, messageEmail, premiumSubscriptionEmail, sendEmail, welcomeEmail } from "./email/index.js";
+
+function getListingRejectionReasonLabel(reason: string): string {
+  switch (String(reason || "").toLowerCase()) {
+  case "spam":
+    return "Spam";
+  case "prohibited":
+    return "Prohibited item or content";
+  case "low_quality":
+    return "Low quality listing";
+  case "duplicate":
+    return "Duplicate listing";
+  case "misleading":
+    return "Misleading information";
+  default:
+    return "Marketplace guidelines issue";
+  }
+}
 
 /**
  * Sends a welcome email when a new user document is created.
@@ -277,6 +294,151 @@ export const onFeaturePurchaseCreated = onDocumentCreated(
       logger.error("Failed to send featured listing confirmation email", {
         purchaseId: event.params.purchaseId,
         userId,
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Sends a listing rejection email when a listing status changes to rejected.
+ */
+export const onListingRejected = onDocumentUpdated(
+  {
+    document: "listings/{listingId}",
+    secrets: ["RESEND_API_KEY"],
+  },
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    if (!afterData) {
+      return;
+    }
+
+    const previousStatus = String(beforeData?.status || "").toLowerCase();
+    const nextStatus = String(afterData.status || "").toLowerCase();
+
+    if (previousStatus === "rejected" || nextStatus !== "rejected") {
+      return;
+    }
+
+    const db = getFirestore();
+    const userId = String(afterData.userId || "").trim();
+    const listingTitle = String(afterData.title || "your listing").trim();
+    const rejectionReasonCode = String(afterData.rejectionReason || "").trim().toLowerCase();
+    const rejectionNotes = String(afterData.rejectionNotes || "").trim();
+    const rejectionReason = rejectionReasonCode ?
+      `${getListingRejectionReasonLabel(rejectionReasonCode)}${rejectionNotes ? `. ${rejectionNotes}` : ""}` :
+      "It did not meet our marketplace guidelines.";
+    const featurePaymentStatus = String(afterData.featurePaymentStatus || "").toLowerCase();
+    const includesFeaturedReviewNote = Boolean(afterData.featureRequested) && featurePaymentStatus !== "not_requested";
+
+    try {
+      let recipientEmail = String(afterData.sellerEmail || "").trim();
+      let recipientName = String(afterData.sellerName || afterData.userName || "").trim() || "there";
+
+      if (userId) {
+        const userSnap = await db.collection("users").doc(userId).get();
+        if (userSnap.exists) {
+          const userData = userSnap.data() || {};
+          recipientEmail = recipientEmail || String(userData.email || "").trim();
+          recipientName = String(userData.displayName || userData.name || recipientName).trim() || "there";
+        }
+      }
+
+      if (!recipientEmail) {
+        logger.warn("Rejected listing has no email; skipping rejection email", {
+          listingId: event.params.listingId,
+          userId,
+        });
+        return;
+      }
+
+      const template = listingRejectedEmail(
+        recipientName,
+        listingTitle,
+        rejectionReason,
+        includesFeaturedReviewNote,
+      );
+
+      await sendEmail({
+        to: recipientEmail,
+        subject: template.subject,
+        html: template.html,
+        uid: userId || undefined,
+        unsubscribeType: "digests",
+        respectPreferences: false,
+      });
+
+      logger.info("Listing rejection email sent", {
+        listingId: event.params.listingId,
+        userId,
+        recipientEmail,
+      });
+    } catch (error) {
+      logger.error("Failed to send listing rejection email", {
+        listingId: event.params.listingId,
+        userId,
+        error,
+      });
+    }
+  }
+);
+
+/**
+ * Sends an account-disabled email when a user is disabled by an admin.
+ */
+export const onUserDisabled = onDocumentUpdated(
+  {
+    document: "users/{userId}",
+    secrets: ["RESEND_API_KEY"],
+  },
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    if (!afterData) {
+      return;
+    }
+
+    const wasDisabled = beforeData?.isDisabled === true;
+    const isDisabled = afterData.isDisabled === true;
+
+    if (wasDisabled || !isDisabled) {
+      return;
+    }
+
+    const recipientEmail = String(afterData.email || "").trim();
+    if (!recipientEmail) {
+      logger.warn("Disabled user has no email; skipping disabled email", {
+        userId: event.params.userId,
+      });
+      return;
+    }
+
+    const recipientName = String(afterData.displayName || afterData.name || "there").trim() || "there";
+    const disabledReason = String(afterData.disabledReason || afterData.banReason || afterData.suspendReason || "").trim() ||
+      "A violation of our marketplace or safety policies was recorded on your account.";
+
+    try {
+      const template = accountDisabledEmail(recipientName, disabledReason);
+      await sendEmail({
+        to: recipientEmail,
+        subject: template.subject,
+        html: template.html,
+        uid: event.params.userId,
+        unsubscribeType: "digests",
+        respectPreferences: false,
+      });
+
+      logger.info("Account disabled email sent", {
+        userId: event.params.userId,
+        recipientEmail,
+      });
+    } catch (error) {
+      logger.error("Failed to send account disabled email", {
+        userId: event.params.userId,
         error,
       });
     }

@@ -6,15 +6,18 @@ type PostType = 'lost' | 'found' | 'adoption';
 
 export default function ListingPostedScreen() {
   const router = useRouter();
-  const { petId, postType, listingId } = useLocalSearchParams<{ petId?: string; postType?: string; listingId?: string }>();
+  const { petId, postType, listingId, status } = useLocalSearchParams<{ petId?: string; postType?: string; listingId?: string; status?: string }>();
   const isMarketplaceListing = typeof listingId === 'string' && listingId.length > 0;
+  const isPendingReview = isMarketplaceListing && status === 'pending_review';
 
   const normalizedPostType: PostType =
     postType === 'found' || postType === 'adoption' ? postType : 'lost';
 
   const confirmationMessage =
     isMarketplaceListing
-      ? 'Posting successful. To see your listing, tap below, or go to your profile to manage it later.'
+      ? isPendingReview
+        ? 'Your listing was submitted and is pending safety review. You can track it from your profile while our team checks it.'
+        : 'Posting successful. To see your listing, tap below, or go to your profile to manage it later.'
       : normalizedPostType === 'found'
         ? 'Your found pet post is now live. Where would you like to go next?'
         : normalizedPostType === 'adoption'
@@ -32,6 +35,11 @@ export default function ListingPostedScreen() {
 
   const viewListing = () => {
     if (isMarketplaceListing) {
+      if (isPendingReview) {
+        goToPetCorner();
+        return;
+      }
+
       router.replace({
         pathname: '/listing' as any,
         params: { id: listingId },
@@ -63,7 +71,9 @@ export default function ListingPostedScreen() {
 
           <View style={styles.actions}>
             <TouchableOpacity style={styles.primaryButton} onPress={viewListing} activeOpacity={0.85}>
-              <Text style={styles.primaryButtonText}>{isMarketplaceListing ? 'View Listing' : 'View Listing'}</Text>
+              <Text style={styles.primaryButtonText}>
+                {isMarketplaceListing ? (isPendingReview ? 'Go To Profile' : 'View Listing') : 'View Listing'}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondaryButton} onPress={goToPetCorner} activeOpacity={0.85}>

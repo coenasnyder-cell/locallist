@@ -9,7 +9,7 @@ type Props = {
   onNavigateToPendingUsers: () => void;
   onNavigateToUsers: () => void;
   onNavigateToPendingBusinesses: () => void;
-  onNavigateToPendingListings: () => void;
+  onNavigateToSafetyModeration: () => void;
   onNavigateToFeaturePurchases: () => void;
   onNavigateToReportedMessages: () => void;
   onNavigateToReportedListings: () => void;
@@ -22,7 +22,7 @@ export default function AdminMobileActionCenter({
   onNavigateToPendingUsers,
   onNavigateToUsers,
   onNavigateToPendingBusinesses,
-  onNavigateToPendingListings,
+  onNavigateToSafetyModeration,
   onNavigateToFeaturePurchases,
   onNavigateToReportedMessages,
   onNavigateToReportedListings,
@@ -125,11 +125,11 @@ export default function AdminMobileActionCenter({
         <Feather name="chevron-right" size={20} color="#94a3b8" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={onNavigateToPendingListings} activeOpacity={0.8}>
-        <Feather name="list" size={22} color="#f59e0b" />
+      <TouchableOpacity style={styles.card} onPress={onNavigateToSafetyModeration} activeOpacity={0.8}>
+        <Feather name="shield" size={22} color="#dc2626" />
         <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>Pending Listings</Text>
-          <Text style={styles.cardSubtitle}>Review listings awaiting approval</Text>
+          <Text style={styles.cardTitle}>Safety Moderation</Text>
+          <Text style={styles.cardSubtitle}>Open AI-flagged listings and listing safety review queues</Text>
         </View>
         <Feather name="chevron-right" size={20} color="#94a3b8" />
       </TouchableOpacity>

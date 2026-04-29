@@ -14,8 +14,8 @@
     <div class="menu-sidebar" id="menuSidebar">
       <h3>Menu</h3>
       <a href="index.html" onclick="toggleMenu(); return true;">Home</a>
-      <a href="browse.html" onclick="toggleMenu(); return true;">Local List Marketplace</a>
-      <a href="community-hub.html" onclick="toggleMenu(); return true;">Community Hub</a>
+      <a href="buy-sell-hub.html" onclick="toggleMenu(); return true;">Buy &amp; Sell</a>
+      <a href="community-hub.html" onclick="toggleMenu(); return true;">Business &amp; Services</a>
       <a href="support-legal-hub.html" onclick="toggleMenu(); return true;">Support Hub</a>
       <a href="messages.html" onclick="toggleMenu(); return true;">Messages</a>
       <a href="profile.html" id="menuProfileLink" onclick="toggleMenu(); return true;">Profile</a>
@@ -52,8 +52,8 @@
 
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="index.html" class="desktop-nav-link">Home</a>
-      <a href="browse.html" class="desktop-nav-link">Marketplace</a>
-      <a href="community-hub.html" class="desktop-nav-link">Community Hub</a>
+      <a href="buy-sell-hub.html" class="desktop-nav-link">Buy &amp; Sell</a>
+      <a href="community-hub.html" class="desktop-nav-link">Business &amp; Services</a>
       <a href="support-legal-hub.html" class="desktop-nav-link">Support Hub</a>
       <a href="messages.html" class="desktop-nav-link">Messages</a>
       <a href="profile.html" class="desktop-nav-link" id="desktopProfileLink">Profile</a>
@@ -146,7 +146,8 @@
       }
       
       .menu-sidebar a:hover {
-        background: #f0f8fc;
+        background: #f8fafc;
+        color: #0f172a;
       }
       
       .logo-container {
@@ -360,16 +361,16 @@
       }
 
       .desktop-nav-link:hover {
-        color: #1d4ed8;
-        background: #eff6ff;
-        border-color: #bfdbfe;
+        color: #0f172a;
+        background: #f8fafc;
+        border-color: #cbd5e1;
       }
 
       .desktop-nav-link.active {
         color: #fff;
-        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
-        border-color: #1d4ed8;
-        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22);
       }
 
       @media (max-width: 768px) {

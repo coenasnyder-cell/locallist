@@ -24,6 +24,13 @@
         }
       },
       {
+        "source": "/api/**",
+        "function": {
+          "functionId": "listingsApi",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "!/login.html",
         "destination": "/index.html"
       },

@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community Hub - Local List</title>
+  <title>Buy &amp; Sell - Local List</title>
   <style>
     * {
       margin: 0;
@@ -49,7 +49,6 @@
       color: #fff;
       padding: 30px 24px;
       box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
-      text-align: center;
     }
 
     .hero::before {
@@ -79,17 +78,13 @@
     }
 
     .hero h1 {
-      font-size: clamp(28px, 4vw, 40px);
+      font-size: clamp(24px, 4vw, 42px);
       font-weight: 800;
-      line-height: 1.12;
-      margin: 0 auto;
-      max-width: 900px;
-      white-space: normal;
-      text-wrap: balance;
-    }
-
-    .hero-title-break {
-      display: block;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      max-width: none;
+      text-align: center;
+      white-space: nowrap;
     }
 
     .hero p {
@@ -431,36 +426,44 @@
 
   <main>
     <div class="page-shell">
-      <section class="hero" aria-label="Community hub overview">
-        <h1>Find trusted local businesses and services<span class="hero-title-break">for whatever you need next</span></h1>
+      <section class="hero" aria-label="Buy and sell overview">
+      <h1>Find your next deal or sell your stuff locally</h1>
       </section>
 
-      <section class="section" aria-label="Community hub sections">
-        <a class="stack-card" href="serviceslist.html" aria-label="Services">
-          <div class="stack-icon" aria-hidden="true">&#128295;</div>
+      <section class="section" aria-label="Buy and sell sections">
+        <a class="stack-card" href="browse.html" aria-label="Items">
+          <div class="stack-icon" aria-hidden="true">&#128722;</div>
           <div class="stack-copy">
-            <h2>Services</h2>
-            <p>Find local professionals ready to help</p>
+            <h2>Items</h2>
+            <p>Furniture, electronics, and more</p>
           </div>
           <div class="stack-arrow" aria-hidden="true">&rarr;</div>
         </a>
 
-        <a class="stack-card" href="businesslocallist.html" aria-label="Local Businesses">
-          <div class="stack-icon" aria-hidden="true">&#127970;</div>
+        <a class="stack-card" href="pet-hub.html" aria-label="Pets Near You">
+          <div class="stack-icon" aria-hidden="true">&#128062;</div>
           <div class="stack-copy">
-            <h2>Local Businesses</h2>
-            <p>Browse trusted spots and community favorites</p>
+            <h2>Pets Near You</h2>
+            <p>Adopt, rehome, or sell pets</p>
           </div>
           <div class="stack-arrow" aria-hidden="true">&rarr;</div>
         </a>
 
+        <a class="stack-card" href="yard-sales.html" aria-label="Yard Sales">
+          <div class="stack-icon" aria-hidden="true">&#127991;&#65039;</div>
+          <div class="stack-copy">
+            <h2>Yard Sales</h2>
+            <p>Broswse Weekly Yard Sales</p>
+          </div>
+          <div class="stack-arrow" aria-hidden="true">&rarr;</div>
+        </a>
       </section>
 
       <section class="section recent-shell" aria-label="Recently posted">
         <div class="recent-header">
           <div>
             <h2 class="recent-title">Recently Posted &rarr;</h2>
-            <p class="recent-subtitle">New businesses and services around you.</p>
+            <p class="recent-subtitle">Just Posted Near You</p>
           </div>
           <div class="recent-controls" aria-hidden="true">
             <button class="scroll-btn" type="button" id="recentScrollLeft" aria-label="Scroll recent posts left">&larr;</button>
@@ -539,119 +542,109 @@
       return formatShortDate(date);
     }
 
-    function extractServiceImage(service) {
-      if (service.serviceImage) return String(service.serviceImage).trim();
-      if (service.imageUrl) return String(service.imageUrl).trim();
-      if (service.serviceImageUrl) return String(service.serviceImageUrl).trim();
-      if (service.businessLogo) return String(service.businessLogo).trim();
-      if (Array.isArray(service.images) && service.images.length > 0) {
-        return String(service.images[0] || '').trim();
+    function isExpired(timestampValue) {
+      const expiresAt = normalizeDate(timestampValue);
+      return !!(expiresAt && expiresAt < new Date());
+    }
+
+    function getItemImage(listing) {
+      if (Array.isArray(listing.images) && listing.images.length > 0) {
+        return String(listing.images[0] || '').trim();
       }
       return '';
     }
 
-    function extractBusinessImage(profile) {
-      const candidates = [
-        profile.businessCoverImage,
-        profile.businessPhotoSingle,
-        profile.businessPhotosingle,
-        profile.businessLogo,
-      ];
-      for (const candidate of candidates) {
-        const value = String(candidate || '').trim();
-        if (value) return value;
+    function getPetImage(pet) {
+      if (Array.isArray(pet.petImages) && pet.petImages.length > 0) {
+        return String(pet.petImages[0] || '').trim();
       }
-      return '';
+      return String(pet.petPhoto || '').trim();
     }
 
-    function isApprovedService(service) {
-      if (service.isActive === false) return false;
-      if (Object.prototype.hasOwnProperty.call(service, 'isApproved') && service.isApproved === false) return false;
-      if (String(service.approvalStatus || '').toLowerCase() === 'pending') return false;
-      if (String(service.status || '').toLowerCase() === 'pending') return false;
+    function getYardSaleImage(sale) {
+      return String(sale.yardsaleImage || '').trim();
+    }
+
+    function getYardSaleCreated(sale) {
+      return sale.yardsaleCreatedat ?? sale.yardsaleCreatedAt ?? sale.createdAt ?? null;
+    }
+
+    function isApprovedItem(listing) {
+      return String(listing.status || '').toLowerCase() === 'approved' && listing.isActive !== false;
+    }
+
+    function isActivePet(pet) {
+      return !isExpired(pet.expiresAt);
+    }
+
+    function isActiveYardSale(sale) {
+      if (sale.yardsalestatus && sale.yardsalestatus !== 'active') return false;
+      if (isExpired(sale.yardsaleExpires)) return false;
       return true;
     }
 
-    function isVisibleBusiness(profile) {
-      const hasExplicitApproval = Object.prototype.hasOwnProperty.call(profile, 'isApproved');
-      const isApprovedProfile = profile.isApproved === true;
-      const isLegacyVisibleProfile = !hasExplicitApproval && profile.isActive !== false;
-      const listingType = String(profile.listingType || '').toLowerCase();
-      return (listingType === 'shoplocal' || listingType === 'both') && (isApprovedProfile || isLegacyVisibleProfile);
-    }
-
-    function isVisibleLegacyService(profile) {
-      const hasExplicitApproval = Object.prototype.hasOwnProperty.call(profile, 'isApproved');
-      const isApprovedProfile = profile.isApproved === true;
-      const isLegacyVisibleProfile = !hasExplicitApproval && profile.isActive !== false;
-      const listingType = String(profile.listingType || '').toLowerCase();
-      return (listingType === 'services' || listingType === 'both') && (isApprovedProfile || isLegacyVisibleProfile);
-    }
-
-    function mapServiceDoc(doc) {
+    function mapItemDoc(doc) {
       const data = doc.data() || {};
       return {
-        icon: 'S',
-        pill: 'Service',
-        title: data.serviceName || data.providerName || data.businessName || 'Service',
-        image: extractServiceImage(data),
-        metaOne: data.category || 'Local Service',
-        metaTwo: data.serviceArea || data.zipCode || 'Location TBD',
-        href: `service-details.html?id=${encodeURIComponent(doc.id)}`,
+        id: doc.id,
+        icon: 'ITEM',
+        pill: 'Item',
+        title: data.title || 'Untitled Item',
+        image: getItemImage(data),
+        metaOne: data.category || 'Marketplace',
+        metaTwo: data.city || data.pickupLocation || 'Location TBD',
+        href: `single-listing.html?id=${encodeURIComponent(doc.id)}`,
         createdAt: data.createdAt || null,
       };
     }
 
-    function mapLegacyServiceDoc(doc) {
+    function mapPetDoc(doc) {
       const data = doc.data() || {};
-      const city = String(data.businessCity || '').trim();
-      const state = String(data.businessState || '').trim();
-      const location = [city, state].filter(Boolean).join(', ') || 'Location TBD';
+      const postType = String(data.postType || '').toLowerCase();
+      const typeLabel = postType ? postType.charAt(0).toUpperCase() + postType.slice(1) : 'Pet';
       return {
-        icon: 'S',
-        pill: 'Service',
-        title: data.businessName || 'Service',
-        image: extractBusinessImage(data),
-        metaOne: data.businessCategory || 'Local Service',
-        metaTwo: location,
-        href: `business-profile.html?id=${encodeURIComponent(doc.id)}`,
-        createdAt: data.createdAt || data.updatedAt || null,
+        id: doc.id,
+        icon: 'PET',
+        pill: 'Pet',
+        title: data.petName || `${data.petType || 'Local'} Pet`,
+        image: getPetImage(data),
+        metaOne: `${typeLabel}${data.petBreed ? ` • ${data.petBreed}` : ''}`,
+        metaTwo: data.petSeenLocation || data.petCity || 'Location TBD',
+        href: `pet-details.html?id=${encodeURIComponent(doc.id)}`,
+        createdAt: data.createdAt || null,
       };
     }
 
-    function mapBusinessDoc(doc) {
+    function mapYardSaleDoc(doc) {
       const data = doc.data() || {};
-      const city = String(data.businessCity || '').trim();
-      const state = String(data.businessState || '').trim();
-      const location = [city, state].filter(Boolean).join(', ') || 'Location TBD';
       return {
-        icon: 'B',
-        pill: 'Business',
-        title: data.businessName || 'Local Business',
-        image: extractBusinessImage(data),
-        metaOne: data.businessCategory || 'Community Business',
-        metaTwo: location,
-        href: `business-profile.html?id=${encodeURIComponent(doc.id)}`,
-        createdAt: data.createdAt || data.updatedAt || null,
+        id: doc.id,
+        icon: 'SALE',
+        pill: 'Yard Sale',
+        title: data.yardsaleTitle || 'Yard Sale',
+        image: getYardSaleImage(data),
+        metaOne: formatShortDate(data.yardsaleDate),
+        metaTwo: data.yardsalelocation || 'Location TBD',
+        href: 'yard-sales.html',
+        createdAt: getYardSaleCreated(data),
       };
     }
 
     function renderRecentCards(cards) {
       if (!cards.length) {
-        recentRail.innerHTML = '<div class="recent-empty">No recent community posts yet. New services and businesses will appear here automatically.</div>';
+        recentRail.innerHTML = '<div class="recent-empty">No recent buy and sell posts yet. New listings will appear here automatically.</div>';
         return;
       }
 
       recentRail.innerHTML = cards.map((card) => {
         const imageHtml = card.image
           ? `<img class="recent-image" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.title)}" loading="lazy">`
-          : `<div class="recent-image-placeholder" aria-hidden="true">${escapeHtml(card.icon)}</div>`;
+          : `<div class="recent-image-placeholder" aria-hidden="true">${card.icon}</div>`;
 
         return `
           <a class="recent-card" href="${escapeHtml(card.href)}">
             <div class="recent-image-wrap">
               ${imageHtml}
-              <span class="recent-pill">${escapeHtml(card.pill)}</span>
             </div>
             <div class="recent-body">
               <div class="recent-card-title">${escapeHtml(card.title)}</div>
@@ -667,40 +660,30 @@
     async function loadRecentPosts() {
       const db = window.firebaseDb;
       if (!db) {
-        recentRail.innerHTML = '<div class="recent-empty">Recently posted community listings are unavailable right now.</div>';
+        recentRail.innerHTML = '<div class="recent-empty">Recently posted listings are unavailable right now.</div>';
         return;
       }
 
       try {
-        const [servicesSnapshot, businessLocalSnapshot] = await Promise.all([
-          db.collection('services').where('isActive', '==', true).get().catch(() => null),
-          db.collection('businessLocal').get().catch(() => null),
+        const [itemsSnapshot, petsSnapshot, yardSalesSnapshot] = await Promise.all([
+          db.collection('listings').get(),
+          db.collection('pets').get(),
+          db.collection('yardSales').get(),
         ]);
 
-        let businessSnapshot = businessLocalSnapshot;
-        if (!businessSnapshot || businessSnapshot.empty) {
-          businessSnapshot = await db.collection('shopLocal').get().catch(() => null);
-        }
+        const items = itemsSnapshot.docs
+          .filter((doc) => isApprovedItem(doc.data() || {}))
+          .map(mapItemDoc);
 
-        let recentServices = servicesSnapshot
-          ? servicesSnapshot.docs
-              .filter((doc) => isApprovedService(doc.data() || {}))
-              .map(mapServiceDoc)
-          : [];
+        const pets = petsSnapshot.docs
+          .filter((doc) => isActivePet(doc.data() || {}))
+          .map(mapPetDoc);
 
-        if (recentServices.length === 0 && businessSnapshot) {
-          recentServices = businessSnapshot.docs
-            .filter((doc) => isVisibleLegacyService(doc.data() || {}))
-            .map(mapLegacyServiceDoc);
-        }
+        const yardSales = yardSalesSnapshot.docs
+          .filter((doc) => isActiveYardSale(doc.data() || {}))
+          .map(mapYardSaleDoc);
 
-        const recentBusinesses = businessSnapshot
-          ? businessSnapshot.docs
-              .filter((doc) => isVisibleBusiness(doc.data() || {}))
-              .map(mapBusinessDoc)
-          : [];
-
-        const recentCards = [...recentServices, ...recentBusinesses]
+        const recentCards = [...items, ...pets, ...yardSales]
           .sort((a, b) => {
             const timeA = normalizeDate(a.createdAt);
             const timeB = normalizeDate(b.createdAt);
@@ -712,7 +695,7 @@
 
         renderRecentCards(recentCards);
       } catch (error) {
-        console.error('Error loading recent community posts:', error);
+        console.error('Error loading recent buy and sell posts:', error);
         recentRail.innerHTML = '<div class="recent-empty">Unable to load recent posts right now. Please try again later.</div>';
       }
     }

@@ -11,6 +11,7 @@ import AdminPendingApprovals from '../../components/AdminPendingApprovals';
 import AdminPendingBusinesses from '../../components/AdminPendingBusinesses';
 import AdminReportedListings from '../../components/AdminReportedListings';
 import AdminReportedMessages from '../../components/AdminReportedMessages';
+import AdminSafetyModeration from '../../components/AdminSafetyModeration';
 import AdminSiteSettings from '../../components/AdminSiteSettings';
 import AdminUsersList from '../../components/AdminUsersList';
 import { useAdminStatus } from '../../hooks/useAdminStatus';
@@ -26,6 +27,7 @@ export default function AdminTabScreen() {
     | 'pending-users'
     | 'users'
     | 'pending-businesses'
+    | 'safety-moderation'
     | 'pending-listings'
     | 'feature-purchases'
     | 'reported-messages'
@@ -52,6 +54,10 @@ export default function AdminTabScreen() {
 
   const handleNavigateToPendingListings = () => {
     setCurrentPage('pending-listings');
+  };
+
+  const handleNavigateToSafetyModeration = () => {
+    setCurrentPage('safety-moderation');
   };
 
   const handleNavigateToFeaturePurchases = () => {
@@ -88,8 +94,10 @@ export default function AdminTabScreen() {
         return 'User Management';
       case 'pending-businesses':
         return 'Pending Businesses';
+      case 'safety-moderation':
+        return 'Safety Moderation';
       case 'pending-listings':
-        return 'Pending Listings';
+        return 'AI Flagged Listings';
       case 'feature-purchases':
         return 'Featured Purchases';
       case 'reported-messages':
@@ -139,7 +147,7 @@ export default function AdminTabScreen() {
             onNavigateToPendingUsers={handleNavigateToPendingUsers}
             onNavigateToUsers={handleNavigateToUsers}
             onNavigateToPendingBusinesses={handleNavigateToPendingBusinesses}
-            onNavigateToPendingListings={handleNavigateToPendingListings}
+            onNavigateToSafetyModeration={handleNavigateToSafetyModeration}
             onNavigateToFeaturePurchases={handleNavigateToFeaturePurchases}
             onNavigateToReportedMessages={handleNavigateToReportedMessages}
             onNavigateToReportedListings={handleNavigateToReportedListings}
@@ -154,6 +162,11 @@ export default function AdminTabScreen() {
           <AdminUsersList />
         ) : currentPage === 'pending-businesses' ? (
           <AdminPendingBusinesses />
+        ) : currentPage === 'safety-moderation' ? (
+          <AdminSafetyModeration
+            onNavigateToAiFlaggedListings={handleNavigateToPendingListings}
+            onNavigateToReportedListings={handleNavigateToReportedListings}
+          />
         ) : currentPage === 'feature-purchases' ? (
           <AdminFeaturePurchases />
         ) : currentPage === 'reported-messages' ? (

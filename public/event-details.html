@@ -250,7 +250,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script>
-    const db = window.firebaseDb;
+    const db = window.firebaseDb || (window.firebase && firebase.firestore ? firebase.firestore() : null);
     const loadingState = document.getElementById('loadingState');
     const errorState = document.getElementById('errorState');
     const eventCard = document.getElementById('eventCard');
@@ -267,8 +267,27 @@
       if (!value) return null;
       if (value instanceof Date) return value;
       if (value.toDate && typeof value.toDate === 'function') return value.toDate();
+      if (typeof value.seconds === 'number') {
+        return new Date(value.seconds * 1000 + (value.nanoseconds || 0) / 1e6);
+      }
       const parsed = new Date(value);
       return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function getEventDateValue(eventData) {
+      return eventData?.eventDate || eventData?.eventStartDate || null;
+    }
+
+    function getPrimaryEventImageUrl(eventData) {
+      const directImage = String(eventData?.eventImage || '').trim();
+      if (directImage) return directImage;
+
+      if (Array.isArray(eventData?.eventImages)) {
+        const firstImage = eventData.eventImages.find((value) => String(value || '').trim());
+        if (firstImage) return String(firstImage).trim();
+      }
+
+      return '';
     }
 
     function formatDate(value) {
@@ -283,7 +302,7 @@
     }
 
     function parseEventDateTime(eventData, timeValue) {
-      const date = normalizeDate(eventData.eventDate);
+      const date = normalizeDate(getEventDateValue(eventData));
       if (!date) return null;
 
       const result = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
@@ -373,7 +392,7 @@
       currentEvent = eventData;
 
       setText('eventTitle', eventData.eventTitle, 'Untitled Event');
-      setText('eventDate', formatDate(eventData.eventDate), 'Date TBD');
+      setText('eventDate', formatDate(getEventDateValue(eventData)), 'Date TBD');
 
       const timeText = eventData.eventStarttime
         ? `${eventData.eventStarttime}${eventData.eventEndtime ? ` - ${eventData.eventEndtime}` : ''}`
@@ -389,10 +408,12 @@
       setText('eventDescription', eventData.eventDescription || 'No description provided.', 'No description provided.');
 
       const imageEl = document.getElementById('eventImage');
-      if (eventData.eventImage) {
-        imageEl.src = eventData.eventImage;
+      const imageUrl = getPrimaryEventImageUrl(eventData);
+      if (imageUrl) {
+        imageEl.src = imageUrl;
         imageEl.style.display = 'block';
       } else {
+        imageEl.removeAttribute('src');
         imageEl.style.display = 'none';
       }
 
@@ -410,7 +431,7 @@
     }
 
     async function loadEvent() {
-      const eventId = getQueryParam('eventId');
+      const eventId = getQueryParam('eventId') || getQueryParam('id');
       const payload = getQueryParam('payload');
 
       if (eventId && db) {
@@ -427,7 +448,7 @@
 
       if (payload) {
         try {
-          const parsed = JSON.parse(decodeURIComponent(payload));
+          const parsed = JSON.parse(payload);
           renderEvent(parsed || {});
           return;
         } catch (error) {

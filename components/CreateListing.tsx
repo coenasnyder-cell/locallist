@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { addDoc, collection, getDocs, getFirestore, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, getFirestore } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import React, { useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -31,6 +31,10 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutMes
   }
 }
 
+const LISTINGS_API_URL =
+	process.env.EXPO_PUBLIC_LISTINGS_API_URL?.trim() ||
+	'https://locallist.biz/api/listings';
+
 function CreateListing() {
 const DRAFT_STORAGE_KEY_BASE = 'create-listing-draft-v1';
 const CATEGORIES = [
@@ -46,6 +50,31 @@ const CATEGORIES = [
 	'Other',
 ];
 const CONDITIONS = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
+
+function normalizeAppCategory(value: string): string {
+	if (value === 'Home Goods') {
+		return 'Home';
+	}
+
+	return value;
+}
+
+function getListingRejectionReasonLabel(reason: string): string {
+	switch (reason.trim().toLowerCase()) {
+		case 'spam':
+			return 'Spam';
+		case 'prohibited':
+			return 'Prohibited item or content';
+		case 'low_quality':
+			return 'Low quality listing';
+		case 'duplicate':
+			return 'Duplicate listing';
+		case 'misleading':
+			return 'Misleading information';
+		default:
+			return 'This listing did not meet our marketplace guidelines.';
+	}
+}
 
 const styles = StyleSheet.create({
 	scrollContainer: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 220 },
@@ -96,9 +125,10 @@ const styles = StyleSheet.create({
 		const [title, setTitle] = useState('');
 		const [description, setDescription] = useState('');
 		const [price, setPrice] = useState('');
-		const params = useLocalSearchParams<{ category?: string; featureCanceled?: string | string[] }>();
-		const initialCategory = typeof params.category === 'string' ? params.category : '';
+		const params = useLocalSearchParams<{ category?: string; featureCanceled?: string | string[]; resubmitListingId?: string | string[] }>();
+		const initialCategory = typeof params.category === 'string' ? normalizeAppCategory(params.category) : '';
 		const featureCanceledParam = Array.isArray(params.featureCanceled) ? params.featureCanceled[0] : params.featureCanceled;
+		const resubmitListingIdParam = Array.isArray(params.resubmitListingId) ? params.resubmitListingId[0] : params.resubmitListingId;
 		const [category, setCategory] = useState(
 			CATEGORIES.includes(initialCategory) ? initialCategory : ''
 		);
@@ -108,6 +138,7 @@ const styles = StyleSheet.create({
 		const [openingPayment, setOpeningPayment] = useState(false);
 		const [showLogin, setShowLogin] = useState(false);
 		const [draftRestored, setDraftRestored] = useState(false);
+		const [resubmitBanner, setResubmitBanner] = useState('');
 		const loginPromptShownRef = useRef(false);
 		const paymentCancelNoticeShownRef = useRef(false);
 		const draftHydratedRef = useRef(false);
@@ -115,6 +146,7 @@ const styles = StyleSheet.create({
 		const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
 		const [flaggedOutOfState, setFlaggedOutOfState] = useState(false);
 		const [wantsFeatured, setWantsFeatured] = useState(false); // Feature listing option
+		const [resubmittedFromListingId, setResubmittedFromListingId] = useState('');
 		const router = useRouter();
 		const { user, profile, loading, canPostListings, postingBlockedReason } = useAccountStatus();
 		const draftStorageKey = `${DRAFT_STORAGE_KEY_BASE}:${user?.uid || 'anonymous'}`;
@@ -156,6 +188,11 @@ const styles = StyleSheet.create({
 			let isMounted = true;
 
 			const loadDraft = async () => {
+				if (resubmitListingIdParam) {
+					draftHydratedRef.current = true;
+					return;
+				}
+
 				try {
 					const stored = await AsyncStorage.getItem(draftStorageKey);
 					if (!stored) {
@@ -181,7 +218,7 @@ const styles = StyleSheet.create({
 						setTitle(typeof parsed.title === 'string' ? parsed.title : '');
 						setDescription(typeof parsed.description === 'string' ? parsed.description : '');
 						setPrice(typeof parsed.price === 'string' ? parsed.price : '');
-						const restoredCategory = typeof parsed.category === 'string' ? parsed.category : '';
+						const restoredCategory = typeof parsed.category === 'string' ? normalizeAppCategory(parsed.category) : '';
 						if (restoredCategory && CATEGORIES.includes(restoredCategory)) {
 							setCategory(restoredCategory);
 						}
@@ -213,7 +250,86 @@ const styles = StyleSheet.create({
 			return () => {
 				isMounted = false;
 			};
-		}, [draftStorageKey]);
+		}, [draftStorageKey, resubmitListingIdParam]);
+
+		React.useEffect(() => {
+			let isMounted = true;
+
+			const loadRejectedListingForResubmission = async () => {
+				if (!resubmitListingIdParam || !user?.uid) {
+					return;
+				}
+
+				try {
+					const db = getFirestore(app);
+					const listingSnap = await getDoc(doc(db, 'listings', resubmitListingIdParam));
+
+					if (!listingSnap.exists()) {
+						if (isMounted) {
+							setResubmitBanner('We could not find that listing to resubmit.');
+						}
+						return;
+					}
+
+					const listingData = listingSnap.data() || {};
+					if (String(listingData.userId || '') !== user.uid) {
+						if (isMounted) {
+							setResubmitBanner('You can only edit your own rejected listings.');
+						}
+						return;
+					}
+
+					if (!isMounted) {
+						return;
+					}
+
+					setTitle(typeof listingData.title === 'string' ? listingData.title : '');
+					setDescription(typeof listingData.description === 'string' ? listingData.description : '');
+					setPrice(
+						typeof listingData.price === 'number' && Number.isFinite(listingData.price) ?
+							String(listingData.price) :
+							''
+					);
+					const normalizedCategory = typeof listingData.category === 'string' ? normalizeAppCategory(listingData.category) : '';
+					setCategory(
+						normalizedCategory && CATEGORIES.includes(normalizedCategory) ?
+							normalizedCategory :
+							''
+					);
+					setCondition(typeof listingData.condition === 'string' ? listingData.condition : '');
+					setZipCode(typeof listingData.zipCode === 'string' ? listingData.zipCode : '');
+					setImages(
+						Array.isArray(listingData.images) ?
+							listingData.images.filter(
+								(image): image is string => typeof image === 'string' && (image.startsWith('http://') || image.startsWith('https://'))
+							) :
+							[]
+					);
+					setWantsFeatured(false);
+					setFlaggedOutOfState(false);
+					setDraftRestored(false);
+					setResubmittedFromListingId(resubmitListingIdParam);
+					setResubmitBanner(
+						typeof listingData.rejectionReason === 'string' && listingData.rejectionReason.trim() ?
+							`Your listing was removed because: ${getListingRejectionReasonLabel(listingData.rejectionReason)}${typeof listingData.rejectionNotes === 'string' && listingData.rejectionNotes.trim() ? `. ${listingData.rejectionNotes.trim()}` : ''}` :
+							'This listing was removed. Update the details below and resubmit when you are ready.'
+					);
+				} catch (error) {
+					console.error('Could not load rejected listing for resubmission', error);
+					if (isMounted) {
+						setResubmitBanner('We could not preload that rejected listing right now.');
+					}
+				} finally {
+					draftHydratedRef.current = true;
+				}
+			};
+
+			loadRejectedListingForResubmission();
+
+			return () => {
+				isMounted = false;
+			};
+		}, [resubmitListingIdParam, user?.uid]);
 
 		const markListingFormStarted = () => {
 			if (formStartedTrackedRef.current) {
@@ -304,6 +420,8 @@ const styles = StyleSheet.create({
 		setLocation(null);
 		setFlaggedOutOfState(false);
 		setDraftRestored(false);
+		setResubmitBanner('');
+		setResubmittedFromListingId('');
 
 		try {
 			await AsyncStorage.removeItem(draftStorageKey);
@@ -323,7 +441,7 @@ const styles = StyleSheet.create({
 		);
 	};
 
-	const launchFeaturedCheckout = async (listingId: string, listingTitle: string) => {
+	const launchFeaturedCheckout = async (listingId: string, listingTitle: string, listingStatus: 'approved' | 'pending_review') => {
 		trackAppEvent('featured_checkout_started', {
 			userId: user?.uid || null,
 			listingId,
@@ -405,6 +523,7 @@ const styles = StyleSheet.create({
 			pathname: '/(app)/listing-posted' as any,
 			params: {
 				listingId,
+				status: listingStatus,
 				checkout: 'featured',
 			},
 		});
@@ -512,6 +631,31 @@ const styles = StyleSheet.create({
 		}
 	};
 
+	const createModeratedListing = async (payload: Record<string, unknown>) => {
+		const idToken = user ? await user.getIdToken() : '';
+		const response = await fetch(LISTINGS_API_URL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+			},
+			body: JSON.stringify(payload),
+		});
+
+		let responseBody: any = null;
+		try {
+			responseBody = await response.json();
+		} catch {
+			responseBody = null;
+		}
+
+		if (!response.ok || !responseBody?.listingId) {
+			throw new Error(responseBody?.error || `Listing creation failed with status ${response.status}`);
+		}
+
+		return responseBody as { listingId: string; status: 'approved' | 'pending_review' };
+	};
+
 	async function handleSubmit(submitWithFeature: boolean = wantsFeatured) {
 		if (!isValid) {
 			if (images.length === 0) {
@@ -610,10 +754,9 @@ const styles = StyleSheet.create({
 		setOpeningPayment(submitWithFeature);
 		setSubmitting(true);
 		try {
-			const db = getFirestore(app);
 			const city = await getCityFromZip(zipCode) ?? 'TBD';
 			const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-			const listingDocRef = await addDoc(collection(db, 'listings'), {
+			const listingPayload = {
 				images,
 				title,
 				description,
@@ -623,9 +766,7 @@ const styles = StyleSheet.create({
 				zipCode,
 				city,
 				pickupLocation,
-				createdAt: serverTimestamp(),
-				expiresAt,
-				status: 'approved',
+				expiresAt: expiresAt.toISOString(),
 				viewCount: 0,
 				isActive: true,
 				isFeatured: false,
@@ -635,6 +776,7 @@ const styles = StyleSheet.create({
 				featurePaymentStatus: submitWithFeature ? 'pending' : 'not_requested',
 				favoritesCount: 0,
 				allowMessages: true,
+				resubmittedFromListingId: resubmittedFromListingId || null,
 				userId: user?.uid || null,
 				userName: sellerName,
 				businessId,
@@ -648,20 +790,23 @@ const styles = StyleSheet.create({
 					latitude: location.latitude, 
 					longitude: location.longitude 
 				}),
-			});
+			};
+
+			const { listingId, status } = await createModeratedListing(listingPayload);
 
 			trackAppEvent('listing_submitted', {
 				userId: user?.uid || null,
-				listingId: listingDocRef.id,
+				listingId,
 				category,
 				isFeaturedRequested: submitWithFeature,
+				moderationStatus: status,
 				source: 'create_listing',
 			});
 
 			// If user wants featured listing, launch Stripe checkout flow
 			if (submitWithFeature) {
 				try {
-					await launchFeaturedCheckout(listingDocRef.id, title.trim());
+					await launchFeaturedCheckout(listingId, title.trim(), status);
 				} catch (checkoutError) {
 					Alert.alert(
 						'Checkout Not Started',
@@ -673,7 +818,8 @@ const styles = StyleSheet.create({
 				router.replace({
 					pathname: '/(app)/listing-posted' as any,
 					params: {
-						listingId: listingDocRef.id,
+						listingId,
+						status,
 					},
 				});
 			}
@@ -701,6 +847,13 @@ const styles = StyleSheet.create({
 							showsVerticalScrollIndicator={true}
 						>
 							<Text style={styles.formTitle}>Create Marketplace Listing</Text>
+							{resubmitBanner ? (
+								<View style={styles.featureSection}>
+									<Text style={styles.featureTitle}>Listing Needs Changes</Text>
+									<Text style={styles.featureDescription}>{resubmitBanner}</Text>
+									<Text style={styles.featureNote}>Featured placement is not carried over automatically when you resubmit.</Text>
+								</View>
+							) : null}
 							<Text style={draftRestored ? styles.draftRestoredHint : styles.draftHint}>
 								{draftRestored ? 'Draft restored from this device.' : 'Draft autosaves on this device while you type.'}
 							</Text>

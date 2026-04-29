@@ -818,6 +818,173 @@
       flex-wrap: wrap;
     }
 
+    .ai-flagged-card {
+      border-width: 1px;
+      border-style: solid;
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .ai-flagged-card.high-risk {
+      border-color: #fecaca;
+      background: #fff5f5;
+    }
+
+    .ai-flagged-card.medium-risk {
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+
+    .ai-flagged-card.low-risk {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .ai-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+
+    .ai-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .ai-card-meta {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #475569;
+    }
+
+    .ai-card-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+
+    .ai-risk-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ai-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .ai-pill.pending {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    .ai-pill.high-risk {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .ai-pill.medium-risk {
+      background: #facc15;
+      color: #713f12;
+    }
+
+    .ai-pill.low-risk {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .ai-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #334155;
+      margin-bottom: 12px;
+    }
+
+    .ai-flagged-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .ai-flagged-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #991b1b;
+      margin-bottom: 6px;
+    }
+
+    .ai-flagged-reason {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #334155;
+    }
+
+    .ai-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .ai-queue-note {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.55;
+    }
+
+    .ai-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .ai-modal-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 12px;
+    }
+
+    .ai-modal-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .ai-modal-value {
+      font-size: 14px;
+      line-height: 1.55;
+      color: #0f172a;
+      word-break: break-word;
+    }
+
     .filter-tabs {
       display: flex;
       gap: 8px;
@@ -1030,6 +1197,14 @@
       .hub-grid.compact-hub-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .ai-card-head {
+        flex-direction: column;
+      }
+
+      .ai-modal-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 
@@ -1154,12 +1329,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr id="rowPendingListings">
-                <td><span class="admin-item-title">⏳ Pending Listings</span></td>
-                <td><span class="count-pill" id="priorityPendingListings">0</span></td>
+              <tr id="rowAiFlaggedListings">
+                <td><span class="admin-item-title">🤖 AI Flagged Listings</span></td>
+                <td><span class="count-pill" id="priorityAiFlaggedListings">0</span></td>
                 <td>
                   <div class="row-actions">
-                    <button class="btn small" onclick="window.navigateToTab('pending-listings')">Manage</button>
+                    <button class="btn small" onclick="window.navigateToTab('ai-flagged-listings')">Review</button>
                   </div>
                 </td>
               </tr>
@@ -1202,9 +1377,14 @@
             </thead>
             <tbody>
               <tr>
-                <td><span class="admin-item-title">Pending Listings</span></td>
-                <td><span class="count-pill" id="modPendingListings">0</span></td>
-                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('pending-listings')">Manage</button></div></td>
+                <td><span class="admin-item-title">AI Flagged Listings</span></td>
+                <td><span class="count-pill" id="modAiFlaggedListings">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('ai-flagged-listings')">Manage</button></div></td>
+              </tr>
+              <tr>
+                <td><span class="admin-item-title">At-Risk Users</span></td>
+                <td><span class="count-pill" id="modAtRiskUsers">0</span></td>
+                <td><div class="row-actions"><button class="btn small" onclick="window.navigateToTab('at-risk-users')">Manage</button></div></td>
               </tr>
               <tr id="rowServiceQueue">
                 <td><span class="admin-item-title">🛠️ Service Approval Queue</span></td>
@@ -1928,6 +2108,27 @@
           <div class="report-card">
             <div class="report-card-header">
               <div>
+                <div class="report-card-title">🛡️ Moderation Report</div>
+                <div class="report-card-desc">Generate a JSON moderation snapshot for AI analysis, policy tuning, and operational review.</div>
+              </div>
+            </div>
+            <div class="report-filters">
+              <label>Listings from <input type="date" id="moderationReportFrom" class="report-date-input"></label>
+              <label>to <input type="date" id="moderationReportTo" class="report-date-input"></label>
+              <label>Recent items
+                <input type="number" id="moderationReportRecentLimit" class="report-date-input" min="1" max="100" value="20" style="width:90px;">
+              </label>
+              <label>At-risk users
+                <input type="number" id="moderationReportAtRiskLimit" class="report-date-input" min="1" max="100" value="25" style="width:90px;">
+              </label>
+              <button class="btn small" onclick="window.generateModerationReport()">Generate JSON</button>
+            </div>
+            <pre id="moderationReportPreview" style="margin-top:14px;max-height:260px;overflow:auto;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px;font-size:12px;line-height:1.5;white-space:pre-wrap;">No moderation report generated yet.</pre>
+          </div>
+
+          <div class="report-card">
+            <div class="report-card-header">
+              <div>
                 <div class="report-card-title">📧 Email Digest Subscribers</div>
                 <div class="report-card-desc">Users who opted in to receive email digests. Use for sending newsletters and digest emails.</div>
               </div>
@@ -2081,6 +2282,28 @@
           </div>
         </section>
 
+        <section id="tab-ai-flagged-listings" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">AI Flagged Listings</div>
+            <button class="btn secondary" id="refreshAiFlaggedListings">Refresh</button>
+          </div>
+          <div class="ai-queue-note">
+            Review listings held by AI moderation before they go live. Use quick actions for fast decisions, and open details when the flag reason needs a closer read.
+          </div>
+          <div class="list" id="aiFlaggedListingsList"></div>
+        </section>
+
+        <section id="tab-at-risk-users" class="tab-section">
+          <div class="section-header">
+            <div class="section-title">At-Risk Users</div>
+            <button class="btn secondary" id="refreshAtRiskUsers">Refresh</button>
+          </div>
+          <div class="ai-queue-note">
+            Review accounts that are trending toward disablement based on rejected listings, flagged listings, and overall trust score. This is a review queue, not an automatic ban list.
+          </div>
+          <div class="list" id="atRiskUsersList"></div>
+        </section>
+
         <section id="tab-pending-listings" class="tab-section">
           <div class="section-header">
             <div class="section-title">Pending Listings</div>
@@ -2232,6 +2455,16 @@
       <div class="modal-actions">
         <button class="btn secondary" id="closeReportModal">Close</button>
         <button class="btn" id="saveReportModal">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="aiModerationModalBackdrop">
+    <div class="modal">
+      <h3 id="aiModerationModalTitle">Listing Details</h3>
+      <div id="aiModerationModalBody"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="closeAiModerationModal">Close</button>
       </div>
     </div>
   </div>

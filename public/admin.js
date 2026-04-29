@@ -27,6 +27,7 @@
     },
     selectedReport: null,
     selectedReportType: null,
+    selectedAiModerationListing: null,
   };
 
   const modalBackdrop = document.getElementById('reportModalBackdrop');
@@ -36,6 +37,12 @@
   const modalNotes = document.getElementById('reportNotes');
   const modalClose = document.getElementById('closeReportModal');
   const modalSave = document.getElementById('saveReportModal');
+  const aiModerationModalBackdrop = document.getElementById('aiModerationModalBackdrop');
+  const aiModerationModalTitle = document.getElementById('aiModerationModalTitle');
+  const aiModerationModalBody = document.getElementById('aiModerationModalBody');
+  const closeAiModerationModal = document.getElementById('closeAiModerationModal');
+  const LISTINGS_ADMIN_API_BASE = `${window.location.origin}/api/admin`;
+  const LISTING_REJECTION_REASONS = ['spam', 'prohibited', 'low_quality', 'duplicate', 'misleading'];
 
   function setStatus(type, message) {
     adminStatus.className = `status-banner status-${type}`;
@@ -52,6 +59,198 @@
     return div.innerHTML;
   }
 
+  function getListingRejectionReasonLabel(reason) {
+    switch (String(reason || '').toLowerCase()) {
+      case 'spam':
+        return 'Spam';
+      case 'prohibited':
+        return 'Prohibited item or content';
+      case 'low_quality':
+        return 'Low quality listing';
+      case 'duplicate':
+        return 'Duplicate listing';
+      case 'misleading':
+        return 'Misleading information';
+      default:
+        return 'Marketplace guidelines issue';
+    }
+  }
+
+  function formatListingRejectionReason(reason, notes) {
+    const label = getListingRejectionReasonLabel(reason);
+    const normalizedNotes = String(notes || '').trim();
+    return normalizedNotes ? `${label}. ${normalizedNotes}` : label;
+  }
+
+  function promptForListingRejection() {
+    const optionsText = LISTING_REJECTION_REASONS
+      .map((reason) => `${reason} = ${getListingRejectionReasonLabel(reason)}`)
+      .join('\n');
+    const selected = window.prompt(
+      `Enter a rejection reason code:\n\n${optionsText}`,
+      'low_quality'
+    );
+
+    if (selected === null) {
+      return null;
+    }
+
+    const rejectionReason = String(selected || '').trim().toLowerCase();
+    if (!LISTING_REJECTION_REASONS.includes(rejectionReason)) {
+      alert(`Please use one of these reason codes: ${LISTING_REJECTION_REASONS.join(', ')}`);
+      return null;
+    }
+
+    const notesPrompt = window.prompt('Optional notes for the seller (optional):', '');
+    if (notesPrompt === null) {
+      return null;
+    }
+
+    return {
+      rejectionReason,
+      rejectionNotes: String(notesPrompt || '').trim(),
+    };
+  }
+
+  function normalizeUserModerationStats(data) {
+    const stats = data?.moderationStats || {};
+
+    return {
+      totalListings: Number.isFinite(Number(stats.totalListings)) ? Number(stats.totalListings) : 0,
+      flaggedCount: Number.isFinite(Number(stats.flaggedCount)) ? Number(stats.flaggedCount) : 0,
+      rejectedCount: Number.isFinite(Number(stats.rejectedCount)) ? Number(stats.rejectedCount) : 0,
+      approvedCount: Number.isFinite(Number(stats.approvedCount)) ? Number(stats.approvedCount) : 0,
+      lastFlaggedAt: stats.lastFlaggedAt || null,
+      lastRejectedAt: stats.lastRejectedAt || null,
+    };
+  }
+
+  function deriveUserModerationRisk(stats, storedRisk) {
+    const trustScore = Math.max(
+      0,
+      Math.min(
+        100,
+        100 - (stats.flaggedCount * 5) - (stats.rejectedCount * 15) + Math.min(stats.approvedCount, 10),
+      ),
+    );
+    const rejectionRate = stats.totalListings > 0 ? stats.rejectedCount / stats.totalListings : 0;
+    const flaggedRate = stats.totalListings > 0 ? stats.flaggedCount / stats.totalListings : 0;
+
+    let riskLevel = 'low';
+    let reviewStatus = 'clear';
+
+    if (trustScore <= 40 || stats.rejectedCount >= 5) {
+      riskLevel = 'high';
+      reviewStatus = 'disabled_candidate';
+    } else if (trustScore <= 60 || stats.rejectedCount >= 3 || rejectionRate >= 0.4) {
+      riskLevel = 'high';
+      reviewStatus = 'at_risk';
+    } else if (trustScore <= 80 || stats.flaggedCount >= 2 || flaggedRate >= 0.35) {
+      riskLevel = 'medium';
+      reviewStatus = 'watch';
+    }
+
+    return {
+      trustScore,
+      riskLevel,
+      reviewStatus,
+      updatedAt: storedRisk?.updatedAt || null,
+    };
+  }
+
+  function isUserAtRisk(risk) {
+    const reviewStatus = String(risk?.reviewStatus || '').toLowerCase();
+    return reviewStatus === 'at_risk' || reviewStatus === 'disabled_candidate';
+  }
+
+  function getUserRiskMeta(risk) {
+    const reviewStatus = String(risk?.reviewStatus || '').toLowerCase();
+
+    if (reviewStatus === 'disabled_candidate') {
+      return { label: 'Disable Candidate', className: 'high-risk' };
+    }
+
+    if (reviewStatus === 'at_risk') {
+      return { label: 'At Risk', className: 'high-risk' };
+    }
+
+    if (String(risk?.riskLevel || '').toLowerCase() === 'medium') {
+      return { label: 'Watch', className: 'medium-risk' };
+    }
+
+    return { label: 'Clear', className: 'low-risk' };
+  }
+
+  function formatModerationDate(value) {
+    if (!value) return '';
+    const date = value?.toDate ? value.toDate() : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
+  async function callListingsAdminApi(endpoint, payload) {
+    if (!auth.currentUser) {
+      throw new Error('You must be signed in as an admin to perform this action.');
+    }
+
+    const token = await auth.currentUser.getIdToken();
+    const response = await fetch(`${LISTINGS_ADMIN_API_BASE}/${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload || {}),
+    });
+
+    let responseBody = null;
+    try {
+      responseBody = await response.json();
+    } catch (error) {
+      responseBody = null;
+    }
+
+    if (!response.ok) {
+      throw new Error(responseBody?.error || `Request failed with status ${response.status}`);
+    }
+
+    return responseBody || {};
+  }
+
+  async function disableUserAccount(userId, reason) {
+    if (!auth.currentUser) {
+      throw new Error('You must be signed in as an admin to perform this action.');
+    }
+
+    const normalizedReason = String(reason || '').trim();
+    if (!normalizedReason) {
+      throw new Error('A disable reason is required.');
+    }
+
+    await db.collection('users').doc(userId).set({
+      isDisabled: true,
+      disabledReason: normalizedReason,
+      disabledAt: firebase.firestore.FieldValue.serverTimestamp(),
+      disabledBy: auth.currentUser.uid,
+    }, { merge: true });
+  }
+
+  async function restoreUserAccountAccess(userId) {
+    await db.collection('users').doc(userId).set({
+      isDisabled: false,
+      disabledReason: null,
+      disabledAt: null,
+      disabledBy: null,
+    }, { merge: true });
+  }
+
   function toggleRow(rowId, count) {
     const row = document.getElementById(rowId);
     if (!row) return;
@@ -66,33 +265,41 @@
   }
 
   async function loadTopPriorityCounts() {
-    const pendingListingsEl = document.getElementById('priorityPendingListings');
+    const aiFlaggedListingsEl = document.getElementById('priorityAiFlaggedListings');
     const serviceQueueEl = document.getElementById('priorityServiceApprovalQueue');
     const reportedListingsEl = document.getElementById('priorityReportedListings');
     const reportedMessagesEl = document.getElementById('priorityReportedMessages');
-    const modPendingListingsEl = document.getElementById('modPendingListings');
+    const modAiFlaggedListingsEl = document.getElementById('modAiFlaggedListings');
     const modServiceQueueEl = document.getElementById('modServiceQueue');
     const modReportedListingsEl = document.getElementById('modReportedListings');
     const modReportedMessagesEl = document.getElementById('modReportedMessages');
     const modPendingReviewsManagementEl = document.getElementById('modPendingReviewsManagement');
+    const modAtRiskUsersEl = document.getElementById('modAtRiskUsers');
 
-    if (!pendingListingsEl || !serviceQueueEl || !reportedListingsEl || !reportedMessagesEl) return;
+    if (!aiFlaggedListingsEl || !serviceQueueEl || !reportedListingsEl || !reportedMessagesEl) return;
 
     try {
-      const [pendingListingsSnap, pendingServicesSnap, pendingReportedListingsSnap, pendingReportedMessagesSnap, pendingBusinessReviewsSnap, pendingReviewRemovalSnap, businessLocalSnap] = await Promise.all([
-        db.collection('listings').where('status', '==', 'pending').get(),
+      const [aiFlaggedListingsSnap, pendingServicesSnap, pendingReportedListingsSnap, pendingReportedMessagesSnap, pendingBusinessReviewsSnap, pendingReviewRemovalSnap, businessLocalSnap, usersSnap] = await Promise.all([
+        db.collection('listings').where('status', '==', 'pending_review').get(),
         db.collection('services').where('approvalStatus', '==', 'pending').get(),
         db.collection('reportedListings').where('status', '==', 'pending').get(),
         db.collection('reportedMessages').where('status', '==', 'pending').get(),
         db.collection('businessReviews').where('status', '==', 'pending').get(),
         db.collection('reviewRemovalRequests').where('status', '==', 'pending').get(),
         db.collection('businessLocal').get(),
+        db.collection('users').get(),
       ]);
 
-      const pendingListingsCount = pendingListingsSnap.size || 0;
+      const aiFlaggedListingsCount = aiFlaggedListingsSnap.size || 0;
       const serviceQueueCount = pendingServicesSnap.size || 0;
       const reportedListingsCount = pendingReportedListingsSnap.size || 0;
       const reportedMessagesCount = pendingReportedMessagesSnap.size || 0;
+      const atRiskUsersCount = usersSnap.docs.filter((docSnap) => {
+        const data = docSnap.data() || {};
+        const stats = normalizeUserModerationStats(data);
+        const risk = deriveUserModerationRisk(stats, data.moderationRisk || {});
+        return isUserAtRisk(risk);
+      }).length;
 
       const pendingBizProfilesCount = businessLocalSnap.docs.filter((d) => {
         const data = d.data() || {};
@@ -101,41 +308,43 @@
         return s !== 'rejected' && s !== 'deleted';
       }).length;
 
-      pendingListingsEl.textContent = String(pendingListingsCount);
+      aiFlaggedListingsEl.textContent = String(aiFlaggedListingsCount);
       serviceQueueEl.textContent = String(serviceQueueCount);
       reportedListingsEl.textContent = String(reportedListingsCount);
       reportedMessagesEl.textContent = String(reportedMessagesCount);
 
-      if (modPendingListingsEl) modPendingListingsEl.textContent = String(pendingListingsCount);
+      if (modAiFlaggedListingsEl) modAiFlaggedListingsEl.textContent = String(aiFlaggedListingsCount);
       if (modServiceQueueEl) modServiceQueueEl.textContent = String(serviceQueueCount);
       if (modReportedListingsEl) modReportedListingsEl.textContent = String(reportedListingsCount);
       if (modReportedMessagesEl) modReportedMessagesEl.textContent = String(reportedMessagesCount);
       if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = String((pendingBusinessReviewsSnap.size || 0) + (pendingReviewRemovalSnap.size || 0));
+      if (modAtRiskUsersEl) modAtRiskUsersEl.textContent = String(atRiskUsersCount);
       setCountPill('modPendingBusinessProfiles', pendingBizProfilesCount);
 
-      toggleRow('rowPendingListings', pendingListingsCount);
+      toggleRow('rowAiFlaggedListings', aiFlaggedListingsCount);
       toggleRow('rowServiceQueue', serviceQueueCount);
       toggleRow('rowReportedListings', reportedListingsCount);
       toggleRow('rowReportedMessages', reportedMessagesCount);
       toggleNoPriorityTasksRow([
-        pendingListingsCount,
+        aiFlaggedListingsCount,
         serviceQueueCount,
         reportedListingsCount,
         reportedMessagesCount,
       ]);
     } catch (error) {
       console.error('Top priority counts load error:', error);
-      pendingListingsEl.textContent = '-';
+      aiFlaggedListingsEl.textContent = '-';
       serviceQueueEl.textContent = '-';
       reportedListingsEl.textContent = '-';
       reportedMessagesEl.textContent = '-';
-      if (modPendingListingsEl) modPendingListingsEl.textContent = '-';
+      if (modAiFlaggedListingsEl) modAiFlaggedListingsEl.textContent = '-';
       if (modServiceQueueEl) modServiceQueueEl.textContent = '-';
       if (modReportedListingsEl) modReportedListingsEl.textContent = '-';
       if (modReportedMessagesEl) modReportedMessagesEl.textContent = '-';
       if (modPendingReviewsManagementEl) modPendingReviewsManagementEl.textContent = '-';
+      if (modAtRiskUsersEl) modAtRiskUsersEl.textContent = '-';
 
-      toggleRow('rowPendingListings', 1);
+      toggleRow('rowAiFlaggedListings', 1);
       toggleRow('rowServiceQueue', 1);
       toggleRow('rowReportedListings', 1);
       toggleRow('rowReportedMessages', 1);
@@ -824,6 +1033,12 @@
         break;
       case 'reviews-management':
         loadReviewsManagement();
+        break;
+      case 'ai-flagged-listings':
+        loadAiFlaggedListings();
+        break;
+      case 'at-risk-users':
+        loadAtRiskUsers();
         break;
       case 'pending-listings':
         loadPendingListings();
@@ -2921,8 +3136,14 @@
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
           if (!id) return;
+          const rejection = promptForListingRejection();
+          if (!rejection) return;
           try {
-            await db.collection('listings').doc(id).update({ status: 'rejected' });
+            await callListingsAdminApi('reject-listing', {
+              listingId: id,
+              rejectionReason: rejection.rejectionReason,
+              rejectionNotes: rejection.rejectionNotes,
+            });
             loadPendingListings();
           } catch { alert('Failed to reject listing.'); }
         });
@@ -4259,10 +4480,456 @@
     URL.revokeObjectURL(url);
   }
 
+  function downloadJSON(filename, value) {
+    const blob = new Blob([JSON.stringify(value, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function formatDate(ts) {
     if (!ts) return '';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleDateString('en-US');
+  }
+
+  window.generateModerationReport = async function () {
+    try {
+      if (!auth.currentUser) {
+        alert('You must be signed in as an admin to generate this report.');
+        return;
+      }
+
+      const from = document.getElementById('moderationReportFrom')?.value || '';
+      const to = document.getElementById('moderationReportTo')?.value || '';
+      const recentLimit = document.getElementById('moderationReportRecentLimit')?.value || '20';
+      const atRiskLimit = document.getElementById('moderationReportAtRiskLimit')?.value || '25';
+      const preview = document.getElementById('moderationReportPreview');
+
+      if (preview) {
+        preview.textContent = 'Generating moderation report...';
+      }
+
+      const token = await auth.currentUser.getIdToken();
+      const params = new URLSearchParams();
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      if (recentLimit) params.set('recentLimit', recentLimit);
+      if (atRiskLimit) params.set('atRiskLimit', atRiskLimit);
+
+      const response = await fetch(`${LISTINGS_ADMIN_API_BASE}/moderation-report?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      let report = null;
+      try {
+        report = await response.json();
+      } catch (error) {
+        report = null;
+      }
+
+      if (!response.ok || !report) {
+        throw new Error(report?.error || `Moderation report failed with status ${response.status}`);
+      }
+
+      if (preview) {
+        preview.textContent = JSON.stringify(report, null, 2);
+      }
+
+      downloadJSON(`moderation-report-${Date.now()}.json`, report);
+    } catch (error) {
+      console.error('Generate moderation report error:', error);
+      const preview = document.getElementById('moderationReportPreview');
+      if (preview) {
+        preview.textContent = `Failed to generate moderation report.\n${error?.message || 'Unknown error'}`;
+      }
+      alert(error?.message || 'Failed to generate moderation report.');
+    }
+  };
+
+  function normalizeModerationResult(data) {
+    const confidence = String(data?.confidence || '').toLowerCase();
+
+    return {
+      flagged: data?.flagged === true,
+      reason: typeof data?.reason === 'string' ? data.reason.trim() : '',
+      confidence: confidence === 'high' || confidence === 'medium' || confidence === 'low' ? confidence : 'low',
+      rawResponse: typeof data?.rawResponse === 'string' ? data.rawResponse : '',
+    };
+  }
+
+  function getAiRiskMeta(confidence) {
+    switch (String(confidence || '').toLowerCase()) {
+      case 'high':
+        return { label: 'High Risk', className: 'high-risk' };
+      case 'medium':
+        return { label: 'Medium Risk', className: 'medium-risk' };
+      default:
+        return { label: 'Low Risk', className: 'low-risk' };
+    }
+  }
+
+  function formatPrice(value) {
+    return typeof value === 'number' && Number.isFinite(value) ? `$${value.toFixed(2)}` : '';
+  }
+
+  function formatAiModerationDate(value) {
+    if (!value) return '';
+    const date = value?.toDate ? value.toDate() : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
+  function openAiModerationModal(listing) {
+    if (!aiModerationModalBackdrop || !aiModerationModalBody || !aiModerationModalTitle) return;
+
+    state.selectedAiModerationListing = listing;
+    const risk = getAiRiskMeta(listing?.moderation?.confidence);
+    const sellerName = listing?.sellerName || listing?.sellerEmail || listing?.userId || 'Unknown seller';
+
+    aiModerationModalTitle.textContent = listing?.title || 'Listing Details';
+    aiModerationModalBody.innerHTML = `
+      <div class="ai-risk-row" style="margin-top: 6px;">
+        <span class="ai-pill pending">Pending Review</span>
+        <span class="ai-pill ${risk.className}">${escapeHtml(risk.label)}</span>
+      </div>
+
+      <div class="ai-flagged-box" style="margin-top: 14px;">
+        <div class="ai-flagged-label">Why This Was Flagged</div>
+        <div class="ai-flagged-reason">${escapeHtml(listing?.moderation?.reason || 'No detailed reason was returned by moderation.')}</div>
+      </div>
+
+      <div class="ai-modal-grid">
+        <div class="ai-modal-card">
+          <div class="ai-modal-label">Seller</div>
+          <div class="ai-modal-value">${escapeHtml(sellerName)}</div>
+        </div>
+        <div class="ai-modal-card">
+          <div class="ai-modal-label">Created</div>
+          <div class="ai-modal-value">${escapeHtml(formatAiModerationDate(listing?.createdAt) || 'Unknown')}</div>
+        </div>
+        <div class="ai-modal-card">
+          <div class="ai-modal-label">Status</div>
+          <div class="ai-modal-value">${escapeHtml(listing?.status || 'pending_review')}</div>
+        </div>
+        <div class="ai-modal-card">
+          <div class="ai-modal-label">Price</div>
+          <div class="ai-modal-value">${escapeHtml(formatPrice(listing?.price) || 'Not provided')}</div>
+        </div>
+      </div>
+
+      <div class="ai-modal-card" style="margin-top: 14px;">
+        <div class="ai-modal-label">Description</div>
+        <div class="ai-modal-value">${escapeHtml(listing?.description || 'No description provided.')}</div>
+      </div>
+
+      ${listing?.moderation?.rawResponse ? `
+        <div class="ai-modal-card" style="margin-top: 14px;">
+          <div class="ai-modal-label">Raw Moderation Response</div>
+          <div class="ai-modal-value">${escapeHtml(listing.moderation.rawResponse)}</div>
+        </div>
+      ` : ''}
+    `;
+
+    aiModerationModalBackdrop.classList.add('active');
+  }
+
+  function initAiModerationModal() {
+    if (!aiModerationModalBackdrop || !closeAiModerationModal) return;
+
+    closeAiModerationModal.addEventListener('click', () => {
+      aiModerationModalBackdrop.classList.remove('active');
+    });
+
+    aiModerationModalBackdrop.addEventListener('click', (event) => {
+      if (event.target === aiModerationModalBackdrop) {
+        aiModerationModalBackdrop.classList.remove('active');
+      }
+    });
+  }
+
+  async function loadAiFlaggedListings() {
+    const list = document.getElementById('aiFlaggedListingsList');
+    if (!list) return;
+
+    list.innerHTML = '<div class="empty-state">Loading AI-flagged listings...</div>';
+
+    try {
+      const snapshot = await db.collection('listings').where('status', '==', 'pending_review').get();
+      const rows = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data() || {};
+          const moderationSnap = await docSnap.ref.collection('moderation').doc('result').get();
+          const moderation = moderationSnap.exists ? normalizeModerationResult(moderationSnap.data() || {}) : normalizeModerationResult({});
+
+          return {
+            id: docSnap.id,
+            ...data,
+            moderation,
+          };
+        })
+      );
+
+      rows.sort((a, b) => {
+        const aTime = a?.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+        const bTime = b?.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+        return bTime - aTime;
+      });
+
+      const listingMap = new Map(rows.map((item) => [item.id, item]));
+
+      list.innerHTML = rows.length === 0
+        ? '<div class="empty-state">No AI-flagged listings are waiting for review.</div>'
+        : rows.map((item) => {
+          const risk = getAiRiskMeta(item.moderation.confidence);
+          const priceLabel = formatPrice(item.price);
+          const reason = item.moderation.reason || 'No detailed reason was returned by moderation.';
+          const sellerName = item.sellerName || item.sellerEmail || item.userId || 'Unknown seller';
+
+          return `
+            <div class="list-item ai-flagged-card ${risk.className}">
+              <div class="ai-card-head">
+                <div>
+                  <div class="ai-card-title">${escapeHtml(item.title || 'Untitled Listing')}</div>
+                  <div class="ai-card-meta">Seller: ${escapeHtml(sellerName)}</div>
+                  <div class="ai-card-meta">Created: ${escapeHtml(formatAiModerationDate(item.createdAt) || 'Unknown')}</div>
+                </div>
+                ${priceLabel ? `<div class="ai-card-price">${escapeHtml(priceLabel)}</div>` : ''}
+              </div>
+
+              <div class="ai-risk-row">
+                <span class="ai-pill pending">Pending Review</span>
+                <span class="ai-pill ${risk.className}">${escapeHtml(risk.label)}</span>
+              </div>
+
+              <div class="ai-description">${escapeHtml(item.description || 'No description provided.')}</div>
+
+              <div class="ai-flagged-box">
+                <div class="ai-flagged-label">Why This Was Flagged</div>
+                <div class="ai-flagged-reason">${escapeHtml(reason)}</div>
+              </div>
+
+              <div class="ai-card-actions">
+                <button class="btn small" data-action="approve-ai-listing" data-id="${escapeHtml(item.id)}">Approve</button>
+                <button class="btn danger small" data-action="reject-ai-listing" data-id="${escapeHtml(item.id)}">Reject</button>
+                <button class="btn secondary small" data-action="view-ai-listing-details" data-id="${escapeHtml(item.id)}">View Details</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      list.querySelectorAll('[data-action="approve-ai-listing"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (!confirm('Approve this listing and make it active?')) return;
+
+          try {
+            await callListingsAdminApi('approve-listing', { listingId: id });
+            loadAiFlaggedListings();
+            loadTopPriorityCounts();
+          } catch (error) {
+            console.error('Error approving AI-flagged listing:', error);
+            alert('Failed to approve listing.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="reject-ai-listing"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          const rejection = promptForListingRejection();
+          if (!rejection) return;
+
+          try {
+            await callListingsAdminApi('reject-listing', {
+              listingId: id,
+              rejectionReason: rejection.rejectionReason,
+              rejectionNotes: rejection.rejectionNotes,
+            });
+            loadAiFlaggedListings();
+            loadTopPriorityCounts();
+          } catch (error) {
+            console.error('Error rejecting AI-flagged listing:', error);
+            alert('Failed to reject listing.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="view-ai-listing-details"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          const listing = listingMap.get(id);
+          if (!listing) return;
+          openAiModerationModal(listing);
+        });
+      });
+    } catch (error) {
+      console.error('AI-flagged listings load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load AI-flagged listings.</div>';
+    }
+  }
+
+  async function loadAtRiskUsers() {
+    const list = document.getElementById('atRiskUsersList');
+    if (!list) return;
+
+    list.innerHTML = '<div class="empty-state">Loading at-risk users...</div>';
+
+    try {
+      const usersSnap = await db.collection('users').get();
+      const rows = usersSnap.docs.map((docSnap) => {
+        const data = docSnap.data() || {};
+        const stats = normalizeUserModerationStats(data);
+        const risk = deriveUserModerationRisk(stats, data.moderationRisk || {});
+
+        return {
+          id: docSnap.id,
+          ...data,
+          moderationStats: stats,
+          moderationRisk: risk,
+        };
+      }).filter((user) => isUserAtRisk(user.moderationRisk));
+
+      rows.sort((a, b) => {
+        const aScore = Number(a?.moderationRisk?.trustScore || 0);
+        const bScore = Number(b?.moderationRisk?.trustScore || 0);
+        if (aScore !== bScore) return aScore - bScore;
+
+        const aRejected = Number(a?.moderationStats?.rejectedCount || 0);
+        const bRejected = Number(b?.moderationStats?.rejectedCount || 0);
+        return bRejected - aRejected;
+      });
+
+      list.innerHTML = rows.length === 0
+        ? '<div class="empty-state">No users are currently in the at-risk queue.</div>'
+        : rows.map((user) => {
+          const riskMeta = getUserRiskMeta(user.moderationRisk);
+          const displayName = user.displayName || user.name || user.email || user.id;
+          const flaggedCount = Number(user.moderationStats.flaggedCount || 0);
+          const rejectedCount = Number(user.moderationStats.rejectedCount || 0);
+          const approvedCount = Number(user.moderationStats.approvedCount || 0);
+          const totalListings = Number(user.moderationStats.totalListings || 0);
+          const lastRejectedAt = formatModerationDate(user.moderationStats.lastRejectedAt) || 'Never';
+          const lastFlaggedAt = formatModerationDate(user.moderationStats.lastFlaggedAt) || 'Never';
+          const disabled = user.isDisabled === true;
+          const disabledReason = typeof user.disabledReason === 'string' && user.disabledReason.trim()
+            ? user.disabledReason.trim()
+            : '';
+          const disabledAt = formatModerationDate(user.disabledAt) || '';
+
+          return `
+            <div class="list-item ai-flagged-card ${riskMeta.className}">
+              <div class="ai-card-head">
+                <div>
+                  <div class="ai-card-title">${escapeHtml(displayName)}</div>
+                  <div class="ai-card-meta">Email: ${escapeHtml(user.email || 'No email on file')}</div>
+                  <div class="ai-card-meta">User ID: ${escapeHtml(user.id)}</div>
+                  ${disabled ? `<div class="ai-card-meta" style="color:#991b1b;font-weight:700;">Account disabled${disabledAt ? ` on ${escapeHtml(disabledAt)}` : ''}</div>` : ''}
+                </div>
+                <div class="ai-card-price">Trust ${escapeHtml(String(user.moderationRisk.trustScore))}</div>
+              </div>
+
+              <div class="ai-risk-row">
+                <span class="ai-pill ${riskMeta.className}">${escapeHtml(riskMeta.label)}</span>
+                <span class="ai-pill pending">${escapeHtml(String(user.moderationRisk.reviewStatus || 'clear').replace('_', ' '))}</span>
+              </div>
+
+              <div class="ai-flagged-box">
+                <div class="ai-flagged-label">Moderation Summary</div>
+                <div class="ai-flagged-reason">
+                  Total Listings: ${escapeHtml(String(totalListings))} | Approved: ${escapeHtml(String(approvedCount))} | Flagged: ${escapeHtml(String(flaggedCount))} | Rejected: ${escapeHtml(String(rejectedCount))}
+                </div>
+              </div>
+
+              <div class="ai-description">
+                Last flagged: ${escapeHtml(lastFlaggedAt)}<br>
+                Last rejected: ${escapeHtml(lastRejectedAt)}
+              </div>
+
+              ${disabledReason ? `
+                <div class="ai-flagged-box">
+                  <div class="ai-flagged-label">Disable Reason</div>
+                  <div class="ai-flagged-reason">${escapeHtml(disabledReason)}</div>
+                </div>
+              ` : ''}
+
+              <div class="ai-card-actions">
+                ${disabled
+                  ? `<button class="btn small" data-action="restore-user-access" data-id="${escapeHtml(user.id)}">Restore Access</button>`
+                  : `<button class="btn danger small" data-action="disable-user-account" data-id="${escapeHtml(user.id)}">Disable Account</button>`
+                }
+                <button class="btn secondary small" data-action="open-user-management" data-id="${escapeHtml(user.id)}">Manage User</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      list.querySelectorAll('[data-action="disable-user-account"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          const promptResult = window.prompt('Enter a reason for disabling this account:', '');
+          if (promptResult === null) return;
+
+          const reason = promptResult.trim();
+          if (!reason) {
+            alert('A reason is required to disable this account.');
+            return;
+          }
+
+          if (!confirm('Disable this account and notify the user by email?')) return;
+
+          try {
+            await disableUserAccount(id, reason);
+            await loadAtRiskUsers();
+          } catch (error) {
+            console.error('Disable user account error:', error);
+            alert(error?.message || 'Failed to disable user account.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="restore-user-access"]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (!confirm('Restore account access for this user?')) return;
+
+          try {
+            await restoreUserAccountAccess(id);
+            await loadAtRiskUsers();
+          } catch (error) {
+            console.error('Restore user access error:', error);
+            alert(error?.message || 'Failed to restore user access.');
+          }
+        });
+      });
+
+      list.querySelectorAll('[data-action="open-user-management"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          window.navigateToTab('user-management');
+        });
+      });
+    } catch (error) {
+      console.error('At-risk users load error:', error);
+      list.innerHTML = '<div class="empty-state">Failed to load at-risk users.</div>';
+    }
   }
 
   window.exportDigestSubscribers = async function () {
@@ -4498,6 +5165,8 @@
     document.getElementById('refreshShopLocalSectionSettings')?.addEventListener('click', loadShopLocalSectionSettings);
     document.getElementById('refreshCommunitySettings')?.addEventListener('click', loadCommunitySettings);
     document.getElementById('refreshApprovals').addEventListener('click', loadPendingApprovals);
+    document.getElementById('refreshAiFlaggedListings')?.addEventListener('click', loadAiFlaggedListings);
+    document.getElementById('refreshAtRiskUsers')?.addEventListener('click', loadAtRiskUsers);
     document.getElementById('refreshListings').addEventListener('click', loadPendingListings);
     document.getElementById('refreshServices')?.addEventListener('click', loadPendingServices);
     document.getElementById('refreshPendingBusinessProfiles')?.addEventListener('click', loadPendingBusinessProfiles);
@@ -4532,10 +5201,13 @@
       }
     });
     modalSave.addEventListener('click', saveReportUpdate);
+    initAiModerationModal();
   }
 
   const SECTION_TITLES = {
     'analytics': 'Analytics',
+    'ai-flagged-listings': 'AI Flagged Listings',
+    'at-risk-users': 'At-Risk Users',
     'pending-listings': 'Pending Listings',
     'pending-services': 'Pending Services',
     'reported-listings': 'Reported Listings',
