@@ -409,8 +409,7 @@
     let isUploadingImages = false;
     let verificationPollIntervalId = null;
     let resubmittedFromListingId = '';
-    const LISTINGS_API_URL = `${window.location.origin}/api/listings`;
-
+    const LISTINGS_API_URL = "/api/listings";
     function applyCategoryFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const rawCategory = params.get('category');

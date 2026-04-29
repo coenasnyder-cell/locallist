@@ -1,17 +1,28 @@
+import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, Timestamp, getFirestore } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
+import { defineSecret } from "firebase-functions/params";
 import { onRequest } from "firebase-functions/v2/https";
 
+const openaiKey = defineSecret("OPENAI_API_KEY");
 if (getApps().length === 0) {
   initializeApp();
 }
 
 const db = getFirestore();
 const app = express();
+const listingApiCors = cors({
+  origin: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 3600,
+});
 
+app.use(listingApiCors);
+app.options("*", listingApiCors);
 app.use(express.json({limit: "1mb"}));
 
 type ModerationConfidence = "low" | "medium" | "high";
@@ -653,12 +664,11 @@ function getListingStatus(moderation: Omit<ModerationResult, "rawResponse">): Li
 }
 
 async function moderateListing(title: string, description: string): Promise<ModerationResult> {
-  const apiKey = normalizeString(process.env.OPENAI_API_KEY);
+const apiKey = openaiKey.value();
 
-  if (!apiKey) {
-    throw new Error("Missing OPENAI_API_KEY");
-  }
-
+if (!apiKey) {
+  throw new Error("Missing OPENAI_API_KEY");
+}
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -825,12 +835,33 @@ app.post("/api/listings", async (req: ListingRequest, res: Response) => {
     const userSnap = await userRef.get();
     const userData = userSnap.data() || {};
     const preModeration = shouldSendToAI(title, description, userData);
-    const moderation = preModeration.sendToAI ?
-      buildStoredModerationResult(
-        await moderateListing(title, description),
-        preModeration.priority || "normal",
-      ) :
-      buildPreModerationResult(preModeration);
+let moderation;
+
+if (preModeration.sendToAI) {
+  try {
+    const aiResult = await moderateListing(title, description);
+
+    moderation = buildStoredModerationResult(
+      aiResult,
+      preModeration.priority || "normal",
+    );
+  } catch (error) {
+    logger.error("🔥 AI moderation failed, using fallback", { error });
+
+  moderation = {
+  flagged: false,
+  reason: "fallback_error",
+  confidence: "low" as const,
+  rawResponse: "FALLBACK",
+  source: "ai" as const,
+  priority: preModeration.priority || "normal",
+  matchedKeywords: [],
+  matchedKeywordCategory: null,
+};
+  }
+} else {
+  moderation = buildPreModerationResult(preModeration);
+}
     const status = preModeration.autoApprove ? "approved" : getListingStatus(moderation);
 
     await db.runTransaction(async (transaction) => {
@@ -1244,4 +1275,7 @@ app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {
   next(error);
 });
 
-export const listingsApi = onRequest({secrets: ["OPENAI_API_KEY"]}, app);
+export const listingsApi = onRequest({
+  secrets: ["OPENAI_API_KEY"],
+  invoker: "public",
+}, app);

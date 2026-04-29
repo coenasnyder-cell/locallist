@@ -11,42 +11,50 @@ import { initializeApp } from "firebase-admin/app";
 import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
 import { setGlobalOptions } from "firebase-functions";
 import * as logger from "firebase-functions/logger";
+import { defineSecret } from "firebase-functions/params";
 import { onSchedule } from "firebase-functions/scheduler";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { onCall, onRequest } from "firebase-functions/v2/https";
 import OpenAI from "openai";
 import Stripe from "stripe";
-const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY,});
-console.log("KEY VALUE:", process.env.OPENAI_API_KEY);
-
-
 
 // Email triggers (Resend)
 export { onFeaturePurchaseCreated, onListingRejected, onMessageCreated, onPremiumPurchaseCreated, onPublicMessageCreated, onUserCreated, onUserDisabled } from "./emailTriggers.js";
 export { listingsApi } from "./listingsApi.js";
 
-export const testOpenAI= onRequest(async (req, res) => {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "user", content: "Say 'connected successfully'" }
-      ],
-    });
+const openaiKey = defineSecret("OPENAI_API_KEY");
 
-    res.json({
-      success: true,
-      output: response.choices[0].message.content,
-    });
-  } catch (error: any) {
-    console.error("OpenAI error:", error);
+export const testOpenAI = onRequest(
+  { secrets: ["OPENAI_API_KEY"] },
+  async (req, res) => {
+    try {
+      const apiKey = openaiKey.value();
 
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+      if (!apiKey) {
+        throw new Error("Missing OPENAI_API_KEY");
+      }
+
+      const openai = new OpenAI({
+        apiKey,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "user", content: "Say 'connected successfully'" }
+        ],
+      });
+
+      res.json({
+        success: true,
+        output: response.choices[0].message.content,
+      });
+    } catch (error: any) {
+      logger.error("OpenAI error:", error);
+      res.status(500).json({ error: error.message });
+    }
   }
-});
+);
 
 export const unsubscribe = onRequest(async (req, res) => {
   const uid = String(req.query.uid || "").trim();
