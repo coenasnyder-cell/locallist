@@ -14,7 +14,7 @@ import * as logger from "firebase-functions/logger";
 import { defineSecret } from "firebase-functions/params";
 import { onSchedule } from "firebase-functions/scheduler";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
-import { onCall, onRequest } from "firebase-functions/v2/https";
+import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import OpenAI from "openai";
 import Stripe from "stripe";
 
@@ -23,6 +23,15 @@ export { onFeaturePurchaseCreated, onListingRejected, onMessageCreated, onPremiu
 export { listingsApi } from "./listingsApi.js";
 
 const openaiKey = defineSecret("OPENAI_API_KEY");
+const callableCorsOrigins = [
+  /^https:\/\/([a-z0-9-]+\.)?locallist\.biz$/i,
+  /^http:\/\/localhost(:\d+)?$/i,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/i,
+];
+const BUSINESS_AI_USAGE_COLLECTION = "businessAiUsage";
+const BUSINESS_AI_USAGE_TIME_ZONE = "America/Chicago";
+const BUSINESS_AI_DESCRIPTION_MONTHLY_LIMIT = 5;
+const BUSINESS_AI_IMAGE_MONTHLY_LIMIT = 5;
 
 export const testOpenAI = onRequest(
   { secrets: ["OPENAI_API_KEY"] },
@@ -180,6 +189,506 @@ export const sendTestEmail = onCall(
   }
 );
 
+export const getBusinessAiUsageSummary = onCall(
+  { cors: callableCorsOrigins },
+  async (request) => {
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new HttpsError("unauthenticated", "Sign in to use the AI Business Assistant.");
+    }
+
+    const db = getFirestore();
+    const userSnap = await db.collection("users").doc(userId).get();
+    const userData = userSnap.exists ? userSnap.data() : undefined;
+    const normalizedUserData = userData as Record<string, unknown> | undefined;
+
+    await assertBusinessAiAssistantAccess(db, userId, normalizedUserData);
+
+    return {
+      success: true,
+      usage: await getBusinessAiUsageSummaryForUser(db, userId),
+    };
+  },
+);
+
+export const generateSellerListingDraft = onCall(
+  { secrets: ["OPENAI_API_KEY"], cors: callableCorsOrigins },
+  async (request) => {
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new HttpsError("unauthenticated", "Sign in to use the AI Listing Assistant.");
+    }
+
+    const db = getFirestore();
+    const userSnap = await db.collection("users").doc(userId).get();
+    const userData = userSnap.exists ? userSnap.data() : undefined;
+    const normalizedUserData = userData as Record<string, unknown> | undefined;
+
+    if (!isAdminUser(normalizedUserData) && !hasSellerHubAccess(normalizedUserData)) {
+      throw new HttpsError(
+        "permission-denied",
+        "Admin access or an active paid seller plan is required to use the AI Listing Assistant.",
+      );
+    }
+
+    const productName = normalizeSingleLine(request.data?.productName);
+    const details = normalizeSingleLine(request.data?.details);
+    const category = normalizeSingleLine(request.data?.category);
+    const condition = normalizeSingleLine(request.data?.condition);
+    const priceContext = normalizeSingleLine(request.data?.priceContext);
+    const referenceImage = normalizeReferenceImageSource(
+      request.data?.referenceImageUrl,
+      request.data?.referenceImage,
+    );
+
+    if (!productName) {
+      throw new HttpsError("invalid-argument", "productName is required.");
+    }
+
+    if (productName.length > 120) {
+      throw new HttpsError("invalid-argument", "productName must be 120 characters or fewer.");
+    }
+
+    if (details.length > 4000) {
+      throw new HttpsError("invalid-argument", "details must be 4000 characters or fewer.");
+    }
+
+    const apiKey = openaiKey.value();
+    if (!apiKey) {
+      throw new HttpsError("failed-precondition", "OPENAI_API_KEY is not configured.");
+    }
+
+    const openai = new OpenAI({ apiKey });
+
+    const promptParts = [
+      `Product name: ${productName}`,
+      category ? `Category: ${category}` : "",
+      condition ? `Condition: ${condition}` : "",
+      priceContext ? `Price context: ${priceContext}` : "",
+      details ? `Optional details: ${details}` : "Optional details:",
+      referenceImage ? "Reference image: included" : "Reference image: not provided",
+    ].filter(Boolean);
+
+    try {
+      const userContent: Array<Record<string, unknown>> = [
+        {
+          type: "text",
+          text: [
+            ...promptParts,
+            "",
+            "Generate a marketplace listing draft with these rules:",
+            "- title: 40 characters max",
+            "- description: 2 to 3 sentences",
+            "- bullets: exactly 3 items",
+            "- each bullet: under 15 words",
+            "- use a casual, friendly seller voice",
+            "- sound natural and local, not corporate or polished",
+            "- keep it easy to scan and realistic",
+            "- avoid sounding stiff, overly formal, or salesy",
+            "- no markdown or extra commentary",
+            "- if a reference image is included, use it quietly to improve the title, description, and bullets",
+            "- do not claim uncertain visual guesses as facts",
+          ].join("\n"),
+        },
+      ];
+
+      if (referenceImage) {
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: referenceImage.imageUrl,
+            detail: "low",
+          },
+        });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.6,
+        max_completion_tokens: 300,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You write casual, natural marketplace listings for local sellers. Return only JSON that matches the requested schema.",
+          },
+          {
+            role: "user",
+            content: userContent as any,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "seller_listing_draft",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                title: { type: "string" },
+                description: { type: "string" },
+                bullets: {
+                  type: "array",
+                  minItems: 3,
+                  maxItems: 3,
+                  items: { type: "string" },
+                },
+              },
+              required: ["title", "description", "bullets"],
+            },
+          },
+        } as any,
+      });
+
+      logger.info("AI listing usage", {
+        userId,
+        model: "gpt-4o-mini",
+        inputTokens: response.usage?.prompt_tokens ?? null,
+        outputTokens: response.usage?.completion_tokens ?? null,
+        totalTokens: response.usage?.total_tokens ?? null,
+        hasReferenceImage: Boolean(referenceImage),
+        hasPriceContext: Boolean(priceContext),
+        hasCategory: Boolean(category),
+        hasCondition: Boolean(condition),
+        hasDetails: Boolean(details),
+        productNameLength: productName.length,
+        priceContextLength: priceContext.length,
+        detailsLength: details.length,
+      });
+
+      const rawContent = response.choices[0]?.message?.content;
+
+      if (!rawContent) {
+        throw new Error("OpenAI returned an empty response.");
+      }
+
+      const parsed = JSON.parse(rawContent);
+      const listing = normalizeGeneratedListingOutput(productName, details, parsed);
+
+      return {
+        success: true,
+        listing,
+      };
+    } catch (error) {
+      logger.error("AI listing draft generation failed", {
+        userId,
+        productName,
+        hasReferenceImage: Boolean(referenceImage),
+        error,
+      });
+      throw new HttpsError("internal", "Failed to generate listing draft.");
+    }
+  },
+);
+
+export const generateBusinessDescriptionDraft = onCall(
+  { secrets: ["OPENAI_API_KEY"], cors: callableCorsOrigins },
+  async (request) => {
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new HttpsError("unauthenticated", "Sign in to use the AI Business Assistant.");
+    }
+
+    const db = getFirestore();
+    const userSnap = await db.collection("users").doc(userId).get();
+    const userData = userSnap.exists ? userSnap.data() : undefined;
+    const normalizedUserData = userData as Record<string, unknown> | undefined;
+    await assertBusinessAiAssistantAccess(db, userId, normalizedUserData);
+
+    const businessName = normalizeSingleLine(request.data?.businessName);
+    const businessType = normalizeValue(request.data?.businessType);
+    const details = normalizeSingleLine(request.data?.details);
+
+    if (!businessName) {
+      throw new HttpsError("invalid-argument", "businessName is required.");
+    }
+
+    if (businessName.length > 120) {
+      throw new HttpsError("invalid-argument", "businessName must be 120 characters or fewer.");
+    }
+
+    if (!["shoplocal", "services", "both"].includes(businessType)) {
+      throw new HttpsError("invalid-argument", "businessType must be shopLocal, services, or both.");
+    }
+
+    if (details.length > 1200) {
+      throw new HttpsError("invalid-argument", "details must be 1200 characters or fewer.");
+    }
+
+    const apiKey = openaiKey.value();
+    if (!apiKey) {
+      throw new HttpsError("failed-precondition", "OPENAI_API_KEY is not configured.");
+    }
+
+    const businessTypeLabels: Record<string, string> = {
+      shoplocal: "Business Local Only - Retail and physical products",
+      services: "Services Only - Professional services",
+      both: "Both - Business Local and Services",
+    };
+
+    const openai = new OpenAI({ apiKey });
+    let usageSummary: BusinessAiUsageSummary | null = null;
+
+    try {
+      usageSummary = await reserveBusinessAiUsage(db, userId, "description");
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.7,
+        max_completion_tokens: 220,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You write strong, natural business profile descriptions for local businesses. Return only JSON that matches the requested schema.",
+          },
+          {
+            role: "user",
+            content: [
+              `Business name: ${businessName}`,
+              `Business type: ${businessTypeLabels[businessType] || businessType}`,
+              details ? `Optional details: ${details}` : "Optional details:",
+              "",
+              "Generate a business description with these rules:",
+              "- description: 3 to 4 sentences",
+              "- keep it clear, confident, and customer-friendly",
+              "- sound local, credible, and welcoming",
+              "- make it strong without sounding stiff, corporate, or overhyped",
+              "- explain what the business offers and why someone should trust it",
+              "- do not use markdown, bullet points, emojis, or extra commentary",
+            ].join("\n"),
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "business_description_draft",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                description: { type: "string" },
+              },
+              required: ["description"],
+            },
+          },
+        } as any,
+      });
+
+      logger.info("AI business description usage", {
+        userId,
+        model: "gpt-4o-mini",
+        inputTokens: response.usage?.prompt_tokens ?? null,
+        outputTokens: response.usage?.completion_tokens ?? null,
+        totalTokens: response.usage?.total_tokens ?? null,
+        businessType,
+        hasDetails: Boolean(details),
+        businessNameLength: businessName.length,
+        detailsLength: details.length,
+      });
+
+      const rawContent = response.choices[0]?.message?.content;
+
+      if (!rawContent) {
+        throw new Error("OpenAI returned an empty response.");
+      }
+
+      const parsed = JSON.parse(rawContent);
+      const draft = normalizeGeneratedBusinessDescriptionOutput(businessName, parsed);
+
+      return {
+        success: true,
+        draft,
+        usage: usageSummary,
+      };
+    } catch (error) {
+      if (usageSummary) {
+        await rollbackReservedBusinessAiUsage(db, userId, "description", usageSummary.monthKey);
+      }
+
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+
+      logger.error("AI business description generation failed", {
+        userId,
+        businessName,
+        businessType,
+        error,
+      });
+      throw new HttpsError("internal", "Failed to generate business description.");
+    }
+  },
+);
+
+export const generateBusinessBrandImage = onCall(
+  { secrets: ["OPENAI_API_KEY"], cors: callableCorsOrigins },
+  async (request) => {
+    const userId = request.auth?.uid;
+
+    if (!userId) {
+      throw new HttpsError("unauthenticated", "Sign in to use the AI Business Assistant.");
+    }
+
+    const db = getFirestore();
+    const userSnap = await db.collection("users").doc(userId).get();
+    const userData = userSnap.exists ? userSnap.data() : undefined;
+    const normalizedUserData = userData as Record<string, unknown> | undefined;
+    await assertBusinessAiAssistantAccess(db, userId, normalizedUserData);
+
+    const businessName = normalizeSingleLine(request.data?.businessName);
+    const businessCategory = normalizeSingleLine(request.data?.businessCategory);
+    const shortDescription = normalizeSingleLine(request.data?.shortDescription);
+    const imageStyle = normalizeSingleLine(request.data?.imageStyle).toLowerCase();
+    const imageColor = normalizeSingleLine(request.data?.imageColor).toLowerCase();
+    const noText = request.data?.noText === true;
+    const imageKind = normalizeValue(request.data?.imageKind);
+
+    if (!businessName) {
+      throw new HttpsError("invalid-argument", "businessName is required.");
+    }
+
+    if (businessName.length > 120) {
+      throw new HttpsError("invalid-argument", "businessName must be 120 characters or fewer.");
+    }
+
+    if (!businessCategory) {
+      throw new HttpsError("invalid-argument", "businessCategory is required.");
+    }
+
+    if (businessCategory.length > 80) {
+      throw new HttpsError("invalid-argument", "businessCategory must be 80 characters or fewer.");
+    }
+
+    if (shortDescription.length > 600) {
+      throw new HttpsError("invalid-argument", "shortDescription is too long.");
+    }
+
+    if (countWords(shortDescription) > 99) {
+      throw new HttpsError("invalid-argument", "shortDescription must be under 100 words.");
+    }
+
+    if (!["clean modern", "bold professional", "warm handmade", "dark premium"].includes(imageStyle)) {
+      throw new HttpsError("invalid-argument", "imageStyle is not supported.");
+    }
+
+    if (!["gold and black", "blue and white", "green and natural", "orange and black"].includes(imageColor)) {
+      throw new HttpsError("invalid-argument", "imageColor is not supported.");
+    }
+
+    if (!["logo", "cover"].includes(imageKind)) {
+      throw new HttpsError("invalid-argument", "imageKind must be logo or cover.");
+    }
+
+    const apiKey = openaiKey.value();
+    if (!apiKey) {
+      throw new HttpsError("failed-precondition", "OPENAI_API_KEY is not configured.");
+    }
+
+    const imageKindLabel = imageKind === "logo" ? "logo concept" : "cover photo concept";
+    const prompt = [
+      `Create a polished ${imageKindLabel} for a local business brand.`,
+      `Business name: ${businessName}`,
+      `Business category: ${businessCategory}`,
+      shortDescription ? `Short description: ${shortDescription}` : "",
+      `Style direction: ${imageStyle}`,
+      `Color theme: ${imageColor}`,
+      "",
+      "Art direction rules:",
+      imageKind === "logo"
+        ? "- Build a clean, simple, memorable brand mark that feels usable as a logo."
+        : "- Build a wide hero-style cover image that feels usable as a website or social cover photo.",
+      "- Keep the composition professional, intentional, and uncluttered.",
+      "- Use the requested color theme clearly.",
+      "- Match the requested style without adding extra themes.",
+      "- Do not include watermarks, mockup frames, or fake UI.",
+      noText
+        ? "- Do not include any readable text, words, letters, initials, monograms, brand names, or typography anywhere in the image."
+        : "- Avoid paragraphs, taglines, or dense readable text inside the image.",
+      "- Make the result feel relevant to the business type.",
+      imageKind === "logo"
+        ? "- Favor a transparent or minimal background and a centered composition."
+        : "- Favor a strong landscape composition with breathing room and a premium brand feel.",
+    ].join("\n");
+
+    const openai = new OpenAI({ apiKey });
+    let usageSummary: BusinessAiUsageSummary | null = null;
+
+    try {
+      usageSummary = await reserveBusinessAiUsage(db, userId, "image");
+
+      const response = await openai.images.generate({
+        model: "gpt-image-1",
+        prompt,
+        size: imageKind === "logo" ? "1024x1024" : "1536x1024",
+        quality: "medium",
+        background: imageKind === "logo" ? "transparent" : "opaque",
+        output_format: "png",
+      });
+
+      const imageBase64 = response.data?.[0]?.b64_json;
+
+      if (!imageBase64) {
+        throw new Error("OpenAI returned an empty image.");
+      }
+
+      logger.info("AI business image usage", {
+        userId,
+        model: "gpt-image-1",
+        businessCategory,
+        imageKind,
+        imageStyle,
+        imageColor,
+        noText,
+        businessNameLength: businessName.length,
+        shortDescriptionLength: shortDescription.length,
+      });
+
+      return {
+        success: true,
+        image: {
+          kind: imageKind,
+          businessName,
+          businessCategory,
+          shortDescription,
+          imageStyle,
+          imageColor,
+          noText,
+          mimeType: "image/png",
+          imageDataUrl: `data:image/png;base64,${imageBase64}`,
+          altText: `${imageKindLabel} for ${businessName}`,
+        },
+        usage: usageSummary,
+      };
+    } catch (error) {
+      if (usageSummary) {
+        await rollbackReservedBusinessAiUsage(db, userId, "image", usageSummary.monthKey);
+      }
+
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+
+      logger.error("AI business image generation failed", {
+        userId,
+        businessName,
+        businessCategory,
+        imageKind,
+        imageStyle,
+        imageColor,
+        noText,
+        error,
+      });
+      throw new HttpsError("internal", "Failed to generate business image.");
+    }
+  },
+);
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
@@ -196,6 +705,451 @@ export const sendTestEmail = onCall(
 setGlobalOptions({ maxInstances: 10 });
 
 initializeApp();
+
+type ResolvedPlanCode = "free" | "seller_pro" | "business_premium";
+type ResolvedPlanStatus = "active" | "pending" | "trial" | "past_due" | "canceled" | "expired";
+type BusinessAiUsageKind = "description" | "image";
+type BusinessAiUsageSummary = {
+  monthKey: string;
+  monthLabel: string;
+  descriptionCount: number;
+  descriptionLimit: number;
+  descriptionRemaining: number;
+  imageCount: number;
+  imageLimit: number;
+  imageRemaining: number;
+};
+
+function normalizeValue(value: unknown): string {
+  return String(value || "").trim().toLowerCase();
+}
+
+function normalizePlanStatus(value: unknown): ResolvedPlanStatus | null {
+  const normalized = normalizeValue(value);
+
+  switch (normalized) {
+    case "active":
+    case "pending":
+    case "trial":
+    case "past_due":
+    case "canceled":
+    case "cancelled":
+    case "expired":
+      return normalized === "cancelled" ? "canceled" : normalized;
+    default:
+      return null;
+  }
+}
+
+function resolveUserPlanCode(userData: Record<string, unknown> | undefined): ResolvedPlanCode {
+  const explicitCode = normalizeValue(userData?.planCode);
+
+  if (explicitCode === "seller_pro" || explicitCode === "business_premium" || explicitCode === "free") {
+    return explicitCode;
+  }
+
+  if (normalizeValue(userData?.sellerTier) === "pro") {
+    return "seller_pro";
+  }
+
+  const accountType = normalizeValue(userData?.accountType);
+  const businessTier = normalizeValue(userData?.businessTier);
+  const subscriptionPlan = normalizeValue(userData?.subscriptionPlan);
+  const premiumStatus = normalizePlanStatus(userData?.premiumStatus);
+
+  if (
+    accountType === "business" &&
+    (
+      businessTier === "premium" ||
+      subscriptionPlan === "premium" ||
+      subscriptionPlan === "business_premium" ||
+      userData?.isPremium === true ||
+      premiumStatus === "active" ||
+      premiumStatus === "trial" ||
+      premiumStatus === "past_due"
+    )
+  ) {
+    return "business_premium";
+  }
+
+  if (subscriptionPlan === "seller_pro") {
+    return "seller_pro";
+  }
+
+  return "free";
+}
+
+function resolveUserPlanStatus(userData: Record<string, unknown> | undefined): ResolvedPlanStatus {
+  return (
+    normalizePlanStatus(userData?.planStatus) ||
+    normalizePlanStatus(userData?.sellerStatus) ||
+    normalizePlanStatus(userData?.premiumStatus) ||
+    normalizePlanStatus(userData?.subscriptionStatus) ||
+    "active"
+  );
+}
+
+function hasActiveBusinessPremium(userData: Record<string, unknown> | undefined): boolean {
+  return resolveUserPlanCode(userData) === "business_premium" &&
+    ["active", "trial"].includes(resolveUserPlanStatus(userData));
+}
+
+function hasServiceProviderProfileSignal(userData: Record<string, unknown> | undefined): boolean {
+  return userData?.hasServiceListing === true ||
+    userData?.hasServices === true ||
+    normalizeValue(userData?.providerType) === "service" ||
+    normalizeValue(userData?.primaryProfileType) === "service" ||
+    normalizeValue(userData?.listingType) === "services" ||
+    Boolean(normalizeValue(userData?.primaryServiceCategory));
+}
+
+function hasPremiumServiceProviderAccess(userData: Record<string, unknown> | undefined): boolean {
+  return hasSellerHubAccess(userData) && hasServiceProviderProfileSignal(userData);
+}
+
+function hasPremiumProfileHubAccess(userData: Record<string, unknown> | undefined): boolean {
+  return isAdminUser(userData) || hasActiveBusinessPremium(userData) || hasPremiumServiceProviderAccess(userData);
+}
+
+function hasSellerHubAccess(userData: Record<string, unknown> | undefined): boolean {
+  const planCode = resolveUserPlanCode(userData);
+  const planStatus = resolveUserPlanStatus(userData);
+  return planCode !== "free" && (planStatus === "active" || planStatus === "trial");
+}
+
+function isAdminUser(userData: Record<string, unknown> | undefined): boolean {
+  return normalizeValue(userData?.role) === "admin";
+}
+
+function normalizeSingleLine(value: unknown): string {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function countWords(value: string): number {
+  return normalizeSingleLine(value)
+    .split(" ")
+    .filter(Boolean)
+    .length;
+}
+
+async function detectServiceProviderProfile(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+  userData: Record<string, unknown> | undefined,
+): Promise<boolean> {
+  if (hasServiceProviderProfileSignal(userData)) {
+    return true;
+  }
+
+  try {
+    const servicesSnap = await db.collection("services").where("userId", "==", userId).limit(1).get();
+    return !servicesSnap.empty;
+  } catch (error) {
+    logger.warn("Failed to detect service provider profile", {
+      userId,
+      error,
+    });
+    return false;
+  }
+}
+
+async function assertBusinessAiAssistantAccess(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+  userData: Record<string, unknown> | undefined,
+): Promise<void> {
+  if (isAdminUser(userData) || hasActiveBusinessPremium(userData)) {
+    return;
+  }
+
+  if (hasSellerHubAccess(userData) && await detectServiceProviderProfile(db, userId, userData)) {
+    return;
+  }
+
+  if (!hasPremiumProfileHubAccess(userData)) {
+    throw new HttpsError(
+      "permission-denied",
+      "An active premium business or premium service-provider plan is required to use the AI Business Assistant.",
+    );
+  }
+}
+
+function getBusinessAiUsagePeriod(date: Date = new Date()): { monthKey: string; monthLabel: string } {
+  const keyParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: BUSINESS_AI_USAGE_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(date);
+  const year = keyParts.find((part) => part.type === "year")?.value || "0000";
+  const month = keyParts.find((part) => part.type === "month")?.value || "01";
+
+  return {
+    monthKey: `${year}-${month}`,
+    monthLabel: new Intl.DateTimeFormat("en-US", {
+      timeZone: BUSINESS_AI_USAGE_TIME_ZONE,
+      month: "long",
+      year: "numeric",
+    }).format(date),
+  };
+}
+
+function normalizeUsageCount(value: unknown): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return 0;
+  }
+
+  return Math.floor(parsed);
+}
+
+function buildBusinessAiUsageSummary(
+  monthKey: string,
+  monthLabel: string,
+  descriptionCount: number,
+  imageCount: number,
+): BusinessAiUsageSummary {
+  return {
+    monthKey,
+    monthLabel,
+    descriptionCount,
+    descriptionLimit: BUSINESS_AI_DESCRIPTION_MONTHLY_LIMIT,
+    descriptionRemaining: Math.max(0, BUSINESS_AI_DESCRIPTION_MONTHLY_LIMIT - descriptionCount),
+    imageCount,
+    imageLimit: BUSINESS_AI_IMAGE_MONTHLY_LIMIT,
+    imageRemaining: Math.max(0, BUSINESS_AI_IMAGE_MONTHLY_LIMIT - imageCount),
+  };
+}
+
+async function getBusinessAiUsageSummaryForUser(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+): Promise<BusinessAiUsageSummary> {
+  const { monthKey, monthLabel } = getBusinessAiUsagePeriod();
+  const usageDoc = await db.collection(BUSINESS_AI_USAGE_COLLECTION).doc(`${userId}_${monthKey}`).get();
+  const usageData = usageDoc.exists ? (usageDoc.data() || {}) : {};
+
+  return buildBusinessAiUsageSummary(
+    monthKey,
+    monthLabel,
+    normalizeUsageCount(usageData.descriptionCount),
+    normalizeUsageCount(usageData.imageCount),
+  );
+}
+
+async function reserveBusinessAiUsage(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+  kind: BusinessAiUsageKind,
+): Promise<BusinessAiUsageSummary> {
+  const { monthKey, monthLabel } = getBusinessAiUsagePeriod();
+  const usageRef = db.collection(BUSINESS_AI_USAGE_COLLECTION).doc(`${userId}_${monthKey}`);
+
+  return db.runTransaction(async (transaction) => {
+    const usageSnap = await transaction.get(usageRef);
+    const usageData = usageSnap.exists ? (usageSnap.data() || {}) : {};
+    const descriptionCount = normalizeUsageCount(usageData.descriptionCount);
+    const imageCount = normalizeUsageCount(usageData.imageCount);
+
+    if (kind === "description" && descriptionCount >= BUSINESS_AI_DESCRIPTION_MONTHLY_LIMIT) {
+      throw new HttpsError(
+        "resource-exhausted",
+        `You've reached your ${BUSINESS_AI_DESCRIPTION_MONTHLY_LIMIT} business profile generations for ${monthLabel}.`,
+      );
+    }
+
+    if (kind === "image" && imageCount >= BUSINESS_AI_IMAGE_MONTHLY_LIMIT) {
+      throw new HttpsError(
+        "resource-exhausted",
+        `You've reached your ${BUSINESS_AI_IMAGE_MONTHLY_LIMIT} business image generations for ${monthLabel}.`,
+      );
+    }
+
+    const nextDescriptionCount = kind === "description" ? descriptionCount + 1 : descriptionCount;
+    const nextImageCount = kind === "image" ? imageCount + 1 : imageCount;
+    const nextData: Record<string, unknown> = {
+      uid: userId,
+      monthKey,
+      descriptionCount: nextDescriptionCount,
+      imageCount: nextImageCount,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    if (!usageSnap.exists) {
+      nextData.createdAt = FieldValue.serverTimestamp();
+    }
+
+    transaction.set(usageRef, nextData, { merge: true });
+
+    return buildBusinessAiUsageSummary(monthKey, monthLabel, nextDescriptionCount, nextImageCount);
+  });
+}
+
+async function rollbackReservedBusinessAiUsage(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+  kind: BusinessAiUsageKind,
+  monthKey: string,
+): Promise<void> {
+  const usageRef = db.collection(BUSINESS_AI_USAGE_COLLECTION).doc(`${userId}_${monthKey}`);
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const usageSnap = await transaction.get(usageRef);
+      if (!usageSnap.exists) {
+        return;
+      }
+
+      const usageData = usageSnap.data() || {};
+      const descriptionCount = normalizeUsageCount(usageData.descriptionCount);
+      const imageCount = normalizeUsageCount(usageData.imageCount);
+
+      transaction.set(usageRef, {
+        descriptionCount: kind === "description" ? Math.max(0, descriptionCount - 1) : descriptionCount,
+        imageCount: kind === "image" ? Math.max(0, imageCount - 1) : imageCount,
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+    });
+  } catch (rollbackError) {
+    logger.error("Failed to roll back reserved AI usage", {
+      userId,
+      kind,
+      monthKey,
+      rollbackError,
+    });
+  }
+}
+
+function truncateByWords(value: string, maxWords: number): string {
+  const words = normalizeSingleLine(value).split(" ").filter(Boolean);
+  if (words.length <= maxWords) {
+    return words.join(" ");
+  }
+
+  return words.slice(0, maxWords).join(" ");
+}
+
+function truncateByChars(value: string, maxChars: number): string {
+  const normalized = normalizeSingleLine(value);
+  if (normalized.length <= maxChars) {
+    return normalized;
+  }
+
+  return normalized.slice(0, Math.max(0, maxChars - 1)).trimEnd() + "…";
+}
+
+function buildFallbackBullets(productName: string, details: string): string[] {
+  const detailText = normalizeSingleLine(details);
+  const fallback = [
+    `Clear local listing for ${productName}`,
+    detailText ? truncateByWords(detailText, 14) : `Highlights key condition and value fast`,
+    `Helps buyers understand the item quickly`,
+  ];
+
+  return fallback.map((bullet) => truncateByWords(bullet, 14));
+}
+
+function normalizeGeneratedListingOutput(
+  productName: string,
+  details: string,
+  payload: unknown,
+): { title: string; bullets: string[]; description: string } {
+  const data = (payload && typeof payload === "object") ? payload as Record<string, unknown> : {};
+  const safeProductName = truncateByChars(productName || "Local marketplace listing", 60);
+
+  const title = truncateByChars(
+    normalizeSingleLine(data.title) || safeProductName,
+    60,
+  );
+
+  const bulletItems = Array.isArray(data.bullets) ? data.bullets : [];
+  const bullets = bulletItems
+    .map((bullet) => truncateByWords(String(bullet || ""), 14))
+    .filter(Boolean)
+    .slice(0, 3);
+
+  while (bullets.length < 3) {
+    bullets.push(buildFallbackBullets(productName, details)[bullets.length]);
+  }
+
+  const description = normalizeSingleLine(data.description) ||
+    `${safeProductName} with a cleaner title and clearer buyer-facing details for your listing. Review and tweak the wording before posting it live.`;
+
+  return {
+    title,
+    bullets,
+    description,
+  };
+}
+
+function normalizeGeneratedBusinessDescriptionOutput(
+  businessName: string,
+  payload: unknown,
+): { description: string } {
+  const data = (payload && typeof payload === "object") ? payload as Record<string, unknown> : {};
+  const safeBusinessName = truncateByChars(businessName || "Local business", 80);
+  const description = truncateByWords(
+    normalizeSingleLine(data.description) ||
+      `${safeBusinessName} is a local business focused on serving customers with dependable service and a clear sense of what it offers.`,
+    95,
+  );
+
+  return {
+    description,
+  };
+}
+
+function normalizeReferenceImageSource(
+  urlValue: unknown,
+  legacyValue: unknown,
+): { imageUrl: string; source: "url" | "data_url" } | null {
+  const referenceImageUrl = String(urlValue || "").trim();
+
+  if (referenceImageUrl) {
+    if (!/^https:\/\/.+/i.test(referenceImageUrl)) {
+      throw new HttpsError("invalid-argument", "referenceImageUrl must be a valid https URL.");
+    }
+
+    if (referenceImageUrl.length > 4096) {
+      throw new HttpsError("invalid-argument", "referenceImageUrl is too long.");
+    }
+
+    return {
+      imageUrl: referenceImageUrl,
+      source: "url",
+    };
+  }
+
+  if (!legacyValue || typeof legacyValue !== "object") {
+    return null;
+  }
+
+  const imageData = legacyValue as Record<string, unknown>;
+  const dataUrl = String(imageData.dataUrl || "").trim();
+  const mimeType = normalizeSingleLine(imageData.mimeType || "image/jpeg").toLowerCase();
+
+  if (!dataUrl) {
+    return null;
+  }
+
+  if (!/^data:image\/(png|jpe?g|webp|gif);base64,[a-z0-9+/=]+$/i.test(dataUrl)) {
+    throw new HttpsError("invalid-argument", "referenceImage must be a valid image data URL.");
+  }
+
+  if (!["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"].includes(mimeType)) {
+    throw new HttpsError("invalid-argument", "referenceImage type is not supported.");
+  }
+
+  if (dataUrl.length > 4_800_000) {
+    throw new HttpsError("invalid-argument", "referenceImage is too large.");
+  }
+
+  return {
+    imageUrl: dataUrl,
+    source: "data_url",
+  };
+}
 
 function chunkArray<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -702,13 +1656,33 @@ export const createPremiumUpgradeCheckoutSession = onCall(
     const baseUrl = process.env.FUNCTIONS_EMULATOR === "true"
       ? "http://localhost:8081"
       : "https://locallist.biz";
+    const requestedSuccessPath = typeof request.data?.successPath === "string"
+      ? request.data.successPath.trim()
+      : "";
+    const requestedCancelPath = typeof request.data?.cancelPath === "string"
+      ? request.data.cancelPath.trim()
+      : "";
+    const normalizeWebCheckoutPath = (value: string, fallback: string): string => {
+      if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("://")) {
+        return fallback;
+      }
+      return value;
+    };
+    const successPath = normalizeWebCheckoutPath(
+      requestedSuccessPath,
+      "/premium-upgrade.html?checkout=premium",
+    );
+    const cancelPath = normalizeWebCheckoutPath(
+      requestedCancelPath,
+      "/premium-upgrade.html?premiumCanceled=1",
+    );
 
     const successUrl = isMobileApp
       ? "myapp://auth-action?checkout=premium"
-      : `${baseUrl}/auth-action?checkout=premium`;
+      : `${baseUrl}${successPath}`;
     const cancelUrl = isMobileApp
       ? "myapp://auth-action?premiumCanceled=1"
-      : `${baseUrl}/auth-action?premiumCanceled=1`;
+      : `${baseUrl}${cancelPath}`;
 
     const unitAmount = 1000;
     let selectedPriceId = premiumPriceId;
@@ -999,9 +1973,13 @@ export const finalizePremiumSubscription = onCall(
     // Activate premium on user doc
     await db.collection("users").doc(userId).set({
       accountType: "business",
+      planCode: "business_premium",
+      planStatus: "active",
       businessTier: "premium",
       isPremium: true,
       premiumStatus: "active",
+      subscriptionPlan: "premium",
+      subscriptionStatus: "active",
       premiumActivatedAt: new Date().toISOString(),
       premiumUpdatedAt: new Date().toISOString(),
       upgradedAt: new Date().toISOString(),
@@ -1364,9 +2342,13 @@ export const handleStripeCheckout = onRequest(
 
           await db.collection("users").doc(String(targetId)).set({
             accountType: "business",
+            planCode: "business_premium",
+            planStatus: "active",
             businessTier: "premium",
             isPremium: true,
             premiumStatus: "active",
+            subscriptionPlan: "premium",
+            subscriptionStatus: "active",
             premiumActivatedAt: new Date().toISOString(),
             premiumUpdatedAt: new Date().toISOString(),
             upgradedAt: new Date().toISOString(),
@@ -1460,8 +2442,13 @@ export const handleStripeCheckout = onRequest(
 
         if (firebaseUserId) {
           await db.collection("users").doc(firebaseUserId).set({
+            planCode: "free",
+            planStatus: "active",
+            businessTier: "free",
             isPremium: false,
             premiumStatus: "canceled",
+            subscriptionPlan: "free",
+            subscriptionStatus: "canceled",
             premiumCanceledAt: new Date().toISOString(),
             premiumUpdatedAt: new Date().toISOString(),
           }, { merge: true });
@@ -1487,7 +2474,11 @@ export const handleStripeCheckout = onRequest(
           if (!usersSnap.empty) {
             const userDoc = usersSnap.docs[0];
             await userDoc.ref.set({
+              planCode: "business_premium",
+              planStatus: "past_due",
               premiumStatus: "past_due",
+              subscriptionPlan: "premium",
+              subscriptionStatus: "past_due",
               premiumUpdatedAt: new Date().toISOString(),
             }, { merge: true });
 
@@ -1659,7 +2650,7 @@ export const autoApproveService = onDocumentCreated(
 
       // Auto-approve the service
       const now = new Date();
-      const isPremium = userData.businessTier === "premium" && userData.isPremium === true;
+      const isPremium = hasActiveBusinessPremium(userData as Record<string, unknown> | undefined);
 
       const updateFields: Record<string, unknown> = {
         isApproved: true,

@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Business Assistant - Local List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #14213d;
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.18), transparent 26%),
+        linear-gradient(180deg, #fffdf7 0%, #f6f7fb 55%, #eef2f7 100%);
+    }
+
+    .page-shell {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .access-banner {
+      margin: 24px 0 0;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid #facc15;
+      background: #fff8db;
+      color: #7c5a03;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      line-height: 1.5;
+    }
+
+    .top-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #475569;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(18, 52, 86, 0.96) 0%, rgba(31, 41, 55, 0.96) 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -90px auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.35), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
+      gap: 24px;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 4vw, 50px);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 640px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 22px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-card-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 14px;
+    }
+
+    .hero-card-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-card-item {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hero-card-item span {
+      width: 10px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: #fbbf24;
+      box-shadow: 0 0 0 5px rgba(251, 191, 36, 0.14);
+    }
+
+    .section {
+      margin-top: 24px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 28px;
+      color: #0f172a;
+    }
+
+    .section-header p {
+      margin: 8px 0 0;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .workspace-shell {
+      margin-top: 18px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 26px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+
+    .workspace-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .workspace-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .ghost-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 0;
+    }
+
+    .workspace-panel {
+      padding: 24px;
+    }
+
+    .workspace-panel + .workspace-panel {
+      border-left: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .workspace-label {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .workspace-panel h3 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      color: #0f172a;
+    }
+
+    .workspace-panel p {
+      margin: 0 0 20px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .assistant-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .form-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #334155;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .form-textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+    }
+
+    .helper-copy {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .assistant-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .copy-button {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, color 0.14s ease;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      min-height: 50px;
+      padding: 0 18px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #fff;
+      box-shadow: 0 14px 24px rgba(234, 88, 12, 0.22);
+    }
+
+    .btn-secondary,
+    .copy-button {
+      background: #fff;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+
+    .copy-button {
+      min-height: 40px;
+      padding: 0 14px;
+      font-size: 13px;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .copy-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled,
+    .btn-secondary:disabled,
+    .copy-button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status-note {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 15px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status-note.active {
+      display: block;
+    }
+
+    .status-note.info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .status-note.success {
+      background: #ecfdf5;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .status-note.error {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .result-empty,
+    .result-card {
+      border: 1px dashed #dbe3ee;
+      border-radius: 20px;
+      padding: 20px;
+      background: #f8fbff;
+    }
+
+    .result-card {
+      display: none;
+      border-style: solid;
+      background: #ffffff;
+    }
+
+    .result-card.active {
+      display: block;
+    }
+
+    .result-empty.hidden {
+      display: none !important;
+    }
+
+    .placeholder-line {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(226, 232, 240, 0.95) 0%, rgba(241, 245, 249, 1) 100%);
+      margin-bottom: 10px;
+    }
+
+    .placeholder-line.long { width: 100%; }
+    .placeholder-line.medium { width: 72%; }
+    .placeholder-line.short { width: 48%; }
+
+    .result-block + .result-block {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .result-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .result-block-header h4 {
+      margin: 0;
+      font-size: 18px;
+      color: #0f172a;
+    }
+
+    .result-output {
+      white-space: pre-wrap;
+      color: #334155;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .image-preview-shell {
+      border: 1px solid #dbe3ee;
+      border-radius: 18px;
+      background:
+        linear-gradient(45deg, #f8fafc 25%, transparent 25%),
+        linear-gradient(-45deg, #f8fafc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f8fafc 75%),
+        linear-gradient(-45deg, transparent 75%, #f8fafc 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+      overflow: hidden;
+    }
+
+    .image-preview {
+      width: 100%;
+      display: block;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.92));
+    }
+
+    .image-preview.cover {
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+    }
+
+    .result-meta {
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .feature-kicker {
+      color: #d97706;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .feature-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #0f172a;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid,
+      .workspace-grid,
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace-panel + .workspace-panel {
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        padding: 18px 14px 36px;
+      }
+
+      .hero,
+      .workspace-panel,
+      .feature-card {
+        padding: 20px;
+      }
+
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .assistant-actions,
+      .result-block-header,
+      .workspace-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="page-shell">
+    <section id="assistantGate" class="access-banner" aria-live="polite">
+      <strong>Business access required</strong>
+      <span id="assistantGateMessage">Sign in with a business account to open the AI Business Assistant.</span>
+    </section>
+
+    <div id="assistantContent" class="hidden">
+      <a class="top-link" href="business-hub.html"><span aria-hidden="true">&lt;-</span> Back to Business Hub</a>
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">Business Hub Tool</div>
+            <h1>AI Business Assistant</h1>
+            <p>
+              Build a stronger business description from your business name, your business type, and a few optional notes.
+              This is the workspace for sharpening your profile copy without crowding the Business Hub itself.
+            </p>
+          </div>
+
+          <aside class="hero-card" aria-label="What this page helps with">
+            <div class="hero-card-title">What this first version does</div>
+            <div class="hero-card-list">
+              <div class="hero-card-item"><span></span><div>Turns a simple business setup into a clearer description for your profile.</div></div>
+              <div class="hero-card-item"><span></span><div>Keeps the tone confident, local, and customer-friendly.</div></div>
+              <div class="hero-card-item"><span></span><div>Gives you a strong draft you can copy into your business profile and edit from there.</div></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Business Description Generator</h2>
+          <p>
+            Start with your business name and where your business appears on Local List. Add a few notes if you want the
+            assistant to make the description more specific.
+          </p>
+        </div>
+
+        <div class="workspace-shell">
+          <div class="workspace-toolbar">
+            <div class="workspace-title">AI Business Description Generator</div>
+            <div class="ghost-chip">Description Draft</div>
+          </div>
+
+          <div class="workspace-grid">
+            <div class="workspace-panel">
+              <div class="workspace-label">Business Input</div>
+              <h3>Tell the assistant about your business</h3>
+              <p>
+                The first version stays focused. It generates one strong business description you can use in your profile
+                and refine from there.
+              </p>
+
+              <form id="businessDescriptionForm" class="assistant-form">
+                <div class="input-grid">
+                  <label class="form-field">
+                    <span class="form-label">Name of business</span>
+                    <input id="businessName" class="form-input" type="text" maxlength="120" placeholder="Example: Hope Grows Coffee Co." required>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="form-label">Business type</span>
+                    <select id="businessType" class="form-select" required>
+                      <option value="">Select where your business appears...</option>
+                      <option value="shopLocal">Business Local Only - Retail &amp; physical products</option>
+                      <option value="services">Services Only - Professional services</option>
+                      <option value="both">Both - Business Local &amp; Services</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="form-field full">
+                  <span class="form-label">What should the description mention?</span>
+                  <textarea id="businessDetails" class="form-textarea" maxlength="1200" placeholder="Optional. Add what you offer, who you help, your specialties, what makes the business different, or the vibe you want it to have."></textarea>
+                  <span class="helper-copy">Optional notes help the description feel less generic and more like your real business.</span>
+                </label>
+
+                <div class="assistant-actions">
+                  <button id="generateButton" class="btn-primary" type="submit">Generate Business Description</button>
+                  <button id="resetButton" class="btn-secondary" type="button">Clear</button>
+                </div>
+              </form>
+
+              <div id="descriptionUsageNote" class="helper-copy">Premium business owners can generate up to 5 business profile descriptions per month.</div>
+
+              <div id="generatorStatus" class="status-note info"></div>
+            </div>
+
+            <div class="workspace-panel">
+              <div class="workspace-label">Assistant Output</div>
+              <h3>Your business description draft</h3>
+              <p>
+                Review the result, make sure it sounds like your business, and copy it into your profile when you are ready.
+              </p>
+
+              <div id="resultEmpty" class="result-empty">
+                <div class="placeholder-line medium"></div>
+                <div class="placeholder-line long"></div>
+                <div class="placeholder-line long"></div>
+                <div class="placeholder-line short"></div>
+                <div class="helper-copy">No draft yet. Generate a description and it will appear here.</div>
+              </div>
+
+              <div id="resultCard" class="result-card">
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4>Description</h4>
+                    <button id="copyDescriptionButton" class="copy-button" type="button">Copy Description</button>
+                  </div>
+                  <div id="resultDescription" class="result-output"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Business Image Generator</h2>
+          <p>
+            Generate a simple logo concept or a wide cover image using your business name, type, style, and color theme.
+          </p>
+        </div>
+
+        <div class="workspace-shell">
+          <div class="workspace-toolbar">
+            <div class="workspace-title">AI Business Image Generator</div>
+            <div class="ghost-chip">Logo or Cover</div>
+          </div>
+
+          <div class="workspace-grid">
+            <div class="workspace-panel">
+              <div class="workspace-label">Visual Input</div>
+              <h3>Set the look for your business image</h3>
+              <p>
+                Choose a category, add a short description, and set a style and color direction for your brand image.
+              </p>
+
+              <form id="businessImageForm" class="assistant-form">
+                <div class="input-grid">
+                  <label class="form-field">
+                    <span class="form-label">Business Name</span>
+                    <input id="imageBusinessName" class="form-input" type="text" maxlength="120" placeholder="Example: Hope Grows Coffee Co." required>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="form-label">Business Category</span>
+                    <input id="imageBusinessCategory" class="form-input" type="text" maxlength="80" placeholder="Example: Coffee Shop, Landscaping, Boutique" required>
+                  </label>
+                </div>
+
+                <label class="form-field full">
+                  <span class="form-label">Short Description</span>
+                  <textarea id="imageShortDescription" class="form-textarea" maxlength="600" placeholder="Optional. Keep it under 100 words. Mention what the business does, what makes it special, or the kind of feeling the image should capture."></textarea>
+                  <span class="helper-copy">Optional, but helpful. Keep this under 100 words.</span>
+                </label>
+
+                <div class="input-grid">
+                  <label class="form-field">
+                    <span class="form-label">Style</span>
+                    <select id="imageStyle" class="form-select">
+                      <option value="clean modern">Clean &amp; Modern</option>
+                      <option value="bold professional">Bold &amp; Professional</option>
+                      <option value="warm handmade">Warm &amp; Handmade</option>
+                      <option value="dark premium">Dark &amp; Premium</option>
+                    </select>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="form-label">Color Theme</span>
+                    <select id="imageColor" class="form-select">
+                      <option value="gold and black">Gold &amp; Black</option>
+                      <option value="blue and white">Blue &amp; White</option>
+                      <option value="green and natural">Green &amp; Natural</option>
+                      <option value="orange and black">Orange &amp; Black</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="form-field full">
+                  <span class="form-label">Text Option</span>
+                  <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:16px;background:#fff;color:#334155;">
+                    <input id="imageNoText" type="checkbox">
+                    <span>Do not include text in the generated logo or cover photo</span>
+                  </label>
+                  <span class="helper-copy">Use this when you want a symbol-only logo or a cover image without any words or lettering.</span>
+                </label>
+
+                <div class="assistant-actions">
+                  <button id="generateLogoButton" class="btn-primary" type="submit" data-image-kind="logo">Generate Logo</button>
+                  <button id="generateCoverButton" class="btn-secondary" type="submit" data-image-kind="cover">Generate Cover Photo</button>
+                  <button id="resetImageButton" class="btn-secondary" type="button">Clear</button>
+                </div>
+              </form>
+
+              <div id="imageUsageNote" class="helper-copy">Premium business owners can generate up to 5 logos or cover photos per month.</div>
+
+              <div id="imageGeneratorStatus" class="status-note info"></div>
+            </div>
+
+            <div class="workspace-panel">
+              <div class="workspace-label">Image Output</div>
+              <h3>Your generated visual</h3>
+              <p>
+                Review the concept, then download the PNG if you want to try it in your profile, site, or social header.
+              </p>
+
+              <div id="imageResultEmpty" class="result-empty">
+                <div class="placeholder-line medium"></div>
+                <div class="placeholder-line long"></div>
+                <div class="placeholder-line long"></div>
+                <div class="placeholder-line short"></div>
+                <div class="helper-copy">No image yet. Generate a logo or cover photo and it will appear here.</div>
+              </div>
+
+              <div id="imageResultCard" class="result-card">
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4 id="imageResultTitle">Generated Image</h4>
+                    <a id="downloadImageButton" class="copy-button hidden" href="#" download="business-brand-image.png">Download PNG</a>
+                  </div>
+                  <div class="image-preview-shell">
+                    <img id="imageResultPreview" class="image-preview" alt="Generated business image preview">
+                  </div>
+                  <div id="imageResultMeta" class="result-meta"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      </div>
+  </div>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-functions-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const functions = window.firebase && typeof window.firebase.functions === 'function'
+      ? window.firebase.functions()
+      : null;
+
+    let currentGeneratedDraft = null;
+    let currentGeneratedImage = null;
+    let currentAiUsageSummary = null;
+    let isGeneratingDescription = false;
+    let isGeneratingImage = false;
+
+    function setStatus(type, message) {
+      const status = document.getElementById('generatorStatus');
+      if (!status) return;
+
+      status.className = `status-note ${type} active`;
+      status.textContent = message;
+    }
+
+    function clearStatus() {
+      const status = document.getElementById('generatorStatus');
+      if (!status) return;
+
+      status.className = 'status-note info';
+      status.textContent = '';
+    }
+
+    function setImageStatus(type, message) {
+      const status = document.getElementById('imageGeneratorStatus');
+      if (!status) return;
+
+      status.className = `status-note ${type} active`;
+      status.textContent = message;
+    }
+
+    function clearImageStatus() {
+      const status = document.getElementById('imageGeneratorStatus');
+      if (!status) return;
+
+      status.className = 'status-note info';
+      status.textContent = '';
+    }
+
+    function applyAiUsageSummary(usage) {
+      currentAiUsageSummary = usage || currentAiUsageSummary;
+
+      const descriptionUsageNote = document.getElementById('descriptionUsageNote');
+      const imageUsageNote = document.getElementById('imageUsageNote');
+      const generateButton = document.getElementById('generateButton');
+      const generateLogoButton = document.getElementById('generateLogoButton');
+      const generateCoverButton = document.getElementById('generateCoverButton');
+
+      const descriptionLimit = Number(currentAiUsageSummary?.descriptionLimit || 5);
+      const descriptionRemaining = Number(currentAiUsageSummary?.descriptionRemaining ?? descriptionLimit);
+      const imageLimit = Number(currentAiUsageSummary?.imageLimit || 5);
+      const imageRemaining = Number(currentAiUsageSummary?.imageRemaining ?? imageLimit);
+      const monthLabel = String(currentAiUsageSummary?.monthLabel || 'this month');
+
+      if (descriptionUsageNote) {
+        descriptionUsageNote.textContent = descriptionRemaining > 0
+          ? `${monthLabel}: ${descriptionRemaining} of ${descriptionLimit} business profile generations left.`
+          : `${monthLabel}: You have reached your ${descriptionLimit} business profile generations for this month.`;
+      }
+
+      if (imageUsageNote) {
+        imageUsageNote.textContent = imageRemaining > 0
+          ? `${monthLabel}: ${imageRemaining} of ${imageLimit} business image generations left.`
+          : `${monthLabel}: You have reached your ${imageLimit} business image generations for this month.`;
+      }
+
+      if (generateButton) {
+        generateButton.disabled = isGeneratingDescription || descriptionRemaining <= 0;
+      }
+
+      if (generateLogoButton) {
+        generateLogoButton.disabled = isGeneratingImage || imageRemaining <= 0;
+      }
+
+      if (generateCoverButton) {
+        generateCoverButton.disabled = isGeneratingImage || imageRemaining <= 0;
+      }
+    }
+
+    async function loadAiUsageSummary() {
+      if (!functions) {
+        applyAiUsageSummary(null);
+        return;
+      }
+
+      try {
+        const callable = functions.httpsCallable('getBusinessAiUsageSummary');
+        const response = await callable({});
+        const usage = response && response.data ? response.data.usage : null;
+        applyAiUsageSummary(usage);
+      } catch (error) {
+        console.error('Failed to load AI usage summary:', error);
+        applyAiUsageSummary(null);
+      }
+    }
+
+    function resetGeneratorUi() {
+      const form = document.getElementById('businessDescriptionForm');
+      if (form) form.reset();
+
+      currentGeneratedDraft = null;
+      document.getElementById('resultDescription').textContent = '';
+      document.getElementById('resultCard').classList.remove('active');
+      document.getElementById('resultEmpty').classList.remove('hidden');
+      clearStatus();
+      hydrateBusinessDefaults();
+    }
+
+    function resetImageGeneratorUi() {
+      const form = document.getElementById('businessImageForm');
+      if (form) form.reset();
+
+      currentGeneratedImage = null;
+
+      const preview = document.getElementById('imageResultPreview');
+      const card = document.getElementById('imageResultCard');
+      const empty = document.getElementById('imageResultEmpty');
+      const downloadButton = document.getElementById('downloadImageButton');
+      const meta = document.getElementById('imageResultMeta');
+      const title = document.getElementById('imageResultTitle');
+
+      if (preview) {
+        preview.removeAttribute('src');
+        preview.className = 'image-preview';
+      }
+
+      if (card) card.classList.remove('active');
+      if (empty) empty.classList.remove('hidden');
+      if (downloadButton) {
+        downloadButton.classList.add('hidden');
+        downloadButton.removeAttribute('href');
+      }
+      if (meta) meta.textContent = '';
+      if (title) title.textContent = 'Generated Image';
+
+      clearImageStatus();
+      hydrateBusinessDefaults();
+    }
+
+    function renderDraft(draft) {
+      const descriptionNode = document.getElementById('resultDescription');
+      const resultCard = document.getElementById('resultCard');
+      const resultEmpty = document.getElementById('resultEmpty');
+
+      if (!descriptionNode || !resultCard || !resultEmpty) {
+        return;
+      }
+
+      descriptionNode.textContent = draft && draft.description ? draft.description : '';
+      resultCard.classList.add('active');
+      resultEmpty.classList.add('hidden');
+    }
+
+    function countWords(value) {
+      return String(value || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .length;
+    }
+
+    function titleCaseWords(value) {
+      return String(value || '')
+        .split(' ')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+
+    function truncateToWordLimit(value, maxWords) {
+      const words = String(value || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      if (words.length <= maxWords) {
+        return words.join(' ');
+      }
+
+      return words.slice(0, maxWords).join(' ');
+    }
+
+    function renderBusinessImage(image) {
+      const preview = document.getElementById('imageResultPreview');
+      const resultCard = document.getElementById('imageResultCard');
+      const resultEmpty = document.getElementById('imageResultEmpty');
+      const downloadButton = document.getElementById('downloadImageButton');
+      const meta = document.getElementById('imageResultMeta');
+      const title = document.getElementById('imageResultTitle');
+
+      if (!preview || !resultCard || !resultEmpty || !downloadButton || !meta || !title) {
+        return;
+      }
+
+      const isCover = String(image?.kind || '').toLowerCase() === 'cover';
+      const safeBusinessName = String(image?.businessName || 'business').trim() || 'business';
+      const slug = safeBusinessName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'business';
+
+      preview.src = image.imageDataUrl || '';
+      preview.alt = image.altText || `${isCover ? 'Cover photo' : 'Logo'} concept for ${safeBusinessName}`;
+      preview.className = isCover ? 'image-preview cover' : 'image-preview';
+
+      title.textContent = isCover ? 'Cover Photo Concept' : 'Logo Concept';
+      meta.textContent = [
+        safeBusinessName,
+        image.businessCategory || '',
+        titleCaseWords(image.imageStyle),
+        titleCaseWords(image.imageColor),
+      ].filter(Boolean).join(' | ');
+
+      downloadButton.href = image.imageDataUrl || '#';
+      downloadButton.download = `${slug}-${isCover ? 'cover-photo' : 'logo'}.png`;
+      downloadButton.classList.remove('hidden');
+
+      resultCard.classList.add('active');
+      resultEmpty.classList.add('hidden');
+    }
+
+    async function copyDescription(button) {
+      const text = currentGeneratedDraft && currentGeneratedDraft.description
+        ? String(currentGeneratedDraft.description).trim()
+        : '';
+
+      if (!text) {
+        setStatus('error', 'Generate a business description before copying it.');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = button ? button.textContent : '';
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Copied';
+        }
+        setStatus('success', 'Description copied to your clipboard.');
+
+        window.setTimeout(() => {
+          if (button) {
+            button.disabled = false;
+            button.textContent = original;
+          }
+        }, 1200);
+      } catch (error) {
+        console.error('Copy failed:', error);
+        setStatus('error', 'Copy failed on this browser. Try selecting the text manually.');
+      }
+    }
+
+    function resolveImageBusinessFieldValue(primaryId, secondaryId) {
+      const primary = String(document.getElementById(primaryId)?.value || '').trim();
+      if (primary) return primary;
+
+      const secondary = secondaryId
+        ? String(document.getElementById(secondaryId)?.value || '').trim()
+        : '';
+      if (secondary) {
+        const primaryNode = document.getElementById(primaryId);
+        if (primaryNode) primaryNode.value = secondary;
+      }
+
+      return secondary;
+    }
+
+    async function generateBusinessDescription(event) {
+      event.preventDefault();
+
+      if (!functions) {
+        setStatus('error', 'Firebase Functions is not available on this page right now.');
+        return;
+      }
+
+      const businessName = String(document.getElementById('businessName')?.value || '').trim();
+      const businessType = String(document.getElementById('businessType')?.value || '').trim();
+      const details = String(document.getElementById('businessDetails')?.value || '').trim();
+      const generateButton = document.getElementById('generateButton');
+
+      if (!businessName) {
+        setStatus('error', 'Add your business name before generating a description.');
+        return;
+      }
+
+      if (!businessType) {
+        setStatus('error', 'Choose a business type before generating a description.');
+        return;
+      }
+
+      try {
+        isGeneratingDescription = true;
+        applyAiUsageSummary(currentAiUsageSummary);
+        setStatus('info', 'Generating your business description...');
+
+        const callable = functions.httpsCallable('generateBusinessDescriptionDraft');
+        const response = await callable({
+          businessName,
+          businessType,
+          details,
+        });
+
+        const draft = response && response.data ? response.data.draft : null;
+        const usage = response && response.data ? response.data.usage : null;
+        if (!draft || !draft.description) {
+          throw new Error('The assistant returned an empty description.');
+        }
+
+        currentGeneratedDraft = draft;
+        renderDraft(draft);
+        applyAiUsageSummary(usage);
+        setStatus('success', usage
+          ? `Description generated. ${usage.descriptionRemaining} of ${usage.descriptionLimit} business profile generations left for ${usage.monthLabel}.`
+          : 'Description generated. Review it and make any edits you want.');
+      } catch (error) {
+        console.error('AI business description generation failed:', error);
+        const message = error && error.message
+          ? error.message
+          : 'Could not generate a business description right now. Please try again.';
+        setStatus('error', message);
+        await loadAiUsageSummary();
+      } finally {
+        isGeneratingDescription = false;
+        applyAiUsageSummary(currentAiUsageSummary);
+      }
+    }
+
+    async function generateBusinessImage(event) {
+      event.preventDefault();
+
+      if (!functions) {
+        setImageStatus('error', 'Firebase Functions is not available on this page right now.');
+        return;
+      }
+
+      const businessName = resolveImageBusinessFieldValue('imageBusinessName', 'businessName');
+      const businessCategory = resolveImageBusinessFieldValue('imageBusinessCategory', '');
+      const imageShortDescription = String(document.getElementById('imageShortDescription')?.value || '').trim();
+      const imageStyle = String(document.getElementById('imageStyle')?.value || '').trim();
+      const imageColor = String(document.getElementById('imageColor')?.value || '').trim();
+      const imageNoText = Boolean(document.getElementById('imageNoText')?.checked);
+      const submitter = event.submitter;
+      const imageKind = String(submitter?.dataset?.imageKind || 'logo').trim().toLowerCase();
+      const generateLogoButton = document.getElementById('generateLogoButton');
+      const generateCoverButton = document.getElementById('generateCoverButton');
+
+      if (!businessName) {
+        setImageStatus('error', 'Add your business name before generating an image.');
+        return;
+      }
+
+      if (!businessCategory) {
+        setImageStatus('error', 'Add a business category before generating an image.');
+        return;
+      }
+
+      if (countWords(imageShortDescription) > 99) {
+        setImageStatus('error', 'Keep the short description under 100 words.');
+        return;
+      }
+
+      try {
+        isGeneratingImage = true;
+        applyAiUsageSummary(currentAiUsageSummary);
+        setImageStatus('info', imageKind === 'cover' ? 'Generating your cover photo...' : 'Generating your logo...');
+
+        const callable = functions.httpsCallable('generateBusinessBrandImage');
+        const response = await callable({
+          businessName,
+          businessCategory,
+          shortDescription: imageShortDescription,
+          imageStyle,
+          imageColor,
+          noText: imageNoText,
+          imageKind,
+        });
+
+        const image = response && response.data ? response.data.image : null;
+        const usage = response && response.data ? response.data.usage : null;
+        if (!image || !image.imageDataUrl) {
+          throw new Error('The assistant returned an empty image.');
+        }
+
+        currentGeneratedImage = image;
+        renderBusinessImage(image);
+        applyAiUsageSummary(usage);
+        setImageStatus('success', usage
+          ? `${imageKind === 'cover' ? 'Cover photo' : 'Logo'} generated. ${usage.imageRemaining} of ${usage.imageLimit} business image generations left for ${usage.monthLabel}.`
+          : imageKind === 'cover'
+            ? 'Cover photo generated. Review it and download the PNG if you want to use it.'
+            : 'Logo generated. Review it and download the PNG if you want to use it.');
+      } catch (error) {
+        console.error('AI business image generation failed:', error);
+        const message = error && error.message
+          ? error.message
+          : 'Could not generate a business image right now. Please try again.';
+        setImageStatus('error', message);
+        await loadAiUsageSummary();
+      } finally {
+        isGeneratingImage = false;
+        applyAiUsageSummary(currentAiUsageSummary);
+      }
+    }
+
+    function setAssistantAccessState(hasAccess, message) {
+      const gate = document.getElementById('assistantGate');
+      const gateMessage = document.getElementById('assistantGateMessage');
+      const content = document.getElementById('assistantContent');
+
+      if (hasAccess) {
+        if (gate) gate.style.display = 'none';
+        if (content) content.classList.remove('hidden');
+        return;
+      }
+
+      if (gate) gate.style.display = 'flex';
+      if (gateMessage) gateMessage.innerHTML = message;
+      if (content) content.classList.add('hidden');
+    }
+
+    async function hydrateBusinessDefaults() {
+      const user = auth && auth.currentUser ? auth.currentUser : null;
+      if (!user || !db) {
+        return;
+      }
+
+      try {
+        const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get();
+        const businessData = businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+        const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
+        const serviceData = servicesSnap && !servicesSnap.empty ? (servicesSnap.docs[0].data() || {}) : {};
+        const businessNameInput = document.getElementById('businessName');
+        const businessTypeInput = document.getElementById('businessType');
+        const businessDetailsInput = document.getElementById('businessDetails');
+        const imageBusinessNameInput = document.getElementById('imageBusinessName');
+        const imageBusinessCategoryInput = document.getElementById('imageBusinessCategory');
+        const imageShortDescriptionInput = document.getElementById('imageShortDescription');
+
+        if (businessNameInput && !businessNameInput.value) {
+          businessNameInput.value = String(businessData.businessName || serviceData.serviceName || serviceData.title || '').trim();
+        }
+
+        if (imageBusinessNameInput && !imageBusinessNameInput.value) {
+          imageBusinessNameInput.value = String(businessData.businessName || serviceData.serviceName || serviceData.title || '').trim();
+        }
+
+        if (businessTypeInput && !businessTypeInput.value) {
+          businessTypeInput.value = String(businessData.listingType || (serviceData.serviceName ? 'services' : '')).trim();
+        }
+
+        if (imageBusinessCategoryInput && !imageBusinessCategoryInput.value) {
+          imageBusinessCategoryInput.value = String(businessData.businessCategory || serviceData.category || '').trim();
+        }
+
+        if (imageShortDescriptionInput && !imageShortDescriptionInput.value) {
+          imageShortDescriptionInput.value = truncateToWordLimit(String(businessData.businessDescription || serviceData.serviceDescription || serviceData.description || '').trim(), 99);
+        }
+
+        if (businessDetailsInput && !businessDetailsInput.value) {
+          businessDetailsInput.value = String(businessData.businessDescription || serviceData.serviceDescription || serviceData.description || '').trim();
+        }
+      } catch (error) {
+        console.error('Failed to preload business defaults:', error);
+      }
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (!user) {
+          setAssistantAccessState(false, 'Sign in with a premium business account to open the AI Business Assistant. <a href="login.html?next=business-ai-assistant.html">Sign in</a>');
+          return;
+        }
+
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+        const businessProfileDoc = await db.collection('businessLocal').doc(user.uid).get();
+        const businessProfileData = businessProfileDoc.exists ? (businessProfileDoc.data() || {}) : {};
+        const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
+        const serviceData = servicesSnap && !servicesSnap.empty ? (servicesSnap.docs[0].data() || {}) : {};
+        const planAccess = window.LocalListPlanAccess || {};
+        const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+        const accessProfile = {
+          ...userData,
+          hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+        };
+        const hasPremiumBusinessAccess = planAccess.hasPremiumProfileHubAccess
+          ? planAccess.hasPremiumProfileHubAccess(accessProfile)
+          : String(userData.planCode || '').toLowerCase() === 'business_premium';
+        const hasAccess = isAdmin || hasPremiumBusinessAccess;
+
+        if (!hasAccess) {
+          setAssistantAccessState(false, 'This page is reserved for premium business owners or admins. Upgrade your business plan to unlock it.');
+          return;
+        }
+
+        setAssistantAccessState(true, '');
+        applyAiUsageSummary(null);
+
+        const businessNameInput = document.getElementById('businessName');
+        const businessTypeInput = document.getElementById('businessType');
+        const businessDetailsInput = document.getElementById('businessDetails');
+        const imageBusinessNameInput = document.getElementById('imageBusinessName');
+        const imageBusinessCategoryInput = document.getElementById('imageBusinessCategory');
+        const imageShortDescriptionInput = document.getElementById('imageShortDescription');
+
+        if (businessNameInput && !businessNameInput.value) {
+          businessNameInput.value = String(businessProfileData.businessName || serviceData.serviceName || serviceData.title || '').trim();
+        }
+
+        if (imageBusinessNameInput && !imageBusinessNameInput.value) {
+          imageBusinessNameInput.value = String(businessProfileData.businessName || serviceData.serviceName || serviceData.title || '').trim();
+        }
+
+        if (businessTypeInput && !businessTypeInput.value) {
+          businessTypeInput.value = String(businessProfileData.listingType || (serviceData.serviceName ? 'services' : '')).trim();
+        }
+
+        if (imageBusinessCategoryInput && !imageBusinessCategoryInput.value) {
+          imageBusinessCategoryInput.value = String(businessProfileData.businessCategory || serviceData.category || '').trim();
+        }
+
+        if (imageShortDescriptionInput && !imageShortDescriptionInput.value) {
+          imageShortDescriptionInput.value = truncateToWordLimit(String(businessProfileData.businessDescription || serviceData.serviceDescription || serviceData.description || '').trim(), 99);
+        }
+
+        if (businessDetailsInput && !businessDetailsInput.value) {
+          businessDetailsInput.value = String(businessProfileData.businessDescription || serviceData.serviceDescription || serviceData.description || '').trim();
+        }
+
+        await loadAiUsageSummary();
+      } catch (error) {
+        console.error('Failed to load AI Business Assistant access:', error);
+        setAssistantAccessState(false, 'We could not verify business access right now. Please try again in a moment.');
+      }
+    });
+
+    document.getElementById('businessDescriptionForm')?.addEventListener('submit', generateBusinessDescription);
+    document.getElementById('resetButton')?.addEventListener('click', resetGeneratorUi);
+    document.getElementById('businessImageForm')?.addEventListener('submit', generateBusinessImage);
+    document.getElementById('resetImageButton')?.addEventListener('click', resetImageGeneratorUi);
+    document.getElementById('copyDescriptionButton')?.addEventListener('click', (event) => {
+      copyDescription(event.currentTarget);
+    });
+  </script>
+</body>
+</html>

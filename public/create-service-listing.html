@@ -559,7 +559,7 @@
           <input type="text" id="priceAmount" class="input" placeholder="e.g. $35/hr  or  $150 flat rate">
         </div>
 
-        <div class="feature-box">
+        <div class="feature-box" id="featuredServiceBox">
           <div class="feature-title">Boost This Service</div>
           <div class="hint" style="font-size:13px; margin-bottom:8px; color:#7c2d12;">Featured services appear at the top of the services page. ($10 for 30 days)</div>
           <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#475569;">
@@ -737,6 +737,8 @@
     const db   = window.firebaseDb;
     const storage = window.firebaseStorage;
     const stripe = window.stripeConfig ? Stripe(window.stripeConfig.publishableKey) : null;
+    const pageParams = new URLSearchParams(window.location.search);
+    const currentEditingServiceId = String(pageParams.get('edit') || '').trim();
 
     let currentUser    = null;
     let currentUserAccountType = 'user';
@@ -745,6 +747,7 @@
     let serviceImageFile = null;
     let logoImageFile = null;
     let galleryImageFiles = [];
+    let currentEditingService = null;
 
     // ── Category definitions ──────────────────────────────────────────────
     const CATEGORIES = [
@@ -786,6 +789,32 @@
     function handleCategoryChange(event) {
       selectedCategory = event.target.value || '';
       document.getElementById('categoryHint').style.display = 'none';
+    }
+
+    function setFormMode() {
+      const isEditing = Boolean(currentEditingServiceId);
+      const title = document.querySelector('.title');
+      const subtitle = document.querySelector('.subtitle');
+      const submitBtn = document.getElementById('submitBtn');
+      const featuredBox = document.getElementById('featuredServiceBox');
+
+      if (title) {
+        title.textContent = isEditing ? 'Edit Your Service' : 'List Your Service';
+      }
+
+      if (subtitle) {
+        subtitle.textContent = isEditing
+          ? 'Update your service details for the Harrison community'
+          : 'Connect with the Harrison community';
+      }
+
+      if (submitBtn) {
+        submitBtn.textContent = isEditing ? 'Save Service Changes' : 'Post My Service';
+      }
+
+      if (featuredBox && isEditing) {
+        featuredBox.style.display = 'none';
+      }
     }
 
     // ── Price type toggle ─────────────────────────────────────────────────
@@ -850,6 +879,45 @@
       document.getElementById('logoPreviewImg').src = '';
       document.getElementById('logoUploadPrompt').style.display = 'block';
       document.getElementById('logoImagePreview').classList.remove('show');
+    }
+
+    function showExistingCoverImage(url) {
+      if (!url) return;
+      document.getElementById('previewImg').src = url;
+      document.getElementById('uploadPrompt').style.display = 'none';
+      document.getElementById('imagePreview').classList.add('show');
+    }
+
+    function showExistingLogoImage(url) {
+      if (!url) return;
+      document.getElementById('logoPreviewImg').src = url;
+      document.getElementById('logoUploadPrompt').style.display = 'none';
+      document.getElementById('logoImagePreview').classList.add('show');
+    }
+
+    function showExistingGalleryImages(urls) {
+      const preview = document.getElementById('galleryPreview');
+      const prompt = document.getElementById('galleryUploadPrompt');
+      if (!preview || !prompt) return;
+
+      preview.innerHTML = '';
+      const safeUrls = Array.isArray(urls) ? urls.filter((url) => typeof url === 'string' && url.trim()) : [];
+
+      if (!safeUrls.length) {
+        prompt.style.display = 'block';
+        return;
+      }
+
+      prompt.style.display = 'none';
+      safeUrls.forEach((url) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-preview-item';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Existing gallery image';
+        wrapper.appendChild(img);
+        preview.appendChild(wrapper);
+      });
     }
 
     function previewGalleryImages(event) {
@@ -1062,6 +1130,66 @@
     }
 
     // ── Form submit ───────────────────────────────────────────────────────
+    async function loadServiceForEdit() {
+      if (!currentEditingServiceId || !currentUser) {
+        setFormMode();
+        return;
+      }
+
+      try {
+        const snap = await db.collection('services').doc(currentEditingServiceId).get();
+        if (!snap.exists) {
+          showError('That service listing could not be found.');
+          return;
+        }
+
+        const service = { id: snap.id, ...(snap.data() || {}) };
+        if (service.userId !== currentUser.uid) {
+          showError('You can only edit your own service listings.');
+          document.getElementById('serviceForm').style.display = 'none';
+          document.getElementById('authGate').style.display = 'block';
+          document.getElementById('authGate').innerHTML = '<h2>Access Restricted</h2><p>You can only edit your own service listings.</p><a href="profile.html" class="sign-in-btn">Back to Profile</a>';
+          return;
+        }
+
+        currentEditingService = service;
+        setFormMode();
+
+        document.getElementById('serviceName').value = service.serviceName || '';
+        document.getElementById('providerName').value = service.providerName || currentUser.displayName || service.serviceName || '';
+        document.getElementById('serviceMotto').value = service.serviceMotto || '';
+        document.getElementById('serviceDescription').value = service.serviceDescription || '';
+        document.getElementById('businessHours').value = service.businessHours || service.hours || '';
+        document.getElementById('streetAddress').value = service.streetAddress || '';
+        document.getElementById('city').value = service.city || '';
+        document.getElementById('state').value = service.state || '';
+        document.getElementById('zipCode').value = service.zipCode || '';
+        document.getElementById('serviceArea').value = service.serviceArea || '';
+        document.getElementById('contactPhone').value = service.contactPhone || '';
+        document.getElementById('contactWebsite').value = service.contactWebsite || '';
+        document.getElementById('contactEmail').value = service.contactEmail || currentUser.email || '';
+        document.getElementById('facebookUrl').value = service.facebookUrl || '';
+        document.getElementById('youtubeUrl').value = service.youtubeUrl || '';
+        document.getElementById('allowMessaging').checked = service.allowMessaging !== false;
+        document.getElementById('preferredContactMethod').value = service.preferredContactMethod || '';
+
+        selectedCategory = service.categoryId || '';
+        if (selectedCategory) {
+          document.getElementById('selectedCategory').value = selectedCategory;
+        }
+
+        document.getElementById('descCount').textContent = String((service.serviceDescription || '').length);
+        handlePreferredContactChange();
+
+        showExistingCoverImage(service.coverImage || service.serviceImage || '');
+        showExistingLogoImage(service.logoImage || '');
+        showExistingGalleryImages(service.galleryImages || service.serviceImages || []);
+      } catch (error) {
+        console.error('Failed to load service for editing:', error);
+        showError('We could not load this service for editing right now.');
+      }
+    }
+
     async function handleSubmit(event) {
       event.preventDefault();
 
@@ -1116,7 +1244,15 @@
         return;
       }
 
-      const hasAtLeastOneImage = Boolean(serviceImageFile || logoImageFile || galleryImageFiles.length);
+      const hasAtLeastOneImage = Boolean(
+        serviceImageFile ||
+        logoImageFile ||
+        galleryImageFiles.length ||
+        currentEditingService?.coverImage ||
+        currentEditingService?.logoImage ||
+        (Array.isArray(currentEditingService?.galleryImages) && currentEditingService.galleryImages.length) ||
+        currentEditingService?.serviceImage
+      );
       if (!hasAtLeastOneImage) {
         showError('Please upload at least one image using the cover image, logo image, or gallery.');
         document.getElementById('serviceImage').focus();
@@ -1151,12 +1287,12 @@
 
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Posting...';
+      submitBtn.textContent = currentEditingServiceId ? 'Saving changes...' : 'Posting...';
 
       try {
-        let coverImageUrl = null;
-        let logoImageUrl = null;
-        let galleryImageUrls = [];
+        let coverImageUrl = currentEditingService?.coverImage || currentEditingService?.serviceImage || null;
+        let logoImageUrl = currentEditingService?.logoImage || null;
+        let galleryImageUrls = Array.isArray(currentEditingService?.galleryImages) ? [...currentEditingService.galleryImages] : [];
         if (serviceImageFile) {
           submitBtn.textContent = 'Uploading cover image...';
           coverImageUrl = await uploadImage(currentUser.uid);
@@ -1174,17 +1310,24 @@
 
         const catObj = CATEGORIES.find(c => c.id === selectedCategory);
         const serviceName = document.getElementById('serviceName').value.trim();
+        const providerName = document.getElementById('providerName').value.trim() || currentUser.displayName || serviceName;
+        const serviceArea = document.getElementById('serviceArea').value.trim() || city;
+        const businessHours = document.getElementById('businessHours').value.trim() || null;
+        const contactEmail = String(currentUser.email || document.getElementById('contactEmail').value.trim() || '').trim() || null;
         const serviceImage = coverImageUrl || logoImageUrl || galleryImageUrls[0] || null;
 
         const serviceData = {
           userId:             currentUser.uid,
           serviceName:        serviceName,
+          providerName:       providerName,
           category:           catObj ? catObj.label : selectedCategory,
           categoryId:         selectedCategory,
           serviceMotto:       document.getElementById('serviceMotto').value.trim() || null,
           serviceDescription: document.getElementById('serviceDescription').value.trim(),
-          businessHours:      document.getElementById('businessHours').value.trim() || null,
+          businessHours:      businessHours,
+          hours:              businessHours,
           serviceImage:       serviceImage,
+          serviceArea:        serviceArea || null,
           streetAddress:      document.getElementById('streetAddress').value.trim() || null,
           city:               city,
           state:              state,
@@ -1193,6 +1336,7 @@
           preferredContactValue: preferredValue,
           allowMessaging:     allowMessaging,
           contactPhone:       phone || null,
+          contactEmail:       contactEmail,
           contactWebsite:     website || null,
           facebookUrl:        document.getElementById('facebookUrl').value.trim() || null,
           youtubeUrl:         document.getElementById('youtubeUrl').value.trim() || null,
@@ -1207,17 +1351,56 @@
           featureDurationDays: wantsFeaturedService ? 30 : null,
           featurePrice:       wantsFeaturedService ? 10 : null,
           featurePaymentStatus: wantsFeaturedService ? 'pending' : 'not_requested',
-          viewCount:          0,
-          createdAt:          firebase.firestore.FieldValue.serverTimestamp()
+          updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
         };
 
         submitBtn.textContent = 'Saving...';
-        const serviceRef = await db.collection('services').add(serviceData);
+        let serviceRef = null;
 
-        if (wantsFeaturedService) {
+        if (currentEditingServiceId) {
+          const existingFeatureState = currentEditingService || {};
+          await db.collection('services').doc(currentEditingServiceId).set({
+            ...serviceData,
+            isActive: existingFeatureState.isActive !== false,
+            isApproved: existingFeatureState.isApproved === true,
+            approvalStatus: existingFeatureState.approvalStatus || 'pending',
+            isFeatured: existingFeatureState.isFeatured === true,
+            featureRequested: existingFeatureState.featureRequested === true,
+            featureDurationDays: existingFeatureState.featureDurationDays || null,
+            featurePrice: existingFeatureState.featurePrice || null,
+            featurePaymentStatus: existingFeatureState.featurePaymentStatus || 'not_requested',
+          }, { merge: true });
+          serviceRef = { id: currentEditingServiceId };
+        } else {
+          serviceData.isActive = true;
+          serviceData.isApproved = false;
+          serviceData.approvalStatus = 'pending';
+          serviceData.isFeatured = false;
+          serviceData.featureRequested = wantsFeaturedService;
+          serviceData.featureDurationDays = wantsFeaturedService ? 30 : null;
+          serviceData.featurePrice = wantsFeaturedService ? 10 : null;
+          serviceData.featurePaymentStatus = wantsFeaturedService ? 'pending' : 'not_requested';
+          serviceData.viewCount = 0;
+          serviceData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          serviceRef = await db.collection('services').add(serviceData);
+        }
+
+        await db.collection('users').doc(currentUser.uid).set({
+          hasServices: true,
+          hasServiceListing: true,
+          providerType: 'service',
+        }, { merge: true });
+
+        if (!currentEditingServiceId && wantsFeaturedService) {
           showProcessingOverlay('Service submitted. Redirecting to secure checkout...');
           submitBtn.textContent = 'Redirecting to checkout...';
           await initiateStripeCheckoutForService(serviceRef.id, serviceName);
+          return;
+        }
+
+        if (currentEditingServiceId) {
+          showProcessingOverlay('Service changes saved. Taking you back to your listing...');
+          window.location.href = `service-details.html?id=${encodeURIComponent(currentEditingServiceId)}`;
           return;
         }
 
@@ -1238,7 +1421,7 @@
           showError('Failed to post service: ' + error.message);
         }
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Post My Service';
+        submitBtn.textContent = currentEditingServiceId ? 'Save Service Changes' : 'Post My Service';
       }
     }
 
@@ -1248,7 +1431,7 @@
     });
 
     // ── Auth state listener ───────────────────────────────────────────────
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       document.getElementById('loadingState').style.display = 'none';
       if (user) {
         currentUser = user;
@@ -1261,14 +1444,15 @@
           document.getElementById('providerName').value = user.displayName;
         }
 
-        db.collection('users').doc(user.uid).get()
-          .then((doc) => {
-            const data = doc.exists ? doc.data() : null;
-            currentUserAccountType = data && data.accountType ? String(data.accountType) : 'user';
-          })
-          .catch(() => {
-            currentUserAccountType = 'user';
-          });
+        try {
+          const doc = await db.collection('users').doc(user.uid).get();
+          const data = doc.exists ? doc.data() : null;
+          currentUserAccountType = data && data.accountType ? String(data.accountType) : 'user';
+        } catch {
+          currentUserAccountType = 'user';
+        }
+
+        await loadServiceForEdit();
       } else {
         currentUserAccountType = 'user';
         document.getElementById('serviceForm').style.display = 'none';
@@ -1278,6 +1462,7 @@
 
     // Build category dropdown on load
     buildCategoryDropdown();
+    setFormMode();
   </script>
 </body>
 </html>

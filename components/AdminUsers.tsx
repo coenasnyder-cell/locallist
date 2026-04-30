@@ -5,18 +5,26 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { checkIsAdmin } from '../utils/adminUtils';
+import { hasActivePaidPlan } from '../utils/planAccess';
 
 type UserRow = {
   id: string;
   name?: string;
   email?: string;
-  accountType?: 'user' | 'business';
+  accountType?: 'personal' | 'user' | 'business';
   businessName?: string | null;
   businessDescription?: string | null;
   businessPhone?: string | null;
   businessWebsite?: string | null;
-  subscriptionPlan?: 'free' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | 'trial';
+  businessTier?: 'free' | 'premium';
+  planCode?: 'free' | 'seller_pro' | 'business_premium';
+  planStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  sellerTier?: 'free' | 'pro';
+  sellerStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  isPremium?: boolean;
+  premiumStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  subscriptionPlan?: 'free' | 'basic' | 'premium' | 'enterprise' | 'seller_pro' | 'business_premium';
+  subscriptionStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
   subscriptionStartedAt?: any;
   subscriptionExpiresAt?: any;
   zipCode?: string;
@@ -127,7 +135,7 @@ export default function AdminUsers({
     const disabledUsers = users.filter((u) => u.isDisabled).length;
     const activeUsers = users.filter((u) => u.status === 'approved' && !u.isDisabled && !u.isBanned).length;
     const businessAccounts = users.filter((u) => u.accountType === 'business').length;
-    const paidBusinessAccounts = users.filter((u) => u.accountType === 'business' && u.subscriptionPlan && u.subscriptionPlan !== 'free').length;
+    const paidAccounts = users.filter((u) => hasActivePaidPlan(u)).length;
 
     return [
       {
@@ -150,7 +158,7 @@ export default function AdminUsers({
       },
       {
         label: 'Paid Plans',
-        value: paidBusinessAccounts,
+        value: paidAccounts,
         color: '#2E7D32',
         icon: 'dollar-sign',
       },

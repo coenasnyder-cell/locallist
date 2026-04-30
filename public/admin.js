@@ -1192,6 +1192,10 @@
   }
 
   function isPremiumBusinessProfileRecord(item) {
+    if (window.LocalListPlanAccess && typeof window.LocalListPlanAccess.hasBusinessPremiumAccess === 'function') {
+      return window.LocalListPlanAccess.hasBusinessPremiumAccess(item);
+    }
+
     const plan = String(item?.subscriptionPlan || '').toLowerCase();
     const tier = String(item?.businessTier || '').toLowerCase();
     return (plan !== '' && plan !== 'free') || (tier !== '' && tier !== 'free');

@@ -200,6 +200,24 @@
       justify-content: space-between;
     }
 
+    .feature-card-link {
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .feature-card-link:hover,
+    .feature-card-link:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(55, 84, 115, 0.14);
+      border-color: rgba(15, 118, 110, 0.35);
+    }
+
+    .feature-card-link:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, 0.18);
+      outline-offset: 3px;
+    }
+
     .feature-kicker {
       display: inline-flex;
       width: fit-content;
@@ -237,6 +255,16 @@
       border-top: 1px solid rgba(202, 214, 228, 0.95);
       color: #274665;
       font-weight: 700;
+    }
+
+    .feature-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      color: #0f766e;
+      font-weight: 800;
+      letter-spacing: 0.01em;
     }
 
     .panel {
@@ -329,6 +357,34 @@
       font-weight: 700;
     }
 
+    .access-banner {
+      display: none;
+      margin-bottom: 20px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      border: 1px solid #f5c2c7;
+      background: rgba(255, 241, 242, 0.96);
+      color: #7f1d1d;
+      box-shadow: 0 10px 24px rgba(127, 29, 29, 0.08);
+    }
+
+    .access-banner strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 1.08rem;
+      color: #7f1d1d;
+    }
+
+    .access-banner a {
+      color: #9f1239;
+      font-weight: 700;
+    }
+
+    .hub-content.hidden {
+      display: none;
+    }
+
     @media (max-width: 980px) {
       .hero-grid,
       .grid.three,
@@ -375,6 +431,12 @@
   <div id="header-container"></div>
 
   <main class="container">
+    <section id="sellerHubGate" class="access-banner" aria-live="polite">
+      <strong>Paid seller access required</strong>
+      <span id="sellerHubGateMessage">Sign in with an active paid seller plan to open the Seller's Hub.</span>
+    </section>
+
+    <div id="sellerHubContent" class="hub-content hidden">
     <section class="hero">
       <div class="hero-grid">
         <div>
@@ -409,17 +471,18 @@
       </div>
 
       <div class="grid three">
-        <article class="feature-card">
+        <a class="feature-card feature-card-link" href="seller-ai-assistant.html" aria-label="Open AI Listing Assistant">
           <div>
             <div class="feature-kicker">AI Tools</div>
-            <h3>Sell Faster</h3>
+            <h3>AI Listing Assistant</h3>
             <p>
-              Future tools can help sellers rewrite titles, improve descriptions, spot weak photos, and suggest edits
-              that make listings easier to trust and quicker to buy.
+              Open the dedicated workspace for future title rewrites, description polish, photo feedback, and listing
+              optimization tools built to help items sell faster.
             </p>
+            <div class="feature-cta">Open workspace <span aria-hidden="true">-&gt;</span></div>
           </div>
-          <div class="feature-note">Planned modules: title rewrite, description polish, photo feedback.</div>
-        </article>
+          <div class="feature-note">First step: page shell, navigation, and room for the assistant workflow.</div>
+        </a>
 
         <article class="feature-card">
           <div>
@@ -539,8 +602,57 @@
       <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
       <p style="margin-top: 8px;"><a href="browse.html">Back to Browse</a></p>
     </div>
+    </div>
   </main>
 
   <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+
+    function setSellerHubAccessState(hasAccess, message) {
+      const gate = document.getElementById('sellerHubGate');
+      const gateMessage = document.getElementById('sellerHubGateMessage');
+      const content = document.getElementById('sellerHubContent');
+
+      if (hasAccess) {
+        if (gate) gate.style.display = 'none';
+        if (content) content.classList.remove('hidden');
+        return;
+      }
+
+      if (gate) gate.style.display = 'block';
+      if (gateMessage) gateMessage.innerHTML = message;
+      if (content) content.classList.add('hidden');
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (!user) {
+          setSellerHubAccessState(false, 'Sign in with an active paid seller plan to open the Seller\\'s Hub. <a href="login.html?next=seller-hub.html">Sign in</a>');
+          return;
+        }
+
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+        const planAccess = window.LocalListPlanAccess || {};
+        const hasAccess = planAccess.hasSellerHubAccess ? planAccess.hasSellerHubAccess(userData) : false;
+
+        if (!hasAccess) {
+          setSellerHubAccessState(false, 'This hub is for active paid seller plans. Upgrade to Seller Pro or Business Premium to unlock it.');
+          return;
+        }
+
+        setSellerHubAccessState(true, '');
+      } catch (error) {
+        console.error('Failed to load seller hub access:', error);
+        setSellerHubAccessState(false, 'We could not verify seller access right now. Please try again in a moment.');
+      }
+    });
+  </script>
 </body>
 </html>

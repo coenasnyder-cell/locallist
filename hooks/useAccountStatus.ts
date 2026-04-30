@@ -2,7 +2,15 @@ import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 import { app } from '../firebase';
-import { UserProfile as BaseUserProfile } from '../types/User';
+import { PlanCode, PlanStatus, UserProfile as BaseUserProfile } from '../types/User';
+import {
+  hasActivePaidPlan,
+  hasAiSellerToolsAccess,
+  hasBusinessPremiumAccess,
+  hasSellerHubAccess,
+  hasSellerProAccess,
+  resolvePlan,
+} from '../utils/planAccess';
 
 type UserProfile = BaseUserProfile & {
   status?: string;
@@ -58,6 +66,13 @@ type AccountStatus = {
   isAdmin: boolean;
   isBusinessAccount: boolean;
   isRegularAccount: boolean;
+  planCode: PlanCode;
+  planStatus: PlanStatus;
+  hasPaidPlan: boolean;
+  hasBusinessPremium: boolean;
+  hasSellerPro: boolean;
+  hasSellerHubAccess: boolean;
+  hasAiSellerToolsAccess: boolean;
   /** True when signed-in, verified, but name/ZIP still missing (show mandatory service-area screen). */
   needsServiceAreaProfile: boolean;
   canPostListings: boolean;
@@ -127,6 +142,12 @@ export function useAccountStatus(): AccountStatus {
   const isAdmin = normalizedRole === 'admin';
   const isBusinessAccount = normalizedAccountType === 'business';
   const isRegularAccount = !!user && (!!profile ? !isBusinessAccount : false);
+  const { planCode, planStatus } = resolvePlan(profile);
+  const paidPlan = hasActivePaidPlan(profile);
+  const businessPremium = hasBusinessPremiumAccess(profile);
+  const sellerPro = hasSellerProAccess(profile);
+  const sellerHubAccess = hasSellerHubAccess(profile);
+  const aiSellerToolsAccess = hasAiSellerToolsAccess(profile);
   const needsServiceAreaProfile = !!user && isVerified && profileNeedsServiceArea(profile);
   const normalizedStatus = String(profile?.status || '').toLowerCase();
 
@@ -164,6 +185,13 @@ export function useAccountStatus(): AccountStatus {
     isAdmin,
     isBusinessAccount,
     isRegularAccount,
+    planCode,
+    planStatus,
+    hasPaidPlan: paidPlan,
+    hasBusinessPremium: businessPremium,
+    hasSellerPro: sellerPro,
+    hasSellerHubAccess: sellerHubAccess,
+    hasAiSellerToolsAccess: aiSellerToolsAccess,
     needsServiceAreaProfile,
     canPostListings,
     postingBlockedReason,

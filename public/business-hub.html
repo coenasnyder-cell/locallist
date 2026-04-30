@@ -627,6 +627,13 @@
 
     <div id="statusBanner" class="status-banner status-loading">Checking your business account access...</div>
 
+    <div id="premiumUpgradeBanner" class="status-banner status-locked hidden">
+      <span id="premiumUpgradeBannerMessage">Upgrade to Premium to unlock more profile hub tools.</span>
+      <div class="cta-row">
+        <a id="premiumUpgradeBannerLink" class="btn secondary" href="premium-upgrade.html">Upgrade</a>
+      </div>
+    </div>
+
     <section id="businessHub" class="hidden" aria-label="Business hub tools">
       <div class="welcome-strip">
         <h2 id="hubWelcomeTitle">👋 Welcome back</h2>
@@ -649,15 +656,19 @@
 
       <p class="section-label">Quick Actions</p>
       <div class="quick-actions-grid">
-        <a class="card" href="business-settings.html">
+        <a class="card" id="aiAssistantCard" href="business-ai-assistant.html">
+          <h3>AI Business Assistant</h3>
+          <p>Generate a stronger business description for your profile.</p>
+        </a>
+        <a class="card" id="settingsCard" href="business-settings.html">
           <h3>⚙️ Business Settings</h3>
           <p>Manage your profile &amp; branding.</p>
         </a>
-        <a class="card" href="business-listings.html">
+        <a class="card" id="listingsCard" href="business-listings.html">
           <h3>📦 Listings</h3>
           <p>View and manage your listings.</p>
         </a>
-        <a class="card" href="promotion-center.html">
+        <a class="card" id="promotionsCard" href="promotion-center.html">
           <h3>📣 Promotions</h3>
           <p>Boost visibility and create deals.</p>
         </a>
@@ -724,8 +735,8 @@
         </div>
       </div>
 
-      <p class="section-label">Business Status</p>
-      <div class="section-card">
+      <p class="section-label" id="verificationSectionLabel">Business Status</p>
+      <div class="section-card" id="verificationSectionCard">
         <div class="section-card-head">
           <div class="section-card-title">Verification</div>
           <span class="status-pill" id="businessVerificationState">Pending</span>
@@ -868,13 +879,61 @@
     function showAccessDenied() {
       document.getElementById('businessHub').classList.add('hidden');
       document.getElementById('upgradeGate').classList.add('hidden');
+      document.getElementById('premiumUpgradeBanner')?.classList.add('hidden');
       setStatus('status-locked', 'Business Hub is currently available only to business accounts.');
     }
 
     function showBusinessRequiredGate() {
       document.getElementById('businessHub').classList.add('hidden');
       document.getElementById('upgradeGate').classList.remove('hidden');
+      document.getElementById('premiumUpgradeBanner')?.classList.add('hidden');
       setStatus('status-locked', 'Business account required to access Business Hub.');
+    }
+
+    function updatePremiumUpgradeBanner(visible, hasBusinessOnlyAccess) {
+      const banner = document.getElementById('premiumUpgradeBanner');
+      const message = document.getElementById('premiumUpgradeBannerMessage');
+      const link = document.getElementById('premiumUpgradeBannerLink');
+      if (!banner || !message || !link) return;
+
+      if (!visible) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      message.textContent = hasBusinessOnlyAccess
+        ? 'Upgrade to Premium to unlock AI tools, advanced analytics, deals, and expanded promotion tools.'
+        : 'Upgrade to Premium to unlock AI tools, advanced analytics, and expanded promotion tools for service providers.';
+      link.href = 'premium-upgrade.html';
+      banner.classList.remove('hidden');
+    }
+
+    function applyHubFeatureVisibility(options) {
+      const {
+        hasPremiumHubFeatures,
+        hasBusinessOnlyAccess,
+      } = options;
+
+      const aiAssistantCard = document.getElementById('aiAssistantCard');
+      const advancedAnalyticsCard = document.getElementById('advancedAnalyticsCard');
+      const verificationSectionLabel = document.getElementById('verificationSectionLabel');
+      const verificationSectionCard = document.getElementById('verificationSectionCard');
+
+      if (aiAssistantCard) {
+        aiAssistantCard.href = hasPremiumHubFeatures ? 'business-ai-assistant.html' : 'premium-upgrade.html';
+      }
+
+      if (advancedAnalyticsCard) {
+        advancedAnalyticsCard.href = hasPremiumHubFeatures ? 'business-analytics.html' : 'premium-upgrade.html';
+      }
+
+      if (verificationSectionLabel) {
+        verificationSectionLabel.style.display = hasBusinessOnlyAccess ? '' : 'none';
+      }
+
+      if (verificationSectionCard) {
+        verificationSectionCard.style.display = hasBusinessOnlyAccess ? '' : 'none';
+      }
     }
 
     function escapeHtml(value) {
@@ -913,20 +972,6 @@
         node.textContent = '';
         node.classList.add('hidden');
       }
-    }
-
-    function normalizeBusinessTier(userData, businessLocalData) {
-      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
-      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
-      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
-      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
-      const tier = fromUser || fromLocal || fromSubscription || 'free';
-
-      if (userData?.isPremium === true && premiumStatus === 'active') {
-        return 'premium';
-      }
-
-      return tier === 'premium' ? 'premium' : 'free';
     }
 
     function updateAnalyticsAccessCard(canAccessAdvanced) {
@@ -1302,7 +1347,12 @@
           const data = userDoc.exists ? userDoc.data() : {};
           const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get();
           const businessLocalData = businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+          const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
           const businessData = { ...data, ...businessLocalData };
+          const accessProfile = {
+            ...data,
+            hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+          };
 
           renderHubUserSummary(user, data);
           loadBlockedUsers(data.blockedUsers || []);
@@ -1311,34 +1361,36 @@
           const isAdminLocal = localStorage.getItem('isAdmin') === 'true';
           const isAdmin = isAdminRole || isAdminLocal;
 
-          const isBusiness = data.accountType === 'business';
-          const businessTier = normalizeBusinessTier(data, businessLocalData);
-          const canAccessAdvancedAnalytics = isAdmin || businessTier === 'premium';
+          const planAccess = window.LocalListPlanAccess || {};
+          const hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          const hasPremiumHubFeatures = isAdmin || (planAccess.hasPremiumProfileHubAccess ? planAccess.hasPremiumProfileHubAccess(accessProfile) : false);
+          const hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
 
-          if (isBusiness || isAdmin) {
-            updateAnalyticsAccessCard(canAccessAdvancedAnalytics);
-            await loadBusinessHubAnalytics(user.uid, businessData, { canAccessAdvanced: canAccessAdvancedAnalytics });
-            await loadBusinessVerificationStatus(user.uid, businessData);
-
-            // Update Add A Business card: always go to businesslocal.html (create or edit)
-            const addBusinessCard = document.getElementById('addBusinessCard');
-            const addBusinessDesc = document.getElementById('addBusinessDesc');
-            if (addBusinessCard) {
-              addBusinessCard.href = 'businesslocal.html';
-              if (addBusinessDesc) {
-                addBusinessDesc.textContent = businessData.businessName
-                  ? 'Edit or update your existing business profile.'
-                  : 'Create your business presence on Local List.';
-              }
-            }
-
-            if (isAdmin && !isBusiness) {
-              showBusinessHub('Admin access active. Business Hub tools are visible for review.');
-            } else {
-              showBusinessHub('Business account access active.');
-            }
-          } else {
+          if (!hasHubAccess) {
             showBusinessRequiredGate();
+            return;
+          }
+
+          updatePremiumUpgradeBanner(!hasPremiumHubFeatures && !isAdmin, hasBusinessOnlyAccess);
+          applyHubFeatureVisibility({
+            hasPremiumHubFeatures,
+            hasBusinessOnlyAccess,
+          });
+          updateAnalyticsAccessCard(hasPremiumHubFeatures);
+          await loadBusinessHubAnalytics(user.uid, businessData, { canAccessAdvanced: hasPremiumHubFeatures });
+
+          if (hasBusinessOnlyAccess) {
+            await loadBusinessVerificationStatus(user.uid, businessData);
+          } else {
+            setText('welcomeVerification', 'Optional');
+          }
+
+          if (isAdmin && !hasBusinessOnlyAccess) {
+            showBusinessHub('Admin access active. Business Hub tools are visible for review.');
+          } else if (hasBusinessOnlyAccess) {
+            showBusinessHub('Business account access active.');
+          } else {
+            showBusinessHub('Service provider access active.');
           }
         } catch (error) {
           console.error('Business hub access check failed:', error);

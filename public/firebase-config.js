@@ -58,4 +58,177 @@ const stripeConfig = {
   window.firebaseAuth = auth;
   window.firebaseDb = db;
   window.firebaseStorage = storage;
+
+  const ACTIVE_PAID_PLAN_STATUSES = {
+    active: true,
+    trial: true,
+  };
+
+  function normalizeValue(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function normalizePlanStatus(value) {
+    const normalized = normalizeValue(value);
+
+    switch (normalized) {
+      case 'active':
+      case 'pending':
+      case 'trial':
+      case 'past_due':
+      case 'canceled':
+      case 'cancelled':
+      case 'expired':
+        return normalized === 'cancelled' ? 'canceled' : normalized;
+      default:
+        return '';
+    }
+  }
+
+  function resolveAccountType(profile) {
+    const normalized = normalizeValue(profile && profile.accountType);
+    if (normalized === 'business') return 'business';
+    if (normalized === 'personal') return 'personal';
+    return 'user';
+  }
+
+  function resolvePlanCode(profile) {
+    const explicitCode = normalizeValue(profile && profile.planCode);
+    if (explicitCode === 'free' || explicitCode === 'seller_pro' || explicitCode === 'business_premium') {
+      return explicitCode;
+    }
+
+    const sellerTier = normalizeValue(profile && profile.sellerTier);
+    if (sellerTier === 'pro') {
+      return 'seller_pro';
+    }
+
+    const accountType = resolveAccountType(profile);
+    const businessTier = normalizeValue(profile && profile.businessTier);
+    const subscriptionPlan = normalizeValue(profile && profile.subscriptionPlan);
+    const premiumStatus = normalizePlanStatus(profile && profile.premiumStatus);
+
+    if (
+      accountType === 'business' &&
+      (
+        businessTier === 'premium' ||
+        subscriptionPlan === 'premium' ||
+        subscriptionPlan === 'business_premium' ||
+        (profile && profile.isPremium === true) ||
+        premiumStatus === 'active' ||
+        premiumStatus === 'trial' ||
+        premiumStatus === 'past_due'
+      )
+    ) {
+      return 'business_premium';
+    }
+
+    if (subscriptionPlan === 'seller_pro') {
+      return 'seller_pro';
+    }
+
+    return 'free';
+  }
+
+  function resolvePlanStatus(profile) {
+    return (
+      normalizePlanStatus(profile && profile.planStatus) ||
+      normalizePlanStatus(profile && profile.sellerStatus) ||
+      normalizePlanStatus(profile && profile.premiumStatus) ||
+      normalizePlanStatus(profile && profile.subscriptionStatus) ||
+      'active'
+    );
+  }
+
+  function resolvePlan(profile) {
+    return {
+      accountType: resolveAccountType(profile),
+      planCode: resolvePlanCode(profile),
+      planStatus: resolvePlanStatus(profile),
+    };
+  }
+
+  function hasActivePaidPlan(profile) {
+    const resolved = resolvePlan(profile);
+    return resolved.planCode !== 'free' && ACTIVE_PAID_PLAN_STATUSES[resolved.planStatus] === true;
+  }
+
+  function hasBusinessPremiumAccess(profile) {
+    const resolved = resolvePlan(profile);
+    return resolved.planCode === 'business_premium' && ACTIVE_PAID_PLAN_STATUSES[resolved.planStatus] === true;
+  }
+
+  function hasSellerProAccess(profile) {
+    const resolved = resolvePlan(profile);
+    return resolved.planCode === 'seller_pro' && ACTIVE_PAID_PLAN_STATUSES[resolved.planStatus] === true;
+  }
+
+  function hasServiceProviderProfile(profile) {
+    return Boolean(
+      (profile && profile.hasServiceListing === true) ||
+      (profile && profile.hasServices === true) ||
+      normalizeValue(profile && profile.providerType) === 'service' ||
+      normalizeValue(profile && profile.primaryProfileType) === 'service' ||
+      normalizeValue(profile && profile.listingType) === 'services' ||
+      normalizeValue(profile && profile.primaryServiceCategory)
+    );
+  }
+
+  function hasPremiumServiceProviderAccess(profile) {
+    return hasServiceProviderProfile(profile) && hasSellerProAccess(profile);
+  }
+
+  function hasProfileHubAccess(profile) {
+    return resolveAccountType(profile) === 'business' || hasServiceProviderProfile(profile) || isAdminProfile(profile);
+  }
+
+  function hasPremiumProfileHubAccess(profile) {
+    return hasBusinessPremiumAccess(profile) || hasPremiumServiceProviderAccess(profile) || isAdminProfile(profile);
+  }
+
+  function hasBusinessOnlyAccess(profile) {
+    return resolveAccountType(profile) === 'business' || isAdminProfile(profile);
+  }
+
+  function isAdminProfile(profile) {
+    return normalizeValue(profile && profile.role) === 'admin';
+  }
+
+  function hasSellerHubAccess(profile) {
+    return hasActivePaidPlan(profile);
+  }
+
+  function getProfileNavTarget(profile) {
+    const resolved = resolvePlan(profile);
+
+    if (resolved.accountType === 'business' || hasServiceProviderProfile(profile)) {
+      return { href: 'business-hub.html', label: 'Business Hub' };
+    }
+
+    if (hasSellerHubAccess(profile)) {
+      return { href: 'seller-hub.html', label: "Seller's Hub" };
+    }
+
+    return { href: 'profile.html', label: 'Profile' };
+  }
+
+  window.LocalListPlanAccess = {
+    normalizeValue,
+    normalizePlanStatus,
+    resolveAccountType,
+    resolvePlanCode,
+    resolvePlanStatus,
+    resolvePlan,
+    hasActivePaidPlan,
+    hasServiceProviderProfile,
+    hasPremiumServiceProviderAccess,
+    hasProfileHubAccess,
+    hasPremiumProfileHubAccess,
+    hasBusinessOnlyAccess,
+    hasBusinessPremiumAccess,
+    hasSellerProAccess,
+    hasSellerHubAccess,
+    hasAiSellerToolsAccess: hasSellerHubAccess,
+    getProfileNavTarget,
+  };
 })();

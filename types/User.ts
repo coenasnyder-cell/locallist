@@ -1,18 +1,34 @@
+export type AccountType = 'personal' | 'user' | 'business';
+export type BusinessTier = 'free' | 'premium';
+export type PlanCode = 'free' | 'seller_pro' | 'business_premium';
+export type PlanStatus = 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+export type LegacySubscriptionPlan =
+  | 'free'
+  | 'basic'
+  | 'premium'
+  | 'enterprise'
+  | 'seller_pro'
+  | 'business_premium';
+
 export interface UserProfile {
   uid: string;
   email: string;
   displayName?: string;
   photoURL?: string;
-  accountType?: 'personal' | 'user' | 'business';
+  accountType?: AccountType;
   businessName?: string | null;
   businessDescription?: string | null;
   businessPhone?: string | null;
   businessWebsite?: string | null;
-  businessTier?: 'free' | 'premium';
+  businessTier?: BusinessTier;
+  planCode?: PlanCode;
+  planStatus?: PlanStatus;
+  sellerTier?: 'free' | 'pro';
+  sellerStatus?: PlanStatus;
   isPremium?: boolean;
-  premiumStatus?: 'active' | 'pending' | 'canceled' | 'cancelled' | 'expired';
-  subscriptionPlan?: 'free' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | 'trial';
+  premiumStatus?: PlanStatus;
+  subscriptionPlan?: LegacySubscriptionPlan;
+  subscriptionStatus?: PlanStatus;
   subscriptionStartedAt?: any;
   subscriptionExpiresAt?: any;
   isBanned?: boolean;

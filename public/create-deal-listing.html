@@ -280,22 +280,10 @@
       formMessage.textContent = text;
     }
 
-    function normalizeBusinessTier(profileData) {
-      const fromUser = String(profileData?.businessTier || '').trim().toLowerCase();
-      const fromSubscription = String(profileData?.subscriptionPlan || '').trim().toLowerCase();
-      const premiumStatus = String(profileData?.premiumStatus || '').trim().toLowerCase();
-      const tier = fromUser || fromSubscription || 'free';
-
-      if (profileData?.isPremium === true && premiumStatus === 'active') {
-        return 'premium';
-      }
-
-      return tier === 'premium' ? 'premium' : 'free';
-    }
-
     function hasPremiumDealPostingAccess(profileData) {
-      const isBusiness = String(profileData?.accountType || '').toLowerCase() === 'business';
-      return isAdminUser || (isBusiness && normalizeBusinessTier(profileData) === 'premium');
+      const planAccess = window.LocalListPlanAccess || {};
+      const isBusiness = (planAccess.resolveAccountType ? planAccess.resolveAccountType(profileData) : String(profileData?.accountType || '').toLowerCase()) === 'business';
+      return isAdminUser || (isBusiness && planAccess.hasBusinessPremiumAccess && planAccess.hasBusinessPremiumAccess(profileData));
     }
 
     function updateAccessState(profileData) {

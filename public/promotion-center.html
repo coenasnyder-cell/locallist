@@ -272,7 +272,7 @@
 
       <p class="section-label">Post &amp; Promote</p>
       <div class="grid">
-        <a class="card" href="businesslocal.html">
+        <a class="card" id="addBusinessCard" href="businesslocal.html">
           <h3>🏪 Add A Business</h3>
           <p>Edit or update your existing business profile.</p>
         </a>
@@ -327,8 +327,11 @@
 
     const state = {
       userId: '',
-      businessTier: 'free',
+      planCode: 'free',
       isAdmin: false,
+      hasHubAccess: false,
+      hasPremiumHubFeatures: false,
+      hasBusinessOnlyAccess: false,
       promotions: [],
       assets: {
         marketplace: [],
@@ -379,61 +382,64 @@
     }
 
     function isFreePlan() {
-      return !state.isAdmin && state.businessTier === 'free';
+      return !state.isAdmin && state.planCode === 'free';
     }
 
     function getFreeActivePromotionCount() {
       return state.promotions.filter((promotion) => String(promotion.status || '') === 'active').length;
     }
 
-    function normalizeBusinessTier(userData, businessLocalData) {
-      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
-      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
-      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
-      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
-      const tier = fromUser || fromLocal || fromSubscription || 'free';
-
-      if (userData?.isPremium === true && premiumStatus === 'active') {
-        return 'premium';
-      }
-
-      return tier === 'premium' ? 'premium' : 'free';
-    }
-
     function hasPremiumPostingAccess() {
-      return state.isAdmin || state.businessTier === 'premium';
+      return state.isAdmin || state.hasPremiumHubFeatures;
     }
 
     function applyPostingAccess() {
+      const addBusinessCard = document.getElementById('addBusinessCard');
       const jobCard = document.getElementById('jobPostCard');
       const dealsCard = document.getElementById('dealsPostCard');
-      if (!jobCard || !dealsCard) return;
+      const serviceCard = document.getElementById('servicePostCard');
+      if (!jobCard || !dealsCard || !serviceCard) return;
 
       const jobTitle = jobCard.querySelector('h3');
       const jobCopy = jobCard.querySelector('p');
       const dealsTitle = dealsCard.querySelector('h3');
       const dealsCopy = dealsCard.querySelector('p');
+      const serviceTitle = serviceCard.querySelector('h3');
+      const serviceCopy = serviceCard.querySelector('p');
 
-      if (!jobTitle || !jobCopy || !dealsTitle || !dealsCopy) return;
+      if (!jobTitle || !jobCopy || !dealsTitle || !dealsCopy || !serviceTitle || !serviceCopy) return;
 
-      if (hasPremiumPostingAccess()) {
+      if (addBusinessCard) {
+        addBusinessCard.style.display = state.hasBusinessOnlyAccess ? '' : 'none';
+      }
+
+      if (state.hasBusinessOnlyAccess && hasPremiumPostingAccess()) {
         jobCard.href = 'create-job-listing.html';
         jobTitle.textContent = 'Job Post';
         jobCopy.textContent = 'Post hiring opportunities to reach local candidates.';
+        jobCard.style.display = '';
+      } else if (state.hasBusinessOnlyAccess) {
+        jobCard.href = 'premium-upgrade.html';
+        jobTitle.textContent = 'Upgrade to Post Jobs';
+        jobCopy.textContent = 'Job posting is available for Premium business accounts only.';
+        jobCard.style.display = '';
+      } else {
+        jobCard.style.display = 'none';
+      }
 
+      if (hasPremiumPostingAccess()) {
         dealsCard.href = 'create-deal-listing.html';
         dealsTitle.textContent = 'Deals';
         dealsCopy.textContent = 'Promote discounts and special offers to local shoppers.';
-        return;
+      } else {
+        dealsCard.href = 'premium-upgrade.html';
+        dealsTitle.textContent = 'Upgrade to Post Deals';
+        dealsCopy.textContent = 'Deal posting is available for Premium accounts only.';
       }
 
-      jobCard.href = 'profile.html';
-      jobTitle.textContent = 'Upgrade to Post Jobs';
-      jobCopy.textContent = 'Job posting is available for Premium business accounts only.';
-
-      dealsCard.href = 'profile.html';
-      dealsTitle.textContent = 'Upgrade to Post Deals';
-      dealsCopy.textContent = 'Deal posting is available for Premium business accounts only.';
+      serviceCard.href = 'create-service-listing.html';
+      serviceTitle.textContent = 'Add A Service';
+      serviceCopy.textContent = 'List your professional services for local customers to find.';
     }
 
     async function loadMyPromotions() {
@@ -548,27 +554,35 @@
         state.userId = user.uid;
 
         try {
-          const [userDoc, businessLocalDoc] = await Promise.all([
+          const [userDoc, businessLocalDoc, servicesSnap] = await Promise.all([
             db.collection('users').doc(user.uid).get(),
-            db.collection('businessLocal').doc(user.uid).get().catch(() => null)
+            db.collection('businessLocal').doc(user.uid).get().catch(() => null),
+            db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null)
           ]);
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
           const businessLocalData = businessLocalDoc && businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
-          const isBusiness = userData.accountType === 'business';
+          const planAccess = window.LocalListPlanAccess || {};
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+          const accessProfile = {
+            ...userData,
+            hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+          };
 
           state.isAdmin = isAdmin;
-          state.businessTier = normalizeBusinessTier(userData, businessLocalData);
+          state.planCode = planAccess.resolvePlanCode ? planAccess.resolvePlanCode(userData) : 'free';
+          state.hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          state.hasPremiumHubFeatures = isAdmin || (planAccess.hasPremiumProfileHubAccess ? planAccess.hasPremiumProfileHubAccess(accessProfile) : false);
+          state.hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
           applyPostingAccess();
 
-          if (!isBusiness && !isAdmin) {
+          if (!state.hasHubAccess) {
             setStatus('status-locked', 'Business account required to use Post & Promote.');
             showGate();
             return;
           }
 
           showCenter();
-          setStatus('status-access', isBusiness ? 'Post & Promote loaded.' : 'Admin preview mode: Post & Promote loaded.');
+          setStatus('status-access', state.hasBusinessOnlyAccess ? 'Post & Promote loaded.' : 'Service promotion tools loaded.');
           await loadMyPromotions();
         } catch (error) {
           console.error('Failed to load Post & Promote:', error);

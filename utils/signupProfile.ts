@@ -47,6 +47,8 @@ export function buildPersonalUserData(fields: PersonalSignupFields, options?: Bu
     businessDescription: null,
     businessPhone: null,
     businessWebsite: null,
+    planCode: 'free' as const,
+    planStatus: 'active' as const,
     subscriptionPlan: 'free' as const,
     subscriptionStatus: 'active' as const,
     subscriptionExpiresAt: null,

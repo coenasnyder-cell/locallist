@@ -327,21 +327,9 @@
       return String(userProfileData?.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
     }
 
-    function normalizeBusinessTier(profileData) {
-      const fromUser = String(profileData?.businessTier || '').trim().toLowerCase();
-      const fromSubscription = String(profileData?.subscriptionPlan || '').trim().toLowerCase();
-      const premiumStatus = String(profileData?.premiumStatus || '').trim().toLowerCase();
-      const tier = fromUser || fromSubscription || 'free';
-
-      if (profileData?.isPremium === true && premiumStatus === 'active') {
-        return 'premium';
-      }
-
-      return tier === 'premium' ? 'premium' : 'free';
-    }
-
     function hasPremiumPostingAccess() {
-      return isAdminUser() || (isBusinessAccount() && normalizeBusinessTier(userProfileData) === 'premium');
+      const planAccess = window.LocalListPlanAccess || {};
+      return isAdminUser() || (isBusinessAccount() && planAccess.hasBusinessPremiumAccess && planAccess.hasBusinessPremiumAccess(userProfileData));
     }
 
     function updateAccessState() {

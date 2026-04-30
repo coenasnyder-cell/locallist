@@ -37,6 +37,12 @@ service firebase.storage {
       allow read: if true;
     }
 
+    // AI listing reference images - allow signed-in users to upload their own
+    match /aiListingReferenceImages/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+    }
+
     // Pet images - allow users to upload their own
     match /petImages/{userId}/{fileName} {
       allow write: if request.auth != null && request.auth.uid == userId;

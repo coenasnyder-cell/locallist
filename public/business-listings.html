@@ -388,6 +388,42 @@
     let activeDeals = [];
     let archivedDeals = [];
     let pendingDeals = [];
+    const listingAccess = {
+      hasHubAccess: false,
+      hasPremiumHubFeatures: false,
+      hasBusinessOnlyAccess: false,
+    };
+
+    function updateListingTabOptions() {
+      const select = document.getElementById('listingTypeSelect');
+      if (!select) return;
+
+      const allowedByTab = {
+        marketplace: listingAccess.hasBusinessOnlyAccess,
+        services: listingAccess.hasHubAccess,
+        deals: listingAccess.hasPremiumHubFeatures,
+        featured: listingAccess.hasBusinessOnlyAccess,
+        pending: listingAccess.hasHubAccess,
+        sold: listingAccess.hasBusinessOnlyAccess,
+        archived: listingAccess.hasHubAccess,
+        saved: listingAccess.hasHubAccess,
+      };
+
+      Array.from(select.options).forEach((option) => {
+        const isAllowed = allowedByTab[option.value] !== false;
+        option.hidden = !isAllowed;
+        option.disabled = !isAllowed;
+      });
+
+      if (select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
+        const nextOption = Array.from(select.options).find((option) => !option.disabled);
+        if (nextOption) {
+          select.value = nextOption.value;
+        }
+      }
+
+      switchTab(select.value);
+    }
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -400,14 +436,23 @@
       try {
         const userDoc = await db.collection('users').doc(user.uid).get();
         const userData = userDoc.exists ? (userDoc.data() || {}) : {};
-        const isBusiness = userData.accountType === 'business';
+        const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
         const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+        const planAccess = window.LocalListPlanAccess || {};
+        const accessProfile = {
+          ...userData,
+          hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+        };
+        listingAccess.hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+        listingAccess.hasPremiumHubFeatures = isAdmin || (planAccess.hasPremiumProfileHubAccess ? planAccess.hasPremiumProfileHubAccess(accessProfile) : false);
+        listingAccess.hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
 
-        if (!isBusiness && !isAdmin) {
+        if (!listingAccess.hasHubAccess) {
           window.location.href = 'profile.html';
           return;
         }
 
+        updateListingTabOptions();
         await loadListings();
       } catch (error) {
         console.error('Error validating account:', error);

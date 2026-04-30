@@ -401,6 +401,7 @@
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
     const categorySelect = document.getElementById('category');
+    const conditionSelect = document.getElementById('condition');
     const imagePreview = document.getElementById('imagePreview');
     const resubmitNotice = document.getElementById('resubmitNotice');
     const resubmitNoticeText = document.getElementById('resubmitNoticeText');
@@ -409,6 +410,7 @@
     let isUploadingImages = false;
     let verificationPollIntervalId = null;
     let resubmittedFromListingId = '';
+    const AI_LISTING_DRAFT_STORAGE_KEY = 'sellerAiListingDraft';
     const LISTINGS_API_URL = "/api/listings";
     function applyCategoryFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -450,6 +452,76 @@
     function getResubmitListingIdFromUrl() {
       const params = new URLSearchParams(window.location.search);
       return (params.get('resubmitListingId') || '').trim();
+    }
+
+    function getAiDraftPrefill() {
+      try {
+        const raw = sessionStorage.getItem(AI_LISTING_DRAFT_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch (error) {
+        console.warn('Failed to read AI listing draft prefill:', error);
+        return null;
+      }
+    }
+
+    function clearAiDraftPrefill() {
+      try {
+        sessionStorage.removeItem(AI_LISTING_DRAFT_STORAGE_KEY);
+      } catch (error) {
+        console.warn('Failed to clear AI listing draft prefill:', error);
+      }
+    }
+
+    function applySelectValue(selectNode, value, aliases) {
+      if (!selectNode || !value) return false;
+      const rawValue = String(value || '').trim();
+      const normalizedValue = aliases && aliases[rawValue] ? aliases[rawValue] : rawValue;
+      const hasOption = Array.from(selectNode.options).some((option) => option.value === normalizedValue);
+
+      if (!hasOption) {
+        return false;
+      }
+
+      selectNode.value = normalizedValue;
+      selectNode.dispatchEvent(new Event('change'));
+      return true;
+    }
+
+    function applyAiDraftPrefill() {
+      if (getResubmitListingIdFromUrl()) {
+        clearAiDraftPrefill();
+        return;
+      }
+
+      const draft = getAiDraftPrefill();
+      if (!draft) return;
+
+      const titleInput = document.getElementById('title');
+      const descriptionInput = document.getElementById('description');
+      const priceInput = document.getElementById('price');
+
+      if (titleInput && draft.title) {
+        titleInput.value = String(draft.title).trim();
+      }
+
+      if (descriptionInput && draft.description) {
+        descriptionInput.value = String(draft.description).trim();
+      }
+
+      if (priceInput && draft.price) {
+        priceInput.value = String(draft.price).trim();
+      }
+
+      applySelectValue(categorySelect, draft.category, {
+        Home: 'Home Goods',
+      });
+
+      applySelectValue(conditionSelect, draft.condition, {});
+
+      showSuccess('Draft imported from AI Listing Assistant. Add images, ZIP, and any final edits before submitting.');
+      clearAiDraftPrefill();
     }
 
     function getListingRejectionReasonLabel(reason) {
@@ -539,6 +611,7 @@
     });
 
     applyCategoryFromUrl();
+    applyAiDraftPrefill();
 
     // Stripe checkout must run on HTTPS in production (localhost is allowed for testing).
     const isStripeContextAllowed =

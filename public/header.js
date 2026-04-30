@@ -480,9 +480,9 @@
       return null;
     }
 
-    function applyProfileNavTarget(isBusiness) {
-      const targetHref = isBusiness ? 'business-hub.html' : 'profile.html';
-      const targetLabel = isBusiness ? 'Business Hub' : 'Profile';
+    function applyProfileNavTarget(target) {
+      const targetHref = target && target.href ? target.href : 'profile.html';
+      const targetLabel = target && target.label ? target.label : 'Profile';
 
       const menuProfileLink = document.getElementById('menuProfileLink');
       const desktopProfileLink = document.getElementById('desktopProfileLink');
@@ -504,23 +504,37 @@
         const currentUser = auth && auth.currentUser ? auth.currentUser : null;
 
         if (!currentUser) {
-          applyProfileNavTarget(false);
+          applyProfileNavTarget(null);
           return;
         }
 
         const db = getDbInstance();
         if (!db) {
-          applyProfileNavTarget(false);
+          applyProfileNavTarget(null);
           return;
         }
 
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         const userData = userDoc.exists ? (userDoc.data() || {}) : {};
-        const isBusiness = String(userData.accountType || '').toLowerCase() === 'business';
-        applyProfileNavTarget(isBusiness);
+        const servicesSnap = await db.collection('services')
+          .where('userId', '==', currentUser.uid)
+          .limit(1)
+          .get()
+          .catch(() => null);
+        const accessProfile = {
+          ...userData,
+          hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+        };
+        const planAccess = window.LocalListPlanAccess;
+        const target = planAccess && typeof planAccess.getProfileNavTarget === 'function'
+          ? planAccess.getProfileNavTarget(accessProfile)
+          : (String(userData.accountType || '').toLowerCase() === 'business'
+            ? { href: 'business-hub.html', label: 'Business Hub' }
+            : { href: 'profile.html', label: 'Profile' });
+        applyProfileNavTarget(target);
       } catch (error) {
         console.warn('Could not determine account type for header nav:', error);
-        applyProfileNavTarget(false);
+        applyProfileNavTarget(null);
       } finally {
         updateDesktopNavActiveLink();
       }

@@ -489,20 +489,6 @@
       document.getElementById('premiumGate').classList.remove('hidden');
     }
 
-    function normalizeBusinessTier(userData, businessLocalData) {
-      const fromUser = String(userData?.businessTier || '').trim().toLowerCase();
-      const fromLocal = String(businessLocalData?.businessTier || '').trim().toLowerCase();
-      const fromSubscription = String(userData?.subscriptionPlan || '').trim().toLowerCase();
-      const premiumStatus = String(userData?.premiumStatus || '').trim().toLowerCase();
-      const tier = fromUser || fromLocal || fromSubscription || 'free';
-
-      if (userData?.isPremium === true && premiumStatus === 'active') {
-        return 'premium';
-      }
-
-      return tier === 'premium' ? 'premium' : 'free';
-    }
-
     async function loadAnalyticsForBusiness(user, userData) {
       const uid = user.uid;
       const businessLocalDoc = await db.collection('businessLocal').doc(uid).get();
@@ -686,12 +672,18 @@
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
           const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get().catch(() => null);
           const businessLocalData = businessLocalDoc && businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
-          const isBusiness = userData.accountType === 'business';
+          const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
+          const planAccess = window.LocalListPlanAccess || {};
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
-          const businessTier = normalizeBusinessTier(userData, businessLocalData);
-          const hasPremiumAnalytics = isAdmin || businessTier === 'premium';
+          const accessProfile = {
+            ...userData,
+            hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+          };
+          const hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          const hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
+          const hasPremiumAnalytics = isAdmin || (planAccess.hasPremiumProfileHubAccess ? planAccess.hasPremiumProfileHubAccess(accessProfile) : false);
 
-          if (!isBusiness && !isAdmin) {
+          if (!hasHubAccess) {
             setStatus('status-locked', 'Business account required to access analytics.');
             showGate();
             return;
@@ -704,7 +696,7 @@
           }
 
           showAnalytics();
-          setStatus('status-access', isBusiness ? 'Premium business analytics loaded.' : 'Admin preview mode: analytics loaded.');
+          setStatus('status-access', hasBusinessOnlyAccess ? 'Premium business analytics loaded.' : 'Premium service analytics loaded.');
           await loadAnalyticsForBusiness(user, userData);
         } catch (error) {
           console.error('Error loading business analytics:', error);

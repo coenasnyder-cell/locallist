@@ -279,9 +279,9 @@
 
     <section class="panel hidden" id="businessSettingsPanel" aria-label="Business profile settings">
       <div class="panel-header">
-        <h2>Business Profile</h2>
+        <h2 id="settingsPanelTitle">Business Profile</h2>
         <div class="cta-row">
-          <a class="btn" href="businesslocal.html">Edit Business Profile</a>
+          <a class="btn" id="editProfileBtn" href="businesslocal.html">Edit Business Profile</a>
           <a class="btn secondary hidden" id="viewBusinessProfileBtn" href="#">View Public Profile</a>
         </div>
       </div>
@@ -380,6 +380,13 @@
     function renderBusinessSettings(userId, businessData) {
       document.getElementById('businessSettingsPanel').classList.remove('hidden');
       document.getElementById('helperPanel').classList.remove('hidden');
+      const titleNode = document.getElementById('settingsPanelTitle');
+      const editBtn = document.getElementById('editProfileBtn');
+
+      if (titleNode) titleNode.textContent = 'Business Profile';
+      if (editBtn) {
+        editBtn.href = 'businesslocal.html';
+      }
 
       setText('businessName', businessData.businessName || businessData.displayName || 'Business account');
       setText('businessCategory', businessData.businessCategory || businessData.listingType || '-');
@@ -423,6 +430,64 @@
       }
     }
 
+    function renderServiceProviderSettings(serviceData) {
+      document.getElementById('businessSettingsPanel').classList.remove('hidden');
+      document.getElementById('helperPanel').classList.remove('hidden');
+
+      const titleNode = document.getElementById('settingsPanelTitle');
+      const editBtn = document.getElementById('editProfileBtn');
+      const viewBtn = document.getElementById('viewBusinessProfileBtn');
+
+      if (titleNode) titleNode.textContent = 'Profile Settings';
+      if (editBtn) {
+        editBtn.href = serviceData && serviceData.id
+          ? `create-service-listing.html?edit=${encodeURIComponent(serviceData.id)}`
+          : 'create-service-listing.html';
+      }
+
+      setText('businessName', serviceData.serviceName || serviceData.title || serviceData.displayName || 'Service profile');
+      setText('businessCategory', serviceData.category || serviceData.priceType || '-');
+      setText('businessPhone', serviceData.phone || serviceData.businessPhone || '-');
+      setText('businessDescription', serviceData.serviceDescription || serviceData.description || serviceData.businessDescription || '-');
+      setText('businessAddress', serviceData.serviceArea || serviceData.businessAddress || serviceData.zipCode || '-');
+      setText('businessHours', serviceData.availability || serviceData.businessHours || '-');
+
+      const websiteNode = document.getElementById('businessWebsite');
+      if (websiteNode) {
+        const rawWebsite = serviceData.website || serviceData.businessWebsite || '';
+        if (rawWebsite) {
+          const href = /^https?:\/\//i.test(rawWebsite)
+            ? rawWebsite
+            : `https://${rawWebsite}`;
+          websiteNode.innerHTML = `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(rawWebsite)}</a>`;
+        } else {
+          websiteNode.textContent = '-';
+        }
+      }
+
+      const logoField = document.getElementById('businessLogoField');
+      const logoNode = document.getElementById('businessLogo');
+      if (logoField && logoNode) {
+        const serviceImage = serviceData.serviceImage || serviceData.businessLogo || '';
+        if (serviceImage) {
+          logoField.classList.remove('hidden');
+          logoNode.src = serviceImage;
+        } else {
+          logoField.classList.add('hidden');
+          logoNode.removeAttribute('src');
+        }
+      }
+
+      if (viewBtn) {
+        if (serviceData && serviceData.id) {
+          viewBtn.href = `service-details.html?id=${encodeURIComponent(serviceData.id)}`;
+          viewBtn.classList.remove('hidden');
+        } else {
+          viewBtn.classList.add('hidden');
+        }
+      }
+    }
+
     async function loadBusinessSettingsAccess() {
       if (!auth || !db) {
         setStatus('status-locked', 'Unable to verify access right now. Please refresh and try again.');
@@ -440,19 +505,34 @@
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
           const businessLocalDoc = await db.collection('businessLocal').doc(user.uid).get();
           const businessLocalData = businessLocalDoc.exists ? (businessLocalDoc.data() || {}) : {};
+          const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
           const businessData = { ...userData, ...businessLocalData };
+          const primaryService = servicesSnap && !servicesSnap.empty
+            ? { id: servicesSnap.docs[0].id, ...(servicesSnap.docs[0].data() || {}) }
+            : null;
 
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
-          const isBusiness = userData.accountType === 'business';
+          const planAccess = window.LocalListPlanAccess || {};
+          const accessProfile = {
+            ...userData,
+            hasServiceListing: Boolean(primaryService),
+          };
+          const hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          const hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
 
-          if (!isBusiness && !isAdmin) {
+          if (!hasHubAccess) {
             setStatus('status-locked', 'Business account required to access Business Settings.');
             return;
           }
 
           renderSummary(user, userData);
-          renderBusinessSettings(user.uid, businessData);
-          setStatus('status-access', isAdmin && !isBusiness ? 'Admin access active. Business Settings loaded for review.' : 'Business Settings loaded.');
+          if (hasBusinessOnlyAccess) {
+            renderBusinessSettings(user.uid, businessData);
+            setStatus('status-access', isAdmin && !hasBusinessOnlyAccess ? 'Admin access active. Business Settings loaded for review.' : 'Business Settings loaded.');
+          } else {
+            renderServiceProviderSettings(primaryService || {});
+            setStatus('status-access', 'Profile Settings loaded.');
+          }
         } catch (error) {
           console.error('Error loading business settings:', error);
           setStatus('status-locked', 'Could not load your business settings right now. Please try again.');

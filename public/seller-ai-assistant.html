@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Listing Assistant - Local List</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #10243d;
+      background:
+        radial-gradient(circle at top left, rgba(255, 210, 163, 0.42), transparent 30%),
+        radial-gradient(circle at top right, rgba(126, 231, 214, 0.22), transparent 34%),
+        linear-gradient(180deg, #fdf8f2 0%, #f6fbff 52%, #eef5fb 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .access-banner {
+      display: none;
+      margin-bottom: 20px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      border: 1px solid #f5c2c7;
+      background: rgba(255, 241, 242, 0.96);
+      color: #7f1d1d;
+      box-shadow: 0 10px 24px rgba(127, 29, 29, 0.08);
+    }
+
+    .access-banner strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 1.08rem;
+      color: #7f1d1d;
+    }
+
+    .access-banner a {
+      color: #9f1239;
+      font-weight: 700;
+    }
+
+    .page-content.hidden {
+      display: none;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(9, 31, 54, 0.98) 0%, rgba(20, 56, 84, 0.95) 54%, rgba(15, 118, 110, 0.88) 100%);
+      color: #ffffff;
+      box-shadow: 0 24px 60px rgba(16, 36, 61, 0.18);
+      margin-bottom: 20px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -90px -130px auto;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 209, 102, 0.48) 0%, rgba(255, 209, 102, 0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.28fr 0.92fr;
+      gap: 18px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: clamp(2.4rem, 4vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 620px;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      max-width: 640px;
+      font-size: 1.02rem;
+      line-height: 1.72;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .hero-card {
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card-title {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    .hero-card-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero-card-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.5;
+    }
+
+    .hero-card-item span {
+      flex: 0 0 auto;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #ffd166;
+      margin-top: 8px;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: -0.04em;
+      color: #0f172a;
+    }
+
+    .section-header p {
+      color: #526277;
+      line-height: 1.6;
+      max-width: 720px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel,
+    .feature-card,
+    .step-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(202, 214, 228, 0.9);
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(55, 84, 115, 0.08);
+    }
+
+    .panel,
+    .feature-card,
+    .step-card {
+      padding: 24px;
+    }
+
+    .feature-kicker {
+      display: inline-flex;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      color: #0f766e;
+      background: rgba(15, 118, 110, 0.12);
+    }
+
+    .panel h3,
+    .feature-card h3,
+    .step-card h3 {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 1.32rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+      color: #10243d;
+    }
+
+    .panel p,
+    .feature-card p,
+    .step-card p {
+      color: #5d6d82;
+      line-height: 1.68;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .pill {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #eef6fb;
+      color: #274665;
+      border: 1px solid #d7e6f2;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .workspace-shell {
+      margin-top: 18px;
+      border: 1px dashed rgba(15, 118, 110, 0.35);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(248, 251, 255, 0.9) 0%, rgba(240, 247, 252, 0.88) 100%);
+      padding: 18px;
+    }
+
+    .workspace-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .workspace-title {
+      font-weight: 800;
+      color: #10243d;
+      letter-spacing: 0.01em;
+    }
+
+    .workspace-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 118, 110, 0.2);
+      background: rgba(255, 255, 255, 0.7);
+      color: #0f766e;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+
+    .workspace-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(210, 223, 235, 0.95);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 230px;
+    }
+
+    .assistant-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .image-upload-shell {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px dashed rgba(15, 118, 110, 0.32);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(247, 252, 250, 0.96) 0%, rgba(241, 248, 252, 0.96) 100%);
+    }
+
+    .image-upload-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .image-upload-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .file-input-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .image-preview-card {
+      display: none;
+      grid-template-columns: 124px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(210, 223, 235, 0.95);
+    }
+
+    .image-preview-card.active {
+      display: grid;
+    }
+
+    .image-preview {
+      width: 124px;
+      height: 124px;
+      border-radius: 16px;
+      object-fit: cover;
+      background: linear-gradient(135deg, rgba(226, 235, 243, 0.95), rgba(245, 249, 252, 0.95));
+      border: 1px solid rgba(210, 223, 235, 0.95);
+    }
+
+    .image-preview-meta {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .image-preview-name {
+      font-weight: 800;
+      color: #10243d;
+      word-break: break-word;
+    }
+
+    .image-preview-details {
+      color: #526277;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .image-preview-hint {
+      color: #0f766e;
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      color: #334155;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid #d7e6f2;
+      background: rgba(255, 255, 255, 0.96);
+      color: #10243d;
+      padding: 12px 14px;
+      font: inherit;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .form-textarea {
+      min-height: 148px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: #0f766e;
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    .helper-copy {
+      color: #708198;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .assistant-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .btn-primary {
+      background: #0f766e;
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(15, 118, 110, 0.18);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.85);
+      color: #274665;
+      border: 1px solid #d7e6f2;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled,
+    .btn-secondary:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .status-note.active {
+      display: block;
+    }
+
+    .status-note.info {
+      background: rgba(224, 242, 254, 0.92);
+      border: 1px solid #bae6fd;
+      color: #0c4a6e;
+    }
+
+    .status-note.error {
+      background: rgba(255, 241, 242, 0.96);
+      border: 1px solid #fecdd3;
+      color: #9f1239;
+    }
+
+    .status-note.success {
+      background: rgba(236, 253, 245, 0.96);
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+
+    .result-empty {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      color: #5d6d82;
+    }
+
+    .result-card {
+      display: none;
+      gap: 18px;
+    }
+
+    .result-card.active {
+      display: grid;
+    }
+
+    .result-block {
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .result-block h4 {
+      font-size: 0.84rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #708198;
+    }
+
+    .result-output {
+      background: rgba(248, 251, 255, 0.9);
+      border: 1px solid rgba(210, 223, 235, 0.95);
+      border-radius: 14px;
+      padding: 14px;
+      color: #10243d;
+      line-height: 1.62;
+      white-space: pre-wrap;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 8px;
+      padding-left: 18px;
+      color: #10243d;
+    }
+
+    .copy-button {
+      border: 1px solid #d7e6f2;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #274665;
+      padding: 7px 12px;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+
+    .copy-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(15, 118, 110, 0.35);
+      color: #0f766e;
+    }
+
+    .copy-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    .workspace-label {
+      display: inline-flex;
+      margin-bottom: 10px;
+      color: #708198;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .workspace-placeholder {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .placeholder-line {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(226, 235, 243, 0.95) 0%, rgba(237, 244, 250, 0.95) 100%);
+    }
+
+    .placeholder-line.short {
+      width: 58%;
+    }
+
+    .placeholder-line.medium {
+      width: 74%;
+    }
+
+    .placeholder-line.long {
+      width: 100%;
+    }
+
+    .top-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      color: #274665;
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      color: #6b7c91;
+      font-size: 0.95rem;
+      padding-top: 28px;
+    }
+
+    .footer a {
+      color: #274665;
+      font-weight: 700;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .grid.two,
+      .grid.three,
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        width: min(100% - 20px, 1160px);
+        padding-top: 18px;
+      }
+
+      .hero,
+      .panel,
+      .feature-card,
+      .step-card,
+      .workspace-panel {
+        border-radius: 20px;
+      }
+
+      .hero {
+        padding: 24px 20px;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.45rem;
+      }
+
+      .image-preview-card {
+        grid-template-columns: 1fr;
+      }
+
+      .image-preview {
+        width: 100%;
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <main class="container">
+    <section id="assistantGate" class="access-banner" aria-live="polite">
+      <strong>Paid seller access required</strong>
+      <span id="assistantGateMessage">Sign in with an active paid seller plan to open the AI Listing Assistant.</span>
+    </section>
+
+    <div id="assistantContent" class="page-content hidden">
+      <a class="top-link" href="seller-hub.html"><span aria-hidden="true">&lt;-</span> Back to Seller's Hub</a>
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">Seller Pro Workspace</div>
+            <h1>AI Listing Assistant</h1>
+            <p>
+              This page is the dedicated home for the future listing assistant. It gives you a clean place to build the
+              workflow step by step without crowding the Seller's Hub.
+            </p>
+          </div>
+
+          <aside class="hero-card" aria-label="What this page will handle">
+            <div class="hero-card-title">Planned flow</div>
+            <div class="hero-card-list">
+              <div class="hero-card-item"><span></span><div>Start with a draft listing or existing post.</div></div>
+              <div class="hero-card-item"><span></span><div>Improve title, description, photos, and pricing suggestions.</div></div>
+              <div class="hero-card-item"><span></span><div>Review outputs before applying them to a live listing.</div></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Listing Generator</h2>
+            <p>
+              This first version generates a marketplace-ready title, three short bullets, and a buyer-friendly
+              description from the details you provide.
+            </p>
+          </div>
+        </div>
+
+        <div class="workspace-shell">
+          <div class="workspace-toolbar">
+            <div class="workspace-title">AI Listing Generator</div>
+            <div class="workspace-actions">
+              <div class="ghost-chip">Title</div>
+              <div class="ghost-chip">Description</div>
+              <div class="ghost-chip">Bullets</div>
+            </div>
+          </div>
+
+          <div class="workspace-grid">
+            <div class="workspace-panel">
+              <div class="workspace-label">Listing Input</div>
+              <h3>Tell the assistant what you are selling</h3>
+              <p>
+                Start with the item name and any details you want turned into a cleaner draft. The assistant will keep
+                the output short, clear, and easier for buyers to scan.
+              </p>
+
+              <form id="listingGeneratorForm" class="assistant-form">
+                <div class="image-upload-shell">
+                  <div class="image-upload-header">
+                    <div>
+                      <div class="form-label">Reference image</div>
+                      <div class="helper-copy">Optional. Add one clear product photo and the assistant will suggest details worth mentioning based on what it can see.</div>
+                    </div>
+
+                    <div class="image-upload-actions">
+                      <input id="referenceImage" class="file-input-hidden" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif">
+                      <button id="selectImageButton" class="btn-secondary" type="button">Add Photo</button>
+                      <button id="removeImageButton" class="btn-secondary" type="button" disabled>Remove Photo</button>
+                    </div>
+                  </div>
+
+                  <div id="imagePreviewCard" class="image-preview-card">
+                    <img id="imagePreview" class="image-preview" alt="Listing reference preview">
+                    <div class="image-preview-meta">
+                      <div id="imagePreviewName" class="image-preview-name"></div>
+                      <div id="imagePreviewDetails" class="image-preview-details"></div>
+                      <div class="image-preview-hint">The image is used for suggestions only. Double-check any AI guesses before posting.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="input-grid">
+                  <label class="form-field">
+                    <span class="form-label">Product name</span>
+                    <input id="productName" class="form-input" type="text" maxlength="120" placeholder="Example: Solid wood coffee table" required>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="form-label">Price context</span>
+                    <input id="priceContext" class="form-input" type="text" maxlength="80" placeholder="Example: Asking $85">
+                  </label>
+                </div>
+
+                <label class="form-field full">
+                  <span class="form-label">Details</span>
+                  <textarea id="details" class="form-textarea" maxlength="4000" placeholder="Add size, brand, color, flaws, included accessories, pickup notes, or anything buyers should know."></textarea>
+                  <span class="helper-copy">Helpful details produce stronger drafts. You can include flaws, measurements, and what makes the item valuable.</span>
+                </label>
+
+                <div class="assistant-actions">
+                  <button id="generateButton" class="btn-primary" type="submit">Generate Listing Draft</button>
+                  <button id="resetButton" class="btn-secondary" type="button">Clear</button>
+                  <button id="useInListingButton" class="btn-secondary" type="button" disabled>Use In Listing</button>
+                </div>
+              </form>
+
+              <div id="generatorStatus" class="status-note info"></div>
+            </div>
+
+            <div class="workspace-panel">
+              <div class="workspace-label">Assistant Output</div>
+              <h3>Your generated draft</h3>
+              <p>
+                Review the draft here, then copy the parts you want into your real listing flow. We can wire direct
+                posting and editing actions later.
+              </p>
+
+              <div id="resultEmpty" class="result-empty">
+                <div class="workspace-placeholder">
+                  <div class="placeholder-line medium"></div>
+                  <div class="placeholder-line long"></div>
+                  <div class="placeholder-line long"></div>
+                  <div class="placeholder-line short"></div>
+                </div>
+                <div class="helper-copy">No draft yet. Generate a listing and the assistant will return a title, bullets, and description here.</div>
+              </div>
+
+              <div id="resultCard" class="result-card">
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4>Title</h4>
+                    <button class="copy-button" type="button" data-copy-target="title">Copy Title</button>
+                  </div>
+                  <div id="resultTitle" class="result-output"></div>
+                </div>
+
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4>Description</h4>
+                    <button class="copy-button" type="button" data-copy-target="description">Copy Description</button>
+                  </div>
+                  <div id="resultDescription" class="result-output"></div>
+                </div>
+
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4>Bullets</h4>
+                    <button class="copy-button" type="button" data-copy-target="bullets">Copy Bullets</button>
+                  </div>
+                  <ol id="resultBullets" class="result-list"></ol>
+                </div>
+
+                <div class="result-block">
+                  <div class="result-block-header">
+                    <h4>Full Draft</h4>
+                    <button class="copy-button" type="button" data-copy-target="all">Copy All</button>
+                  </div>
+                  <div class="helper-copy">Copy the full draft in one step if you want to paste it into your listing flow.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid three">
+          <article class="feature-card">
+            <div class="feature-kicker">Phase 1</div>
+            <h3>Single listing helper</h3>
+            <p>Start with one focused flow: paste a draft listing and get clearer copy back.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-kicker">Phase 2</div>
+            <h3>Quality suggestions</h3>
+            <p>Add checks for weak titles, missing details, and photo issues that may hurt conversion.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-kicker">Phase 3</div>
+            <h3>Seller workflow</h3>
+            <p>Save drafts, compare revisions, and carry polished output directly into the posting flow later.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid two">
+          <article class="panel">
+            <h3>What belongs on this page first</h3>
+            <p>
+              The best first version is a narrow, useful one: title rewrite, description cleanup, and a simple review
+              panel. That gives sellers immediate value without overcomplicating the build.
+            </p>
+            <div class="pill-row">
+              <div class="pill">Title Rewrite</div>
+              <div class="pill">Description Polish</div>
+              <div class="pill">Missing Details Check</div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h3>Why keep it on its own page</h3>
+            <p>
+              The Seller's Hub stays clean as the dashboard, while this page becomes the real tool workspace. That
+              makes the feature easier to grow step by step.
+            </p>
+            <div class="pill-row">
+              <div class="pill">More room</div>
+              <div class="pill">Cleaner code</div>
+              <div class="pill">Better workflow</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid three">
+          <article class="step-card">
+            <div class="feature-kicker">Step 1</div>
+            <h3>Generator is live</h3>
+            <p>The page now creates a real draft from seller input using the backend AI function.</p>
+          </article>
+
+          <article class="step-card">
+            <div class="feature-kicker">Step 2</div>
+            <h3>Next can be editing tools</h3>
+            <p>We can add copy buttons, regenerate actions, and more focused assistant improvements next.</p>
+          </article>
+
+          <article class="step-card">
+            <div class="feature-kicker">Step 3</div>
+            <h3>Then posting workflow</h3>
+            <p>After that, we can connect the draft directly into listing creation or saved seller drafts.</p>
+          </article>
+        </div>
+      </section>
+
+      <div class="footer">
+        <p>&copy; 2026 Local List. A local marketplace for Harrison.</p>
+        <p style="margin-top: 8px;"><a href="seller-hub.html">Back to Seller's Hub</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="header.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    const storage = window.firebaseStorage;
+    const functions = window.firebase && typeof window.firebase.functions === 'function'
+      ? window.firebase.functions()
+      : null;
+    const AI_LISTING_DRAFT_STORAGE_KEY = 'sellerAiListingDraft';
+
+    let currentUserProfile = null;
+    let currentGeneratedListing = null;
+    let currentReferenceImage = null;
+    const MAX_REFERENCE_IMAGE_BYTES = 4 * 1024 * 1024;
+    const MAX_REFERENCE_IMAGE_DIMENSION = 1600;
+
+    function setStatus(type, message) {
+      const status = document.getElementById('generatorStatus');
+      if (!status) return;
+
+      status.className = `status-note ${type} active`;
+      status.textContent = message;
+    }
+
+    function clearStatus() {
+      const status = document.getElementById('generatorStatus');
+      if (!status) return;
+
+      status.className = 'status-note info';
+      status.textContent = '';
+    }
+
+    function renderListingResult(listing) {
+      const emptyState = document.getElementById('resultEmpty');
+      const resultCard = document.getElementById('resultCard');
+      const title = document.getElementById('resultTitle');
+      const bullets = document.getElementById('resultBullets');
+      const description = document.getElementById('resultDescription');
+
+      if (!title || !bullets || !description || !resultCard || !emptyState) return;
+
+      title.textContent = listing.title || '';
+      description.textContent = listing.description || '';
+      bullets.innerHTML = '';
+
+      (Array.isArray(listing.bullets) ? listing.bullets : []).forEach((bullet) => {
+        const item = document.createElement('li');
+        item.textContent = String(bullet || '');
+        bullets.appendChild(item);
+      });
+
+      emptyState.style.display = 'none';
+      resultCard.classList.add('active');
+    }
+
+    function resetGeneratorUi() {
+      const form = document.getElementById('listingGeneratorForm');
+      const emptyState = document.getElementById('resultEmpty');
+      const resultCard = document.getElementById('resultCard');
+      const useInListingButton = document.getElementById('useInListingButton');
+
+      if (form) form.reset();
+      clearReferenceImage();
+      if (emptyState) emptyState.style.display = 'grid';
+      if (resultCard) resultCard.classList.remove('active');
+      if (useInListingButton) useInListingButton.disabled = true;
+      currentGeneratedListing = null;
+      clearStatus();
+    }
+
+    function extractPriceValue(priceContext) {
+      const match = String(priceContext || '').match(/-?\d+(?:\.\d{1,2})?/);
+      return match ? match[0] : '';
+    }
+
+    function buildListingPrefillPayload() {
+      if (!currentGeneratedListing) {
+        return null;
+      }
+
+      const priceContext = String(document.getElementById('priceContext')?.value || '').trim();
+      const bullets = Array.isArray(currentGeneratedListing.bullets) ? currentGeneratedListing.bullets : [];
+      const bulletText = bullets.length ? bullets.map((bullet) => `- ${bullet}`).join('\n') : '';
+      const description = String(currentGeneratedListing.description || '').trim();
+
+      return {
+        title: String(currentGeneratedListing.title || '').trim(),
+        description: [description, bulletText].filter(Boolean).join('\n\n'),
+        price: extractPriceValue(priceContext),
+        source: 'seller_ai_assistant',
+        createdAt: Date.now(),
+      };
+    }
+
+    function getListingDraftText(copyTarget) {
+      const title = String(document.getElementById('resultTitle')?.textContent || '').trim();
+      const description = String(document.getElementById('resultDescription')?.textContent || '').trim();
+      const bullets = Array.from(document.querySelectorAll('#resultBullets li'))
+        .map((item) => String(item.textContent || '').trim())
+        .filter(Boolean);
+
+      if (copyTarget === 'title') {
+        return title;
+      }
+
+      if (copyTarget === 'bullets') {
+        return bullets.map((bullet) => `- ${bullet}`).join('\n');
+      }
+
+      if (copyTarget === 'description') {
+        return description;
+      }
+
+      if (copyTarget === 'all') {
+        return [
+          title ? `Title: ${title}` : '',
+          description ? `Description:\n${description}` : '',
+          bullets.length ? `Bullets:\n${bullets.map((bullet) => `- ${bullet}`).join('\n')}` : '',
+        ].filter(Boolean).join('\n\n');
+      }
+
+      return '';
+    }
+
+    function formatBytes(bytes) {
+      const size = Number(bytes || 0);
+      if (!Number.isFinite(size) || size <= 0) {
+        return '';
+      }
+
+      if (size < 1024 * 1024) {
+        return `${Math.max(1, Math.round(size / 1024))} KB`;
+      }
+
+      return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function loadImageElement(source) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('We could not read that image.'));
+        image.src = source;
+      });
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('We could not read that file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function optimizeReferenceImage(file) {
+      const originalDataUrl = await readFileAsDataUrl(file);
+      const image = await loadImageElement(originalDataUrl);
+      const width = Number(image.naturalWidth || image.width || 0);
+      const height = Number(image.naturalHeight || image.height || 0);
+      const largestSide = Math.max(width, height, 1);
+      const scale = largestSide > MAX_REFERENCE_IMAGE_DIMENSION ? (MAX_REFERENCE_IMAGE_DIMENSION / largestSide) : 1;
+      const targetWidth = Math.max(1, Math.round(width * scale));
+      const targetHeight = Math.max(1, Math.round(height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        throw new Error('Your browser could not prepare that image.');
+      }
+
+      context.drawImage(image, 0, 0, targetWidth, targetHeight);
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/jpeg', 0.82);
+      });
+
+      if (!blob) {
+        throw new Error('Your browser could not compress that image.');
+      }
+
+      const safeFileName = String(file.name || 'reference-image.jpg')
+        .replace(/\.[^/.]+$/, '')
+        .replace(/[^a-z0-9-_]+/gi, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 80) || 'reference-image';
+
+      return {
+        blob,
+        previewUrl: URL.createObjectURL(blob),
+        fileName: `${safeFileName}.jpg`,
+        mimeType: 'image/jpeg',
+        width: targetWidth,
+        height: targetHeight,
+        sizeBytes: blob.size,
+        uploadedUrl: '',
+        storagePath: '',
+      };
+    }
+
+    function renderReferenceImage() {
+      const previewCard = document.getElementById('imagePreviewCard');
+      const preview = document.getElementById('imagePreview');
+      const name = document.getElementById('imagePreviewName');
+      const details = document.getElementById('imagePreviewDetails');
+      const removeButton = document.getElementById('removeImageButton');
+
+      if (!previewCard || !preview || !name || !details || !removeButton) {
+        return;
+      }
+
+      if (!currentReferenceImage) {
+        previewCard.classList.remove('active');
+        preview.removeAttribute('src');
+        name.textContent = '';
+        details.textContent = '';
+        removeButton.disabled = true;
+        return;
+      }
+
+      preview.src = currentReferenceImage.previewUrl || '';
+      name.textContent = currentReferenceImage.fileName || 'Reference image';
+      details.textContent = `${currentReferenceImage.width} x ${currentReferenceImage.height} px • ${formatBytes(currentReferenceImage.sizeBytes)}`;
+      previewCard.classList.add('active');
+      removeButton.disabled = false;
+    }
+
+    function clearReferenceImage() {
+      if (currentReferenceImage && currentReferenceImage.previewUrl) {
+        URL.revokeObjectURL(currentReferenceImage.previewUrl);
+      }
+      currentReferenceImage = null;
+      const fileInput = document.getElementById('referenceImage');
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      renderReferenceImage();
+    }
+
+    async function handleReferenceImageSelection(event) {
+      const input = event.target;
+      const file = input && input.files ? input.files[0] : null;
+
+      if (!file) {
+        clearReferenceImage();
+        return;
+      }
+
+      if (!/^image\//i.test(file.type || '')) {
+        clearReferenceImage();
+        setStatus('error', 'Choose a PNG, JPG, WEBP, or GIF image.');
+        return;
+      }
+
+      if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
+        clearReferenceImage();
+        setStatus('error', 'Choose an image under 4 MB so it can be processed reliably.');
+        return;
+      }
+
+      try {
+        setStatus('info', 'Preparing your photo for image-based suggestions...');
+        currentReferenceImage = await optimizeReferenceImage(file);
+        renderReferenceImage();
+        setStatus('success', 'Photo added. The assistant will use it as an optional reference.');
+      } catch (error) {
+        console.error('Failed to prepare reference image:', error);
+        clearReferenceImage();
+        const message = error && error.message
+          ? error.message
+          : 'We could not prepare that image right now.';
+        setStatus('error', message);
+      }
+    }
+
+    async function uploadReferenceImageIfNeeded() {
+      if (!currentReferenceImage) {
+        return '';
+      }
+
+      if (currentReferenceImage.uploadedUrl) {
+        return currentReferenceImage.uploadedUrl;
+      }
+
+      const currentUser = auth && auth.currentUser ? auth.currentUser : null;
+      if (!currentUser) {
+        throw new Error('Sign in before uploading a reference photo.');
+      }
+
+      if (!storage || typeof storage.ref !== 'function') {
+        throw new Error('Firebase Storage is not available on this page right now.');
+      }
+
+      const storagePath = `aiListingReferenceImages/${currentUser.uid}/${Date.now()}_${currentReferenceImage.fileName}`;
+      const fileRef = storage.ref(storagePath);
+
+      await fileRef.put(currentReferenceImage.blob, {
+        contentType: currentReferenceImage.mimeType || 'image/jpeg',
+        cacheControl: 'public,max-age=86400',
+      });
+
+      const downloadUrl = await fileRef.getDownloadURL();
+      currentReferenceImage.uploadedUrl = downloadUrl;
+      currentReferenceImage.storagePath = storagePath;
+      return downloadUrl;
+    }
+
+    async function copyListingDraft(copyTarget, button) {
+      const text = getListingDraftText(copyTarget);
+
+      if (!text) {
+        setStatus('error', 'Generate a draft before copying content.');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = button ? button.textContent : '';
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Copied';
+        }
+        setStatus('success', 'Copied to your clipboard.');
+
+        window.setTimeout(() => {
+          if (button) {
+            button.disabled = false;
+            button.textContent = original;
+          }
+        }, 1200);
+      } catch (error) {
+        console.error('Copy failed:', error);
+        setStatus('error', 'Copy failed on this browser. Try selecting the text manually.');
+      }
+    }
+
+    async function generateListingDraft(event) {
+      event.preventDefault();
+
+      if (!functions) {
+        setStatus('error', 'Firebase Functions is not available on this page right now.');
+        return;
+      }
+
+      const productName = String(document.getElementById('productName')?.value || '').trim();
+      const priceContext = String(document.getElementById('priceContext')?.value || '').trim();
+      const details = String(document.getElementById('details')?.value || '').trim();
+      const generateButton = document.getElementById('generateButton');
+
+      if (!productName) {
+        setStatus('error', 'Add a product name before generating a draft.');
+        return;
+      }
+
+      try {
+        if (generateButton) generateButton.disabled = true;
+        setStatus('info', currentReferenceImage ? 'Uploading your reference photo and generating your listing draft...' : 'Generating your listing draft...');
+        const referenceImageUrl = currentReferenceImage
+          ? await uploadReferenceImageIfNeeded()
+          : '';
+
+        const callable = functions.httpsCallable('generateSellerListingDraft');
+        const response = await callable({
+          productName,
+          priceContext,
+          details,
+          referenceImageUrl: referenceImageUrl || null,
+        });
+
+        const listing = response && response.data ? response.data.listing : null;
+        if (!listing) {
+          throw new Error('The assistant returned an empty draft.');
+        }
+
+        currentGeneratedListing = listing;
+        renderListingResult(listing);
+        const useInListingButton = document.getElementById('useInListingButton');
+        if (useInListingButton) useInListingButton.disabled = false;
+        setStatus('success', 'Draft generated. Review it and use any parts you want.');
+      } catch (error) {
+        console.error('AI listing generation failed:', error);
+        const message = error && error.message
+          ? error.message
+          : 'Could not generate a draft right now. Please try again.';
+        setStatus('error', message);
+      } finally {
+        if (generateButton) generateButton.disabled = false;
+      }
+    }
+
+    function useDraftInListing() {
+      const payload = buildListingPrefillPayload();
+
+      if (!payload) {
+        setStatus('error', 'Generate a draft before sending it into the listing form.');
+        return;
+      }
+
+      try {
+        sessionStorage.setItem(AI_LISTING_DRAFT_STORAGE_KEY, JSON.stringify(payload));
+        window.location.href = 'create-listing.html?prefill=ai';
+      } catch (error) {
+        console.error('Failed to store AI listing draft:', error);
+        setStatus('error', 'We could not move this draft into the listing form right now.');
+      }
+    }
+
+    function setAssistantAccessState(hasAccess, message) {
+      const gate = document.getElementById('assistantGate');
+      const gateMessage = document.getElementById('assistantGateMessage');
+      const content = document.getElementById('assistantContent');
+
+      if (hasAccess) {
+        if (gate) gate.style.display = 'none';
+        if (content) content.classList.remove('hidden');
+        return;
+      }
+
+      if (gate) gate.style.display = 'block';
+      if (gateMessage) gateMessage.innerHTML = message;
+      if (content) content.classList.add('hidden');
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (!user) {
+          setAssistantAccessState(false, 'Sign in with an active paid seller plan to open the AI Listing Assistant. <a href="login.html?next=seller-ai-assistant.html">Sign in</a>');
+          return;
+        }
+
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+        currentUserProfile = userData;
+        const planAccess = window.LocalListPlanAccess || {};
+        const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+        const hasAccess = isAdmin || (planAccess.hasSellerHubAccess ? planAccess.hasSellerHubAccess(userData) : false);
+
+        if (!hasAccess) {
+          setAssistantAccessState(false, 'This page is reserved for admins or active paid seller plans. Upgrade to Seller Pro or Business Premium to unlock it.');
+          return;
+        }
+
+        setAssistantAccessState(true, '');
+      } catch (error) {
+        console.error('Failed to load AI Listing Assistant access:', error);
+        setAssistantAccessState(false, 'We could not verify seller access right now. Please try again in a moment.');
+      }
+    });
+
+    document.getElementById('listingGeneratorForm')?.addEventListener('submit', generateListingDraft);
+    document.getElementById('resetButton')?.addEventListener('click', resetGeneratorUi);
+    document.getElementById('useInListingButton')?.addEventListener('click', useDraftInListing);
+    document.getElementById('selectImageButton')?.addEventListener('click', () => {
+      document.getElementById('referenceImage')?.click();
+    });
+    document.getElementById('removeImageButton')?.addEventListener('click', () => {
+      clearReferenceImage();
+      setStatus('info', 'Reference photo removed.');
+    });
+    document.getElementById('referenceImage')?.addEventListener('change', handleReferenceImageSelection);
+    document.querySelectorAll('[data-copy-target]').forEach((button) => {
+      button.addEventListener('click', () => {
+        copyListingDraft(button.getAttribute('data-copy-target'), button);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -613,18 +613,25 @@
           state.currentUser = user;
           const userDoc = await db.collection('users').doc(user.uid).get();
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+          const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
           state.viewerData = userData;
-          const isBusiness = userData.accountType === 'business';
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+          const planAccess = window.LocalListPlanAccess || {};
+          const accessProfile = {
+            ...userData,
+            hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+          };
+          const hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          const hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
 
-          if (!isBusiness && !isAdmin) {
+          if (!hasHubAccess) {
             setStatus('status-locked', 'Business account required to access reputation tools.');
             showGate();
             return;
           }
 
           showReputation();
-          setStatus('status-access', isBusiness ? 'Reputation tools loaded.' : 'Admin preview mode: reputation tools loaded.');
+          setStatus('status-access', hasBusinessOnlyAccess ? 'Reputation tools loaded.' : 'Service reputation tools loaded.');
           await loadReputationForBusiness(user.uid);
         } catch (error) {
           console.error('Failed to load reputation tools:', error);

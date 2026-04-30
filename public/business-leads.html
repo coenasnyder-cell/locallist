@@ -789,18 +789,25 @@
         try {
           const userDoc = await db.collection('users').doc(user.uid).get();
           const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+          const servicesSnap = await db.collection('services').where('userId', '==', user.uid).limit(1).get().catch(() => null);
           state.responseBaselineAt = toDate(userData.leadsMetricsResetAt);
-          const isBusiness = userData.accountType === 'business';
           const isAdmin = String(userData.role || '').toLowerCase() === 'admin' || localStorage.getItem('isAdmin') === 'true';
+          const planAccess = window.LocalListPlanAccess || {};
+          const accessProfile = {
+            ...userData,
+            hasServiceListing: Boolean(servicesSnap && !servicesSnap.empty),
+          };
+          const hasHubAccess = isAdmin || (planAccess.hasProfileHubAccess ? planAccess.hasProfileHubAccess(accessProfile) : false);
+          const hasBusinessOnlyAccess = isAdmin || (planAccess.hasBusinessOnlyAccess ? planAccess.hasBusinessOnlyAccess(accessProfile) : false);
 
-          if (!isBusiness && !isAdmin) {
+          if (!hasHubAccess) {
             setStatus('status-locked', 'Business account required to access leads and inbox tools.');
             showGate();
             return;
           }
 
           showLeads();
-          setStatus('status-access', isBusiness ? 'Leads and inbox loaded.' : 'Admin preview mode: leads tools loaded.');
+          setStatus('status-access', hasBusinessOnlyAccess ? 'Leads and inbox loaded.' : 'Service leads and inbox loaded.');
           await loadLeadThreads(user.uid);
         } catch (error) {
           console.error('Failed to load leads/inbox tools:', error);

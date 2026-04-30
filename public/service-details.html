@@ -595,6 +595,7 @@
     auth.onAuthStateChanged((user) => {
       currentUser = user;
       if (currentService) {
+        renderService(currentService);
         loadReviewsForService(currentService).catch((error) => {
           console.error('Error refreshing reviews after auth change:', error);
         });
@@ -708,14 +709,14 @@
       const phone = String(profile.contactPhone || '').trim();
       const email = String(profile.contactEmail || '').trim();
       const website = String(profile.contactWebsite || '').trim();
+      const localListValues = ['local list', 'locallist', 'local_list', 'message', 'messaging', 'chat'];
+
+      if (localListValues.includes(preferred)) return null;
 
       if (preferred === 'phone' && phone) return { label: 'Phone', value: phone };
       if (preferred === 'email' && email) return { label: 'Email', value: email };
       if (preferred === 'website' && website) return { label: 'Website', value: website };
 
-      if (phone) return { label: 'Phone', value: phone };
-      if (email) return { label: 'Email', value: email };
-      if (website) return { label: 'Website', value: website };
       return null;
     }
 
@@ -999,22 +1000,30 @@ function renderReviewRatingSummary(summary) {
     function renderService(profile) {
       const serviceName = profile.serviceName || profile.businessName || 'Service';
       const description = profile.serviceDescription || profile.businessDescription || 'No description available.';
-      const providerName = profile.providerName || profile.businessName || 'Not provided';
+      const providerName = profile.providerName || profile.businessName || profile.serviceName || 'Not provided';
       const category = profile.category || 'Services';
       const categoryIcon = profile.categoryIcon || '🔧';
       const serviceImage = profile.serviceImage || profile.businessLogo || '';
-      const serviceArea = profile.serviceArea || 'Not specified';
+      const serviceArea = profile.serviceArea || [profile.city, profile.state].filter(Boolean).join(', ') || profile.zipCode || 'Not specified';
       const zipCode = profile.zipCode || 'Not specified';
-      const hours = String(profile.hours || '').trim();
+      const hours = String(profile.hours || profile.businessHours || '').trim();
       const tier = String(profile.businessTier || '').toLowerCase();
 
       const contactPhone = String(profile.contactPhone || '').trim();
-      const contactEmail = String(profile.contactEmail || '').trim();
+      const contactEmail = String(
+        profile.contactEmail ||
+        (String(profile.preferredContactMethod || '').toLowerCase() === 'email' ? profile.preferredContactValue : '') ||
+        ''
+      ).trim();
       const contactWebsiteRaw = String(profile.contactWebsite || '').trim();
       const contactWebsite = normalizeUrl(contactWebsiteRaw);
 
       const preferred = resolvePreferredContact(profile);
       const priceLabel = formatPrice(profile);
+      const canEditService = Boolean(currentUser && currentUser.uid && currentUser.uid === profile.userId);
+      const editServiceButton = canEditService
+        ? `<div style="margin-top:12px;"><a class="btn btn-secondary" href="create-service-listing.html?edit=${encodeURIComponent(profile.id)}">Edit Service</a></div>`
+        : '';
 
 const logoImageHtml = `
   <div class="business-logo-container">
@@ -1024,7 +1033,7 @@ const logoImageHtml = `
 
       const tierHtml = tier === 'premium' ? '<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700;margin-top:10px;">⭐ Premium</span>' : '';
 
-      let preferredValueHtml = '<div class="info-value">No preferred contact method provided</div>';
+      let preferredValueHtml = '';
       if (preferred) {
         if (preferred.label === 'Phone') {
           preferredValueHtml = `<div class="info-value"><a href="tel:${escapeHtml(preferred.value)}">${escapeHtml(preferred.value)}</a></div>`;
@@ -1045,6 +1054,17 @@ const logoImageHtml = `
         contactPhone ? `<a class="btn btn-primary" href="tel:${escapeHtml(contactPhone)}">📞 Call</a>` : '',
         contactEmail ? `<a class="btn btn-primary" href="mailto:${escapeHtml(contactEmail)}">✉️ Email</a>` : '',
         contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">🌐 Website</a>` : ''
+      ].filter(Boolean).join('');
+      const actionButtonsNoCall = [
+        messagingBtn,
+        contactEmail ? `<a class="btn btn-primary" href="mailto:${escapeHtml(contactEmail)}">âœ‰ï¸ Email</a>` : '',
+        contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">ðŸŒ Website</a>` : ''
+      ].filter(Boolean).join('');
+
+      const actionButtonsCompact = [
+        messagingBtn,
+        contactEmail ? `<a class="btn btn-primary" href="mailto:${escapeHtml(contactEmail)}">Email</a>` : '',
+        contactWebsite ? `<a class="btn btn-primary" href="${escapeHtml(contactWebsite)}" target="_blank" rel="noopener noreferrer">Website</a>` : ''
       ].filter(Boolean).join('');
 
       const socialLinks = [
@@ -1102,6 +1122,7 @@ const logoImageHtml = `
   <div class="header-text">
     <h1 class="service-name">${escapeHtml(serviceName)}</h1>
     <div id="reviewSummaryTop"></div>
+    ${editServiceButton}
   </div>
 
 </section>
@@ -1147,13 +1168,13 @@ const logoImageHtml = `
       </div>
     </div>
 
-    <div class="info-item">
-      <div class="info-label">Preferred Contact</div>
-      <div class="info-value">
-        ${preferred ? escapeHtml(preferred.label) : 'Not specified'}
+    ${preferred ? `
+      <div class="info-item">
+        <div class="info-label">Preferred Contact</div>
+        <div class="info-value">${escapeHtml(preferred.label)}</div>
+        ${preferredValueHtml}
       </div>
-      ${preferredValueHtml}
-    </div>
+    ` : ''}
 
     ${contactPhone && `
       <div class="info-item">
@@ -1181,10 +1202,10 @@ const logoImageHtml = `
     </div>
 
     <!-- ACTION BUTTONS -->
-    ${actionButtons && `
+    ${actionButtonsCompact && `
       <div class="info-item">
         <div class="action-buttons">
-          ${actionButtons}
+          ${actionButtonsCompact}
         </div>
       </div>
     `}
@@ -1193,24 +1214,23 @@ const logoImageHtml = `
 ${(() => {
 const galleryImages = [
   ...(Array.isArray(profile.galleryImages) ? profile.galleryImages : []),
-  ...(Array.isArray(profile.serviceImages) ? profile.serviceImages : []),
-  profile.serviceImage,
-  profile.coverImage
+  ...(Array.isArray(profile.serviceImages) ? profile.serviceImages : [])
 ]
 .filter(img => typeof img === 'string' && img.trim().length > 0);
 
-  if (!galleryImages.length) return '';
-
   return `
-    <section class="gallery-container">
-      <div class="gallery-section">
-        <div class="gallery-title">Gallery</div>
-        <div class="gallery">
-          ${galleryImages.map(img => `
-            <img src="${escapeHtml(img)}" alt="Gallery Image">
-          `).join('')}
+    ${galleryImages.length ? `
+      <section class="gallery-container">
+        <div class="gallery-section">
+          <div class="gallery-title">Gallery</div>
+          <div class="gallery">
+            ${galleryImages.map(img => `
+              <img src="${escapeHtml(img)}" alt="Gallery Image">
+            `).join('')}
+          </div>
         </div>
-    </section>
+      </section>
+    ` : ''}
     <section class="reviews-section">
       <div class="reviews-header">
         <h2 class="reviews-title">Customer Reviews</h2>

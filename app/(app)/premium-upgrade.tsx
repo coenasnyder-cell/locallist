@@ -18,6 +18,7 @@ import { auth, db } from '@/firebase';
 import { StripeProvider } from '@stripe/stripe-react-native';
 
 import { handleUpgrade, STRIPE_UPGRADE_CANCELED } from '@/lib/payments/handleUpgrade';
+import { hasBusinessPremiumAccess } from '@/utils/planAccess';
 
 type CompareRow = { feature: string; free: 'yes' | 'no'; premium: 'yes' | 'no' };
 
@@ -362,11 +363,7 @@ export default function PremiumUpgradeScreen() {
       }
 
       const data = userDoc.data();
-      const tier = String(data?.businessTier || '').toLowerCase();
-      const status = String(data?.premiumStatus || '').toLowerCase();
-      const premium =
-        (data?.isPremium === true && status === 'active') ||
-        (String(data?.accountType || '').toLowerCase() === 'business' && tier === 'premium');
+      const premium = hasBusinessPremiumAccess(data);
 
       setAlreadyPremium(Boolean(premium));
       return Boolean(premium);

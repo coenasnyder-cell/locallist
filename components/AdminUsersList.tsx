@@ -5,18 +5,26 @@ import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { app } from '../firebase';
 import { checkIsAdmin } from '../utils/adminUtils';
+import { resolvePlan } from '../utils/planAccess';
 
 type UserRow = {
   id: string;
   name?: string;
   email?: string;
-  accountType?: 'user' | 'business';
+  accountType?: 'personal' | 'user' | 'business';
   businessName?: string | null;
   businessDescription?: string | null;
   businessPhone?: string | null;
   businessWebsite?: string | null;
-  subscriptionPlan?: 'free' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | 'trial';
+  businessTier?: 'free' | 'premium';
+  planCode?: 'free' | 'seller_pro' | 'business_premium';
+  planStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  sellerTier?: 'free' | 'pro';
+  sellerStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  isPremium?: boolean;
+  premiumStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
+  subscriptionPlan?: 'free' | 'basic' | 'premium' | 'enterprise' | 'seller_pro' | 'business_premium';
+  subscriptionStatus?: 'active' | 'pending' | 'trial' | 'past_due' | 'canceled' | 'cancelled' | 'expired';
   subscriptionStartedAt?: any;
   subscriptionExpiresAt?: any;
   zipCode?: string;
@@ -218,6 +226,8 @@ export default function AdminUsersList({ initialTab = 'all', initialAccountTypeF
           nextFields.businessDescription = target.businessDescription ?? null;
           nextFields.businessPhone = target.businessPhone ?? null;
           nextFields.businessWebsite = target.businessWebsite ?? null;
+          nextFields.planCode = target.planCode === 'business_premium' ? 'business_premium' : 'free';
+          nextFields.planStatus = target.planCode === 'business_premium' ? (target.planStatus || 'active') : 'active';
           nextFields.subscriptionPlan = target.subscriptionPlan || 'free';
           nextFields.subscriptionStatus = target.subscriptionStatus || 'active';
           if (!target.subscriptionStartedAt) {
@@ -228,6 +238,8 @@ export default function AdminUsersList({ initialTab = 'all', initialAccountTypeF
           nextFields.businessDescription = null;
           nextFields.businessPhone = null;
           nextFields.businessWebsite = null;
+          nextFields.planCode = target.planCode === 'seller_pro' ? 'seller_pro' : 'free';
+          nextFields.planStatus = target.planCode === 'seller_pro' ? (target.planStatus || 'active') : 'active';
           nextFields.subscriptionPlan = 'free';
           nextFields.subscriptionStatus = 'active';
         }
@@ -257,6 +269,7 @@ export default function AdminUsersList({ initialTab = 'all', initialAccountTypeF
   const renderItem = ({ item }: { item: UserRow }) => {
     const statusLabel = item.status || '';
     const accountTypeLabel = item.accountType === 'business' ? 'Business' : 'User';
+    const resolvedPlan = resolvePlan(item);
     const disabledLabel = item.isDisabled ? 'Disabled' : 'Active';
     const bannedLabel = item.isBanned ? 'Banned' : 'Not banned';
     const zipLabel = item.zipCode || '';
@@ -273,9 +286,9 @@ export default function AdminUsersList({ initialTab = 'all', initialAccountTypeF
         {item.accountType === 'business' && item.businessName && (
           <Text style={styles.meta}>Business: {item.businessName}</Text>
         )}
-        {item.accountType === 'business' && (
-          <Text style={[styles.meta, { color: item.subscriptionPlan === 'free' ? '#666' : '#1565C0', fontWeight: '600' }]}>
-            Plan: {(item.subscriptionPlan || 'free').toUpperCase()} {item.subscriptionStatus && `(${item.subscriptionStatus})`}
+        {(resolvedPlan.planCode !== 'free' || item.accountType === 'business') && (
+          <Text style={[styles.meta, { color: resolvedPlan.planCode === 'free' ? '#666' : '#1565C0', fontWeight: '600' }]}>
+            Plan: {resolvedPlan.planCode.toUpperCase()} ({resolvedPlan.planStatus})
           </Text>
         )}
         {zipLabel ? <Text style={styles.meta}>ZIP: {zipLabel} {item.zipApproved ? '(approved)' : '(unapproved)'}</Text> : null}
