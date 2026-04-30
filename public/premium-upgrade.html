@@ -12,6 +12,9 @@
       --text: #14213d;
       --muted: #5c6b82;
       --line: #d9e2ec;
+      --brand-blue: #2563eb;
+      --brand-blue-deep: #1e3a8a;
+      --brand-blue-soft: #93c5fd;
       --accent: #0f766e;
       --accent-strong: #0b5d57;
       --accent-soft: #d7f0ec;
@@ -199,6 +202,38 @@
       padding: 24px;
     }
 
+    .section-heading-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px 16px;
+      margin-bottom: 8px;
+    }
+
+    .pricing-hero {
+      padding: 26px 28px;
+      text-align: center;
+      color: #fff;
+      border: none;
+      background:#475569;
+        
+    }
+
+    .pricing-hero-title {
+      font-size: 16pz;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+    }
+
+    .pricing-hero-price {
+      margin-top: 8px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
     .section-label {
       color: var(--muted);
       font-size: 0.82rem;
@@ -210,13 +245,20 @@
 
     .section-title {
       font-size: 1.5rem;
-      margin-bottom: 8px;
+      margin-bottom: 0;
     }
 
     .section-copy {
       color: var(--muted);
       line-height: 1.7;
       margin-bottom: 18px;
+    }
+
+    .section-price-note {
+      color: var(--text);
+      font-size: 0.98rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .compare-table {
@@ -422,38 +464,20 @@
       </div>
     </section>
 
-    <section id="upgradeContent" class="layout hidden" aria-label="Premium upgrade">
-      <div class="hero">
-        <div class="hero-main">
-          <div class="eyebrow">Premium Membership</div>
-          <h1 class="hero-title">Free or Premium, side by side</h1>
-          <p class="hero-copy">
-            This page mirrors the app upgrade screen on the web. You can compare what comes with a free account and what unlocks when you move up to Premium.
-          </p>
-          <div class="hero-list">
-            <div class="hero-list-item">Core hub tools stay available on free accounts.</div>
-            <div class="hero-list-item">Premium unlocks AI tools, advanced analytics, stronger promotion options, and added visibility.</div>
-            <div class="hero-list-item">Checkout runs through Stripe on the web and brings you right back here after payment.</div>
-          </div>
-        </div>
-
-        <aside class="hero-side">
-          <h2>Simple monthly pricing</h2>
-          <p>
-            Premium is billed at one flat monthly rate, with card checkout handled by Stripe. You can keep the chart and update any wording later without touching the checkout flow.
-          </p>
-          <div class="price-chip">
-            <strong>$10</strong>
-            <span>/ month</span>
-          </div>
-        </aside>
-      </div>
+    <section id="upgradeContent" class="layout" aria-label="Premium upgrade options">
+      <section class="section-card pricing-hero">
+         <h1 class="pricing-hero-title">Get more visibility</h1>       
+        <h1 class="pricing-hero-title">Plans Start at Only</h1>
+        <p class="pricing-hero-price">$10 a month</p>
+      </section>
 
       <section class="section-card">
         <div class="section-label">Plan Comparison</div>
-        <h2 class="section-title">Free vs Premium</h2>
+        <div class="section-heading-row">
+          <h2 class="section-title">Free or Premium, side by side</h2>
+          <div class="section-price-note">Upgrade for just $10 a month</div>
+        </div>
         <p class="section-copy">Compare what&apos;s included at a glance.</p>
-
         <table class="compare-table" aria-label="Premium comparison chart">
           <thead>
             <tr>
@@ -464,22 +488,12 @@
           </thead>
           <tbody>
             <tr>
-              <td>Business profile access</td>
+              <td>Public Business or Service Profile</td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
             <tr>
-              <td>Service posting</td>
-              <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
-              <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
-            </tr>
-            <tr>
-              <td>Advanced posting access (jobs and deals)</td>
-              <td class="cell-center"><span class="pill-icon pill-no">×</span></td>
-              <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
-            </tr>
-            <tr>
-              <td>Messaging</td>
+              <td>Leads and Messaging</td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
@@ -489,12 +503,12 @@
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
             <tr>
-              <td>Advanced web analytics</td>
+              <td>Advanced Account Analytics</td>
               <td class="cell-center"><span class="pill-icon pill-no">×</span></td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
             <tr>
-              <td>Trend and insight reporting</td>
+              <td>Advanced AI Listing Tools</td>
               <td class="cell-center"><span class="pill-icon pill-no">×</span></td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
@@ -508,6 +522,11 @@
               <td class="cell-center"><span class="pill-icon pill-no">×</span></td>
               <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
             </tr>
+             <tr>
+              <td>Advanced posting access (jobs and deals)</td>
+              <td class="cell-center"><span class="pill-icon pill-no">×</span></td>
+              <td class="cell-center"><span class="pill-icon pill-yes">✓</span></td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -516,13 +535,13 @@
         <div class="section-label">Checkout</div>
         <h2 class="section-title">Upgrade on the web</h2>
         <p class="section-copy">
-          Use the premium checkout button to start Stripe checkout on the web. After payment, the page will return here and refresh your account status automatically.
+          Start secure checkout below. After payment, this page returns here and refreshes your access automatically.
         </p>
         <div class="actions">
           <a id="freeAccountLink" class="btn btn-secondary" href="businesslocal.html">Free Account</a>
           <button id="startUpgradeBtn" class="btn btn-primary" type="button">Premium Account</button>
         </div>
-        <p class="small-note">If you already paid and came back here, the page will keep checking your account and refresh once premium access finishes syncing.</p>
+        <p class="small-note">If you already paid and came back here, the page will keep checking until premium finishes syncing.</p>
       </section>
     </section>
   </main>
@@ -554,10 +573,15 @@
       statusBanner.textContent = message;
     }
 
+    function toggleHidden(element, hidden) {
+      if (!element) return;
+      element.classList.toggle('hidden', hidden);
+    }
+
     function showState(state) {
-      signinState.classList.toggle('hidden', state !== 'signin');
-      premiumActiveState.classList.toggle('hidden', state !== 'premium');
-      upgradeContent.classList.toggle('hidden', state !== 'upgrade');
+      toggleHidden(signinState, state !== 'signin');
+      toggleHidden(premiumActiveState, state !== 'premium');
+      toggleHidden(upgradeContent, state !== 'upgrade');
     }
 
     function getQueryParam(name) {
@@ -616,8 +640,10 @@
         return;
       }
 
-      startUpgradeBtn.disabled = true;
-      startUpgradeBtn.textContent = 'Starting checkout...';
+      if (startUpgradeBtn) {
+        startUpgradeBtn.disabled = true;
+        startUpgradeBtn.textContent = 'Starting checkout...';
+      }
       setStatus('status-loading', 'Starting secure Stripe checkout...');
 
       try {
@@ -639,8 +665,10 @@
       } catch (error) {
         console.error('Premium upgrade checkout failed:', error);
         setStatus('status-locked', 'Premium checkout could not be started right now. Please try again.');
-        startUpgradeBtn.disabled = false;
-        startUpgradeBtn.textContent = 'Premium Account';
+        if (startUpgradeBtn) {
+          startUpgradeBtn.disabled = false;
+          startUpgradeBtn.textContent = 'Premium Account';
+        }
       }
     }
 
@@ -675,8 +703,10 @@
           if (premiumCanceled === '1') {
             setStatus('status-warning', 'Premium checkout was canceled. You can review the comparison and try again any time.');
             showState('upgrade');
-            startUpgradeBtn.disabled = false;
-            startUpgradeBtn.textContent = 'Premium Account';
+            if (startUpgradeBtn) {
+              startUpgradeBtn.disabled = false;
+              startUpgradeBtn.textContent = 'Premium Account';
+            }
             return;
           }
 
@@ -690,8 +720,10 @@
               setStatus('status-warning', 'Checkout completed, but premium may still be syncing. Refresh in a moment if access has not updated yet.');
               showState('upgrade');
             }
-            startUpgradeBtn.disabled = false;
-            startUpgradeBtn.textContent = 'Premium Account';
+            if (startUpgradeBtn) {
+              startUpgradeBtn.disabled = false;
+              startUpgradeBtn.textContent = 'Premium Account';
+            }
             return;
           }
 
@@ -703,14 +735,18 @@
 
           setStatus('status-access', 'You can compare plans here and upgrade to Premium when you are ready.');
           showState('upgrade');
-          startUpgradeBtn.disabled = false;
-          startUpgradeBtn.textContent = 'Premium Account';
+          if (startUpgradeBtn) {
+            startUpgradeBtn.disabled = false;
+            startUpgradeBtn.textContent = 'Premium Account';
+          }
         } catch (error) {
           console.error('Failed to initialize premium upgrade page:', error);
           setStatus('status-locked', 'We could not load your premium options right now. Please refresh and try again.');
           showState('upgrade');
-          startUpgradeBtn.disabled = false;
-          startUpgradeBtn.textContent = 'Premium Account';
+          if (startUpgradeBtn) {
+            startUpgradeBtn.disabled = false;
+            startUpgradeBtn.textContent = 'Premium Account';
+          }
         }
       });
     }
